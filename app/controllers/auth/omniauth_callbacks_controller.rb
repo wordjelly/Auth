@@ -1,6 +1,17 @@
 class Auth::OmniauthCallbacksController < Auth::ApplicationController
   prepend_before_action { request.env["devise.skip_timeout"] = true }
 
+  def facebook
+
+  end
+
+
+  def google_oauth2
+
+  end
+
+
+
   def passthru
     render status: 404, text: "Not found. Authentication passthru."
   end

@@ -1,6 +1,7 @@
 require 'mongoid'
 require 'simple_token_authentication'
 
+
 module Auth::Concerns::UserConcern
 		
 	mattr_accessor :redirect_url

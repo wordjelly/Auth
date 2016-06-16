@@ -6,7 +6,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = 'a66b3c69092bb2bfb7364f6140a0874e128da2893d8730f1f646eca560ef84cc32f6a40605d24f56a044b216b73483201b72c28a82c487109b885f812efff607'
+  # config.secret_key = 'c05c64532fc17dcf16df18b1f84a6c9e6c077a07ae6aa33e64e450405a0c6191963fe9fc76927baf3040883cf1bfcb507438272a64daac1a45ab6c365b88801c'
 
   # ==> Mailer Configuration
   # Configure the e-mail address which will be shown in Devise::Mailer,
@@ -102,7 +102,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 11
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '237ce91cd770ea7189d69556aba568168d963ada7b3782b56a581711c7675453168cb3ad0302955f86d9d2552e1ef4e964ba95a0bfa4d29cfe1e55094294b7a8'
+  # config.pepper = '681f9db1f50590d3ccdb9f4483b1ad02b50a812517cec9a83df92f5a70db7346848d864503dbad8d6ae37e20df87569ee28613a7074599be29e91d9cc9f13da0'
 
   # Send a notification email when the user's password is changed
   # config.send_password_change_notification = false
@@ -233,7 +233,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  # config.navigational_formats = ['*/*', :html]
+  config.navigational_formats = ["*/*", :html, :json, :js]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -242,7 +242,18 @@ Devise.setup do |config|
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
   # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
+  config.omniauth :google_oauth2, '79069425775-njseh8c39qsf24bicherbd3hdvk5o21c.apps.googleusercontent.com', 'Wftk1VDJsD7stJxo5GayRSAb', {
+      :scope => "email, profile",
+      :prompt => "select_account",
+      :image_aspect_ratio => "square",
+      :image_size => 50
+  }
 
+  config.omniauth :facebook, "278055859212434", "aa28a5873807a38dde361665c9732c31",{
+    :scope => 'email',
+    :info_fields => 'first_name,last_name,email,work',
+    :display => 'page'
+  }
 
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or
