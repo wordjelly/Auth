@@ -1,8 +1,8 @@
-class Auth::OmniauthCallbacksController < Auth::ApplicationController
+class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   prepend_before_action { request.env["devise.skip_timeout"] = true }
 
   def facebook
-
+    
   end
 
 
@@ -13,7 +13,7 @@ class Auth::OmniauthCallbacksController < Auth::ApplicationController
 
 
   def passthru
-    render status: 404, text: "Not found. Authentication passthru."
+    super
   end
 
   def failure
@@ -21,8 +21,8 @@ class Auth::OmniauthCallbacksController < Auth::ApplicationController
     redirect_to after_omniauth_failure_path_for(resource_name)
   end
 
-  protected
-
+  
+=begin
   def failed_strategy
     request.respond_to?(:get_header) ? request.get_header("omniauth.error.strategy") : env["omniauth.error.strategy"]
   end
@@ -42,4 +42,5 @@ class Auth::OmniauthCallbacksController < Auth::ApplicationController
   def translation_scope
     'devise.omniauth_callbacks'
   end
+=end
 end

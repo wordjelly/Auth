@@ -4,12 +4,13 @@ module Auth
     isolate_namespace Auth
   end
 
+
   mattr_accessor :omniauth_prefix
   mattr_accessor :enable_token_auth
 
   self.omniauth_prefix = "/omniauth"
   self.enable_token_auth = true
-
+=begin
   def self.setup(&block)
     yield self
 
@@ -17,6 +18,8 @@ module Auth
       if defined?(::OmniAuth)
         ::OmniAuth::config.path_prefix = Devise.omniauth_path_prefix = self.omniauth_prefix
 
+        puts "after engine initialized"
+        puts ::Omniauth::config.path_prefix
 
         # Omniauth currently does not pass along omniauth.params upon failure redirect
         # see also: https://github.com/intridea/omniauth/issues/626
@@ -50,10 +53,11 @@ module Auth
             end
           end
         end
-
+      else
+        puts "omniauth is not defined"
       end
     end
   end
-
+=end
 
 end
