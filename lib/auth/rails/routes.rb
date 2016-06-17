@@ -2,7 +2,7 @@ module ActionDispatch::Routing
   class Mapper
 
 	def mount_devise_token_auth_for(resource, opts)
-	  
+	  puts "came to mount for devise."
 	  # ensure objects exist to simplify attr checks
 	  opts[:controllers] ||= {}
 	  opts[:skip]        ||= []

@@ -5,10 +5,12 @@ module Auth
   end
 
 
-  mattr_accessor :omniauth_prefix
+  #mattr_accessor :omniauth_prefix
   mattr_accessor :enable_token_auth
+ 
 
-  self.omniauth_prefix = "/omniauth"
+
+ 
   self.enable_token_auth = true
 =begin
   def self.setup(&block)
