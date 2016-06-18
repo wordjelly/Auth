@@ -2,12 +2,12 @@ class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   prepend_before_action { request.env["devise.skip_timeout"] = true }
 
   def facebook
-    
+    puts "came to facebook callback"
   end
 
 
   def google_oauth2
-
+    puts "came to google oauth"
   end
 
 
@@ -21,8 +21,8 @@ class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     redirect_to after_omniauth_failure_path_for(resource_name)
   end
 
-  
-=begin
+  protected  
+
   def failed_strategy
     request.respond_to?(:get_header) ? request.get_header("omniauth.error.strategy") : env["omniauth.error.strategy"]
   end
@@ -42,5 +42,5 @@ class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def translation_scope
     'devise.omniauth_callbacks'
   end
-=end
+
 end

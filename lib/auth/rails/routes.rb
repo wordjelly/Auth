@@ -2,11 +2,11 @@ module ActionDispatch::Routing
   class Mapper
 
 	def mount_devise_token_auth_for(resource, opts)
-	  puts "came to mount for devise."
+	  
 	  # ensure objects exist to simplify attr checks
 	  opts[:controllers] ||= {}
 	  opts[:skip]        ||= []
-	  opts[:at] = "/authenticate"
+	  
 
 	  # check for ctrl overrides, fall back to defaults
 	  sessions_ctrl          = opts[:controllers][:sessions] || "auth/sessions"
@@ -30,7 +30,7 @@ module ActionDispatch::Routing
 	  devise_for resource_as_pluralized_string.to_sym,
 	    :class_name  => resource,
 	    :module      => :devise,
-	    :path        => "#{opts[:at]}/#{resource_as_pluralized_string}",
+	    :path        => "#{MOUNT_PATH}/#{resource_as_pluralized_string}",
 	    :controllers => controllers,
 	    :skip        => opts[:skip] + [:omniauth_callbacks]
 
@@ -51,17 +51,17 @@ module ActionDispatch::Routing
 
 	  mapping_name = resource.underscore.gsub('/', '_')
 	  mapping_name = "#{namespace_name}_#{mapping_name}" if namespace_name
-	  devise_scope mapping_name.to_sym do
+	  #devise_scope mapping_name.to_sym do
 
-		  resource_class.omniauth_providers.each do |provider|
-		  	
-		  	match "#{::OmniAuth.config.path_prefix}/#{resource_as_pluralized_string}/auth/#{provider}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{resource.downcase}_#{provider}_omniauth_authorize"
+			  resource_class.omniauth_providers.each do |provider|
+			  	
+			  	match "#{MOUNT_PATH}/omniauth/#{provider}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 
-		  	match "#{opts[:at]}/#{resource_as_pluralized_string}/#{provider}/omniauth_callback", controller: omniauth_ctrl, action: provider, via: [:get,:post], as: "#{resource.downcase}_#{provider}_omniauth_callback"
+			  	match "#{MOUNT_PATH}/omniauth/#{provider}/omniauth_callback", controller: omniauth_ctrl, action: provider, via: [:get,:post], as: "#{provider}_omniauth_callback"
 
-		  end
+			  end
 
-	  end
+	  #end
 
 
 =begin
