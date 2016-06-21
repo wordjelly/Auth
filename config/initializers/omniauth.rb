@@ -19,8 +19,3 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 
 end
 
-module Devise::OmniAuth::UrlHelpers
-	def omniauth_authorize_path(resource_or_scope, provider, *args)
-		puts "trying to override"
-	end
-end

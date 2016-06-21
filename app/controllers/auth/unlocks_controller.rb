@@ -1,4 +1,4 @@
-class Auth::UnlocksController < Auth::ApplicationController
+class Auth::UnlocksController < DeviseController
   prepend_before_action :require_no_authentication
 
   # GET /resource/unlock/new

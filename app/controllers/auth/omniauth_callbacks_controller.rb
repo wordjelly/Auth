@@ -1,5 +1,5 @@
-class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  prepend_before_action { request.env["devise.skip_timeout"] = true }
+class Auth::OmniauthCallbacksController < Auth::ApplicationController
+  #prepend_before_action { request.env["devise.skip_timeout"] = true }
 
   def facebook
     puts "came to facebook callback"
@@ -13,7 +13,7 @@ class Auth::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
 
   def passthru
-    super
+    
   end
 
   def failure

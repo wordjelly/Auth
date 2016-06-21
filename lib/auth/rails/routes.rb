@@ -57,7 +57,7 @@ module ActionDispatch::Routing
 			  	
 			  	match "#{MOUNT_PATH}/omniauth/#{provider}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 
-			  	match "#{MOUNT_PATH}/omniauth/#{provider}/omniauth_callback", controller: omniauth_ctrl, action: provider, via: [:get,:post], as: "#{provider}_omniauth_callback"
+			  	match "#{MOUNT_PATH}/omniauth/#{provider}/callback", controller: omniauth_ctrl, action: provider, via: [:get,:post], as: "#{provider}_omniauth_callback"
 
 			  end
 
