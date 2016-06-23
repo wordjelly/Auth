@@ -70,7 +70,7 @@ module Auth::Concerns::OmniConcern
       ##it will derive the resource class from the omni_hash referrer path.
 
 
-      identity = Identity.new(:provider => provider, :uid => uid, :email => email)
+      identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
 
       ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
       existing_oauth_users = 

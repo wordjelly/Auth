@@ -36,10 +36,10 @@ module Auth::Concerns::UserConcern
 		  
 
 		  ## Confirmable
-		  # field :confirmation_token,   type: String
-		  # field :confirmed_at,         type: Time
-		  # field :confirmation_sent_at, type: Time
-		  # field :unconfirmed_email,    type: String # Only if using reconfirmable
+		   field :confirmation_token,   type: String
+		   field :confirmed_at,         type: Time
+		   field :confirmation_sent_at, type: Time
+		   field :unconfirmed_email,    type: String # Only if using reconfirmable
 
 		  ## Lockable
 		  # field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
@@ -64,13 +64,13 @@ module Auth::Concerns::UserConcern
 	protected
 
 	def set_es
-		if attributes.has_key("es")
-		    if !email.nil?
-		      salt = SecureRandom.hex(32)
-		      pre_es = salt + email
-		      self.es = Digest::SHA256.hexdigest(pre_es)
-		    end
-		end
+		
+	    if !email.nil?
+	      salt = SecureRandom.hex(32)
+	      pre_es = salt + email
+	      self.es = Digest::SHA256.hexdigest(pre_es)
+	    end
+		
 	end
 
 
