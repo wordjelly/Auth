@@ -5,62 +5,28 @@ module Auth
     isolate_namespace Auth
   end
 
+  class << self
+    attr_accessor :configuration
+  end
 
-  #mattr_accessor :omniauth_prefix
-  mattr_accessor :enable_token_auth
- 
+  def self.configure
+    self.configuration ||= Configuration.new
+    yield(configuration)
+  end
 
+  class Configuration
+    attr_accessor :enable_token_auth
+    attr_accessor :oauth_credentials
+    attr_accessor :mount_path
+    attr_accessor :auth_resources
 
- 
-  self.enable_token_auth = true
-=begin
-  def self.setup(&block)
-    yield self
-
-    Rails.application.config.after_initialize do
-      if defined?(::OmniAuth)
-        ::OmniAuth::config.path_prefix = Devise.omniauth_path_prefix = self.omniauth_prefix
-
-        puts "after engine initialized"
-        puts ::Omniauth::config.path_prefix
-
-        # Omniauth currently does not pass along omniauth.params upon failure redirect
-        # see also: https://github.com/intridea/omniauth/issues/626
-        OmniAuth::FailureEndpoint.class_eval do
-          def redirect_to_failure
-            message_key = env['omniauth.error.type']
-            origin_query_param = env['omniauth.origin'] ? "&origin=#{CGI.escape(env['omniauth.origin'])}" : ""
-            strategy_name_query_param = env['omniauth.error.strategy'] ? "&strategy=#{env['omniauth.error.strategy'].name}" : ""
-            extra_params = env['omniauth.params'] ? "&#{env['omniauth.params'].to_query}" : ""
-            new_path = "#{env['SCRIPT_NAME']}#{OmniAuth.config.path_prefix}/failure?message=#{message_key}#{origin_query_param}#{strategy_name_query_param}#{extra_params}"
-            Rack::Response.new(["302 Moved"], 302, 'Location' => new_path).finish
-          end
-        end
-
-
-        # Omniauth currently removes omniauth.params during mocked requests
-        # see also: https://github.com/intridea/omniauth/pull/812
-        OmniAuth::Strategy.class_eval do
-          def mock_callback_call
-            setup_phase
-            @env['omniauth.origin'] = session.delete('omniauth.origin')
-            @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
-            @env['omniauth.params'] = session.delete('omniauth.params') || {}
-            mocked_auth = OmniAuth.mock_auth_for(name.to_s)
-            if mocked_auth.is_a?(Symbol)
-              fail!(mocked_auth)
-            else
-              @env['omniauth.auth'] = mocked_auth
-              OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
-              call_app!
-            end
-          end
-        end
-      else
-        puts "omniauth is not defined"
-      end
+    def initialize
+      @enable_token_auth = true
+      @oauth_credentials = {}
+      @mount_path = "/authenticate"
+      @auth_resources = {}
     end
   end
-=end
+  
 
 end

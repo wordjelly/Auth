@@ -276,3 +276,34 @@ Devise.setup do |config|
   #config.omniauth_path_prefix = '/other'
 end
 
+
+module Devise
+
+  class ParameterSanitizer
+
+     DEFAULT_PERMITTED_ATTRIBUTES = {
+      sign_in: [:password, :remember_me],
+      sign_up: [:password, :password_confirmation, :redirect_url],
+      account_update: [:password, :password_confirmation, :current_password]
+      }
+
+  end
+
+  module Controllers
+
+    module Helpers
+
+      def after_sign_in_path_for(resource_or_scope)
+        if resource_or_scope.redirect_url.nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
+            stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
+        else
+            resource_or_scope.redirect_url + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
+        end
+        
+      end
+
+    end
+
+  end
+
+end

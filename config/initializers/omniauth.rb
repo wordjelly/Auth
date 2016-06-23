@@ -103,21 +103,21 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 
 	on_failure { |env| Auth::OmniauthCallbacksController.action(:failure).call(env) }
 	
-	provider :facebook, FACEBOOK_CREDENTIALS[0], FACEBOOK_CREDENTIALS[1],{
+	provider :facebook, Auth.configuration.oauth_credentials["facebook"]["app_id"], Auth.configuration.oauth_credentials["facebook"]["app_secret"],{
 	   :scope => 'email',
 	   :info_fields => 'first_name,last_name,email,work',
 	   :display => 'page',
-	   :path_prefix => MOUNT_PATH + "/omniauth",
-	   :models => AUTH_RESOURCES.keys
+	   :path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path,
+	   :models => Auth.configuration.auth_resources.keys
 	}
 
-	provider :google_oauth2, GOOGLE_CREDENTIALS[0], GOOGLE_CREDENTIALS[1],{
+	provider :google_oauth2, Auth.configuration.oauth_credentials["google_oauth2"]["app_id"], Auth.configuration.oauth_credentials["google_oauth2"]["app_secret"],{
       :scope => "email, profile",
       :prompt => "select_account",
       :image_aspect_ratio => "square",
       :image_size => 50,
-	  :path_prefix => MOUNT_PATH + "/omniauth",
-	  :models => AUTH_RESOURCES.keys
+	  :path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path,
+	  :models => Auth.configuration.auth_resources.keys
   	}
 end
 

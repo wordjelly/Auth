@@ -48,9 +48,10 @@ module Auth::Concerns::UserConcern
 
 	    end
 
-	    unless Auth.enable_token_auth
+	    unless Auth.configuration.enable_token_auth
 
 	    else
+	    	
 	    	acts_as_token_authenticatable
   			field :authentication_token
 	    	field :es

@@ -1,13 +1,13 @@
 module ActionDispatch::Routing
   class Mapper
 
-  	##@param omniauth_resources[Hash] -> 
+  	##@param app_route_resources[Hash] -> 
   	##key:resource[String] -> the name of the resource for which omniauth routes are to be generated.
   	##value:opts[Hash] -> the options specifying the views, controllers etc for omniauth.
   	##expected to be present in the preinitializer in the routes of the target app.
-	def mount_omniauth_routes(omniauth_resources)
+	def mount_routes(app_route_resources)
 	  
-	  omniauth_resources.each do |resource,opts| 
+	  app_route_resources.each do |resource,opts| 
 
 	  	  puts "resource is : #{resource}"
 	  	  puts "opts are: #{opts}"
@@ -34,12 +34,12 @@ module ActionDispatch::Routing
 		  # remove any unwanted devise modules
 		  opts[:skip].each{|item| controllers.delete(item)}
 
-		  resource_as_pluralized_string = resource.pluralize.underscore.gsub('/', '_')
+		  resource_as_pluralized_string = Auth::OmniAuth::Path.resource_pluralized(resource)
 
 		  devise_for resource_as_pluralized_string.to_sym,
 		    :class_name  => resource,
 		    :module      => :devise,
-		    :path        => "#{MOUNT_PATH}/#{resource_as_pluralized_string}",
+		    :path        => "#{Auth::OmniAuth::Path.resource_path(resource)}",
 		    :controllers => controllers,
 		    :skip        => opts[:skip] + [:omniauth_callbacks]
 
@@ -102,3 +102,4 @@ module ActionDispatch::Routing
 
   end
 end
+
