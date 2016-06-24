@@ -19,8 +19,10 @@ module Auth
     attr_accessor :oauth_credentials
     attr_accessor :mount_path
     attr_accessor :auth_resources
+   
 
     def initialize
+      
       @enable_token_auth = true
       @oauth_credentials = {}
       @mount_path = "/authenticate"

@@ -23,7 +23,11 @@ Auth.configure do |config|
 	##you can use devise generate to build alternative controllers for your own purposes.
 	##remember that the omniauth controller must include the omni_concern, and it should inherit from your application_controller and not the devise_omniauth_callbacks controller.
 	config.auth_resources = {
-		"User" => {}
+		"User" => {
+			"token_auth_lambda" =>  lambda { |controller| controller.request.format.json? },
+			"token_auth_condition" => "if",
+			"token_auth_fallback" => "none"
+		}
 	}
 
 end
