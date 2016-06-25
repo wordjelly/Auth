@@ -101,32 +101,46 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 	##{:user => 'es', :admin => 'es',......other_models => 'es'}
 	##this es is the additional identifier in addition to the authentication_token.
 	##so it has to be defined for each model.
-	SimpleTokenAuthentication.configure do |cf|
-	  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
-	  cf.identifiers = q
+	if Auth.configuration.enable_token_auth
+		SimpleTokenAuthentication.configure do |cf|
+		  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
+		  cf.identifiers = q
+		end
 	end
 
-	##need to determine models(pass them into the  preinitializer, app side)
-	##derive route mount in app side from the same initializer on app side.
-	##here pass models for only those that have the omniauthable strategy.
-
+	
 	on_failure { |env| Auth::OmniauthCallbacksController.action(:failure).call(env) }
 	
+	oauth_credentials = Auth.configuration.oauth_credentials.map{|k,v| [OmniAuth::Utils.camelize(k).downcase, v]}.to_h
+	oauth_keys = oauth_credentials.keys
 
-	provider :facebook, Auth.configuration.oauth_credentials["facebook"]["app_id"], Auth.configuration.oauth_credentials["facebook"]["app_secret"],{
-	   :scope => 'email',
-	   :info_fields => 'first_name,last_name,email,work',
-	   :display => 'page',
-	   :path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path,
-	   :models => Auth.configuration.auth_resources.keys
+
+	##determine which models are oauthable, we need to pass this into the builder.
+	oauthable_models = Auth.configuration.auth_resources.keys.reject{|m|
+
+		if Auth.configuration.auth_resources[m][:skip].nil?
+			false
+		elsif (Auth.configuration.auth_resources[m][:skip].include? :omniauthable)
+			true
+		else
+			false
+		end
 	}
 
-	provider :google_oauth2, Auth.configuration.oauth_credentials["google_oauth2"]["app_id"], Auth.configuration.oauth_credentials["google_oauth2"]["app_secret"],{
-      :scope => "email, profile",
-      :prompt => "select_account",
-      :image_aspect_ratio => "square",
-      :image_size => 50,
-	  :path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path,
-	  :models => Auth.configuration.auth_resources.keys
-  	}
+
+	OmniAuth::Strategies.constants.each do |constant|
+
+		provider_key = constant.to_s.downcase
+		
+	
+		if oauth_keys.include? provider_key
+
+			
+			provider(constant.to_s, oauth_credentials[provider_key]["app_id"], oauth_credentials[provider_key]["app_secret"],oauth_credentials[provider_key]["options"].merge!({:path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path, :models => oauthable_models}))
+
+		end
+
+
+	end
+
 end

@@ -5,11 +5,22 @@ Auth.configure do |config|
 	config.oauth_credentials = {
 		"facebook" => {
 			"app_id" => "278055859212434",
-			"app_secret" => "aa28a5873807a38dde361665c9732c31"
+			"app_secret" => "aa28a5873807a38dde361665c9732c31",
+			"options" => {
+				:scope => 'email',
+				:info_fields => 'first_name,last_name,email,work',
+				:display => 'page'
+				}
 			},
 		"google_oauth2" => {
 			"app_id" => "79069425775-njseh8c39qsf24bicherbd3hdvk5o21c.apps.googleusercontent.com",
-			"app_secret" => "Wftk1VDJsD7stJxo5GayRSAb"
+			"app_secret" => "Wftk1VDJsD7stJxo5GayRSAb",
+			"options" => {
+				:scope => "email, profile",
+		        :prompt => "select_account",
+		        :image_aspect_ratio => "square",
+		        :image_size => 50
+			}
 		}
 	}
 
