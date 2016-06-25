@@ -6,8 +6,13 @@ class Api::V1::TokenAuthController < ApplicationController
 	include Auth::Concerns::TokenConcern
 
 	def index
-		puts "current user is found"
-		puts current_user
+		puts "doing index action."
+		if current_user
+			render json: current_user, status: 200
+		else
+			render json: {errors: "no current user"}, status: 400
+		end
+
 	end
 
 end

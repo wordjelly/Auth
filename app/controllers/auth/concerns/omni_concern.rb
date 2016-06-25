@@ -13,6 +13,7 @@ module Auth::Concerns::OmniConcern
   def failure
     set_flash_message :alert, :failure, kind: OmniAuth::Utils.camelize(failed_strategy.name), reason: failure_message
     redirect_to after_omniauth_failure_path_for(resource_name)
+    #should render the failure view.
   end
 
   
@@ -84,15 +85,17 @@ module Auth::Concerns::OmniConcern
    
       if existing_oauth_users.count == 1
 
-        user = from_view(existing_oauth_users,User)
+        user = from_view(existing_oauth_users,user_klazz)
 
         if user.persisted?
           user.skip_confirmation!
-          Rails.logger.debug("came to sign in an redirec")
-          sign_in_and_redirect user
+          Rails.logger.debug("this user already exists")
+          #sign_in_and_redirect user
+          sign_in user
+          after_sign_in_path_for(user)
         else
           
-          redirect_to oauth_sign_in_failed_users_path
+          redirect_to omniauth_failure_path
 
         end
 
@@ -101,7 +104,7 @@ module Auth::Concerns::OmniConcern
 
         Rails.logger.debug("it is a current user trying to sign up with oauth.")
         ##throw him to profile, he's an asshole.
-      redirect_to profile_user_path(current_user.id)        
+        after_sign_in_path_for(current_user)        
 
       else 
 
@@ -144,9 +147,9 @@ module Auth::Concerns::OmniConcern
         if new_user.persisted?
           new_user.skip_confirmation!
           sign_in new_user
-          redirect_to profile_user_path(new_user.id)
+          after_sign_in_path_for(new_user)    
         else
-          redirect_to oauth_sign_in_failed_users_path
+          redirect_to omniauth_failure_path
         end
 
       end

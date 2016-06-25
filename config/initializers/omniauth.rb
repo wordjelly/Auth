@@ -97,12 +97,22 @@ end
 
 Rails.application.config.middleware.use OmniAuth::Builder do
 
+	##want to generate a hash that shows:
+	##{:user => 'es', :admin => 'es',......other_models => 'es'}
+	##this es is the additional identifier in addition to the authentication_token.
+	##so it has to be defined for each model.
+	SimpleTokenAuthentication.configure do |cf|
+	  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
+	  cf.identifiers = q
+	end
+
 	##need to determine models(pass them into the  preinitializer, app side)
 	##derive route mount in app side from the same initializer on app side.
 	##here pass models for only those that have the omniauthable strategy.
 
 	on_failure { |env| Auth::OmniauthCallbacksController.action(:failure).call(env) }
 	
+
 	provider :facebook, Auth.configuration.oauth_credentials["facebook"]["app_id"], Auth.configuration.oauth_credentials["facebook"]["app_secret"],{
 	   :scope => 'email',
 	   :info_fields => 'first_name,last_name,email,work',
@@ -120,4 +130,3 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 	  :models => Auth.configuration.auth_resources.keys
   	}
 end
-

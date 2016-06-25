@@ -24,9 +24,10 @@ Auth.configure do |config|
 	##remember that the omniauth controller must include the omni_concern, and it should inherit from your application_controller and not the devise_omniauth_callbacks controller.
 	config.auth_resources = {
 		"User" => {
-			"token_auth_lambda" =>  lambda { |controller| controller.request.format.json? },
-			"token_auth_condition" => "if",
-			"token_auth_fallback" => "none"
+			"token_auth_options" => {
+				fallback: :none,
+			    if: lambda { |controller| controller.request.format.json? } 
+			}
 		}
 	}
 
