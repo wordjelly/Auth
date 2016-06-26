@@ -11,12 +11,12 @@ module Auth::Concerns::OmniConcern
   end
 
   def failure
+    puts "HIT THE FAILURE"
     set_flash_message :alert, :failure, kind: OmniAuth::Utils.camelize(failed_strategy.name), reason: failure_message
     redirect_to after_omniauth_failure_path_for(resource_name)
     #should render the failure view.
   end
 
-  
 
   def get_omni_hash
     request.env["omniauth.auth"]
@@ -62,98 +62,102 @@ module Auth::Concerns::OmniConcern
   end
 
   def omni_common
+     
+        user_klazz = Object.const_get(get_model_class)
+        omni_hash = get_omni_hash
 
-      user_klazz = Object.const_get(get_model_class)
-      omni_hash = get_omni_hash
+        email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
 
-      email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
-
-      ##it will derive the resource class from the omni_hash referrer path.
+        ##it will derive the resource class from the omni_hash referrer path.
 
 
-      identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
+        identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
 
-      ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
-      existing_oauth_users = 
-      user_klazz.collection.find(
-        {"identities" =>
-               {"$elemMatch" => 
-                      {"provider" => provider, "uid" => uid
-                      }
-               }
-        })
-   
-      if existing_oauth_users.count == 1
+        ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
+        existing_oauth_users = 
+        user_klazz.collection.find(
+          {"identities" =>
+                 {"$elemMatch" => 
+                        {"provider" => provider, "uid" => uid
+                        }
+                 }
+          })
+     
+        if existing_oauth_users.count == 1
 
-        user = from_view(existing_oauth_users,user_klazz)
+          user = from_view(existing_oauth_users,user_klazz)
 
-        if user.persisted?
-          user.skip_confirmation!
-          Rails.logger.debug("this user already exists")
-          #sign_in_and_redirect user
-          sign_in user
-          after_sign_in_path_for(user)
-        else
+          if user.persisted?
+            user.skip_confirmation!
+            Rails.logger.debug("this user already exists")
+            #sign_in_and_redirect user
+            sign_in user
+
+            redirect_to after_sign_in_path_for(user)
+            #redirect_to omniauth_failed_path_for
+
+          else
+           
+            redirect_to omniauth_failed_path_for
+
+          end
+
+        
+        elsif current_user
+
+          Rails.logger.debug("it is a current user trying to sign up with oauth.")
+          ##throw him to profile, he's an asshole.
+          after_sign_in_path_for(current_user)        
+
+        else 
+
+          Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
           
-          redirect_to omniauth_failure_path
-
-        end
-
-      
-      elsif current_user
-
-        Rails.logger.debug("it is a current user trying to sign up with oauth.")
-        ##throw him to profile, he's an asshole.
-        after_sign_in_path_for(current_user)        
-
-      else 
-
-        Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
-        
-        
-        new_user_view = user_klazz.collection.find_one_and_update(
-          {
-            "email" => email,
-            "identities" => {
-              "$elemMatch" => {
-                "uid" => {
-                  "$ne" => uid
-                },
-                "provider" => {
-                  "$ne" => provider
-                }               
-              }
-            }
-          },
-          {
-            "$push" => {
-              "identities" => identity.attributes.except("_id")
-            },
-            "$setOnInsert" => {
+          
+          new_user_view = user_klazz.collection.find_one_and_update(
+            {
               "email" => email,
-              "password" =>  Devise.friendly_token(20)
-            }
-          },
-          :return_document => :after,
-          :upsert => true
-        )
+              "identities" => {
+                "$elemMatch" => {
+                  "uid" => {
+                    "$ne" => uid
+                  },
+                  "provider" => {
+                    "$ne" => provider
+                  }               
+                }
+              }
+            },
+            {
+              "$push" => {
+                "identities" => identity.attributes.except("_id")
+              },
+              "$setOnInsert" => {
+                "email" => email,
+                "password" =>  Devise.friendly_token(20)
+              }
+            },
+            :return_document => :after,
+            :upsert => true
+          )
 
 
-        new_user = from_bson(new_user_view,user_klazz)
-        
+          new_user = from_bson(new_user_view,user_klazz)
+          
 
-        ##sign in and send to the user profiles path.
+          ##sign in and send to the user profiles path.
 
-        if new_user.persisted?
-          new_user.skip_confirmation!
-          sign_in new_user
-          after_sign_in_path_for(new_user)    
-        else
-          redirect_to omniauth_failure_path
+          if new_user.persisted?
+            new_user.skip_confirmation!
+            sign_in new_user
+            redirect_to after_sign_in_path_for(new_user)    
+          else
+            redirect_to omniauth_failed_path_for
+          end
+
         end
 
-      end
-
+     
 
   end
 

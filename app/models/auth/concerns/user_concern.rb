@@ -4,7 +4,7 @@ require 'simple_token_authentication'
 
 module Auth::Concerns::UserConcern
 		
-	mattr_accessor :redirect_url
+	
 
 	extend ActiveSupport::Concern
 	included do 
@@ -56,13 +56,30 @@ module Auth::Concerns::UserConcern
   			field :authentication_token
 	    	field :es
 	    	before_save do |document|
-	    		document.set_es
+	    		if document.es.blank?
+	    			document.set_es
+	    		end
 	    	end
 	    end
 
 	end
 
+	
+
+	def reset_token_and_es
+		self.authentication_token = nil
+		self.es = nil
+	end
+
+	def has_token_and_es
+		return !self.es.nil? && !self.authentication_token.nil?
+	end
+
 	protected
+
+	##setting these as nil, forces a new auth_token and es to be generated
+	##because in the before_save hooks they are set if they are blank.
+	
 
 	def set_es
 		

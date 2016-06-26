@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  mount Auth::Engine => Auth.configuration.mount_path
+  get 'aditya/index'
+
+  mount Auth::Engine => Auth.configuration.mount_path, :as => 'auth'
   mount_routes Auth.configuration.auth_resources
   
   ##app-specific routes 

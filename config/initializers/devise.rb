@@ -276,31 +276,76 @@ Devise.setup do |config|
   #config.omniauth_path_prefix = '/other'
 end
 
+DeviseController.class_eval do 
+
+  def require_no_authentication
+   
+    assert_is_devise_resource!
+    return unless is_navigational_format?
+    no_input = devise_mapping.no_input_strategies
+
+    authenticated = if no_input.present?
+      args = no_input.dup.push scope: resource_name
+      warden.authenticate?(*args)
+    else
+      warden.authenticated?(resource_name)
+    end
+
+    ##you come to the sign_up or sign_in page with a redirect url
+    ## => you don't trigger the after_sign_in_path for , because that would have triggered you to get redirected to wherever you wanted with the user details.
+    ## => instead , we reset the authentication token and the es salt, and keep you on the sign_in or sign_up page, but we set the redirect url into the session, so that after you sign up/sign in successfully you will be redirected to wherever you want but by this point in time, there is a new redirect_url and es.
+    ##you come without a redirect url
+    ## => you can sign in by cookies and you will go to the after sign in path for the user.
+    if authenticated && resource = warden.user(resource_name)
+      if params[:redirect_url].nil?
+        puts "NO REDIRECT URL IN PARAMS"
+        session.delete(:redirect_url)
+        flash[:alert] = I18n.t("devise.failure.already_authenticated")
+        redirect_to after_sign_in_path_for(resource)
+      else
+        if resource.has_token_and_es
+          resource.reset_token_and_es
+          resource.save
+        end
+        session[:redirect_url] = params[:redirect_url]
+      end
+    else
+      if !params[:redirect_url].nil?
+        session[:redirect_url] = params[:redirect_url]
+      end
+    end
+  end
+
+end
+
 
 module Devise
-
-  class ParameterSanitizer
-
-     DEFAULT_PERMITTED_ATTRIBUTES = {
-      sign_in: [:password, :remember_me],
-      sign_up: [:password, :password_confirmation, :redirect_url],
-      account_update: [:password, :password_confirmation, :current_password]
-      }
-
-  end
 
   module Controllers
 
     module Helpers
 
       def after_sign_in_path_for(resource_or_scope)
-        if resource_or_scope.redirect_url.nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
+        if session[:redirect_url].nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
+            puts "session redirect url is: #{session[:redirect_url]}"
+            puts "the auth token is : #{resource_or_scope.authentication_token}"
+            puts "the es is : #{resource_or_scope.es}"
             stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
-        else
-            resource_or_scope.redirect_url + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
+        else 
+            redir_url = session[:redirect_url] + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
+           
+            if redir_url =~ URI::regexp
+              redir_url   
+            else
+              Auth::ApplicationController.helpers.omniauth_failed_path_for
+            end
+            
+            
         end
         
       end
+
+
 
     end
 

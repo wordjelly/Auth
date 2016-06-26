@@ -28,7 +28,7 @@ module Auth
 
 			##the path for the omniauth_failure, it is the same for all models 
 			def self.omniauth_failure_path
-				"#{omniauth_prefix_path}/failed"
+				"omniauth/failed"
 			end
 		end
 	end
