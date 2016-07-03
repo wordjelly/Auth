@@ -9,8 +9,8 @@ module ActionDispatch::Routing
 	  
 	  app_route_resources.each do |resource,opts| 
 
-	  	  puts "resource is : #{resource}"
-	  	  puts "opts are: #{opts}"
+	  	  #puts "resource is : #{resource}"
+	  	  #puts "opts are: #{opts}"
 
 		  # ensure objects exist to simplify attr checks
 		  opts[:controllers] ||= {}
@@ -71,17 +71,19 @@ module ActionDispatch::Routing
 					puts "resource is: #{resource}"
 					puts "provider is: #{provider}"
 
-					request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
+					omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
 
 					common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
 
-					match "#{request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
+					match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 
 					match "#{common_callback_path}", controller: omniauth_ctrl, action: "omni_common", via: [:get,:post], as: "#{provider}_omniauth_callback"
 				end
 
 
 				##add the omniauth_sign_in_failed_path.
+				
+				match "omniauth/failed", controller:omniauth_ctrl, action: "failure", via: [:get,:post], as: "omniauth_failure"
 				
 			end
 

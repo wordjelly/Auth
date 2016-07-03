@@ -11,10 +11,10 @@ module Auth::Concerns::OmniConcern
   end
 
   def failure
-    puts "HIT THE FAILURE"
-    set_flash_message :alert, :failure, kind: OmniAuth::Utils.camelize(failed_strategy.name), reason: failure_message
-    redirect_to after_omniauth_failure_path_for(resource_name)
-    #should render the failure view.
+    #puts "HIT THE FAILURE"
+    #set_flash_message :alert, :failure, kind: OmniAuth::Utils.camelize(failed_strategy.name), reason: failure_message
+    #puts "this is the failed strategy name: #{failed_strategy.name}"
+    #puts "this is the failure message : #{failed_message}"
   end
 
 
@@ -28,7 +28,7 @@ module Auth::Concerns::OmniConcern
     
     path = request.env["omniauth.model"]
     
-    puts "omniauth model is #{path}"
+    #puts "omniauth model is #{path}"
 
     request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
       jj = Regexp.last_match
