@@ -4,9 +4,8 @@ require 'simple_token_authentication'
 
 module Auth::Concerns::UserConcern
 		
-	
-
 	extend ActiveSupport::Concern
+
 	included do 
 
 		##if devise modules are not defined, then define them, by default omniauth contains 
@@ -32,8 +31,16 @@ module Auth::Concerns::UserConcern
 		  field :current_sign_in_ip, type: String
 		  field :last_sign_in_ip,    type: String
 
+		  ##oauth identities.
 		  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
 		  
+		  ##redirect_urls
+		  field :redirect_urls,		type: Array, default: []
+
+		  ##provider_id
+		  field :provider_id, 		 type: String
+		  field :provider_secret,	 type: String
+		 
 
 		  ## Confirmable
 		   field :confirmation_token,   type: String
@@ -41,10 +48,22 @@ module Auth::Concerns::UserConcern
 		   field :confirmation_sent_at, type: Time
 		   field :unconfirmed_email,    type: String # Only if using reconfirmable
 
+		   ##fields for remote provider.
+		   field :provider_id, type: String
+		   field :provider_secret, type: String
+
+
 		  ## Lockable
 		  # field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
 		  # field :unlock_token,    type: String # Only if unlock strategy is :email or :both
 		  # field :locked_at,       type: Time
+
+		  before_save do |document|
+		  	if document.provider_id.blank?
+		  		document.provider_id = SecureRandom.hex(32)
+		  		document.provider_secret = SecureRandom.hex(32)
+		  	end
+		  end
 
 	    end
 

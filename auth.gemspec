@@ -26,5 +26,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'omniauth-twitter'
   s.add_dependency 'omniauth-facebook'
   s.add_dependency 'omniauth-linkedin'
+  s.add_dependency 'request_store'
 
 end

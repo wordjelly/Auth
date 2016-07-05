@@ -83,7 +83,7 @@ module ActionDispatch::Routing
 
 				##add the omniauth_sign_in_failed_path.
 				
-				match "omniauth/failed", controller:omniauth_ctrl, action: "failure", via: [:get,:post], as: "omniauth_failure"
+				#match "omniauth/failed", controller:omniauth_ctrl, action: "failure", via: [:get,:post], as: "omniauth_failure"
 				
 			end
 

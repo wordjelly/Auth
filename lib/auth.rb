@@ -5,5 +5,6 @@ require 'omniauth-facebook'
 require "devise"
 require "mongoid"
 require "simple_token_authentication"
+require "request_store"
 module Auth
 end

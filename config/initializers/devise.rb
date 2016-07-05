@@ -237,7 +237,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  # config.navigational_formats = ['*/*', :html]
+  config.navigational_formats = ['*/*', :html, :json]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -278,8 +278,38 @@ end
 
 DeviseController.class_eval do 
 
+  def set_redirect_params(resource_name)
+    RequestStore.store[:redirect_url] = nil
+    RequestStore.store[:provider_usr] = nil
+    ##if a provider usr and provider id are present in the params, then we check whether we have any such user in our database.
+    ##if yes, then we set that user onto the provider_usr variable.
+    provider_usr = nil
+    if !params[:provider_id].nil? && !params[:provider_secret].nil?
+      provider_usr = resource_name.constantize.collection.find(provider_id: params[:provider_id], provider_secret: params[:provider_secret])
+      provider_usr = Auth::ApplicationController.from_view(provider_usr,resource_name.constantize)
+      RequestStore.store[:provider_usr] = provider_usr
+    end
+
+    ##if there is a redirect url in the params and the provider_usr is not nil, and the redirect url is present in the providers redirect urls, then we set the redirect url into the request store.
+    if ( !params[:redirect_url].nil? && !provider_usr.nil? && provider_usr.redirect_urls.include?(params[:redirect_url]))
+      RequestStore.store[:redirect_url] = params[:redirect_url]    
+    end
+
+  end
+
+
+
   def require_no_authentication
-   
+    
+    set_redirect_params(resource_name)
+    
+    
+
+    if action_name == "create" && request.format.symbol == :json
+      return unless RequestStore.store[:provider_usr]
+    end
+
+
     assert_is_devise_resource!
     return unless is_navigational_format?
     no_input = devise_mapping.no_input_strategies
@@ -298,20 +328,14 @@ DeviseController.class_eval do
     ## => you can sign in by cookies and you will go to the after sign in path for the user.
     if authenticated && resource = warden.user(resource_name)
       if params[:redirect_url].nil?
-        puts "NO REDIRECT URL IN PARAMS"
-        session.delete(:redirect_url)
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
+        ##someone has come to the sign up/sign in page with a redirect url , and is already authenticated, so we reset the auth tokens.
         if resource.has_token_and_es
           resource.reset_token_and_es
           resource.save
-        end
-        session[:redirect_url] = params[:redirect_url]
-      end
-    else
-      if !params[:redirect_url].nil?
-        session[:redirect_url] = params[:redirect_url]
+        end 
       end
     end
   end
@@ -321,25 +345,35 @@ end
 
 module Devise
 
+  class ParameterSanitizer
+
+    DEFAULT_PERMITTED_ATTRIBUTES =
+      {
+        sign_in: [:password, :remember_me, :redirect_url, :provider_id, :provider_secret],
+        sign_up: [:password, :password_confirmation, :redirect_url, :provider_id, :provider_secret],
+        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :provider_id, :provider_secret]
+      }
+
+  end
+
   module Controllers
 
     module Helpers
 
       def after_sign_in_path_for(resource_or_scope)
-        if session[:redirect_url].nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
-            puts "session redirect url is: #{session[:redirect_url]}"
-            puts "the auth token is : #{resource_or_scope.authentication_token}"
-            puts "the es is : #{resource_or_scope.es}"
+        if RequestStore.store[:redirect_url].nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
+            #puts "session redirect url is: #{session[:redirect_url]}"
+            #puts "the auth token is : #{resource_or_scope.authentication_token}"
+            #puts "the es is : #{resource_or_scope.es}"
             stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
         else 
-            redir_url = session[:redirect_url] + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
+            redir_url = RequestStore.store[:redirect_url] + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
            
             if redir_url =~ URI::regexp
               redir_url   
             else
               Auth::ApplicationController.helpers.omniauth_failed_path_for
             end
-            
             
         end
         
