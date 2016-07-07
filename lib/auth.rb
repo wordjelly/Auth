@@ -6,5 +6,8 @@ require "devise"
 require "mongoid"
 require "simple_token_authentication"
 require "request_store"
+require "thin"
+require "mongoid_versioned_atomic"
+
 module Auth
 end

@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'mongoid-versioned-atomic', :git => "git://github.com/wordjelly/mongoid-versioned-atomic.git"
+
 # Declare your gem's dependencies in auth.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.

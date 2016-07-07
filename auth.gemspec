@@ -27,5 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'omniauth-facebook'
   s.add_dependency 'omniauth-linkedin'
   s.add_dependency 'request_store'
+  s.add_dependency 'thin'
+ 
 
 end

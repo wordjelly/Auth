@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  c_id: MyString
+  c_secret: MyString
+
+two:
+  c_id: MyString
+  c_secret: MyString

@@ -8,7 +8,12 @@ module Auth::Concerns::UserConcern
 
 	included do 
 
+
+		include MongoidVersionedAtomic::VAtomic
 		##if devise modules are not defined, then define them, by default omniauth contains 
+		
+		after_save :create_client
+
 		unless self.method_defined?(:devise_modules)
 	      devise :database_authenticatable, :registerable,
 	          :recoverable, :trackable, :validatable, :confirmable
@@ -34,36 +39,26 @@ module Auth::Concerns::UserConcern
 		  ##oauth identities.
 		  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
 		  
-		  ##redirect_urls
-		  field :redirect_urls,		type: Array, default: []
-
-		  ##provider_id
-		  field :provider_id, 		 type: String
-		  field :provider_secret,	 type: String
 		 
 
 		  ## Confirmable
-		   field :confirmation_token,   type: String
-		   field :confirmed_at,         type: Time
-		   field :confirmation_sent_at, type: Time
-		   field :unconfirmed_email,    type: String # Only if using reconfirmable
-
-		   ##fields for remote provider.
-		   field :provider_id, type: String
-		   field :provider_secret, type: String
-
+		  field :confirmation_token,   type: String
+		  field :confirmed_at,         type: Time
+		  field :confirmation_sent_at, type: Time
+		  field :unconfirmed_email,    type: String # Only if using reconfirmable
 
 		  ## Lockable
 		  # field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
 		  # field :unlock_token,    type: String # Only if unlock strategy is :email or :both
 		  # field :locked_at,       type: Time
 
-		  before_save do |document|
-		  	if document.provider_id.blank?
-		  		document.provider_id = SecureRandom.hex(32)
-		  		document.provider_secret = SecureRandom.hex(32)
-		  	end
-		  end
+		  field :client_id, type: BSON::ObjectId
+
+		  ##save a client where the user id is not the current user
+		  ##id,
+		  ##if such a client exists, then set an api_key only
+		  ##if he does not already have an api key.
+		  
 
 	    end
 
@@ -110,6 +105,40 @@ module Auth::Concerns::UserConcern
 		
 	end
 
+	##tries to create a client with a unique api_key
+	##tries 10 attempts
+	##initially tries a versioned_create
+	##if the op is successfull then it breaks.
+	##if the op_count becomes zero it breaks.
+	##if the op is not successfull and we already have a client with this api_key, then we try another api_key and retry the versioned_create, and decrement the op_count.
+	##at the end it will exit, and there may or may not be a client with this user_id.
+	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
+	def create_client
+
+		c = Client.new(:api_key => SecureRandom.hex(32), :user_id => self.id)
+
+		c.versioned_create({:api_key => c.api_key})
+		op_count = 10
+
+		while(true)
+
+			if c.op_success?
+				break
+			elsif op_count == 0
+				break
+			elsif !c.op_success && (Client.where(:api_key => c.api_key).count == 1)
+				c.api_key = SecureRandom.hex(32)
+				c.versioned_create({:api_key => c.api_key})
+				op_count-=1
+			else
+				break
+			end
+
+		end
+
+
+
+	end
 
 
 end
