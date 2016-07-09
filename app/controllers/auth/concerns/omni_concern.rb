@@ -112,9 +112,9 @@ module Auth::Concerns::OmniConcern
         else 
 
           Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
-          
-          
-          new_user_view = user_klazz.collection.find_one_and_update(
+            
+
+          new_user = user_klazz.versioned_upsert_one(
             {
               "email" => email,
               "identities" => {
@@ -135,20 +135,25 @@ module Auth::Concerns::OmniConcern
               "$setOnInsert" => {
                 "email" => email,
                 "password" =>  Devise.friendly_token(20)
+                "authentication_token" => SimpleTokenAuthentication::ActsAsTokenAuthenticatable.generate_authentication_token(SimpleTokenAuthentication::ActsAsTokenAuthenticatable.token_generator),
+                "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email)
               }
-            },
-            :return_document => :after,
-            :upsert => true
+            }
           )
 
-
-          new_user = from_bson(new_user_view,user_klazz)
+          ##basically if this is not nil, then 
           
-
+        
           ##sign in and send to the user profiles path.
 
-          if new_user.persisted?
+          if !new_user.nil? && new_user.persisted?
+
+            new_user.create_client
+
             new_user.skip_confirmation!
+            
+            ##call the after_save_callbacks.
+
             sign_in new_user
             redirect_to after_sign_in_path_for(new_user)    
           else

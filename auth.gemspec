@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~> 4.2.6"
-  s.add_dependency 'mongoid', '~> 5.1.0'
   s.add_dependency 'simple_token_authentication', '~> 1.0'
   s.add_dependency 'devise', "~> 4.1.1"
   s.add_dependency 'omniauth'
