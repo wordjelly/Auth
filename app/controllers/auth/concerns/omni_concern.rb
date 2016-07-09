@@ -3,7 +3,7 @@ module Auth::Concerns::OmniConcern
   extend ActiveSupport::Concern
 
   included do 
-    
+    before_action: check_state, only: [:omni_common]
   end
 
   def passthru
@@ -59,6 +59,14 @@ module Auth::Concerns::OmniConcern
 
   def translation_scope
     'devise.omniauth_callbacks'
+  end
+
+  ##needs to validate that the state parameter is an api key
+  ##that exists in the client collection.
+  ##what to do when the user is authenticating via the website.
+  ##we can check the form_authenticity_token each time, or an api token.
+  def check_state
+    
   end
 
   def omni_common
