@@ -78,17 +78,31 @@ module OmniAuth
 	    ##now the callback call
 	    # Performs the steps necessary to run the callback phase of a strategy.
 	    def callback_call
-
+	      check_state
 	      setup_phase
 	      log :info, 'Callback phase initiated.'
 	      @env['omniauth.origin'] = session.delete('omniauth.origin')
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
-	      @env['omniauth.model'] = session.delete('omniauth.model')
-	      
+	      if !session['omniauth_model'].blank?
+	      	@env['omniauth.model'] = session.delete('omniauth.model')
+	      end
+
 	      OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
 	      callback_phase
 	    end
+
+
+	    def check_state
+	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
+	    		c = Auth::Client.new(JSON.parse(request.params['state']))
+	    		if Auth::Client.where(:api_key => c.api_key).count == 1
+	    			session['omniauth.state'] = request.params['state'] = c.api_key
+	    			@env['omniauth.model'] = c.path
+	    		end
+	    	end
+	    end
+
 
 	end
 end

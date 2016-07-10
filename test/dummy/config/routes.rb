@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  
+  get 'home/index'
+
+  get "/" => "home#index"
+
   resources :oauth_tests do 
     collection do 
       get :google_sign_in

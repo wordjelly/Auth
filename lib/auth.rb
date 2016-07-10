@@ -8,6 +8,7 @@ require "simple_token_authentication"
 require "request_store"
 require "thin"
 require "mongoid_versioned_atomic"
+require "jquery-rails"
 
 module Auth
 end

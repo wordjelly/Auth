@@ -25,7 +25,11 @@ window.gpAsyncInit = function() {
       response_type: 'code',
       cookie_policy: 'single_host_origin',
       client_id: '79069425775-njseh8c39qsf24bicherbd3hdvk5o21c.apps.googleusercontent.com',
-      scope: 'email profile'
+      scope: 'email profile',
+      state: JSON.stringify({
+        'api_key' : 'alabama',
+        'path' : 'omniauth/users/'
+      })
     }, function(response) {
       if (response && !response.error) {
       	console.log("this is the response");

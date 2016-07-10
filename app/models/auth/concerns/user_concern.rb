@@ -16,7 +16,8 @@ module Auth::Concerns::UserConcern
 
 		unless self.method_defined?(:devise_modules)
 	      devise :database_authenticatable, :registerable,
-	          :recoverable, :trackable, :validatable, :confirmable
+	          :recoverable, :trackable, :validatable
+	      ##devise :confirmable
 	      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
 	      ## Database authenticatable
 		  field :email,              type: String, default: ""
@@ -42,10 +43,10 @@ module Auth::Concerns::UserConcern
 		 
 
 		  ## Confirmable
-		  field :confirmation_token,   type: String
-		  field :confirmed_at,         type: Time
-		  field :confirmation_sent_at, type: Time
-		  field :unconfirmed_email,    type: String # Only if using reconfirmable
+		  #field :confirmation_token,   type: String
+		  #field :confirmed_at,         type: Time
+		  #field :confirmation_sent_at, type: Time
+		  #field :unconfirmed_email,    type: String # Only if using reconfirmable
 
 		  ## Lockable
 		  # field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
@@ -115,7 +116,7 @@ module Auth::Concerns::UserConcern
 	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
 	def create_client
 
-		c = Client.new(:api_key => SecureRandom.hex(32), :user_id => self.id)
+		c = Auth::Client.new(:api_key => "alabama", :user_id => self.id)
 
 		c.versioned_create({:api_key => c.api_key})
 		op_count = 10
@@ -126,7 +127,7 @@ module Auth::Concerns::UserConcern
 				break
 			elsif op_count == 0
 				break
-			elsif !c.op_success && (Client.where(:api_key => c.api_key).count == 1)
+			elsif !c.op_success && (Auth::Client.where(:api_key => c.api_key).count == 1)
 				c.api_key = SecureRandom.hex(32)
 				c.versioned_create({:api_key => c.api_key})
 				op_count-=1

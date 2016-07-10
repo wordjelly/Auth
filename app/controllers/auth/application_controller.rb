@@ -3,7 +3,8 @@ module Auth
     protect_from_forgery with: :exception
   	include Auth::ApplicationHelper
   	
-    	
+
+   	
     def from_bson(bson_doc,klass)
 
 	 	if !bson_doc.nil?
@@ -34,6 +35,7 @@ module Auth
 
 	 end
 
+	
 
   end
 end

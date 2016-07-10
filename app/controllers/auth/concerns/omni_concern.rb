@@ -2,8 +2,8 @@ module Auth::Concerns::OmniConcern
 
   extend ActiveSupport::Concern
 
-  included do 
-    before_action: check_state, only: [:omni_common]
+  included do
+    
   end
 
   def passthru
@@ -26,7 +26,7 @@ module Auth::Concerns::OmniConcern
 
     model = nil
     
-    path = request.env["omniauth.model"]
+    #path = request.env["omniauth.model"]
     
     #puts "omniauth model is #{path}"
 
@@ -61,13 +61,6 @@ module Auth::Concerns::OmniConcern
     'devise.omniauth_callbacks'
   end
 
-  ##needs to validate that the state parameter is an api key
-  ##that exists in the client collection.
-  ##what to do when the user is authenticating via the website.
-  ##we can check the form_authenticity_token each time, or an api token.
-  def check_state
-    
-  end
 
   def omni_common
      
@@ -142,7 +135,7 @@ module Auth::Concerns::OmniConcern
               },
               "$setOnInsert" => {
                 "email" => email,
-                "password" =>  Devise.friendly_token(20)
+                "password" =>  Devise.friendly_token(20),
                 "authentication_token" => SimpleTokenAuthentication::ActsAsTokenAuthenticatable.generate_authentication_token(SimpleTokenAuthentication::ActsAsTokenAuthenticatable.token_generator),
                 "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email)
               }
