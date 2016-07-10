@@ -84,7 +84,7 @@ module OmniAuth
 	      @env['omniauth.origin'] = session.delete('omniauth.origin')
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
-	      if !session['omniauth_model'].blank?
+	      if !session['omniauth.model'].blank?
 	      	@env['omniauth.model'] = session.delete('omniauth.model')
 	      end
 
