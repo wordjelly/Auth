@@ -280,21 +280,18 @@ DeviseController.class_eval do
 
   def set_redirect_params(resource_name)
     RequestStore.store[:redirect_url] = nil
-    RequestStore.store[:provider_usr] = nil
-    ##if a provider usr and provider id are present in the params, then we check whether we have any such user in our database.
-    ##if yes, then we set that user onto the provider_usr variable.
-    provider_usr = nil
-    if !params[:provider_id].nil? && !params[:provider_secret].nil?
-      provider_usr = resource_name.constantize.collection.find(provider_id: params[:provider_id], provider_secret: params[:provider_secret])
-      provider_usr = Auth::ApplicationController.from_view(provider_usr,resource_name.constantize)
-      RequestStore.store[:provider_usr] = provider_usr
-    end
 
-    ##if there is a redirect url in the params and the provider_usr is not nil, and the redirect url is present in the providers redirect urls, then we set the redirect url into the request store.
-    if ( !params[:redirect_url].nil? && !provider_usr.nil? && provider_usr.redirect_urls.include?(params[:redirect_url]))
-      RequestStore.store[:redirect_url] = params[:redirect_url]    
+    if !params[:api_key].nil? && !params[:redirect_url].nil?
+      begin
+        client = Client.find(api_key: params[:api_key])
+        RequestStore.store[:client] = client
+        if client.contains_redirect_url?(params[:redirect_url])
+          RequestStore.store[:redirect_url] = params[:redirect_url]
+        end
+      rescue => e
+        ##to rescue when the client api key is not foudn.
+      end
     end
-
   end
 
 
@@ -302,11 +299,10 @@ DeviseController.class_eval do
   def require_no_authentication
     
     set_redirect_params(resource_name)
-    
-    
 
-    if action_name == "create" && request.format.symbol == :json
-      return unless RequestStore.store[:provider_usr]
+    ##if the request format is json, and we don't have a client, then return 
+    if (request.format.symbol == :json && RequestStore.store[:client].nil?)
+      return
     end
 
 
@@ -322,12 +318,12 @@ DeviseController.class_eval do
     end
 
     ##you come to the sign_up or sign_in page with a redirect url
-    ## => you don't trigger the after_sign_in_path for , because that would have triggered you to get redirected to wherever you wanted with the user details.
-    ## => instead , we reset the authentication token and the es salt, and keep you on the sign_in or sign_up page, but we set the redirect url into the session, so that after you sign up/sign in successfully you will be redirected to wherever you want but by this point in time, there is a new redirect_url and es.
+      ## => you don't trigger the after_sign_in_path for , because that would have triggered you to get redirected to wherever you wanted with the user details.
+      ## => instead , we reset the authentication token and the es salt, and keep you on the sign_in or sign_up page, but we set the redirect url into the session, so that after you sign up/sign in successfully you will be redirected to wherever you want but by this point in time, there is a new redirect_url and es.
     ##you come without a redirect url
-    ## => you can sign in by cookies and you will go to the after sign in path for the user.
+      ## => you can sign in by cookies and you will go to the after sign in path for the user.
     if authenticated && resource = warden.user(resource_name)
-      if params[:redirect_url].nil?
+      if RequestStore.store[:redirect_url].nil?
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -349,9 +345,9 @@ module Devise
 
     DEFAULT_PERMITTED_ATTRIBUTES =
       {
-        sign_in: [:password, :remember_me, :redirect_url, :provider_id, :provider_secret],
-        sign_up: [:password, :password_confirmation, :redirect_url, :provider_id, :provider_secret],
-        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :provider_id, :provider_secret]
+        sign_in: [:password, :remember_me, :redirect_url, :api_key],
+        sign_up: [:password, :password_confirmation, :redirect_url, :api_key],
+        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :api_key]
       }
 
   end
@@ -362,9 +358,6 @@ module Devise
 
       def after_sign_in_path_for(resource_or_scope)
         if RequestStore.store[:redirect_url].nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
-            #puts "session redirect url is: #{session[:redirect_url]}"
-            #puts "the auth token is : #{resource_or_scope.authentication_token}"
-            #puts "the es is : #{resource_or_scope.es}"
             stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
         else 
             redir_url = RequestStore.store[:redirect_url] + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
@@ -374,13 +367,10 @@ module Devise
             else
               Auth::ApplicationController.helpers.omniauth_failed_path_for
             end
-            
         end
         
       end
-
-
-
+      
     end
 
   end

@@ -1,0 +1,25 @@
+specification:
+
+1.setup:
+	
+	- should skip modules if told to skip, and routes should not get generated.
+	- should also skip those steps in oauth registration.
+	- should generate routes for multiple resources.
+	- should generate omniauth_failure_path if at least one resource has omniauth enabled.
+	- should use app controllers if specified in the opts.
+	- should enable token_auth by default.
+	- should skip token_auth if told to
+	- should provide way to invalidate and refresh tokens.
+	- redirect_url behaviour - with json_api and web app.
+	- should allow client to set redirect_urls.
+	- redirect_url should work with oauth.
+
+
+2.api :
+
+3.web application :
+
+-start the tests in a brand new app, using this as a gem.
+-preinitializer should have 2 resources, one called admin and the other called user.
+-it should use app controllers for admin and basic controllers for user
+-then test everything set above.

@@ -1,9 +1,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  c_id: MyString
-  c_secret: MyString
+  api_key: MyString
+  path: 
+  redirect_urls: 
+  user_id: 
 
 two:
-  c_id: MyString
-  c_secret: MyString
+  api_key: MyString
+  path: 
+  redirect_urls: 
+  user_id: 

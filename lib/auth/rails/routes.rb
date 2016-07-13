@@ -22,14 +22,16 @@ module ActionDispatch::Routing
 		  registrations_ctrl     = opts[:controllers][:registrations] || "auth/registrations"
 		  passwords_ctrl         = opts[:controllers][:passwords] || "auth/passwords"
 		  confirmations_ctrl     = opts[:controllers][:confirmations] || "auth/confirmations"
-		  token_validations_ctrl = opts[:controllers][:token_validations] || "auth/token_validations"
 		  omniauth_ctrl          = opts[:controllers][:omniauth_callbacks] || "auth/omniauth_callbacks"
+		  unlocks_ctrl 			 = opts[:controllers][:unlocks] || "auth/unlocks"
 
 		  # define devise controller mappings
 		  controllers = {:sessions           => sessions_ctrl,
 		                 :registrations      => registrations_ctrl,
 		                 :passwords          => passwords_ctrl,
-		                 :confirmations      => confirmations_ctrl}
+		                 :confirmations      => confirmations_ctrl,
+		             	 :unlocks  			 => unlocks_ctrl
+		             	}
 
 		  # remove any unwanted devise modules
 		  opts[:skip].each{|item| controllers.delete(item)}

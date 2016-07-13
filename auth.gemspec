@@ -28,5 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'request_store'
   s.add_dependency 'thin'
   s.add_dependency 'jquery-rails'
+  s.add_dependency "friendly_id", "~> 4.0.0.beta8"
+
 
 end

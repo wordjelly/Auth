@@ -14,6 +14,7 @@ PATH
   specs:
     auth (0.0.1)
       devise (~> 4.1.1)
+      friendly_id (~> 4.0.0.beta8)
       jquery-rails
       omniauth
       omniauth-facebook
@@ -88,6 +89,7 @@ GEM
     eventmachine (1.2.0.1)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
+    friendly_id (4.0.10)
     globalid (0.3.6)
       activesupport (>= 4.1.0)
     hashie (3.4.4)

@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Api key:</strong>
+  <%= @client.api_key %>
+</p>
+
+<p>
+  <strong>Path:</strong>
+  <%= @client.path %>
+</p>
+
+<p>
+  <strong>Redirect urls:</strong>
+  <%= @client.redirect_urls %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @client.user_id %>
+</p>
+
+<%= link_to 'Edit', edit_client_path(@client) %> |
+<%= link_to 'Back', clients_path %>

@@ -109,7 +109,6 @@ class Auth::RegistrationsController < DeviseController
   # The path used after sign up. You need to overwrite this method
   # in your own RegistrationsController.
   def after_sign_up_path_for(resource)
-    puts resource.attributes.to_s
     after_sign_in_path_for(resource)
   end
 

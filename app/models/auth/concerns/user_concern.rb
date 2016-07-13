@@ -14,51 +14,84 @@ module Auth::Concerns::UserConcern
 		
 		after_save :create_client
 
+
 		unless self.method_defined?(:devise_modules)
-	      devise :database_authenticatable, :registerable,
-	          :recoverable, :trackable, :validatable
-	      ##devise :confirmable
-	      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
-	      ## Database authenticatable
-		  field :email,              type: String, default: ""
-		  field :encrypted_password, type: String, default: ""
 
-		  ## Recoverable
-		  field :reset_password_token,   type: String
-		  field :reset_password_sent_at, type: Time
+		  ##get the options for the current class.
+		  opts = Auth.configuration.auth_resources[self.name]
 
-		  ## Rememberable
-		  field :remember_created_at, type: Time
 
-		  ## Trackable
-		  field :sign_in_count,      type: Integer, default: 0
-		  field :current_sign_in_at, type: Time
-		  field :last_sign_in_at,    type: Time
-		  field :current_sign_in_ip, type: String
-		  field :last_sign_in_ip,    type: String
-
-		  ##oauth identities.
-		  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
+		  ## Database authenticatable
+	      ##
+	      #################################
+	      if !opts[:skip].include? :sessions
+		      devise :database_authenticatable
+		      devise :validatable
+		      devise :trackable
+			  field :email,              type: String, default: ""
+			  field :encrypted_password, type: String, default: ""
+			  field :client_id, type: BSON::ObjectId
+			  field :sign_in_count,      type: Integer, default: 0
+			  field :current_sign_in_at, type: Time
+			  field :last_sign_in_at,    type: Time
+			  field :current_sign_in_ip, type: String
+			  field :last_sign_in_ip,    type: String
+		  end
 		  
-		 
 
-		  ## Confirmable
-		  #field :confirmation_token,   type: String
-		  #field :confirmed_at,         type: Time
-		  #field :confirmation_sent_at, type: Time
-		  #field :unconfirmed_email,    type: String # Only if using reconfirmable
+
+		  ##REGISTRABLES
+		  ##
+		  ####################################
+		  if !opts[:skip].include? :registrations
+	      	devise :registerable
+	        field :remember_created_at, type: Time
+	  	  end
+
+
+	      ##### Recoverable
+	      ###
+	      ##########################################
+	      if !opts[:skip].include? :passwords
+		      devise :recoverable	      
+			  field :reset_password_token,   type: String
+			  field :reset_password_sent_at, type: Time
+		  end
+
+			      
+	      
+		  ##### ## Confirmable
+		  ##
+		  #########################################
+		  if !opts[:skip].include? :confirmations
+		      devise :confirmable
+			  field :confirmation_token,   type: String
+			  field :confirmed_at,         type: Time
+			  field :confirmation_sent_at, type: Time
+			  field :unconfirmed_email,    type: String # Only if using reconfirmable
+	      end
+
 
 		  ## Lockable
-		  # field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
-		  # field :unlock_token,    type: String # Only if unlock strategy is :email or :both
-		  # field :locked_at,       type: Time
+		  ###################
+		  ##########################################
+	      if !opts[:skip].include? :unlocks
+		      devise :lockable
+			  field :failed_attempts, type: Integer, default: 0 # Only if lock strategy is :failed_attempts
+			  field :unlock_token,    type: String # Only if unlock strategy is :email or :both
+			  field :locked_at,       type: Time
+	      end
 
-		  field :client_id, type: BSON::ObjectId
 
-		  ##save a client where the user id is not the current user
-		  ##id,
-		  ##if such a client exists, then set an api_key only
-		  ##if he does not already have an api key.
+	      ####OAUTHABLE
+	      ##
+	      ############################################3
+	      if !opts[:skip].include? :omniauthable
+		      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
+			  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
+		  end
+
+		  
 		  
 
 	    end
@@ -106,19 +139,24 @@ module Auth::Concerns::UserConcern
 		
 	end
 
-	##tries to create a client with a unique api_key
+	##tries to create a client with a unique api_key, and user id.
 	##tries 10 attempts
 	##initially tries a versioned_create
 	##if the op is successfull then it breaks.
 	##if the op_count becomes zero it breaks.
-	##if the op is not successfull and we already have a client with this api_key, then we try another api_key and retry the versioned_create, and decrement the op_count.
+	##if there is no client with this user id, then and only then will it change the api_key and again try to create a client with this user_id and this api_key.
 	##at the end it will exit, and there may or may not be a client with this user_id.
 	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
 	def create_client
 
-		c = Auth::Client.new(:api_key => "alabama", :user_id => self.id)
+		##we want to create a new client, provided that there is no client for this user id.
+		##if a client already exists, then we dont want to do anything.
+		##when we create the client we want to be sure that 
+		##provided that there is no client with this user id.
 
-		c.versioned_create({:api_key => c.api_key})
+		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :user_id => self.id)
+
+		c.versioned_create({:user_id => id, :api_key => c.api_key})
 		op_count = 10
 
 		while(true)
@@ -127,9 +165,9 @@ module Auth::Concerns::UserConcern
 				break
 			elsif op_count == 0
 				break
-			elsif !c.op_success && (Auth::Client.where(:api_key => c.api_key).count == 1)
+			elsif (Auth::Client.where(:user_id => id).count == 0)
 				c.api_key = SecureRandom.hex(32)
-				c.versioned_create({:api_key => c.api_key})
+				c.versioned_create({:user_id => id, :api_key => c.api_key})
 				op_count-=1
 			else
 				break

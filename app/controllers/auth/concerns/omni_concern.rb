@@ -63,14 +63,14 @@ module Auth::Concerns::OmniConcern
 
 
   def omni_common
-     
+        ##clear the omniauth state from the session.
+        session.delete('omniauth.state')
         user_klazz = Object.const_get(get_model_class)
         omni_hash = get_omni_hash
 
         email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
 
         ##it will derive the resource class from the omni_hash referrer path.
-
 
         identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
 
@@ -89,14 +89,19 @@ module Auth::Concerns::OmniConcern
           user = from_view(existing_oauth_users,user_klazz)
 
           if user.persisted?
-            user.skip_confirmation!
+            
+
+
+            if !Auth.configuration.auth_resources[get_model_class][:skip].include? :confirmable
+              user.skip_confirmation!
+            end
+            
             Rails.logger.debug("this user already exists")
-            #sign_in_and_redirect user
+            
             sign_in user
 
             redirect_to after_sign_in_path_for(user)
-            #redirect_to omniauth_failed_path_for
-
+            
           else
            
             redirect_to omniauth_failed_path_for
