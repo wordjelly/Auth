@@ -14,8 +14,14 @@ specification:
 	- should allow client to set redirect_urls.
 	- redirect_url should work with oauth.
 
-
 2.api :
+	
+	- should create user provided api_key
+	- should update user provided api_key
+	- should get auth_token on sign_up/sign_in, provided api_key
+	- should be able to request password change , provided api_key
+	- should be able to call omniauth_callback using 
+
 
 3.web application :
 

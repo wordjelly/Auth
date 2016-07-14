@@ -12,6 +12,24 @@ module Auth
   def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)
+    
+    self.configuration.auth_resources.keys.each do |res|
+      ##a skip option must be present on each auth resource.
+      if self.configuration.auth_resources[res][:skip].nil?
+        self.configuration.auth_resources[res][:skip] = {}
+      end
+
+      ##a token_auth_options hash must be present on the 
+      ##configuration for each resource..
+      if self.configuration.auth_resources[res]["token_auth_options"].nil?
+        self.configuration.auth_resources[res]["token_auth_options"] = 
+        {
+          fallback: :none,
+          if: lambda { |controller| controller.request.format.json? } 
+        }
+      end
+    end
+    ##
   end
 
   class Configuration
@@ -22,7 +40,6 @@ module Auth
    
 
     def initialize
-      
       @enable_token_auth = true
       @oauth_credentials = {}
       @mount_path = "/authenticate"
