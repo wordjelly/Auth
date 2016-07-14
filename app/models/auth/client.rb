@@ -20,5 +20,9 @@ module Auth
         return self.redirect_urls.include? url
     end
 
+    def self.is_active(api_key)
+        
+    end
+
   end
 end

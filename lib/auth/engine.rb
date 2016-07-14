@@ -3,6 +3,9 @@ require "auth/rails/routes"
 module Auth
   class Engine < ::Rails::Engine
     isolate_namespace Auth
+    config.generators do |g|
+      g.test_framework :rspec
+    end
   end
 
   class << self
@@ -16,7 +19,7 @@ module Auth
     self.configuration.auth_resources.keys.each do |res|
       ##a skip option must be present on each auth resource.
       if self.configuration.auth_resources[res][:skip].nil?
-        self.configuration.auth_resources[res][:skip] = {}
+        self.configuration.auth_resources[res][:skip] = []
       end
 
       ##a token_auth_options hash must be present on the 

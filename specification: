@@ -20,7 +20,9 @@ specification:
 	- should update user provided api_key
 	- should get auth_token on sign_up/sign_in, provided api_key
 	- should be able to request password change , provided api_key
-	- should be able to call omniauth_callback using 
+	- should be able to call omniauth_callback, provided api_key
+	- after calling the omniauth_callback should return the auth_token(test for facebook and google)
+	- test with android java app.
 
 
 3.web application :
