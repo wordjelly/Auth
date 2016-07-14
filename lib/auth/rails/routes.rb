@@ -70,8 +70,8 @@ module ActionDispatch::Routing
 
 				resource_class.omniauth_providers.each do |provider|
 					
-					puts "resource is: #{resource}"
-					puts "provider is: #{provider}"
+					#puts "resource is: #{resource}"
+					#puts "provider is: #{provider}"
 
 					omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
 
@@ -82,10 +82,12 @@ module ActionDispatch::Routing
 					match "#{common_callback_path}", controller: omniauth_ctrl, action: "omni_common", via: [:get,:post], as: "#{provider}_omniauth_callback"
 				end
 
+				oauth_failure_path = Auth::OmniAuth::Path.omniauth_failure_path
+				match "#{oauth_failure_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
 
-				##add the omniauth_sign_in_failed_path.
+	
+
 				
-				#match "omniauth/failed", controller:omniauth_ctrl, action: "failure", via: [:get,:post], as: "omniauth_failure"
 				
 			end
 

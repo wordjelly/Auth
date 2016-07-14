@@ -1,8 +1,8 @@
 require "rails_helper"
 
-
+##if you want to test a controller that uses routes defined by the 
 describe Auth::ClientsController do 
-
+	routes{Auth::Engine.routes}
 
 	context "-- client web app ---" do 
 
@@ -10,15 +10,14 @@ describe Auth::ClientsController do
 
 			c = Auth::Client.new
 			c.redirect_urls = ["hello"]
-			@params = c.attributes	
+			@params = {:client => c.attributes}	
 			post :create, @params 
-			#response = assigns(:r)
-			#params_should_equal_response(response,@params,subject.current_user)
-			#Corner.count.should eq(1)
+			
 
 		end
 
 	end
 
-
 end
+
+

@@ -3,7 +3,7 @@ module Auth::Concerns::OmniConcern
   extend ActiveSupport::Concern
 
   included do
-    
+    helper_method :omniauth_failed_path_for
   end
 
   def passthru
@@ -56,6 +56,11 @@ module Auth::Concerns::OmniConcern
   def after_omniauth_failure_path_for(scope)
     new_session_path(scope)
   end
+
+  def omniauth_failed_path_for
+    omniauth_failure_path
+  end
+
 
   def translation_scope
     'devise.omniauth_callbacks'

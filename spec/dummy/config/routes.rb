@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   
-  get 'home/index'
-
+ 
   get "/" => "home#index"
 
   resources :oauth_tests do 
@@ -10,11 +9,9 @@ Rails.application.routes.draw do
     end
   end
   
-  get 'aditya/index'
-
-  mount Auth::Engine => Auth.configuration.mount_path, :as => 'auth'
+  mount Auth::Engine => "/authenticate", :as => 'auth'
   mount_routes Auth.configuration.auth_resources
-  
+ 
   ##app-specific routes 
   namespace :api do 
 

@@ -6,6 +6,7 @@ module Auth
 
     # GET /clients
     def index
+      puts "came to index action"
       @clients = Client.all
     end
 
