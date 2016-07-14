@@ -341,6 +341,20 @@ end
 
 module Devise
 
+  Devise.include_helpers(Devise::OmniAuth)
+
+  module OmniAuth
+    module UrlHelpers
+      def omniauth_authorize_path(resource_or_scope, provider, *args)
+        "#{request.base_url}#{Auth::OmniAuth::Path.omniauth_request_path(resource_or_scope,provider)}"
+      end
+
+      def omniauth_failure_path_for(resource_or_scope)
+        "#{request.base_url}#{Auth::OmniAuth::Path.omniauth_failure_route_path(resource_or_scope)}"
+      end
+    end
+  end
+
   class ParameterSanitizer
 
     DEFAULT_PERMITTED_ATTRIBUTES =

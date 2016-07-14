@@ -26,9 +26,18 @@ module Auth
 				"#{Auth.configuration.mount_path}/#{resource_pluralized resource}"
 			end
 
-			##the path for the omniauth_failure, it is the same for all models 
-			def self.omniauth_failure_path
+			##the absolute path that is returned by the omniauth url helper
+			##devise takes care of prepending the resource and the mount prefix.
+			def self.omniauth_failure_absolute_path
 				"omniauth/failed"
+			end
+
+			##this is the path that is used in the routes.rb file, to build
+			##the actual route.
+			##keeps :res as a wildcard for the required resource.
+			def self.omniauth_failure_route_path(resource_or_scope)
+				resource_or_scope = resource_or_scope.nil? ? ":res" : resource_pluralized(resource_or_scope.class.name)
+				"#{Auth.configuration.mount_path}/#{resource_or_scope}/#{omniauth_failure_absolute_path}"
 			end
 		end
 	end

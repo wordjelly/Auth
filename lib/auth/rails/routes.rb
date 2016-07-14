@@ -82,8 +82,8 @@ module ActionDispatch::Routing
 					match "#{common_callback_path}", controller: omniauth_ctrl, action: "omni_common", via: [:get,:post], as: "#{provider}_omniauth_callback"
 				end
 
-				oauth_failure_path = Auth::OmniAuth::Path.omniauth_failure_path
-				match "#{oauth_failure_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
+				oauth_failure_route_path = Auth::OmniAuth::Path.omniauth_failure_route_path(nil)
+				match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
 
 	
 
