@@ -368,6 +368,22 @@ module Devise
 
   module Controllers
 
+    module SignInOut
+
+      ##gets the currently signed in scope.
+      ##@return [scope] : the currently signed in scope or nil, if no
+      ##scope is signed in.
+      def signed_in_as?
+        Devise.mappings.keys.any? do |_scope|
+          if warden.authenticate?(scope: _scope)
+            return _scope
+          end
+        end
+        return nil
+      end
+
+    end
+
     module Helpers
 
       def after_sign_in_path_for(resource_or_scope)

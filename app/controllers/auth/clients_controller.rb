@@ -1,9 +1,11 @@
 require_dependency "auth/application_controller"
-
 module Auth
   class ClientsController < ApplicationController
+    
+    include Auth::Concerns::TokenConcern
     before_action :set_client, only: [:show, :edit, :destroy,:update]
 
+    
     # GET /clients
     def index
       puts "came to index action"
@@ -17,7 +19,7 @@ module Auth
     # GET /clients/new
     def new
       @client = Client.new
-      @client.user_id = BSON::ObjectId.new
+      #@client.user_id = BSON::ObjectId.new
     end
 
     # GET /clients/1/edit
@@ -27,7 +29,7 @@ module Auth
     # POST /clients
     def create
       @client = Client.new(client_params)
-      @client.versioned_create
+      @client.versioned_create(:user_id => @client.user_id)
       if @client.op_success?
         redirect_to @client, notice: 'Client was successfully created.'
       else
@@ -63,6 +65,15 @@ module Auth
       # Only allow a trusted parameter "white list" through.
       def client_params
         params.require(:client).permit({:redirect_urls => []},:user_id)
+      end
+
+      def check_signed_in
+        scope = signed_in_as?
+        if scope.nil?
+
+        else
+          
+        end
       end
   end
 end

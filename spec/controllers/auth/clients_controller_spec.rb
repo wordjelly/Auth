@@ -9,10 +9,10 @@ describe Auth::ClientsController do
 		it "-- should create a client ---" do
 
 			c = Auth::Client.new
+			c.user_id = BSON::ObjectId.new
 			c.redirect_urls = ["hello"]
 			@params = {:client => c.attributes}	
 			post :create, @params 
-			
 
 		end
 

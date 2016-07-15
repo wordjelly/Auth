@@ -36,3 +36,108 @@ MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify
 MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0007291509999999999s
 Redirected to 
 Completed 500 Internal Server Error in 10ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788bc41421aa9274dc23c67", "version"=>"0", "redirect_urls"=>["hello"]}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"_id"=>BSON::ObjectId('5788bc41421aa9274dc23c68')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788bc41421aa9274dc23c68'), "redirect_urls"=>["hello"], "version"=>1}}, "new"=>true, "upsert"=>true, "by...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000673194s
+Redirected to 
+Completed 500 Internal Server Error in 9ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788be0f421aa928395d679a", "version"=>"0", "redirect_urls"=>["hello"]}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"_id"=>BSON::ObjectId('5788be0f421aa928395d679b')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788be0f421aa928395d679b'), "redirect_urls"=>["hello"], "version"=>1}}, "new"=>true, "upsert"=>true, "by...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000615159s
+Redirected to 
+Completed 500 Internal Server Error in 9ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788bfb5421aa9288afe1d02", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788bfb5421aa9288afe1d03"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788bfb5421aa9288afe1d03')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788bfb5421aa9288afe1d04'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788bfb5421aa9288...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0007199320000000001s
+Redirected to http://test.host/authenticate/clients/5788bfb5421aa9288afe1d03
+Completed 302 Found in 9ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e778421aa930107de37d", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e778421aa930107de37e"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e8a7421aa93039bea386", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e8a7421aa93039bea387"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e8e0421aa9304bb7364d", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e8e0421aa9304bb7364e"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788e8e0421aa9304bb7364e')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788e8e0421aa9304bb7364f'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788e8e0421aa9304...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001405019s
+Redirected to http://test.host/authenticate/clients/5788e8e0421aa9304bb7364e
+Completed 302 Found in 14ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e8ee421aa9305d3e4048", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e8ee421aa9305d3e4049"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e98c421aa930ac61f232", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e98c421aa930ac61f233"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e9a8421aa930b6c6602f", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e9a8421aa930b6c66030"}}
+Completed 500 Internal Server Error in 2ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e9dc421aa930d4c8c4fa", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e9dc421aa930d4c8c4fb"}}
+Completed 500 Internal Server Error in 0ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788e9ee421aa930de04e6c3", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788e9ee421aa930de04e6c4"}}
+Completed 500 Internal Server Error in 0ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788ea3b421aa9310ea90030", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788ea3b421aa9310ea90031"}}
+Completed 500 Internal Server Error in 0ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788ea5e421aa9311aac9814", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788ea5e421aa9311aac9815"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788ea5e421aa9311aac9815')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788ea5e421aa9311aac9816'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788ea5e421aa9311...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000806965s
+Redirected to http://test.host/authenticate/clients/5788ea5e421aa9311aac9815
+Completed 302 Found in 9ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788ea78421aa9312cb547d4", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788ea78421aa9312cb547d5"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788f1f5421aa93375953fcf", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788f1f5421aa93375953fd0"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788f1f5421aa93375953fd0')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788f1f5421aa93375953fd1'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788f1f5421aa9337...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0006755180000000001s
+Redirected to http://test.host/authenticate/clients/5788f1f5421aa93375953fd0
+Completed 302 Found in 9ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788f20d421aa933855321e6", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788f20d421aa933855321e7"}}
+Completed 500 Internal Server Error in 2ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788f3b1421aa9340f683aab", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788f3b1421aa9340f683aac"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788f3b1421aa9340f683aac')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788f3b1421aa9340f683aad'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788f3b1421aa9340...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000803503s
+Redirected to http://test.host/authenticate/clients/5788f3b1421aa9340f683aac
+Completed 302 Found in 10ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788f3d4421aa9342b5c6c99", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788f3d4421aa9342b5c6c9a"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('5788f3d4421aa9342b5c6c9a')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5788f3d4421aa9342b5c6c9b'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('5788f3d4421aa9342...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001028563s
+Redirected to http://test.host/authenticate/clients/5788f3d4421aa9342b5c6c9a
+Completed 302 Found in 12ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5788f8a0421aa935341c0e99", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5788f8a0421aa935341c0e9a"}}
+Completed 500 Internal Server Error in 1ms
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"57890007421aa9368d07182c", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"57890007421aa9368d07182d"}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"5789001e421aa9369f287761", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5789001e421aa9369f287762"}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)

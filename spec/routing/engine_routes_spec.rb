@@ -1,13 +1,5 @@
 require "rails_helper"
-
-RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
-  it "routes to the list of all clients" do
-    expect(:get => "clients").
-      to route_to(:controller => "auth/clients", :action => "index")
-  end
-end
-
+=begin
 RSpec.describe Auth::RegistrationsController, :type => :routing do
   it "routes to the new user registration action." do
     expect(:get => new_user_registration_path).
@@ -21,3 +13,4 @@ RSpec.describe Auth::OmniauthCallbacksController, :type => :routing do
       to route_to(:controller => "auth/omniauth_callbacks", :action => "failure")
   end
 end
+=end
