@@ -27,8 +27,9 @@ module Auth
       if self.configuration.auth_resources[res]["token_auth_options"].nil?
         self.configuration.auth_resources[res]["token_auth_options"] = 
         {
-          fallback: :none,
-          if: lambda { |controller| controller.request.format.json? } 
+          fallback: :exception
+          #,
+          #if: lambda { |controller| controller.request.format.json? } 
         }
       end
     end

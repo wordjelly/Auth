@@ -256,10 +256,11 @@ Devise.setup do |config|
   # If you want to use other strategies, that are not supported by Devise, or
   # change the failure app, you can configure them inside the config.warden block.
   #
-  # config.warden do |manager|
-  #   manager.intercept_401 = false
-  #   manager.default_strategies(scope: :user).unshift :some_external_strategy
-  # end
+   config.warden do |manager|
+     #manager.intercept_401 = false
+     #manager.default_strategies(scope: :user).unshift :some_external_strategy
+     #manager.failure_app = CustomFailure
+   end
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine
@@ -341,8 +342,9 @@ end
 
 module Devise
 
-  Devise.include_helpers(Devise::OmniAuth)
 
+
+  
   module OmniAuth
     module UrlHelpers
       def omniauth_authorize_path(resource_or_scope, provider, *args)
@@ -352,7 +354,45 @@ module Devise
       def omniauth_failure_path_for(resource_or_scope)
         "#{request.base_url}#{Auth::OmniAuth::Path.omniauth_failure_route_path(resource_or_scope)}"
       end
+
+      
     end
+  end
+
+  
+
+  Devise.include_helpers(Devise::OmniAuth)
+
+
+  ##checks if the request is json, otherwise lets it fall back to whatever is defined by the custom_failure defined in the target app.
+  ##if it is a json request, then renders a 401.
+  class FailureApp  
+
+    def self.call(env)
+      @json_respond  ||= action(:json_respond)
+      jf = @json_respond.call(env)
+      if jf[0] == 401
+        jf
+      else
+        @respond ||= action(:respond)
+        @respond.call(env)
+      end
+    end
+
+    def json_respond
+      if request.format == :json or request.content_type == 'application/json'
+            return json_failure
+      end
+      
+    end
+
+    def json_failure
+        
+        self.status = 401
+        self.content_type = 'application/json'
+        self.response_body = {"success"=> false, "errors" => ["u shall not pass LOL"]}.to_json
+    end
+
   end
 
   class ParameterSanitizer

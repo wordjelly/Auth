@@ -31,3 +31,17 @@ specification:
 -preinitializer should have 2 resources, one called admin and the other called user.
 -it should use app controllers for admin and basic controllers for user
 -then test everything set above.
+
+-----------------------------
+client_controller_tests
+
+redirect_url_tests -> after normal sign in , and omniauth_sign_in
+
+omniauth_api_tests
+
+basic_devise_tests
+
+options_tests
+-----------------------------
+
+

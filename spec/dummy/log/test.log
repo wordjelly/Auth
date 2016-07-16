@@ -141,3 +141,106 @@ Processing by Auth::ClientsController#create as HTML
   Parameters: {"client"=>{"_id"=>"5789001e421aa9369f287761", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"5789001e421aa9369f287762"}}
 Completed 401 Unauthorized in 1ms
   Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"578a415d421aa95ce3565910", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"578a415d421aa95ce3565911"}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"578a4769421aa95df8fb17bf", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"578a4769421aa95df8fb17c0"}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as HTML
+  Parameters: {"client"=>{"_id"=>"578a4773421aa95e02555a02", "version"=>"0", "redirect_urls"=>["hello"], "user_id"=>"578a4773421aa95e02555a03"}}
+Unpermitted parameters: _id, version
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578a4773421aa95e02555a03')}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578a4773421aa95e02555a04'), "redirect_urls"=>["hello"], "user_id"=>BSON::ObjectId('578a4773421aa95e0...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000992119s
+Redirected to http://test.host/authenticate/clients/578a4773421aa95e02555a03
+Completed 302 Found in 10ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+  Rendered /home/bhargav/Github/auth/app/views/auth/clients/index.html.erb within layouts/auth/application (0.3ms)
+Completed 200 OK in 17ms (Views: 10.8ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
