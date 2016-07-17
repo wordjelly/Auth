@@ -256,11 +256,11 @@ Devise.setup do |config|
   # If you want to use other strategies, that are not supported by Devise, or
   # change the failure app, you can configure them inside the config.warden block.
   #
-   config.warden do |manager|
+   #config.warden do |manager|
      #manager.intercept_401 = false
      #manager.default_strategies(scope: :user).unshift :some_external_strategy
      #manager.failure_app = CustomFailure
-   end
+   #end
 
   # ==> Mountable engine configurations
   # When using Devise inside an engine, let's call it `MyEngine`, and this engine
@@ -380,6 +380,13 @@ module Devise
     end
 
     def json_respond
+     # puts "----START---------------------------------------"
+     # request.headers.each {|key,value|
+
+      #  puts key
+      #  puts value
+
+      #}
       if request.format == :json or request.content_type == 'application/json'
             return json_failure
       end
@@ -392,6 +399,8 @@ module Devise
         self.content_type = 'application/json'
         self.response_body = {"success"=> false, "errors" => ["u shall not pass LOL"]}.to_json
     end
+
+    
 
   end
 

@@ -12,8 +12,8 @@ class Auth::RegistrationsController < DeviseController
 
   # POST /resource
   def create
+   
     build_resource(sign_up_params)
-
     resource.save
     yield resource if block_given?
     if resource.persisted?
@@ -27,6 +27,7 @@ class Auth::RegistrationsController < DeviseController
         respond_with resource, location: after_inactive_sign_up_path_for(resource)
       end
     else
+
       clean_up_passwords resource
       set_minimum_password_length
       respond_with resource

@@ -8,7 +8,6 @@ module Auth
     
     # GET /clients
     def index
-      puts "came to index action"
       @clients = Client.all
     end
 
@@ -67,13 +66,6 @@ module Auth
         params.require(:client).permit({:redirect_urls => []},:user_id)
       end
 
-      def check_signed_in
-        scope = signed_in_as?
-        if scope.nil?
-
-        else
-          
-        end
-      end
+      
   end
 end

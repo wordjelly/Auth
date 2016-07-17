@@ -20,7 +20,6 @@ module Auth::Concerns::UserConcern
 		  ##get the options for the current class.
 		  opts = Auth.configuration.auth_resources[self.name]
 
-
 		  ## Database authenticatable
 	      ##
 	      #################################
@@ -64,11 +63,11 @@ module Auth::Concerns::UserConcern
 		  ##
 		  #########################################
 		  if !opts[:skip].include? :confirmations
-		      devise :confirmable
-			  field :confirmation_token,   type: String
-			  field :confirmed_at,         type: Time
-			  field :confirmation_sent_at, type: Time
-			  field :unconfirmed_email,    type: String # Only if using reconfirmable
+		      #devise :confirmable
+			  #field :confirmation_token,   type: String
+			  #field :confirmed_at,         type: Time
+			  #field :confirmation_sent_at, type: Time
+			  #field :unconfirmed_email,    type: String # Only if using reconfirmable
 	      end
 
 
@@ -97,14 +96,16 @@ module Auth::Concerns::UserConcern
 	    end
 
 	    unless Auth.configuration.enable_token_auth
-
+	    	
 	    else
 	    	
 	    	acts_as_token_authenticatable
-  			field :authentication_token
-	    	field :es
+  			field :authentication_token, type: String
+	    	field :es, type: String
 	    	before_save do |document|
+	    		
 	    		if document.es.blank?
+	    			
 	    			document.set_es
 	    		end
 	    	end
@@ -148,7 +149,7 @@ module Auth::Concerns::UserConcern
 	##at the end it will exit, and there may or may not be a client with this user_id.
 	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
 	def create_client
-
+		
 		##we want to create a new client, provided that there is no client for this user id.
 		##if a client already exists, then we dont want to do anything.
 		##when we create the client we want to be sure that 
@@ -175,6 +176,7 @@ module Auth::Concerns::UserConcern
 
 		end
 
+		#puts "c op success was: #{c.op_success?}"
 
 
 	end
