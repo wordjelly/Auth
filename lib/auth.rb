@@ -9,6 +9,7 @@ require "request_store"
 require "thin"
 require "mongoid_versioned_atomic"
 require "jquery-rails"
+require "valid_url"
 
 module Auth
 end

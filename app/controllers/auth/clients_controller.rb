@@ -2,13 +2,20 @@ require_dependency "auth/application_controller"
 module Auth
   class ClientsController < ApplicationController
     
+    ##had to add html here, because just adding json does not work.
+    ##the before action, will weed out html requests, so no need to worry about that.
+   
+    respond_to :html,:json
+    before_action :ensure_json_request  
     include Auth::Concerns::TokenConcern
     before_action :set_client, only: [:show, :edit, :destroy,:update]
 
-    
+    ##need to check permissions of 
+
     # GET /clients
     def index
       @clients = Client.all
+      respond_with @clients
     end
 
     # GET /clients/1
@@ -18,7 +25,6 @@ module Auth
     # GET /clients/new
     def new
       @client = Client.new
-      #@client.user_id = BSON::ObjectId.new
     end
 
     # GET /clients/1/edit
@@ -39,6 +45,7 @@ module Auth
     # PATCH/PUT /clients/1
     def update
       ##this line ensures that only the redirect urls can be updated, it only considers the redirect_urls as dirty_fields.
+      ##puts params.to_s
       @client.redirect_urls = client_params[:redirect_urls]
       @client.versioned_update({"redirect_urls" => nil})
       if @client.op_success?
@@ -66,6 +73,10 @@ module Auth
         params.require(:client).permit({:redirect_urls => []},:user_id)
       end
 
-      
+      def ensure_json_request  
+        return if request.format == :json
+        render :nothing => true, :status => 406  
+      end 
+
   end
 end

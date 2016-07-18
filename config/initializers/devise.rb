@@ -354,8 +354,6 @@ module Devise
       def omniauth_failure_path_for(resource_or_scope)
         "#{request.base_url}#{Auth::OmniAuth::Path.omniauth_failure_route_path(resource_or_scope)}"
       end
-
-      
     end
   end
 

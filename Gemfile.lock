@@ -24,6 +24,7 @@ PATH
       request_store
       simple_token_authentication (~> 1.0)
       thin
+      valid_url
 
 GEM
   remote: https://rubygems.org/
@@ -247,6 +248,9 @@ GEM
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uuidtools (2.1.5)
+    valid_url (0.0.4)
+      addressable
+      rails
     warden (1.2.6)
       rack (>= 1.0)
     xpath (2.0.0)
