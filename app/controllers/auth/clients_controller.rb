@@ -14,17 +14,20 @@ module Auth
 
     # GET /clients
     def index
-      @clients = Client.all
-      respond_with @clients
+      #@clients = Client.all
+      #respond_with @clients
+      render :nothing => true, :status => 200
     end
 
     # GET /clients/1
     def show
+      respond_with @client
     end
 
     # GET /clients/new
     def new
-      @client = Client.new
+      #@client = Client.new
+      render :nothing => true, :status => 200
     end
 
     # GET /clients/1/edit
@@ -33,6 +36,7 @@ module Auth
 
     # POST /clients
     def create
+=begin
       @client = Client.new(client_params)
       @client.versioned_create(:user_id => @client.user_id)
       if @client.op_success?
@@ -40,25 +44,29 @@ module Auth
       else
         render :new
       end
+=end
+      render :nothing => true, :status => 200
     end
 
+    # response code of 204 is ok.
+    # anything else means fail.
     # PATCH/PUT /clients/1
     def update
       ##this line ensures that only the redirect urls can be updated, it only considers the redirect_urls as dirty_fields.
       ##puts params.to_s
       @client.redirect_urls = client_params[:redirect_urls]
       @client.versioned_update({"redirect_urls" => nil})
-      if @client.op_success?
-        redirect_to @client, notice: 'Client was successfully updated.'
-      else
-        render :edit
-      end
+      respond_with @client
     end
 
+    # response status of 404 or 204 is ok.
+    # 404 means client doesnt exist
+    # 204 means it was destroyed.
     # DELETE /clients/1
     def destroy
       @client.destroy
-      redirect_to clients_url, notice: 'Client was successfully destroyed.'
+      #redirect_to clients_url, notice: 'Client was successfully destroyed.'
+      respond_with(status: 200)
     end
 
     private
@@ -66,6 +74,11 @@ module Auth
       # the find method is overriden in the model, where it uses the :id (which is actually the user_id, because we have overridden the to_param method to use user_id). 
       def set_client
         @client = Client.find(params[:id])
+        if @client.nil?
+          render :nothing => true, :status => 404
+        else
+          return
+        end
       end
 
       # Only allow a trusted parameter "white list" through.
