@@ -17154,3 +17154,441 @@ MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify
 MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001220633s
 Redirected to http://www.example.com/
 Completed 302 Found in 14ms
+Processing by Auth::ClientsController#index as HTML
+  Rendered text template (0.0ms)
+Filter chain halted as :ensure_json_request rendered or redirected
+Completed 406 Not Acceptable in 7ms (Views: 6.4ms)
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"marina_hahn@schimmel.org"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001718266s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"nuy4kHd_zypxtfTMQ834"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.001630736s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e81'), "email"=>"marina_hahn@schimmel.org", "encrypted_password"=>"$2a$04$Y7fCkx.YSFo5M5mNaqvQHef/k4hpaOUxk/rkrPv4Zoha/fgk.wBI.", "sign_in_count"=>0, "failed_attempts"=>0, ...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.0005902430000000001s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e81'), "api_key"=>"adeec7d9c3f169eaf3c59c11f36c31beb7b8d819b681fc08a0d0f5ed64309fe2"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002353099s
+Processing by Auth::ClientsController#index as HTML
+  Rendered text template (0.0ms)
+Filter chain halted as :ensure_json_request rendered or redirected
+Completed 406 Not Acceptable in 1ms (Views: 0.3ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"malvina@schmitt.name"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0010460360000000002s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"uLafX9sLjtWxc2ayGcq_"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.001212688s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e84'), "email"=>"malvina@schmitt.name", "encrypted_password"=>"$2a$04$Gyn2T3kBUdMljwfQJg1vZ.ZxLcZCWSlxTywZ8O2eHGF3P0RavHcO2", "sign_in_count"=>0, "failed_attempts"=>0, "ide...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000451005s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e84'), "api_key"=>"0c66cb964b1bab41fadaaaf6e29748c74272e593f838e275f04e91c1ac7db600"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001607071s
+Processing by Auth::ClientsController#index as HTML
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"d39a514bc8990f33cb64fd9eb71ebaff7c2feae257cf2673ada422ea66ab95ef"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001149829s
+  Rendered text template (0.0ms)
+Completed 200 OK in 4ms (Views: 0.4ms)
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"marta@torphy.info"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0008382060000000001s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"poh7nkYLezzriuCXkBUp"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.000951863s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e86'), "email"=>"marta@torphy.info", "encrypted_password"=>"$2a$04$DaA5Gv5j0TPkVdfo2neGhOoFtIpcV.ltq09qw.uzT9MyA56io4fwu", "sign_in_count"=>0, "failed_attempts"=>0, "identi...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.042041637s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e86'), "api_key"=>"987d95c9cccaa92066fb9be4feed66cd8ab2aa3510890f84928950a967f7dfe8"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002419179s
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"759655af86a21d80faadba0e75aab058b583b7827081271e0dbdc5c410a6b057"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0016509349999999999s
+  Rendered text template (0.0ms)
+Completed 200 OK in 5ms (Views: 0.5ms)
+Processing by Auth::ClientsController#index as JSON
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as JSON
+  Parameters: {"params"=>{"redirect_urls"=>["http://www.google.com"], "user_id"=>BSON::ObjectId('578fe615421aa921c9973e88')}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"wrong"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001334037s
+Completed 401 Unauthorized in 3ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as JSON
+  Parameters: {"redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe615421aa921c9973e88", "client"=>{"redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe615421aa921c9973e88"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"wrong"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001646308s
+Completed 401 Unauthorized in 4ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"lizzie@harber.net"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0013121650000000001s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e89'), "email"=>"lizzie@harber.net", "encrypted_password"=>"$2a$04$nFAZaZWD4ouFCB3E7ztFSus6GryIl/m1AG2C/4u5ajtQrS43mV1ta", "sign_in_count"=>0, "failed_attempts"=>0, "identi...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.0005148490000000001s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e89'), "api_key"=>"66d616f78b9530a915873baeddd967d4549c0bd02e8fc2f7f9d6cdbfb3b26cc8"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002223098s
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0006090119999999999s
+  Rendered text template (0.0ms)
+Completed 200 OK in 3ms (Views: 0.4ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"reanna@jones.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000837657s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e8b'), "email"=>"reanna@jones.biz", "encrypted_password"=>"$2a$04$R/YcHwKps8anP58IcWJVRO9xsZJ/4FVbU8RI4ELgtevPTBFgnVsty", "sign_in_count"=>0, "failed_attempts"=>0, "identit...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.00038979899999999997s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e8b'), "api_key"=>"7a82d00136f56e87c883b2f59d281fbaf5360da07a2f7b931c714d6832e60242"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001321437s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe615421aa921c9973e8e", "version"=>"0", "redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe615421aa921c9973e8d"}, "id"=>"578fe615421aa921c9973e8d"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.00048405000000000003s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e8d')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0007934050000000001s
+  Rendered text template (0.0ms)
+Filter chain halted as :set_client rendered or redirected
+Completed 404 Not Found in 5ms (Views: 0.4ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"devin@white.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000799721s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e8f'), "email"=>"devin@white.com", "encrypted_password"=>"$2a$04$JKixnAtiIS4HTbMNNUgleeFJ6m8MexOmXheUXiN/ril.Ppf8DQ3iu", "sign_in_count"=>0, "failed_attempts"=>0, "identiti...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000369897s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e8f'), "api_key"=>"1ec1ffcb6b6081fdae94208c0e0df756f54f276f7e0af87e725573528edadb9b"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.009560204s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe615421aa921c9973e91", "version"=>"0", "redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe615421aa921c9973e8f"}, "id"=>"578fe615421aa921c9973e8f"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000464544s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e8f')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000744355s
+Unpermitted parameters: _id, version
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"version"=>1, "_id"=>BSON::ObjectId('578fe615421aa921c9973e90')}, "update"=>{"$set"=>{"redirect_urls"=>["http://www.google.com"]}, "$inc"=>{"version"=>1}}, "new"=>true, "bypassDocumentValidation"=>false}
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000883582s
+Completed 204 No Content in 93ms
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"leopoldo@klockohowe.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0013021159999999999s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e92'), "email"=>"leopoldo@klockohowe.biz", "encrypted_password"=>"$2a$04$rpFzJAtLY8u1JgEbrX648u6qj8vRQTbtzv8PQxSo9bzSR7HxiyyLS", "sign_in_count"=>0, "failed_attempts"=>0, "...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.004737106s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e92'), "api_key"=>"ee277066b7c396d04d998cd6e57b4baa128e2252854ca059f5a97afc4d431acd"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001731211s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe615421aa921c9973e94", "version"=>"0", "redirect_urls"=>["dog"], "user_id"=>"578fe615421aa921c9973e92"}, "id"=>"578fe615421aa921c9973e92"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0006702300000000001s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e92')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0012978570000000001s
+Unpermitted parameters: _id, version
+Completed 422 Unprocessable Entity in 7ms (Views: 0.3ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"olen@klocko.org"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001059528s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e95'), "email"=>"olen@klocko.org", "encrypted_password"=>"$2a$04$uMyvUaKX8O3h/KeJrhvqjuhak3YVGN4V2vwD/I2TJZTzm85dnzsW2", "sign_in_count"=>0, "failed_attempts"=>0, "identiti...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000458482s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e95'), "api_key"=>"8076c718a15edc289514f29c16ef43d77b579e7bf6d5781927ee4b15d503a715"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001731261s
+Processing by Auth::ClientsController#destroy as JSON
+  Parameters: {"id"=>"578fe615421aa921c9973e95", "client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0005474950000000001s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e95')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000998272s
+MONGODB | localhost:27017 | dummy_test.delete | STARTED | {"delete"=>"auth_clients", "deletes"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973e96')}, "limit"=>1}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_test.delete | SUCCEEDED | 0.00047593500000000003s
+Completed 204 No Content in 9ms
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"auth_clients", "query"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973e95')}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.000379348s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"cortney@marvin.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0010702320000000002s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe615421aa921c9973e97'), "email"=>"cortney@marvin.com", "encrypted_password"=>"$2a$04$X4fOUnSi9/IYQXv6q4EbQuhVF/I3BljQ6jg2K06cNT9xSZqsOpRMu", "sign_in_count"=>0, "failed_attempts"=>0, "ident...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000506346s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e97'), "api_key"=>"30e5b9ffd93f845b944b346961ec534c1450ac8fd1782b508c845efe85c72258"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe615421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002222612s
+Processing by Auth::ClientsController#show as JSON
+  Parameters: {"id"=>"578fe615421aa921c9973e97", "client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000624261s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe615421aa921c9973e97')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0012618240000000001s
+Completed 200 OK in 8ms (Views: 0.5ms)
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-07-21 02:29:01 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.5ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (14.5ms)
+Completed 200 OK in 277ms (Views: 267.8ms)
+Started POST "/authenticate/users" for 127.0.0.1 at 2016-07-21 02:29:02 +0530
+Processing by Auth::RegistrationsController#create as HTML
+  Parameters: {"user"=>{"email"=>"helena.murray@reichertjacobson.biz", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"helena.murray@reichertjacobson.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.00074331s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"iedfgT9iySfaUP4X4Kac"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.0011917719999999998s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe616421aa921c9973e99'), "email"=>"helena.murray@reichertjacobson.biz", "encrypted_password"=>"$2a$04$RhC72TjshdqrTCXnK/Xkb.ippIE2sFD9eBxJDlon2qTnahFMacjdC", "sign_in_count"=>0, "failed_atte...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000416655s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe616421aa921c9973e99'), "api_key"=>"61fb3b9e768feff8603131d0e32e77a3d93087186d423cd378e58590122dbdbb"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001190881s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e99')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-07-20 20:59:02 UTC, "current_sign_in_at"=>2016-07-20 20:59:02 UTC, "last...
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.000403191s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe616421aa921c9973e99'), "api_key"=>"4e4089c684bfcae4fba1454e47b4d08a27ddbacaaf957d437aa5a43b87accd6b"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0010162279999999999s
+Redirected to http://www.example.com/
+Completed 302 Found in 16ms
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dashawn_kilback@stiedemannbreitenberg.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001001304s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"bVdAWstrTx_hFzoufnhb"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.0009139450000000001s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c'), "email"=>"dashawn_kilback@stiedemannbreitenberg.biz", "encrypted_password"=>"$2a$04$2cUHRWbJSjhFUp1637LWJO.ziYCNysZyEzRflH4WZJBkyHsQP83RC", "sign_in_count"=>0, "fail...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000402758s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe616421aa921c9973e9c'), "api_key"=>"8a5e9ddca40f7fab48017694c4ffc91d778f51e0b72c19f1a09a965f6fc9684d"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001544796s
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-07-21 02:29:02 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"user"=>{"email"=>"dashawn_kilback@stiedemannbreitenberg.biz", "password"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dashawn_kilback@stiedemannbreitenberg.biz"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0008275789999999999s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-07-20 20:59:02 UTC, "current_sign_in_at"=>2016-07-20 20:59:02 UTC, "last...
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.001779936s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe616421aa921c9973e9c'), "api_key"=>"c11d9c9c11d9410062405b3b633975fc4c6fe26b3fbcbbd25bd018a7612b0b27"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0011606840000000002s
+Redirected to http://www.example.com/
+Completed 302 Found in 14ms
+Started GET "/" for 127.0.0.1 at 2016-07-21 02:29:02 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (1.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000495333s
+Completed 200 OK in 9ms (Views: 8.8ms)
+Started PUT "/authenticate/users/" for 127.0.0.1 at 2016-07-21 02:29:02 +0530
+Processing by Auth::RegistrationsController#update as HTML
+  Parameters: {"id"=>"578fe616421aa921c9973e9c", "user"=>{"email"=>"zelda.von@herzogbrekke.io", "current_password"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000456329s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c')}}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000321782s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"zelda.von@herzogbrekke.io", "_id"=>{"$ne"=>BSON::ObjectId('578fe616421aa921c9973e9c')}}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001221537s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973e9c')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"email"=>"zelda.von@herzogbrekke.io"}}, "multi"=>false, "upsert"=>false}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.00042029400000000004s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe616421aa921c9973e9c'), "api_key"=>"12076e88fb17b41b3eed58c855f290fb46a31196c296f026169cbd66ea1d22e6"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe616421aa921c9973...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001107419s
+Redirected to http://www.example.com/
+Completed 302 Found in 14ms
+Processing by Auth::ClientsController#index as HTML
+  Rendered text template (0.0ms)
+Filter chain halted as :ensure_json_request rendered or redirected
+Completed 406 Not Acceptable in 7ms (Views: 6.4ms)
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"lazaro.blick@durgan.io"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0016078750000000001s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"ANny2rxxn_GyLZEFGt42"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.001488738s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7940'), "email"=>"lazaro.blick@durgan.io", "encrypted_password"=>"$2a$04$F5kytJTvu1ODojXWCtI07O3kOQlcUtBYD44z.TXA4YwkP/2psi3om", "sign_in_count"=>0, "failed_attempts"=>0, "i...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.00043525s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7940'), "api_key"=>"c7a2e5957d95b996dd5a0e343f40baec5ae49d0a516b6d3973caeccda4ba828b"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0023062350000000002s
+Processing by Auth::ClientsController#index as HTML
+  Rendered text template (0.0ms)
+Filter chain halted as :ensure_json_request rendered or redirected
+Completed 406 Not Acceptable in 1ms (Views: 0.4ms)
+Processing by Auth::ClientsController#index as HTML
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"yvonne@hammesjakubowski.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001247506s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"gDmydJTfCvpsKmRCmyxb"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.001474024s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7943'), "email"=>"yvonne@hammesjakubowski.com", "encrypted_password"=>"$2a$04$UQbYKq15e0ekLN9hQiDP0eqBs.Y6RqFYM1LaxtrgGeNVDesVucLQC", "sign_in_count"=>0, "failed_attempts"=>...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.082120992s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7943'), "api_key"=>"0651aaf29967bec769d44c58a65dc6a07f904a36f3af83e7befff6a4c6e11692"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002043536s
+Processing by Auth::ClientsController#index as HTML
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"fd6568a2dd61a0014373cb759333bf11ab27cd122a36b9981ca26e426608f217"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001322002s
+  Rendered text template (0.0ms)
+Completed 200 OK in 7ms (Views: 0.6ms)
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"maudie@wehnerskiles.name"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001326244s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"UtEZrznutDMhBDiZVG1y"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.001631984s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7945'), "email"=>"maudie@wehnerskiles.name", "encrypted_password"=>"$2a$04$KC57bxM28WvTXl99O77ziuHjLCl3oJFcMjz7q//RMLgrEGPsfe156", "sign_in_count"=>0, "failed_attempts"=>0, ...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000471368s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7945'), "api_key"=>"979b4bf5f7ac2baed5898cd0f35ed083a0f490f6a01c5f5c5f73ab73215b1ad9"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0021636760000000002s
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"4368f75877ae194f92106ac6de35c5dee586179bd1cb6fda79361415cecfc8d0"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0013738099999999998s
+  Rendered text template (0.0ms)
+Completed 200 OK in 5ms (Views: 0.5ms)
+Processing by Auth::ClientsController#index as JSON
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as JSON
+  Parameters: {"params"=>{"redirect_urls"=>["http://www.google.com"], "user_id"=>BSON::ObjectId('578fe63d421aa921de1f7947')}}
+Completed 401 Unauthorized in 1ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"wrong"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0012875249999999999s
+Completed 401 Unauthorized in 3ms
+  Rendered text template (0.0ms)
+Processing by Auth::ClientsController#create as JSON
+  Parameters: {"redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe63d421aa921de1f7947", "client"=>{"redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe63d421aa921de1f7947"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"wrong"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0014835299999999998s
+Completed 401 Unauthorized in 3ms
+  Rendered text template (0.0ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"bo_wiza@lowe.name"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001268188s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7948'), "email"=>"bo_wiza@lowe.name", "encrypted_password"=>"$2a$04$t6f0oHQjiCtahcAPd0ew8.jhoUYainkaEcW0XJLjSJNBeZCvCN0Uu", "sign_in_count"=>0, "failed_attempts"=>0, "identi...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.017850518s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7948'), "api_key"=>"8b95face5b766eb7394ddfa82f931d4e212b1220659a577fe054cc23f117b294"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002262147s
+Processing by Auth::ClientsController#index as JSON
+  Parameters: {"client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000636326s
+  Rendered text template (0.0ms)
+Completed 200 OK in 5ms (Views: 0.7ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"sandy_carroll@kohler.co"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001237338s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f794a'), "email"=>"sandy_carroll@kohler.co", "encrypted_password"=>"$2a$04$p5ayxPCWhFuzAttyhBkjm.hfYck6VgJt53ua4dDHOuqcDwMj.2ewe", "sign_in_count"=>0, "failed_attempts"=>0, "...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000494988s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f794a'), "api_key"=>"56bee34987a0b1ac41f0621e122df8417776b3886ede2c54a14b9fbc982cea31"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001834255s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe63d421aa921de1f794d", "version"=>"0", "redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe63d421aa921de1f794c"}, "id"=>"578fe63d421aa921de1f794c"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000575097s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f794c')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0009226970000000001s
+  Rendered text template (0.0ms)
+Filter chain halted as :set_client rendered or redirected
+Completed 404 Not Found in 6ms (Views: 0.6ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"karelle.gislason@upton.io"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0010367829999999999s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f794e'), "email"=>"karelle.gislason@upton.io", "encrypted_password"=>"$2a$04$GgMQm5W3aWckVPcs3685SOo0DQmWR0Rq8/ava4L99G3U3jD5Fn6mS", "sign_in_count"=>0, "failed_attempts"=>0,...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.00035987100000000005s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f794e'), "api_key"=>"da87d8f3ba603c23f765f7d11fa72db14140becdc789a295b4128cc85dbc609e"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0017020009999999999s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe63d421aa921de1f7950", "version"=>"0", "redirect_urls"=>["http://www.google.com"], "user_id"=>"578fe63d421aa921de1f794e"}, "id"=>"578fe63d421aa921de1f794e"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000492938s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f794e')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.00083331s
+Unpermitted parameters: _id, version
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"version"=>1, "_id"=>BSON::ObjectId('578fe63d421aa921de1f794f')}, "update"=>{"$set"=>{"redirect_urls"=>["http://www.google.com"]}, "$inc"=>{"version"=>1}}, "new"=>true, "bypassDocumentValidation"=>false}
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.000753371s
+Completed 204 No Content in 110ms
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"buford.mayer@windler.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001232084s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7951'), "email"=>"buford.mayer@windler.biz", "encrypted_password"=>"$2a$04$yR1wjmUN0wgoyobY3W1cOuVpXLF43EJEpuicD9/zPCMoSDvzeryHm", "sign_in_count"=>0, "failed_attempts"=>0, ...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.00043243000000000003s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7951'), "api_key"=>"5e66c615b4f6b1401faa832b34d05eed10d9041b8643fb3b608ceeed170c6678"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.002124835s
+Processing by Auth::ClientsController#update as JSON
+  Parameters: {"client"=>{"_id"=>"578fe63d421aa921de1f7953", "version"=>"0", "redirect_urls"=>["dog"], "user_id"=>"578fe63d421aa921de1f7951"}, "id"=>"578fe63d421aa921de1f7951"}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000511465s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7951')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001208665s
+Unpermitted parameters: _id, version
+Completed 422 Unprocessable Entity in 5ms (Views: 0.2ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"ellen@armstrong.co"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000712575s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7954'), "email"=>"ellen@armstrong.co", "encrypted_password"=>"$2a$04$iEKk0i.AP6z87icQ6txGU.LxpheyKWhEOmgIRJ1piGN/AnVf1.FUO", "sign_in_count"=>0, "failed_attempts"=>0, "ident...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000469448s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7954'), "api_key"=>"8a575efafb241539fbd8ba9026c347b6b2cea14c0e4a2af17b80c09148c09895"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.0017335669999999999s
+Processing by Auth::ClientsController#destroy as JSON
+  Parameters: {"id"=>"578fe63d421aa921de1f7954", "client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000391069s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7954')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0007302820000000001s
+MONGODB | localhost:27017 | dummy_test.delete | STARTED | {"delete"=>"auth_clients", "deletes"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7955')}, "limit"=>1}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_test.delete | SUCCEEDED | 0.000304059s
+Completed 204 No Content in 7ms
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"auth_clients", "query"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7954')}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.000259052s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dino@hansen.biz"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000817103s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7956'), "email"=>"dino@hansen.biz", "encrypted_password"=>"$2a$04$/dlIButT6HybDWeaU52K.ukcEQqVpx5xx9/Lz8KZUgBvnUDNntkbW", "sign_in_count"=>0, "failed_attempts"=>0, "identiti...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000327973s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7956'), "api_key"=>"0a1a064f006d0d4e01208d06f25944fa6750b8c863a641a45f09bb5665da943b"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.00159915s
+Processing by Auth::ClientsController#show as JSON
+  Parameters: {"id"=>"578fe63d421aa921de1f7956", "client"=>{}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"es"=>"trachoma"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.00039060099999999997s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"auth_clients", "filter"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7956')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000884305s
+Completed 200 OK in 7ms (Views: 0.5ms)
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-07-21 02:29:41 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.4ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (13.2ms)
+Completed 200 OK in 182ms (Views: 174.1ms)
+Started POST "/authenticate/users" for 127.0.0.1 at 2016-07-21 02:29:41 +0530
+Processing by Auth::RegistrationsController#create as HTML
+  Parameters: {"user"=>{"email"=>"sabrina.walker@roob.io", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"sabrina.walker@roob.io"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001238645s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"xfYmx_ETtq1MeGoaByYG"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.00077965s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7958'), "email"=>"sabrina.walker@roob.io", "encrypted_password"=>"$2a$04$tMl.SvcCtTK48WEX019qD.0HRgnHfEzHUjlnMnXJQp05/fTldRTv6", "sign_in_count"=>0, "failed_attempts"=>0, "i...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000433324s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7958'), "api_key"=>"281d33ba564958454274be9cc132e2ae3f9ab7be5940cc106a4a6d5f4cc0fce2"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001393302s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7958')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-07-20 20:59:41 UTC, "current_sign_in_at"=>2016-07-20 20:59:41 UTC, "last...
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.000377958s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f7958'), "api_key"=>"69b88341ba2730b4db1a85be640b56a95b04c10dd0c5e4f0ccf5334105471270"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001176343s
+Redirected to http://www.example.com/
+Completed 302 Found in 17ms
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"isaac@luettgenbrakus.co"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000817995s
+MONGODB | localhost:27017 | dummy_test.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"EwYDhTH_bDsCtYUXDTpT"}}
+MONGODB | localhost:27017 | dummy_test.count | SUCCEEDED | 0.0011715439999999998s
+MONGODB | localhost:27017 | dummy_test.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b'), "email"=>"isaac@luettgenbrakus.co", "encrypted_password"=>"$2a$04$JlDX1bdN3E5.nEkBYYMfgu4TMM9Sb6mVDC7BKKllv6wfkMI3H2hPm", "sign_in_count"=>0, "failed_attempts"=>0, "...
+MONGODB | localhost:27017 | dummy_test.insert | SUCCEEDED | 0.000476419s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f795b'), "api_key"=>"0c5e1eab59304aa4595a2d6a772536edc549f0a168aaacf832e30cffe460bb2a"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001480281s
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-07-21 02:29:41 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"user"=>{"email"=>"isaac@luettgenbrakus.co", "password"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"isaac@luettgenbrakus.co"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.0008306619999999999s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-07-20 20:59:41 UTC, "current_sign_in_at"=>2016-07-20 20:59:41 UTC, "last...
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.00046853499999999996s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f795b'), "api_key"=>"00cd22e2e75e7f120b6ced82a1308205e4e55922d0a424c0c7bccc4850294329"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.001238345s
+Redirected to http://www.example.com/
+Completed 302 Found in 12ms
+Started GET "/" for 127.0.0.1 at 2016-07-21 02:29:41 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (0.9ms)
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000450627s
+Completed 200 OK in 8ms (Views: 7.9ms)
+Started PUT "/authenticate/users/" for 127.0.0.1 at 2016-07-21 02:29:41 +0530
+Processing by Auth::RegistrationsController#update as HTML
+  Parameters: {"id"=>"578fe63d421aa921de1f795b", "user"=>{"email"=>"hollie_ratke@sipes.info", "current_password"=>"[FILTERED]"}}
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000424767s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b')}}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.000318998s
+MONGODB | localhost:27017 | dummy_test.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"hollie_ratke@sipes.info", "_id"=>{"$ne"=>BSON::ObjectId('578fe63d421aa921de1f795b')}}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_test.find | SUCCEEDED | 0.001170843s
+MONGODB | localhost:27017 | dummy_test.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f795b')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"email"=>"hollie_ratke@sipes.info"}}, "multi"=>false, "upsert"=>false}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_test.update | SUCCEEDED | 0.000369687s
+MONGODB | localhost:27017 | dummy_test.findandmodify | STARTED | {"findandmodify"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('578fe63d421aa921de1f795b'), "api_key"=>"c2e5b6b7734032e6ec75e299babcaa3e01d1f64346ab7b80a7708b8ac177d866"}, "update"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('578fe63d421aa921de1f7...
+MONGODB | localhost:27017 | dummy_test.findandmodify | SUCCEEDED | 0.00109283s
+Redirected to http://www.example.com/
+Completed 302 Found in 12ms

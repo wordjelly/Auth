@@ -26,9 +26,9 @@ RSpec.describe "New user creation", :type => :request do
 
   	it " -- updates the email_salt and authentication token if the user changes his email -- " do 
 
-      @user = FactoryGirl.create(:user)
-      post_via_redirect user_session_path, 'user[email]' => @user.email, 'user[password]' => @user.password
-
+      #@user = FactoryGirl.create(:user)
+      #post_via_redirect user_session_path, 'user[email]' => @user.email, 'user[password]' => @user.password
+      sign_in_as_a_valid_user
 
       put "/authenticate/users/", :id => @user.id, :user => {:email => Faker::Internet.email, :current_password => 'password'}
       @user_updated = assigns(:user)
@@ -42,6 +42,10 @@ RSpec.describe "New user creation", :type => :request do
 
 
   	end
+
+    it " -- redirects " do 
+
+    end
 	
 
   end
