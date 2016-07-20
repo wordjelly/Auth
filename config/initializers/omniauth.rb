@@ -96,7 +96,7 @@ module OmniAuth
 	    def check_state
 	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
 	    		c = Auth::Client.new(JSON.parse(request.params['state']))
-	    		if Auth::Client.where(:api_key => c.api_key).count == 1
+	    		if !Auth::Client.find_valid_api_key(c.api_key).nil?
 	    			session['omniauth.state'] = request.params['state'] = c.api_key
 	    			@env['omniauth.model'] = c.path
 	    		end

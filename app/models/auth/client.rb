@@ -22,8 +22,9 @@ module Auth
         return self.redirect_urls.include? url
     end
 
-    def self.is_active(api_key)
-        
+    def self.find_valid_api_key(api_key)
+        c =  self.find(:api_key => api_key)
+        return c
     end
 
     def there_are_redirect_urls

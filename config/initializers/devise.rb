@@ -279,27 +279,52 @@ end
 
 DeviseController.class_eval do 
 
-  def set_redirect_params(resource_name)
+  def clear_request_store
+    RequestStore.store[:client] = nil
     RequestStore.store[:redirect_url] = nil
+  end
 
-    if !params[:api_key].nil? && !params[:redirect_url].nil?
-      begin
-        client = Client.find(api_key: params[:api_key])
+  def set_client
+    if params[:api_key].nil?
+    else
+      client = Client.find(params[:api_key])
+      if !client.nil?
         RequestStore.store[:client] = client
-        if client.contains_redirect_url?(params[:redirect_url])
-          RequestStore.store[:redirect_url] = params[:redirect_url]
-        end
-      rescue => e
-        ##to rescue when the client api key is not foudn.
+        return true
       end
+    end
+    return false
+  end
+
+  def is_json_request?
+    return (request.format.symbol == :json) ? true : false
+  end
+
+  def protect_json_request
+    if is_json_request? && RequestStore[:client].nil?
+      ##return and redirect 
     end
   end
 
+  def set_redirect_url(client)
+
+    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url])
+        RequestStore[:redirect_url] = redirect_url
+    end
+  end
+
+  def do_before_request
+    set_client
+    set_redirect_url(RequestStore.store[:client])
+    protect_json_request
+  end
+
+ 
 
 
   def require_no_authentication
     
-    set_redirect_params(resource_name)
+    do_before_request
 
     ##if the request format is json, and we don't have a client, then return 
     if (request.format.symbol == :json && RequestStore.store[:client].nil?)
@@ -342,8 +367,34 @@ end
 
 module Devise
 
+  class RegistrationsController
 
+    def authenticate_scope!
+      do_before_request
+      send(:authenticate_#{resource_name}!", force: true)
+      self.resource = send(:current_#{resource_name}")
+    end
 
+  end
+
+  class SessionsController
+
+    private
+
+    # Check if there is no signed in user before doing the sign out.
+    #
+    # If there is no signed in user, it will set the flash message and redirect
+    # to the after_sign_out path.
+    def verify_signed_out_user
+      do_before_request
+      if all_signed_out?
+        set_flash_message! :notice, :already_signed_out
+
+        respond_to_on_destroy
+      end
+    end
+
+  end
   
   module OmniAuth
     module UrlHelpers

@@ -43,5 +43,20 @@ basic_devise_tests
 
 options_tests
 -----------------------------
+confirmations_controller -> has no protection
 
+passwords_controller -> calls require_no_auth everywhere, so it is fully protected.
+
+omniauth_callbacks_controller -> (omni_concern) -> needs to be protected, can be done without too much trouble
+
+registrations_controller -> need to modify two functions, require_no_authentication(which we are modifying anyways, and authenticate_scope!) this will protect all json requests, furthermore certain actions are not to be served by json at all.
+
+
+sessions_controller -> 
+verify_signed_out_user -> for destroy need to add the hook here as well.
+
+unlocks_controller -> completely protected by require_no_authentication.
+
+
+need to figure out how to send json responses.
 
