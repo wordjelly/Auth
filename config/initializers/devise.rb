@@ -314,6 +314,7 @@ DeviseController.class_eval do
   end
 
   def do_before_request
+    clear_request_store
     set_client
     set_redirect_url(RequestStore.store[:client])
     protect_json_request
@@ -369,11 +370,11 @@ module Devise
 
   class RegistrationsController
 
-    def authenticate_scope!
-      do_before_request
-      send(:authenticate_#{resource_name}!", force: true)
-      self.resource = send(:current_#{resource_name}")
-    end
+  def authenticate_scope!
+    do_before_request
+    send("authenticate_#{resource_name}!", force: true)
+    self.resource = send("current_#{resource_name}")
+  end
 
   end
 

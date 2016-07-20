@@ -9,6 +9,7 @@ require "faker"
 require 'factory_girl_rails'
 require 'spec_helper'
 require 'rspec/rails'
+require 'devise'
 require 'support/factory_girl'
 
 

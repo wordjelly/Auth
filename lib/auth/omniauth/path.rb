@@ -40,10 +40,12 @@ module Auth
 				"#{Auth.configuration.mount_path}/#{resource_or_scope}/#{omniauth_failure_absolute_path}"
 			end
 
-			##when authentication fails, this path is called.
-			def self.authnetication_failed_path_for(resource_or_scope)
-				
-			end
+			##refresh auth token path
+			#def self.refresh_auth_token_path(resource_or_scope)
+			#	resource_or_scope = resource_or_scope.nil? ? ":res" : resource_pluralized(resource_or_scope.class.name)
+			#	"#{Auth.configuration.mount_path}/#{resource_or_scope}/refresh_token"
+			#end
+
 
 		end
 	end

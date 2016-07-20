@@ -103,12 +103,11 @@ module Auth::Concerns::UserConcern
   			field :authentication_token, type: String
 	    	field :es, type: String
 	    	before_save do |document|
-	    		
 	    		if document.es.blank?
-	    			
 	    			document.set_es
 	    		end
 	    	end
+
 	    end
 
 	end
@@ -124,7 +123,7 @@ module Auth::Concerns::UserConcern
 		return !self.es.nil? && !self.authentication_token.nil?
 	end
 
-	protected
+	
 
 	##setting these as nil, forces a new auth_token and es to be generated
 	##because in the before_save hooks they are set if they are blank.

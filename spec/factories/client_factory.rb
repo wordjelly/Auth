@@ -9,4 +9,9 @@ FactoryGirl.define do
     password  'password'
     password_confirmation  'password'
   end
+
+  factory :user_update, class: User do 
+  	email {Faker::Internet.email}
+  	current_password 'password'
+  end
 end

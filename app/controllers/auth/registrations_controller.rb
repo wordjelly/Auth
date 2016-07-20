@@ -12,7 +12,8 @@ class Auth::RegistrationsController < DeviseController
 
   # POST /resource
   def create
-   
+    puts "params coming in are:"
+    puts sign_up_params.to_s
     build_resource(sign_up_params)
     resource.save
     yield resource if block_given?
@@ -43,6 +44,7 @@ class Auth::RegistrationsController < DeviseController
   # We need to use a copy of the resource because we don't want to change
   # the current user in place.
   def update
+    puts "Came to update."
     self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
     prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
 
@@ -55,6 +57,7 @@ class Auth::RegistrationsController < DeviseController
         set_flash_message :notice, flash_key
       end
       sign_in resource_name, resource, bypass: true
+      puts "resource was updated."
       respond_with resource, location: after_update_path_for(resource)
     else
       clean_up_passwords resource

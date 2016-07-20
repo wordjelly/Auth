@@ -11,7 +11,6 @@ module ActionDispatch::Routing
 
 	  	  #puts "resource is : #{resource}"
 	  	  #puts "opts are: #{opts}"
-
 		  # ensure objects exist to simplify attr checks
 		  opts[:controllers] ||= {}
 		  opts[:skip]        ||= []
@@ -47,32 +46,12 @@ module ActionDispatch::Routing
 
 
 		  resource_class = Object.const_get resource
-
-		  ##now we have to see if omniauth is defined on the said resource or not.
-
-		  # get namespace name
-		  # namespace_name = @scope[:as]
-
-		  # clear scope so controller routes aren't namespaced
-		  #@scope = ActionDispatch::Routing::Mapper::Scope.new(
-		  #    path:         "",
-		  #    shallow_path: "",
-		  #    constraints:  {},
-		  #    defaults:     {},
-		  #    options:      {},
-		  #    parent:       nil
-		  #)
-
-		  #mapping_name = resource.underscore.gsub('/', '_')
-		  #mapping_name = "#{namespace_name}_#{mapping_name}" if namespace_name
-		 	
-		 	if !(opts[:skip].include? :omniauthable)
+	
+		  if !(opts[:skip].include? :omniauthable)
 
 				resource_class.omniauth_providers.each do |provider|
 					
-					#puts "resource is: #{resource}"
-					#puts "provider is: #{provider}"
-
+					
 					omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
 
 					common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
@@ -83,14 +62,10 @@ module ActionDispatch::Routing
 				end
 
 				oauth_failure_route_path = Auth::OmniAuth::Path.omniauth_failure_route_path(nil)
+
 				match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
-
-	
-
-				
-				
-			end
-
+			
+		  end
 
 	  end
 
