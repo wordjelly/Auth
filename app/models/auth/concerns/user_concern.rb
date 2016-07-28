@@ -1,7 +1,6 @@
 require 'mongoid'
 require 'simple_token_authentication'
 
-
 module Auth::Concerns::UserConcern
 		
 	extend ActiveSupport::Concern
@@ -112,7 +111,18 @@ module Auth::Concerns::UserConcern
 
 	end
 
-	
+	##reset the auth token if the email or password changes.
+	def email=(email)
+		super
+		reset_token_and_es
+	end
+
+	def password=(password)
+		super
+		reset_token_and_es
+	end
+
+
 
 	def reset_token_and_es
 		self.authentication_token = nil
@@ -127,8 +137,6 @@ module Auth::Concerns::UserConcern
 
 	##setting these as nil, forces a new auth_token and es to be generated
 	##because in the before_save hooks they are set if they are blank.
-	
-
 	def set_es
 		
 	    if !email.nil?
@@ -153,29 +161,35 @@ module Auth::Concerns::UserConcern
 		##if a client already exists, then we dont want to do anything.
 		##when we create the client we want to be sure that 
 		##provided that there is no client with this user id.
+		#puts "called create client."
 
+		##first find out if there is already a client for this user id.
 		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :user_id => self.id)
 
-		c.versioned_create({:user_id => id, :api_key => c.api_key})
+
+		c.versioned_create({:user_id => self.id})
 		op_count = 10
 
-		while(true)
+		
 
+		while(true)
+			
 			if c.op_success?
 				break
 			elsif op_count == 0
 				break
-			elsif (Auth::Client.where(:user_id => id).count == 0)
+			elsif (Auth::Client.where(:user_id => self.id).count == 0)
 				c.api_key = SecureRandom.hex(32)
-				c.versioned_create({:user_id => id, :api_key => c.api_key})
+				c.versioned_create({:user_id => self.id})
 				op_count-=1
 			else
 				break
 			end
 
+
 		end
 
-		#puts "c op success was: #{c.op_success?}"
+		
 
 
 	end
