@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/wordjelly/mongoid-versioned-atomic.git
-  revision: dd2d1c3cd06e48483aaa8f237d7247ff853f0fb0
+  revision: e8a4388712cbeae09c45ede4537c58486b318906
   specs:
     mongoid_versioned_atomic (0.0.1)
       aws-sdk (~> 1.3.4)
@@ -210,7 +210,7 @@ GEM
     request_store (1.3.1)
     responders (2.2.0)
       railties (>= 4.2.0, < 5.1)
-    rspec-core (3.5.1)
+    rspec-core (3.5.2)
       rspec-support (~> 3.5.0)
     rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)

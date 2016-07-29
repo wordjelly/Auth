@@ -280,16 +280,18 @@ end
 DeviseController.class_eval do 
 
   def clear_request_store
-    RequestStore.store[:client] = nil
-    RequestStore.store[:redirect_url] = nil
+    @client = nil
+    @redirect_url = nil
   end
 
   def set_client
+
     if params[:api_key].nil?
     else
-      client = Client.find(params[:api_key])
-      if !client.nil?
-        RequestStore.store[:client] = client
+      
+      @client = Auth::Client.where(:api_key => params[:api_key]).first
+      if !@client.nil?
+        
         return true
       end
     end
@@ -301,22 +303,23 @@ DeviseController.class_eval do
   end
 
   def protect_json_request
-    if is_json_request? && RequestStore[:client].nil?
+    if is_json_request? && @client.nil?
       ##return and redirect 
     end
   end
 
   def set_redirect_url(client)
 
-    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url])
-        RequestStore[:redirect_url] = redirect_url
+    if !params[:redirect_url].nil? && !@client.nil? && @client.contains_redirect_url?(params[:redirect_url])
+        @redirect_url = params[:redirect_url]
     end
   end
 
   def do_before_request
+    #puts "doing before request, with params : #{params.to_s}"
     clear_request_store
     set_client
-    set_redirect_url(RequestStore.store[:client])
+    set_redirect_url(@client)
     protect_json_request
   end
 
@@ -328,7 +331,7 @@ DeviseController.class_eval do
     do_before_request
 
     ##if the request format is json, and we don't have a client, then return 
-    if (request.format.symbol == :json && RequestStore.store[:client].nil?)
+    if (request.format.symbol == :json && @client.nil?)
       return
     end
 
@@ -350,7 +353,7 @@ DeviseController.class_eval do
     ##you come without a redirect url
       ## => you can sign in by cookies and you will go to the after sign in path for the user.
     if authenticated && resource = warden.user(resource_name)
-      if RequestStore.store[:redirect_url].nil?
+      if @redirect_url.nil?
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -368,17 +371,18 @@ end
 
 module Devise
 
-  class RegistrationsController
+  RegistrationsController.class_eval do 
 
-  def authenticate_scope!
-    do_before_request
-    send("authenticate_#{resource_name}!", force: true)
-    self.resource = send("current_#{resource_name}")
+    def authenticate_scope!
+      
+      do_before_request
+      send("authenticate_#{resource_name}!", force: true)
+      self.resource = send("current_#{resource_name}")
+    end
+
   end
 
-  end
-
-  class SessionsController
+  SessionsController.class_eval do 
 
     private
 

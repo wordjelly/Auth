@@ -63,8 +63,6 @@ RSpec.describe "New user creation", :type => :request do
 
     it " -- does not create client when user is updated -- " do 
 
-      
-
       sign_in_as_a_valid_user
       client = Auth::Client.find(@user.id)
       c = Auth::Client.all.count
@@ -76,26 +74,44 @@ RSpec.describe "New user creation", :type => :request do
     end
 
 
+    it " -- destroy's client when user is destroyed -- " do 
+      #sign_in_as_a_valid_user
+      #expect{delete :destroy, id: @user.id}.to change{Auth::Client.count}.by(-1)
+    end
 
 
     context " sets client if api key is correct --- " do 
 
+      before(:each) do 
+        ##clear all users
+        User.delete_all
+        post user_registration_path, user: attributes_for(:user)
+        @user = assigns(:user)
+        @api_key = Auth::Client.find(@user.id).api_key
+      end
+
       it " new_user_registration_path -- " do 
-
-          #get new_user_registration_path, {:api_key => }
-
+        get new_user_registration_path, {:api_key => @api_key}
+        @client = assigns(:client)
+        expect(@client).not_to be_nil
       end
 
       it " create user -- " do 
 
+       
+        post user_registration_path, {user: attributes_for(:user), api_key: @api_key}
+        @client = assigns(:client)
+        expect(@client).not_to be_nil
 
       end
 
 
       it " update user -- " do 
-
-
-
+        
+         put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key
+         @client = assigns(:client)
+         expect(@client).not_to be_nil
+         
       end
 
 
