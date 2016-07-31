@@ -12,7 +12,7 @@ module Auth::Concerns::UserConcern
 		##if devise modules are not defined, then define them, by default omniauth contains 
 		
 		after_save :create_client
-
+		after_destroy :destroy_client
 
 		unless self.method_defined?(:devise_modules)
 
@@ -138,13 +138,18 @@ module Auth::Concerns::UserConcern
 	##setting these as nil, forces a new auth_token and es to be generated
 	##because in the before_save hooks they are set if they are blank.
 	def set_es
-		
 	    if !email.nil?
 	      salt = SecureRandom.hex(32)
 	      pre_es = salt + email
 	      self.es = Digest::SHA256.hexdigest(pre_es)
 	    end
 		
+	end
+
+
+	def destroy_client
+		@client = Auth::Client.find(self.id)
+		@client.delete
 	end
 
 	##tries to create a client with a unique api_key, and user id.

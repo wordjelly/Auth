@@ -81,8 +81,15 @@ RSpec.describe "New user creation", :type => :request do
 
 
       it " -- destroy's client when user is destroyed -- " do 
-        #sign_in_as_a_valid_user
-        #expect{delete :destroy, id: @user.id}.to change{Auth::Client.count}.by(-1)
+        post user_registration_path, user: attributes_for(:user)
+        @user = assigns(:user)
+        c = Auth::Client.all.count
+        u = User.all.count
+        delete "/authenticate/users", :id => @user.id
+        c1 = Auth::Client.all.count
+        u1 = User.all.count
+        expect(u - u1).to eq(1)
+        expect(c - c1).to eq(1)
       end
 
     end
@@ -149,6 +156,31 @@ RSpec.describe "New user creation", :type => :request do
 
         context " -- api_key_invalid -- " do 
 
+          it " --(CREATE ACTION) redirects to root path, does not set client or redirect url -- " do 
+
+            post user_registration_path, {user: attributes_for(:user), api_key: "invalid api_key", redirect_url: "http://www.google.com"}
+            @user_just_created = assigns(:user)
+            @redirect_url = assigns(:redirect_url)
+            @client = assigns(:client)
+            expect(@redirect_url).to be_nil
+            expect(@client).to be_nil
+            expect(response).to redirect_to("/")
+
+          end
+
+          it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url" do 
+
+            put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => "invalid api key", redirect_url: "http://www.google.com"
+            @user = assigns(:user)
+            @redirect_url = assigns(:redirect_url)
+            @client = assigns(:client)
+            expect(@redirect_url).to be_nil
+            expect(@client).to be_nil
+            expect(response).to redirect_to("/")
+
+          end
+
+
         end
 
         context "--url in registered urls--" do 
@@ -203,6 +235,30 @@ RSpec.describe "New user creation", :type => :request do
         end
 
         context " -- no api key -- " do 
+
+          it " --(CREATE ACTION) redirects to root path, does not set client or redirect url -- " do 
+
+            post user_registration_path, {user: attributes_for(:user), redirect_url: "http://www.google.com"}
+            @user_just_created = assigns(:user)
+            @redirect_url = assigns(:redirect_url)
+            @client = assigns(:client)
+            expect(@redirect_url).to be_nil
+            expect(@client).to be_nil
+            expect(response).to redirect_to("/")
+
+          end
+
+          it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url" do 
+
+            put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com"
+            @user = assigns(:user)
+            @redirect_url = assigns(:redirect_url)
+            @client = assigns(:client)
+            expect(@redirect_url).to be_nil
+            expect(@client).to be_nil
+            expect(response).to redirect_to("/")
+
+          end
 
         end
 
