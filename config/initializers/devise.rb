@@ -279,6 +279,17 @@ end
 
 DeviseController.class_eval do 
 
+  def render(*args)
+
+    if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil?
+      redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+    else
+      super
+    end
+        
+
+  end
+
   def clear_request_store
     @client = nil
     @redirect_url = nil
@@ -309,8 +320,15 @@ DeviseController.class_eval do
   end
 
   def set_redirect_url(client)
+    #puts "came to set redirect url"
+    #puts "params are: #{params.to_s}"
+    #puts "client is nil ? #{client.nil?}"
+    
+    #if !client.nil?
+    #  puts "client existing redir urls are: #{client.redirect_urls}"
+    #end
 
-    if !params[:redirect_url].nil? && !@client.nil? && @client.contains_redirect_url?(params[:redirect_url])
+    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url])
         @redirect_url = params[:redirect_url]
     end
   end
@@ -394,7 +412,6 @@ module Devise
       do_before_request
       if all_signed_out?
         set_flash_message! :notice, :already_signed_out
-
         respond_to_on_destroy
       end
     end
@@ -466,45 +483,6 @@ module Devise
         sign_up: [:password, :password_confirmation, :redirect_url, :api_key],
         account_update: [:password, :password_confirmation, :current_password, :redirect_url, :api_key]
       }
-
-  end
-
-  module Controllers
-
-    module SignInOut
-
-      ##gets the currently signed in scope.
-      ##@return [scope] : the currently signed in scope or nil, if no
-      ##scope is signed in.
-      def signed_in_as?
-        Devise.mappings.keys.any? do |_scope|
-          if warden.authenticate?(scope: _scope)
-            return _scope
-          end
-        end
-        return nil
-      end
-
-    end
-
-    module Helpers
-
-      def after_sign_in_path_for(resource_or_scope)
-        if RequestStore.store[:redirect_url].nil? || resource_or_scope.authentication_token.nil? || resource_or_scope.es.nil?
-            stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
-        else 
-            redir_url = RequestStore.store[:redirect_url] + "?authentication_token=" + resource_or_scope.authentication_token + "&es=" + resource_or_scope.es
-           
-            if redir_url =~ URI::regexp
-              redir_url   
-            else
-              Auth::ApplicationController.helpers.omniauth_failed_path_for
-            end
-        end
-        
-      end
-      
-    end
 
   end
 
