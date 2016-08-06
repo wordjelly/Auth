@@ -271,7 +271,29 @@ RSpec.describe "New user creation", :type => :request do
 
 
   context " -- json requests -- " do 
+    
+    before(:example) do 
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+        User.delete_all
+        u = User.new(attributes_for(:user))
+        u.save
+        c = Auth::Client.new(:user_id => u.id, :api_key => "test")
+        c.versioned_create
+        @api_key = c.api_key
+    end
 
+    it " -- fails without an api key --- " do 
+      get new_user_registration_path,nil,@headers
+      @usern = assigns(:user)
+      expect(response.code).to eq("401")
+    end
+
+    it " -- passes with an api key --- " do 
+      get new_user_registration_path,{:api_key => @api_key, :format => :json}
+      @usern = assigns(:user)
+      expect(@usern).not_to be_nil 
+      expect(response.code).to eq("200")
+    end
 
 
 

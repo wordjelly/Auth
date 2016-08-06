@@ -1,6 +1,5 @@
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
-
 Devise.setup do |config|
   #parent controller
   config.parent_controller = 'Auth::ApplicationController'
@@ -237,7 +236,7 @@ Devise.setup do |config|
   # should add them to the navigational formats lists.
   #
   # The "*/*" below is required to match Internet Explorer requests.
-  config.navigational_formats = ['*/*', :html, :json]
+  config.navigational_formats = ['*/*', :html, :json, :js]
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -277,7 +276,10 @@ Devise.setup do |config|
   #config.omniauth_path_prefix = '/other'
 end
 
+
 DeviseController.class_eval do 
+
+  respond_to :html, :json
 
   def render(*args)
 
@@ -299,8 +301,9 @@ DeviseController.class_eval do
 
     if params[:api_key].nil?
     else
-      
+     
       @client = Auth::Client.where(:api_key => params[:api_key]).first
+      
       if !@client.nil?
         
         return true
@@ -310,31 +313,27 @@ DeviseController.class_eval do
   end
 
   def is_json_request?
+   
     return (request.format.symbol == :json) ? true : false
   end
 
   def protect_json_request
+    
     if is_json_request? && @client.nil?
-      ##return and redirect 
+      
+      render :nothing => true , :status => :unauthorized
+
     end
   end
 
   def set_redirect_url(client)
-    #puts "came to set redirect url"
-    #puts "params are: #{params.to_s}"
-    #puts "client is nil ? #{client.nil?}"
-    
-    #if !client.nil?
-    #  puts "client existing redir urls are: #{client.redirect_urls}"
-    #end
-
     if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url])
         @redirect_url = params[:redirect_url]
     end
   end
 
   def do_before_request
-    #puts "doing before request, with params : #{params.to_s}"
+    
     clear_request_store
     set_client
     set_redirect_url(@client)
@@ -345,23 +344,18 @@ DeviseController.class_eval do
 
 
   def require_no_authentication
-    
+   
     do_before_request
-
-    ##if the request format is json, and we don't have a client, then return 
-    if (request.format.symbol == :json && @client.nil?)
-      return
-    end
-
-
     assert_is_devise_resource!
     return unless is_navigational_format?
     no_input = devise_mapping.no_input_strategies
 
     authenticated = if no_input.present?
       args = no_input.dup.push scope: resource_name
+      #puts "args are: #{args}"
       warden.authenticate?(*args)
     else
+      #puts "resource name is: #{resource_name}"
       warden.authenticated?(resource_name)
     end
 
@@ -372,6 +366,7 @@ DeviseController.class_eval do
       ## => you can sign in by cookies and you will go to the after sign in path for the user.
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
+        #puts "authenticated already"
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -390,6 +385,8 @@ end
 module Devise
 
   RegistrationsController.class_eval do 
+
+
 
     def authenticate_scope!
       
@@ -487,3 +484,4 @@ module Devise
   end
 
 end
+
