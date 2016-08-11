@@ -279,6 +279,8 @@ end
 
 DeviseController.class_eval do 
 
+  skip_before_action :verify_authenticity_token, if: :is_json_request?
+
   respond_to :html, :json
 
   def render(*args)
@@ -333,7 +335,6 @@ DeviseController.class_eval do
   end
 
   def do_before_request
-    
     clear_request_store
     set_client
     set_redirect_url(@client)

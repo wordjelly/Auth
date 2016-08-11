@@ -269,32 +269,49 @@ RSpec.describe "New user creation", :type => :request do
 
   end
 
-
   context " -- json requests -- " do 
-    
+
+
     before(:example) do 
+        ActionController::Base.allow_forgery_protection = true
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         User.delete_all
         u = User.new(attributes_for(:user))
         u.save
         c = Auth::Client.new(:user_id => u.id, :api_key => "test")
         c.versioned_create
-        @api_key = c.api_key
+        @ap_key = c.api_key
     end
+
 
     it " -- fails without an api key --- " do 
       get new_user_registration_path,nil,@headers
-      @usern = assigns(:user)
       expect(response.code).to eq("401")
     end
 
     it " -- passes with an api key --- " do 
-      get new_user_registration_path,{:api_key => @api_key, :format => :json}
+      get new_user_registration_path,{:api_key => @ap_key, :format => :json}
       @usern = assigns(:user)
       expect(@usern).not_to be_nil 
       expect(response.code).to eq("200")
     end
 
+    context " -- api key -- " do 
+
+      context " -- skips the csrf filter on post,update,destroy requests,only checks api key -- " do 
+
+        it " -- skips csrf filter on post -- " do 
+            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key, :format => :json}
+            @user_just_created = assigns(:user)
+            @cl = assigns(:client)
+            expect(@cl).not_to be_nil
+            expect(@user_just_created).not_to be_nil
+            expect(response.code).to eq("201")
+        end
+
+      end
+
+    end
 
 
   end
