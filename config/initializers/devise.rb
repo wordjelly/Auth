@@ -305,7 +305,6 @@ DeviseController.class_eval do
     else
      
       @client = Auth::Client.where(:api_key => params[:api_key]).first
-      
       if !@client.nil?
         
         return true
@@ -322,7 +321,7 @@ DeviseController.class_eval do
   def protect_json_request
     
     if is_json_request? && @client.nil?
-      
+     
       render :nothing => true , :status => :unauthorized
 
     end
@@ -335,10 +334,15 @@ DeviseController.class_eval do
   end
 
   def do_before_request
+   
     clear_request_store
+   
     set_client
+   
     set_redirect_url(@client)
+
     protect_json_request
+   
   end
 
  
@@ -348,15 +352,18 @@ DeviseController.class_eval do
    
     do_before_request
     assert_is_devise_resource!
+    
+    puts is_navigational_format?
+
     return unless is_navigational_format?
     no_input = devise_mapping.no_input_strategies
-
+    
     authenticated = if no_input.present?
       args = no_input.dup.push scope: resource_name
-      #puts "args are: #{args}"
+    
       warden.authenticate?(*args)
     else
-      #puts "resource name is: #{resource_name}"
+    
       warden.authenticated?(resource_name)
     end
 
@@ -391,9 +398,21 @@ module Devise
 
     def authenticate_scope!
       
-      do_before_request
-      send("authenticate_#{resource_name}!", force: true)
-      self.resource = send("current_#{resource_name}")
+      do_before_request  
+      if is_json_request?
+        token = request.headers["X-#{resource_name.capitalize}-Token"]
+        es = request.headers["X-#{resource_name.capitalize}-Es"]
+        self.resource = resource_name.capitalize.constantize.where(:authentication_token => token, :es => es).first
+        if self.resource.nil?
+          ##return a 401
+        else
+          send(:sign_in,self.resource)
+        end
+      else
+        send("authenticate_#{resource_name}!", force: true)
+        self.resource = send("current_#{resource_name}")
+      end
+
     end
 
   end

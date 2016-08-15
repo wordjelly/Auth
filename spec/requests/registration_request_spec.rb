@@ -99,9 +99,11 @@ RSpec.describe "New user creation", :type => :request do
       before(:each) do 
         ##clear all users
         User.delete_all
-        post user_registration_path, user: attributes_for(:user)
-        @user = assigns(:user)
-        @api_key = Auth::Client.find(@user.id).api_key
+        @usr = User.new(attributes_for(:user))
+        @usr.save
+        @c = Auth::Client.new(:user_id => @usr.id, :api_key => "test")
+        @c.versioned_create
+        @api_key = @c.api_key
       end
 
       it " new_user_registration_path -- " do 
@@ -121,10 +123,12 @@ RSpec.describe "New user creation", :type => :request do
 
 
       it " update user -- " do 
-        
+         
+         sign_in_as_a_valid_user
          put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key
          @client = assigns(:client)
          expect(@client).not_to be_nil
+         
          
       end
 
@@ -276,11 +280,11 @@ RSpec.describe "New user creation", :type => :request do
         ActionController::Base.allow_forgery_protection = true
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         User.delete_all
-        u = User.new(attributes_for(:user))
-        u.save
-        c = Auth::Client.new(:user_id => u.id, :api_key => "test")
-        c.versioned_create
-        @ap_key = c.api_key
+        @u = User.new(attributes_for(:user))
+        @u.save
+        @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c.versioned_create
+        @ap_key = @c.api_key
     end
 
 
@@ -298,15 +302,69 @@ RSpec.describe "New user creation", :type => :request do
 
     context " -- api key -- " do 
 
-      context " -- skips the csrf filter on post,update,destroy requests,only checks api key -- " do 
-
-        it " -- skips csrf filter on post -- " do 
+      context " -- valid api key -- " do 
+        
+        it " -- CREATE REQUEST -- " do 
             post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key, :format => :json}
-            @user_just_created = assigns(:user)
+            @user_created = assigns(:user)
             @cl = assigns(:client)
             expect(@cl).not_to be_nil
-            expect(@user_just_created).not_to be_nil
+            expect(@user_created).not_to be_nil
             expect(response.code).to eq("201")
+        end
+
+        
+
+        it " --- UPDATE REQUEST --- " do 
+          puts " -- CURRENT TEST STARTS HERE --- "
+          put "/authenticate/users/", :id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com", api_key: @ap_key, format: :json
+            @user_updated = assigns(:user)
+            @redirect_url = assigns(:redirect_url)
+            @cl = assigns(:client)
+            expect(@redirect_url).not_to be_nil
+            expect(@client).not_to be_nil
+            expect(response.code).to eq("201")
+
+          puts " -- CURRENT TEST ENDS HERE --- "
+
+        end
+
+
+        it " --- DESTROY REQUEST --- " do 
+
+
+        end
+
+
+        it " -- sets but ignores redirect url --- " do 
+
+
+        end
+
+      end
+
+      context " -- invalid api key -- " do 
+
+        context " -- returns unauthenticated code  -- " do 
+
+          it " -- GET -- " do 
+
+          end
+
+          it " -- CREATE -- " do 
+
+          end
+
+          it " -- UPDATE -- " do 
+
+
+          end
+
+          it " -- DESTROY -- " do 
+
+
+          end
+
         end
 
       end

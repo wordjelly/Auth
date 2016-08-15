@@ -33573,3 +33573,123 @@ Processing by Auth::SessionsController#new as HTML
   Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.3ms)
   Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (8.4ms)
 Completed 200 OK in 123ms (Views: 120.8ms)
+
+
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-08-15 23:43:44 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.6ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (456.3ms)
+Completed 200 OK in 1111ms (Views: 1095.5ms)
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-15 23:43:45 +0530
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-15 23:43:45 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-08-15 23:43:45 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-15 23:43:45 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-08-15 23:43:45 +0530
+
+
+Started POST "/authenticate/users" for 127.0.0.1 at 2016-08-15 23:44:02 +0530
+Processing by Auth::RegistrationsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"VLynYW6y6nxQdScLlOPBMxnK5bXf5gJ+pwcNEJ4KO6wGxynY2B7YOo31suaah3g51pNwNAab2lfzCONd6faGoQ==", "user"=>{"email"=>"trojan@gmail.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Sign up"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"trojan@gmail.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.018536579s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"xUfcA8ZhYQgYGTsePMqh"}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.0003819s
+MONGODB | localhost:27017 | dummy_development.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1'), "email"=>"trojan@gmail.com", "encrypted_password"=>"$2a$11$ligYuu1J8wjQDEF29r1.7OFjmaJS6J2PSffTmD0/JVl/jID7OgDMe", "sign_in_count"=>0, "failed_attempts"=>0, "identit...
+MONGODB | localhost:27017 | dummy_development.insert | SUCCEEDED | 0.025446029s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('57b2066b421aa934b2ad4ca3'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.0009830470000000001s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-08-15 18:14:03 UTC, "current_sign_in_at"=>2016-08-15 18:14:03 UTC, "last...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000497475s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('57b2066b421aa934b2ad4ca4'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000565977s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00032776s
+Redirected to https://localhost:3000/
+Completed 302 Found in 265ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (1.2ms)
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000521317s
+Completed 200 OK in 64ms (Views: 63.8ms)
+
+
+Started GET "/assets/api/v1/token_auth.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/home.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/oauth_tests.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/api/v1/token_auth.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/scaffold.self-83b741db49389dc7cfdf85bf7537a0219cce48e085c4116afc83d55c9af47c78.css?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/home.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/oauth_tests.self-28e00b23682251cda43513cb0b57e42485259242b6a237d233164860579f285e.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/application.self-ff53b6dfc1f30d348bfeedd6e052bba068a052e01ded699aa544d32242090a1f.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/jquery.self-660adc51e0224b731d29f575a6f1ec167ba08ad06ed5deca4f1e8654c135bf4c.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/assets/jquery_ujs.self-e87806d0cf4489aeb1bb7288016024e8de67fd18db693fe026fe3907581e53cd.js?body=1" for 127.0.0.1 at 2016-08-15 23:44:03 +0530
+
+
+Started GET "/authenticate/users/edit" for 127.0.0.1 at 2016-08-15 23:44:07 +0530
+Processing by Auth::RegistrationsController#edit as HTML
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000829468s
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/edit.html.erb within layouts/auth/application (5.8ms)
+Completed 200 OK in 27ms (Views: 22.7ms)
+
+
+Started PUT "/authenticate/users" for 127.0.0.1 at 2016-08-15 23:44:47 +0530
+Processing by Auth::RegistrationsController#update as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"E+U/2CGD9QLrXL9DsMbmixtEf1vWaP6n+B2+f8C5T+5BnrFhly/HRDbcKq6+ol+B1B3q2g8VJo6sElAyt0Xy4w==", "user"=>{"email"=>"trojan@gmail.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]", "current_password"=>"[FILTERED]"}, "commit"=>"Update"}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000367759s
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000326329s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"goeeS-eUww1-8fXz5xJN"}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000322978s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"authentication_token"=>"goeeS-eUww1-8fXz5xJN", "es"=>"dafc118f52461791494decaa50481f9a0018d692a...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000286338s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('57b20697421aa934b2ad4ca5'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000352281s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000346261s
+Redirected to https://localhost:3000/
+Completed 302 Found in 148ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-08-15 23:44:47 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (0.8ms)
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.00036113199999999996s
+Completed 200 OK in 21ms (Views: 21.0ms)
