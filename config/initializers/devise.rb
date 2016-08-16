@@ -314,7 +314,8 @@ DeviseController.class_eval do
   end
 
   def is_json_request?
-   
+    puts "symbol is:"
+    puts request.format.symbol.to_s
     return (request.format.symbol == :json) ? true : false
   end
 
@@ -342,18 +343,21 @@ DeviseController.class_eval do
     set_redirect_url(@client)
 
     protect_json_request
-   
+      
+    #puts "came after protect json srequest."
+
   end
 
  
 
 
   def require_no_authentication
-   
+    
+    #puts "came to require no authentication."
     do_before_request
     assert_is_devise_resource!
     
-    puts is_navigational_format?
+    #puts is_navigational_format?
 
     return unless is_navigational_format?
     no_input = devise_mapping.no_input_strategies
@@ -400,13 +404,17 @@ module Devise
       
       do_before_request  
       if is_json_request?
-        token = request.headers["X-#{resource_name.capitalize}-Token"]
-        es = request.headers["X-#{resource_name.capitalize}-Es"]
-        self.resource = resource_name.capitalize.constantize.where(:authentication_token => token, :es => es).first
+        #puts "is a json request"
+        token = request.headers["X-#{resource_name.to_s.capitalize}-Token"]
+        es = request.headers["X-#{resource_name.to_s.capitalize}-Es"]
+        #puts "token is : #{token}, and es is :#{es}"
+        self.resource = resource_name.to_s.capitalize.constantize.where(:authentication_token => token, :es => es).first
         if self.resource.nil?
-          ##return a 401
+          #puts "no such resource exists."
+          render :nothing => true , :status => :unauthorized
         else
           send(:sign_in,self.resource)
+          
         end
       else
         send("authenticate_#{resource_name}!", force: true)

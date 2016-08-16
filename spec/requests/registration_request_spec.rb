@@ -278,13 +278,13 @@ RSpec.describe "New user creation", :type => :request do
 
     before(:example) do 
         ActionController::Base.allow_forgery_protection = true
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         User.delete_all
         @u = User.new(attributes_for(:user))
         @u.save
         @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
         @c.versioned_create
         @ap_key = @c.api_key
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
     end
 
 
@@ -317,7 +317,11 @@ RSpec.describe "New user creation", :type => :request do
 
         it " --- UPDATE REQUEST --- " do 
           puts " -- CURRENT TEST STARTS HERE --- "
-          put "/authenticate/users/", :id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com", api_key: @ap_key, format: :json
+          #@request.headers["X-User-Token"] = @user.authentication_token
+          #@request.headers["X-User-Es"] = @user.es
+          a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com", api_key: @ap_key}
+          
+          put "/authenticate/users/", a.to_json,@headers
             @user_updated = assigns(:user)
             @redirect_url = assigns(:redirect_url)
             @cl = assigns(:client)
