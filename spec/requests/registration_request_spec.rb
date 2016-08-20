@@ -99,6 +99,7 @@ RSpec.describe "New user creation", :type => :request do
       before(:each) do 
         ##clear all users
         User.delete_all
+        Auth::Client.delete_all
         @usr = User.new(attributes_for(:user))
         @usr.save
         @c = Auth::Client.new(:user_id => @usr.id, :api_key => "test")
@@ -149,37 +150,34 @@ RSpec.describe "New user creation", :type => :request do
         before(:each) do 
 
           User.delete_all
-          post user_registration_path, user: attributes_for(:user)
-          @user = assigns(:user)
-          @cli = Auth::Client.find(@user.id)
-          @cli.redirect_urls = ["http://www.google.com"]
-          @cli.save
+          Auth::Client.delete_all
+          @user = User.new(attributes_for(:user))
+          @user.save
+          @cli = Auth::Client.new(:user_id => @user.id, :api_key => "test", :redirect_urls => ["http://www.google.com"])
+          @cli.versioned_create
           @api_key = @cli.api_key
 
         end
 
         context " -- api_key_invalid -- " do 
 
-          it " --(CREATE ACTION) redirects to root path, does not set client or redirect url -- " do 
+          it " --(CREATE ACTION) redirects to root path, does not set client or redirect url, but successfully creates the user, only the redirect fails. -- " do 
 
             post user_registration_path, {user: attributes_for(:user), api_key: "invalid api_key", redirect_url: "http://www.google.com"}
+            
             @user_just_created = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            @client = assigns(:client)
-            expect(@redirect_url).to be_nil
-            expect(@client).to be_nil
             expect(response).to redirect_to("/")
 
           end
 
-          it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url" do 
+          it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url," do 
+
+            sign_in_as_a_valid_user
 
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => "invalid api key", redirect_url: "http://www.google.com"
-            @user = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            @client = assigns(:client)
-            expect(@redirect_url).to be_nil
-            expect(@client).to be_nil
+            
+            @user_just_updated = assigns(:user)
+
             expect(response).to redirect_to("/")
 
           end
@@ -201,13 +199,13 @@ RSpec.describe "New user creation", :type => :request do
           end
 
           it "--- redirects in put action --- " do 
-
+            sign_in_as_a_valid_user
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key, redirect_url: "http://www.google.com"
-            @user = assigns(:user)
+            @user_just_updated = assigns(:user)
             @redirect_url = assigns(:redirect_url)
             expect(@redirect_url).to be == "http://www.google.com"
-            auth_token = @user.authentication_token
-            es = @user.es
+            auth_token = @user_just_updated.authentication_token
+            es = @user_just_updated.es
             expect(response).to redirect_to("http://www.google.com?authentication_token=#{auth_token}&es=#{es}")
             
           end
@@ -219,19 +217,23 @@ RSpec.describe "New user creation", :type => :request do
           it "---CREATE redirects to default path --- " do 
 
             post user_registration_path, {user: attributes_for(:user), api_key: @api_key, redirect_url: "http://www.yahoo.com"}
+              
             @user_just_created = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            expect(@redirect_url).to be_nil
+            @client = assigns(:client)
+            expect(@client).not_to be_nil
             expect(response).to redirect_to("/")
 
           end
 
           it "---UPDATE redirects to default path --- " do 
-
+            
+            sign_in_as_a_valid_user
+            
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key, redirect_url: "http://www.yahoo.com"
-            @user = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            expect(@redirect_url).to be_nil
+            
+            @user_just_updated = assigns(:user)
+            @client = assigns(:client)
+            expect(@client).not_to be_nil
             expect(response).to redirect_to("/")
 
           end
@@ -243,23 +245,19 @@ RSpec.describe "New user creation", :type => :request do
           it " --(CREATE ACTION) redirects to root path, does not set client or redirect url -- " do 
 
             post user_registration_path, {user: attributes_for(:user), redirect_url: "http://www.google.com"}
+            
             @user_just_created = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            @client = assigns(:client)
-            expect(@redirect_url).to be_nil
-            expect(@client).to be_nil
             expect(response).to redirect_to("/")
 
           end
 
           it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url" do 
 
+            sign_in_as_a_valid_user
+
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com"
-            @user = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
-            @client = assigns(:client)
-            expect(@redirect_url).to be_nil
-            expect(@client).to be_nil
+            
+            @user_just_updated = assigns(:user)
             expect(response).to redirect_to("/")
 
           end
@@ -279,33 +277,78 @@ RSpec.describe "New user creation", :type => :request do
     before(:example) do 
         ActionController::Base.allow_forgery_protection = true
         User.delete_all
+        Auth::Client.delete_all
         @u = User.new(attributes_for(:user))
         @u.save
         @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
     end
 
 
-    it " -- fails without an api key --- " do 
-      get new_user_registration_path,nil,@headers
-      expect(response.code).to eq("401")
+    context " -- fails without an api key --- " do
+      it " - READ - " do  
+        get new_user_registration_path,nil,@headers
+        expect(response.code).to eq("401")
+      end
+
+      it " - CREATE - " do 
+        post "/authenticate/users", {user: attributes_for(:user)}.to_json, @headers
+        expect(response.code).to eq("401")
+      end
+
+      it " - UPDATE - " do 
+        a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}}
+        put "/authenticate/users", a.to_json,@headers
+        expect(response.code).to eq("401")
+      end
+
+      it " - DESTROY - " do 
+        a = {:id => @u.id}
+        delete "/authenticate/users", a.to_json, @headers
+        expect(response.code).to eq("401")
+      end
+
     end
 
-    it " -- passes with an api key --- " do 
-      get new_user_registration_path,{:api_key => @ap_key, :format => :json}
-      @usern = assigns(:user)
-      expect(@usern).not_to be_nil 
-      expect(response.code).to eq("200")
+     context " -- invalid api key -- " do 
+
+        
+
+          it " - READ - " do  
+            get new_user_registration_path,{api_key: "doggy"},@headers
+            expect(response.code).to eq("401")
+          end
+
+          it " - CREATE - " do 
+            post "/authenticate/users", {user: attributes_for(:user), api_key: "doggy"}.to_json, @headers
+            expect(response.code).to eq("401")
+          end
+
+          it " - UPDATE - " do 
+            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: "doggy"}
+            put "/authenticate/users", a.to_json,@headers
+            expect(response.code).to eq("401")
+          end
+
+          it " - DESTROY - " do 
+            a = {:id => @u.id, api_key: "dogy"}
+            delete "/authenticate/users", a.to_json, @headers
+            expect(response.code).to eq("401")
+          end
+      
     end
+   
 
     context " -- api key -- " do 
 
       context " -- valid api key -- " do 
         
+
         it " -- CREATE REQUEST -- " do 
-            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key, :format => :json}
+            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key, :format => :json}.to_json, @headers
             @user_created = assigns(:user)
             @cl = assigns(:client)
             expect(@cl).not_to be_nil
@@ -315,63 +358,49 @@ RSpec.describe "New user creation", :type => :request do
 
         
 
-        it " --- UPDATE REQUEST --- " do 
-          puts " -- CURRENT TEST STARTS HERE --- "
-          #@request.headers["X-User-Token"] = @user.authentication_token
-          #@request.headers["X-User-Es"] = @user.es
-          a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com", api_key: @ap_key}
+        context " --- UPDATE REQUEST --- " do 
+            
+          it " -- works -- " do  
+            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key}
           
-          put "/authenticate/users/", a.to_json,@headers
+            put "/authenticate/users", a.to_json,@headers
             @user_updated = assigns(:user)
-            @redirect_url = assigns(:redirect_url)
             @cl = assigns(:client)
-            expect(@redirect_url).not_to be_nil
-            expect(@client).not_to be_nil
-            expect(response.code).to eq("201")
+            expect(@cl).not_to be_nil
+            expect(response.code).to eq("204")
 
-          puts " -- CURRENT TEST ENDS HERE --- "
+          end
+
+          it " -- doesnt respect redirects --- " do 
+            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, redirect_url: "http://www.google.com"}
+          
+            put "/authenticate/users", a.to_json,@headers
+            @user_updated = assigns(:user)
+            @cl = assigns(:client)
+            @red_url = assigns(:redirect_url)
+            expect(@cl).not_to be_nil
+            expect(@red_url).to be_nil
+            expect(response.code).to eq("204")
+
+
+          end
+          
 
         end
 
 
         it " --- DESTROY REQUEST --- " do 
 
-
-        end
-
-
-        it " -- sets but ignores redirect url --- " do 
-
-
-        end
-
-      end
-
-      context " -- invalid api key -- " do 
-
-        context " -- returns unauthenticated code  -- " do 
-
-          it " -- GET -- " do 
-
-          end
-
-          it " -- CREATE -- " do 
-
-          end
-
-          it " -- UPDATE -- " do 
-
-
-          end
-
-          it " -- DESTROY -- " do 
-
-
-          end
+         
+          a = {:id => @u.id, :api_key => @ap_key}
+          delete "/authenticate/users.json", a.to_json, @headers
+          expect(response.code).to eq("204")
 
         end
 
       end
+
+     
 
     end
 

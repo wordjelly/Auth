@@ -33693,3 +33693,410 @@ Processing by HomeController#index as HTML
 MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b2066a421aa934b2ad4ca1')}, "limit"=>-1}
 MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.00036113199999999996s
 Completed 200 OK in 21ms (Views: 21.0ms)
+
+
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-08-18 00:48:11 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.4ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (747.7ms)
+Completed 200 OK in 1468ms (Views: 1439.7ms)
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:12 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:12 +0530
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:12 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:12 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:12 +0530
+
+
+Started POST "/authenticate/users" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+Processing by Auth::RegistrationsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"rWUTbb8cxN7DwqQr3wrMONXahyJaEIVos2IsCxSeHJzX5nkFQmCRsva6nf9h9JRlIdCRwkih5/OPBuWJDKx4Zw==", "user"=>{"email"=>"dd@gmail.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Sign up"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dd@gmail.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.024353053000000003s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"oxKHze7ULeBRaNXdBSw-"}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00062005s
+MONGODB | localhost:27017 | dummy_development.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('57b4b883421aa937db499820'), "email"=>"dd@gmail.com", "encrypted_password"=>"$2a$11$/VULWM2vz.eHg6TtYPDUKeDoQwzZoGRMd.dpoYQz5LVW7S5KXUja6", "sign_in_count"=>0, "failed_attempts"=>0, "identities"...
+MONGODB | localhost:27017 | dummy_development.insert | SUCCEEDED | 0.023833431000000002s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57b4b883421aa937db499820')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('57b4b883421aa937db499822'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57b4b883421aa937db499820'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.0007823530000000001s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57b4b883421aa937db499820')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"last_sign_in_at"=>2016-08-17 19:18:27 UTC, "current_sign_in_at"=>2016-08-17 19:18:27 UTC, "last...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.00041076999999999997s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57b4b883421aa937db499820')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('57b4b883421aa937db499823'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57b4b883421aa937db499820'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000487938s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57b4b883421aa937db499820')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00045889300000000004s
+Redirected to https://localhost:3000/
+Completed 302 Found in 286ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (1.3ms)
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b4b883421aa937db499820')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000560103s
+Completed 200 OK in 99ms (Views: 98.8ms)
+
+
+Started GET "/assets/api/v1/token_auth.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/home.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/oauth_tests.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/scaffold.self-83b741db49389dc7cfdf85bf7537a0219cce48e085c4116afc83d55c9af47c78.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/oauth_tests.self-28e00b23682251cda43513cb0b57e42485259242b6a237d233164860579f285e.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/jquery_ujs.self-e87806d0cf4489aeb1bb7288016024e8de67fd18db693fe026fe3907581e53cd.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/api/v1/token_auth.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/application.self-ff53b6dfc1f30d348bfeedd6e052bba068a052e01ded699aa544d32242090a1f.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/jquery.self-660adc51e0224b731d29f575a6f1ec167ba08ad06ed5deca4f1e8654c135bf4c.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started GET "/assets/home.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-18 00:48:27 +0530
+
+
+Started DELETE "/authenticate/users/sign_out" for 127.0.0.1 at 2016-08-18 00:48:32 +0530
+Processing by Auth::SessionsController#destroy as HTML
+  Parameters: {"authenticity_token"=>"5yiFC2n77eT0GVOOKZzIi0TcJZ/YN9CCE97JqOej83udq+9jlIe4iMFhalqXYpDWsNYzf8qGshkvugAq/5GXgA=="}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57b4b883421aa937db499820')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000553404s
+Redirected to https://localhost:3000/
+Completed 302 Found in 4ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-08-18 00:48:32 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (1.0ms)
+Completed 200 OK in 23ms (Views: 22.8ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 00:48:34 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.5ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (5.8ms)
+Completed 200 OK in 44ms (Views: 41.4ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 00:48:39 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"GbQ4lByXZHmFYm8VMn+xBhUQNHcJtv/cYZhHT5tLnVbzxa2Fw/xD96AZQCVcuIrP3jYD3YCDZ3RyXNe3k+umug==", "user"=>{"email"=>"dd@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 2ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"GbQ4lByXZHmFYm8VMn+xBhUQNHcJtv/cYZhHT5tLnVbzxa2Fw/xD96AZQCVcuIrP3jYD3YCDZ3RyXNe3k+umug==", "user"=>{"email"=>"dd@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.0ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.7ms)
+Completed 200 OK in 21ms (Views: 18.7ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 00:48:42 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"XRDKqnqHoiMslCSgVmri6o1ddK0xvAa5x3WfSCe8mG63YV+7peyFrQnvC5A4rdkjRntDB7iJnhHUsQ+wLxyjgg==", "user"=>{"email"=>"dd@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 1ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"XRDKqnqHoiMslCSgVmri6o1ddK0xvAa5x3WfSCe8mG63YV+7peyFrQnvC5A4rdkjRntDB7iJnhHUsQ+wLxyjgg==", "user"=>{"email"=>"dd@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.9ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.3ms)
+Completed 200 OK in 18ms (Views: 16.6ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 00:53:26 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (441.7ms)
+Completed 200 OK in 607ms (Views: 595.0ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 00:53:35 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"lENgmfytnb9Lw7vL0QKTgmqdBweZqbB8fgawD+S9gNl+MvWII8a6MW64lPu/xahLobswrRCcKNRtwiD37B27NQ==", "user"=>{"email"=>"bourne@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 1ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"lENgmfytnb9Lw7vL0QKTgmqdBweZqbB8fgawD+S9gNl+MvWII8a6MW64lPu/xahLobswrRCcKNRtwiD37B27NQ==", "user"=>{"email"=>"bourne@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.0ms)
+Completed 200 OK in 15ms (Views: 14.1ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:25:02 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"lENgmfytnb9Lw7vL0QKTgmqdBweZqbB8fgawD+S9gNl+MvWII8a6MW64lPu/xahLobswrRCcKNRtwiD37B27NQ==", "user"=>{"email"=>"bourne@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 11ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"lENgmfytnb9Lw7vL0QKTgmqdBweZqbB8fgawD+S9gNl+MvWII8a6MW64lPu/xahLobswrRCcKNRtwiD37B27NQ==", "user"=>{"email"=>"bourne@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (20.2ms)
+Completed 200 OK in 177ms (Views: 176.1ms)
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 01:25:03 +0530
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-18 01:25:03 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-18 01:25:03 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-08-18 01:25:03 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-08-18 01:25:03 +0530
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:25:27 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (449.3ms)
+Completed 200 OK in 659ms (Views: 644.9ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:25:36 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"3Z8nndTDJYfPiJDRZUlP26vrw6Rw6XXfLYrGr3aUKcQ37rKMC6gCCerzv+ELjnQSYM30Dvnc7Xc+TlZXfjQSKA==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 2ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"3Z8nndTDJYfPiJDRZUlP26vrw6Rw6XXfLYrGr3aUKcQ37rKMC6gCCerzv+ELjnQSYM30Dvnc7Xc+TlZXfjQSKA==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.5ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (6.4ms)
+Completed 200 OK in 25ms (Views: 23.4ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:31:28 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.3ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (435.3ms)
+Completed 200 OK in 669ms (Views: 659.4ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:31:33 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"vT7Ls3O60zgod5g+YN4gBqrHf3nozTpb5SO0ukecaO9XT16irNH0tg0Mtw4OGRvPYeFI02H4ovP25yRCTzxTAw==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 2ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"vT7Ls3O60zgod5g+YN4gBqrHf3nozTpb5SO0ukecaO9XT16irNH0tg0Mtw4OGRvPYeFI02H4ovP25yRCTzxTAw==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]"}, "commit"=>"Log in"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.5ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (6.9ms)
+Completed 200 OK in 25ms (Views: 23.2ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:33:22 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (444.6ms)
+Completed 500 Internal Server Error in 470ms
+
+ActionView::Template::Error (undefined method `dog' for #<User:0x000000051f01a8>):
+    16: 
+    17:   <div class="field">
+    18:     <%= f.label :dog %><br />
+    19:     <%= f.text_field :dog, autocomplete: "off" %>
+    20:   </div>
+    21: 
+    22:   <% if devise_mapping.rememberable? -%>
+  actionview (4.2.7) lib/action_view/helpers/tags/base.rb:28:in `public_send'
+  actionview (4.2.7) lib/action_view/helpers/tags/base.rb:28:in `value'
+  actionview (4.2.7) lib/action_view/helpers/tags/base.rb:38:in `value_before_type_cast'
+  actionview (4.2.7) lib/action_view/helpers/tags/text_field.rb:13:in `block in render'
+  actionview (4.2.7) lib/action_view/helpers/tags/text_field.rb:13:in `fetch'
+  actionview (4.2.7) lib/action_view/helpers/tags/text_field.rb:13:in `render'
+  actionview (4.2.7) lib/action_view/helpers/form_helper.rb:787:in `text_field'
+  actionview (4.2.7) lib/action_view/helpers/form_helper.rb:1323:in `text_field'
+  /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb:19:in `block in __home_bhargav__ithub_auth_app_views_auth_sessions_new_html_erb__2838520370981488114_42659860'
+  actionview (4.2.7) lib/action_view/helpers/capture_helper.rb:38:in `block in capture'
+  actionview (4.2.7) lib/action_view/helpers/capture_helper.rb:202:in `with_output_buffer'
+  actionview (4.2.7) lib/action_view/helpers/capture_helper.rb:38:in `capture'
+  actionview (4.2.7) lib/action_view/helpers/form_helper.rb:444:in `form_for'
+  /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb:3:in `__home_bhargav__ithub_auth_app_views_auth_sessions_new_html_erb__2838520370981488114_42659860'
+  actionview (4.2.7) lib/action_view/template.rb:145:in `block in render'
+  activesupport (4.2.7) lib/active_support/notifications.rb:166:in `instrument'
+  actionview (4.2.7) lib/action_view/template.rb:333:in `instrument'
+  actionview (4.2.7) lib/action_view/template.rb:143:in `render'
+  actionview (4.2.7) lib/action_view/renderer/template_renderer.rb:54:in `block (2 levels) in render_template'
+  actionview (4.2.7) lib/action_view/renderer/abstract_renderer.rb:39:in `block in instrument'
+  activesupport (4.2.7) lib/active_support/notifications.rb:164:in `block in instrument'
+  activesupport (4.2.7) lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+  activesupport (4.2.7) lib/active_support/notifications.rb:164:in `instrument'
+  actionview (4.2.7) lib/action_view/renderer/abstract_renderer.rb:39:in `instrument'
+  actionview (4.2.7) lib/action_view/renderer/template_renderer.rb:53:in `block in render_template'
+  actionview (4.2.7) lib/action_view/renderer/template_renderer.rb:61:in `render_with_layout'
+  actionview (4.2.7) lib/action_view/renderer/template_renderer.rb:52:in `render_template'
+  actionview (4.2.7) lib/action_view/renderer/template_renderer.rb:14:in `render'
+  actionview (4.2.7) lib/action_view/renderer/renderer.rb:46:in `render_template'
+  actionview (4.2.7) lib/action_view/renderer/renderer.rb:27:in `render'
+  actionview (4.2.7) lib/action_view/rendering.rb:100:in `_render_template'
+  actionpack (4.2.7) lib/action_controller/metal/streaming.rb:217:in `_render_template'
+  actionview (4.2.7) lib/action_view/rendering.rb:83:in `render_to_body'
+  actionpack (4.2.7) lib/action_controller/metal/rendering.rb:32:in `render_to_body'
+  actionpack (4.2.7) lib/action_controller/metal/renderers.rb:37:in `render_to_body'
+  actionpack (4.2.7) lib/abstract_controller/rendering.rb:25:in `render'
+  actionpack (4.2.7) lib/action_controller/metal/rendering.rb:16:in `render'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:44:in `block (2 levels) in render'
+  activesupport (4.2.7) lib/active_support/core_ext/benchmark.rb:12:in `block in ms'
+  /usr/lib/ruby/2.1.0/benchmark.rb:294:in `realtime'
+  activesupport (4.2.7) lib/active_support/core_ext/benchmark.rb:12:in `ms'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:44:in `block in render'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:87:in `cleanup_view_runtime'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:43:in `render'
+  /home/bhargav/Github/auth/config/initializers/devise.rb:291:in `render'
+  responders (2.2.0) lib/action_controller/responder.rb:238:in `default_render'
+  responders (2.2.0) lib/action_controller/responder.rb:170:in `to_html'
+  responders (2.2.0) lib/action_controller/responder.rb:163:in `respond'
+  responders (2.2.0) lib/action_controller/responder.rb:156:in `call'
+  responders (2.2.0) lib/action_controller/respond_with.rb:205:in `respond_with'
+  /home/bhargav/Github/auth/app/controllers/auth/sessions_controller.rb:12:in `new'
+  actionpack (4.2.7) lib/action_controller/metal/implicit_render.rb:4:in `send_action'
+  actionpack (4.2.7) lib/abstract_controller/base.rb:198:in `process_action'
+  actionpack (4.2.7) lib/action_controller/metal/rendering.rb:10:in `process_action'
+  actionpack (4.2.7) lib/abstract_controller/callbacks.rb:20:in `block in process_action'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:117:in `call'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:117:in `call'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:555:in `block (2 levels) in compile'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:505:in `call'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:505:in `call'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:92:in `__run_callbacks__'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:778:in `_run_process_action_callbacks'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:81:in `run_callbacks'
+  actionpack (4.2.7) lib/abstract_controller/callbacks.rb:19:in `process_action'
+  actionpack (4.2.7) lib/action_controller/metal/rescue.rb:29:in `process_action'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:32:in `block in process_action'
+  activesupport (4.2.7) lib/active_support/notifications.rb:164:in `block in instrument'
+  activesupport (4.2.7) lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+  activesupport (4.2.7) lib/active_support/notifications.rb:164:in `instrument'
+  actionpack (4.2.7) lib/action_controller/metal/instrumentation.rb:30:in `process_action'
+  actionpack (4.2.7) lib/action_controller/metal/params_wrapper.rb:250:in `process_action'
+  actionpack (4.2.7) lib/abstract_controller/base.rb:137:in `process'
+  actionview (4.2.7) lib/action_view/rendering.rb:30:in `process'
+  actionpack (4.2.7) lib/action_controller/metal.rb:196:in `dispatch'
+  actionpack (4.2.7) lib/action_controller/metal/rack_delegation.rb:13:in `dispatch'
+  actionpack (4.2.7) lib/action_controller/metal.rb:237:in `block in action'
+  actionpack (4.2.7) lib/action_dispatch/routing/route_set.rb:74:in `call'
+  actionpack (4.2.7) lib/action_dispatch/routing/route_set.rb:74:in `dispatch'
+  actionpack (4.2.7) lib/action_dispatch/routing/route_set.rb:43:in `serve'
+  actionpack (4.2.7) lib/action_dispatch/routing/mapper.rb:49:in `serve'
+  actionpack (4.2.7) lib/action_dispatch/journey/router.rb:43:in `block in serve'
+  actionpack (4.2.7) lib/action_dispatch/journey/router.rb:30:in `each'
+  actionpack (4.2.7) lib/action_dispatch/journey/router.rb:30:in `serve'
+  actionpack (4.2.7) lib/action_dispatch/routing/route_set.rb:817:in `call'
+  omniauth (1.3.1) lib/omniauth/strategy.rb:197:in `call!'
+  omniauth (1.3.1) lib/omniauth/strategy.rb:175:in `call'
+  omniauth (1.3.1) lib/omniauth/strategy.rb:197:in `call!'
+  omniauth (1.3.1) lib/omniauth/strategy.rb:175:in `call'
+  omniauth (1.3.1) lib/omniauth/builder.rb:66:in `call'
+  warden (1.2.6) lib/warden/manager.rb:35:in `block in call'
+  warden (1.2.6) lib/warden/manager.rb:34:in `catch'
+  warden (1.2.6) lib/warden/manager.rb:34:in `call'
+  rack (1.6.4) lib/rack/etag.rb:24:in `call'
+  rack (1.6.4) lib/rack/conditionalget.rb:25:in `call'
+  rack (1.6.4) lib/rack/head.rb:13:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/params_parser.rb:27:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/flash.rb:260:in `call'
+  rack (1.6.4) lib/rack/session/abstract/id.rb:225:in `context'
+  rack (1.6.4) lib/rack/session/abstract/id.rb:220:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/cookies.rb:560:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/callbacks.rb:29:in `block in call'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:88:in `__run_callbacks__'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:778:in `_run_call_callbacks'
+  activesupport (4.2.7) lib/active_support/callbacks.rb:81:in `run_callbacks'
+  actionpack (4.2.7) lib/action_dispatch/middleware/callbacks.rb:27:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/reloader.rb:73:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/remote_ip.rb:78:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/debug_exceptions.rb:17:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/show_exceptions.rb:30:in `call'
+  railties (4.2.7) lib/rails/rack/logger.rb:38:in `call_app'
+  railties (4.2.7) lib/rails/rack/logger.rb:20:in `block in call'
+  activesupport (4.2.7) lib/active_support/tagged_logging.rb:68:in `block in tagged'
+  activesupport (4.2.7) lib/active_support/tagged_logging.rb:26:in `tagged'
+  activesupport (4.2.7) lib/active_support/tagged_logging.rb:68:in `tagged'
+  railties (4.2.7) lib/rails/rack/logger.rb:20:in `call'
+  request_store (1.3.1) lib/request_store/middleware.rb:9:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/request_id.rb:21:in `call'
+  rack (1.6.4) lib/rack/methodoverride.rb:22:in `call'
+  rack (1.6.4) lib/rack/runtime.rb:18:in `call'
+  activesupport (4.2.7) lib/active_support/cache/strategy/local_cache_middleware.rb:28:in `call'
+  rack (1.6.4) lib/rack/lock.rb:17:in `call'
+  actionpack (4.2.7) lib/action_dispatch/middleware/static.rb:120:in `call'
+  rack (1.6.4) lib/rack/sendfile.rb:113:in `call'
+  railties (4.2.7) lib/rails/engine.rb:518:in `call'
+  railties (4.2.7) lib/rails/application.rb:165:in `call'
+  thin (1.7.0) lib/thin/connection.rb:86:in `block in pre_process'
+  thin (1.7.0) lib/thin/connection.rb:84:in `catch'
+  thin (1.7.0) lib/thin/connection.rb:84:in `pre_process'
+  thin (1.7.0) lib/thin/connection.rb:53:in `process'
+  thin (1.7.0) lib/thin/connection.rb:39:in `receive_data'
+  eventmachine (1.2.0.1) lib/eventmachine.rb:194:in `run_machine'
+  eventmachine (1.2.0.1) lib/eventmachine.rb:194:in `run'
+  thin (1.7.0) lib/thin/backends/base.rb:73:in `start'
+  thin (1.7.0) lib/thin/server.rb:162:in `start'
+  thin (1.7.0) lib/thin/controllers/controller.rb:87:in `start'
+  thin (1.7.0) lib/thin/runner.rb:200:in `run_command'
+  thin (1.7.0) lib/thin/runner.rb:156:in `run!'
+  thin (1.7.0) bin/thin:6:in `<top (required)>'
+  /usr/local/bin/thin:23:in `load'
+  /usr/local/bin/thin:23:in `<main>'
+
+
+  Rendered /var/lib/gems/2.1.0/gems/actionpack-4.2.7/lib/action_dispatch/middleware/templates/rescues/_source.erb (8.2ms)
+  Rendered /var/lib/gems/2.1.0/gems/actionpack-4.2.7/lib/action_dispatch/middleware/templates/rescues/_trace.html.erb (3.0ms)
+  Rendered /var/lib/gems/2.1.0/gems/actionpack-4.2.7/lib/action_dispatch/middleware/templates/rescues/_request_and_response.html.erb (0.8ms)
+  Rendered /var/lib/gems/2.1.0/gems/actionpack-4.2.7/lib/action_dispatch/middleware/templates/rescues/template_error.html.erb within rescues/layout (21.0ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:34:00 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (436.8ms)
+Completed 200 OK in 639ms (Views: 630.0ms)
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-18 01:34:01 +0530
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-18 01:34:01 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-18 01:34:01 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-08-18 01:34:01 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-08-18 01:34:01 +0530
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-18 01:34:09 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"jO7DtAFYWH8BIPQSDyZ9BNhEKwlYPJi1VFNuDCdGDtVmn1al3jN/8SRb2yJh4UbNE2Ico9EJAB1Hl/70L+Y1OQ==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]", "dog"=>"cocostan"}, "commit"=>"Log in"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"django@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0014591399999999998s
+Completed 401 Unauthorized in 10ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"jO7DtAFYWH8BIPQSDyZ9BNhEKwlYPJi1VFNuDCdGDtVmn1al3jN/8SRb2yJh4UbNE2Ico9EJAB1Hl/70L+Y1OQ==", "user"=>{"email"=>"django@gmail.com", "password"=>"[FILTERED]", "dog"=>"cocostan"}, "commit"=>"Log in"}
+Unpermitted parameter: dog
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.1ms)
+Completed 200 OK in 203ms (Views: 11.8ms)

@@ -1,6 +1,9 @@
 <h2>Log in</h2>
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <% flash.each do |name, msg| %>
+    <%= content_tag :div, msg, id: "flash_#{name}" %>
+  <% end %>
   <div class="field">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true %>
@@ -9,6 +12,11 @@
   <div class="field">
     <%= f.label :password %><br />
     <%= f.password_field :password, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :dog %><br />
+    <%= f.text_field :dog, autocomplete: "off" %>
   </div>
 
   <% if devise_mapping.rememberable? -%>

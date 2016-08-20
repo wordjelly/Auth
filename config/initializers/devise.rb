@@ -314,8 +314,7 @@ DeviseController.class_eval do
   end
 
   def is_json_request?
-    puts "symbol is:"
-    puts request.format.symbol.to_s
+    
     return (request.format.symbol == :json) ? true : false
   end
 
@@ -329,7 +328,7 @@ DeviseController.class_eval do
   end
 
   def set_redirect_url(client)
-    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url])
+    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url]) && !(is_json_request?)
         @redirect_url = params[:redirect_url]
     end
   end
@@ -398,7 +397,15 @@ module Devise
 
   RegistrationsController.class_eval do 
 
-
+    def respond_with_navigational(*args, &block)
+      if is_json_request?
+        respond_with(*args)
+      else
+        respond_with(*args) do |format|
+          format.any(*navigational_formats, &block)
+        end
+      end
+    end
 
     def authenticate_scope!
       
@@ -414,7 +421,6 @@ module Devise
           render :nothing => true , :status => :unauthorized
         else
           send(:sign_in,self.resource)
-          
         end
       else
         send("authenticate_#{resource_name}!", force: true)
