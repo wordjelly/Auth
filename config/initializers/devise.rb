@@ -285,7 +285,9 @@ DeviseController.class_eval do
 
   def render(*args)
 
-    if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil?
+    
+    if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+      session.delete(:client)
       redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
     else
       super
@@ -294,23 +296,27 @@ DeviseController.class_eval do
 
   end
 
-  def clear_request_store
+  def clear_client_and_redirect_url
     @client = nil
     @redirect_url = nil
   end
 
   def set_client
-
-    if params[:api_key].nil?
+    if !session[:client].nil?
+      @client = session[:client]
+      return true
     else
-     
-      @client = Auth::Client.where(:api_key => params[:api_key]).first
-      if !@client.nil?
-        
-        return true
+      if params[:api_key].nil?
+      else
+       
+        @client = Auth::Client.where(:api_key => params[:api_key]).first
+        if !@client.nil?
+          session[:client] = @client
+          return true
+        end
       end
+      return false
     end
-    return false
   end
 
   def is_json_request?
@@ -335,7 +341,7 @@ DeviseController.class_eval do
 
   def do_before_request
    
-    clear_request_store
+    clear_client_and_redirect_url
    
     set_client
    

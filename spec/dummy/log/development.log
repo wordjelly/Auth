@@ -34100,3 +34100,39 @@ Unpermitted parameter: dog
   Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.7ms)
   Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.1ms)
 Completed 200 OK in 203ms (Views: 11.8ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-21 18:20:59 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (446.5ms)
+Completed 200 OK in 821ms (Views: 809.4ms)
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-08-21 18:21:00 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-08-21 18:21:00 +0530
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-08-21 18:21:00 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-08-21 18:21:00 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-08-21 18:21:00 +0530
+
+
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-08-21 18:26:22 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (6.0ms)
+Completed 200 OK in 25ms (Views: 22.2ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-08-21 18:50:03 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (466.6ms)
+Completed 200 OK in 706ms (Views: 692.5ms)
