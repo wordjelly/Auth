@@ -288,6 +288,7 @@ DeviseController.class_eval do
     
     if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
       session.delete(:client)
+      session.delete(:redirect_url)
       redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
     else
       super
@@ -303,7 +304,7 @@ DeviseController.class_eval do
 
   def set_client
     if !session[:client].nil?
-      @client = session[:client]
+      @client = Auth::Client.new(session[:client])
       return true
     else
       if params[:api_key].nil?
@@ -325,17 +326,23 @@ DeviseController.class_eval do
   end
 
   def protect_json_request
-    
+   
     if is_json_request? && @client.nil?
-     
+      
       render :nothing => true , :status => :unauthorized
 
     end
   end
 
   def set_redirect_url(client)
-    if !params[:redirect_url].nil? && !client.nil? && client.contains_redirect_url?(params[:redirect_url]) && !(is_json_request?)
-        @redirect_url = params[:redirect_url]
+    
+    
+    redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
+
+    if !redir_url.nil? && !client.nil? && client.contains_redirect_url?(redir_url) && !(is_json_request?)
+        @redirect_url = redir_url
+        session[:redirect_url] = redir_url
+       
     end
   end
 
@@ -349,7 +356,7 @@ DeviseController.class_eval do
 
     protect_json_request
       
-    #puts "came after protect json srequest."
+    
 
   end
 
@@ -439,14 +446,21 @@ module Devise
 
   SessionsController.class_eval do 
 
-    private
+    prepend_before_action :ignore_json_request, only: [:new]
 
-    # Check if there is no signed in user before doing the sign out.
-    #
-    # If there is no signed in user, it will set the flash message and redirect
-    # to the after_sign_out path.
+    def ignore_json_request
+      if is_json_request?
+        render :nothing => true, :status => 406 and return
+      end
+    end
+    
+    private
+    ##if the destory request is json, we return not servicable.
+    ##otherwise we do nothing.
     def verify_signed_out_user
-      do_before_request
+      if is_json_request?
+        render :nothing => true, :status => 406 and return
+      end
       if all_signed_out?
         set_flash_message! :notice, :already_signed_out
         respond_to_on_destroy

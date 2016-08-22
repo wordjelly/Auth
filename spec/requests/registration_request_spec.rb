@@ -1,5 +1,5 @@
 require "rails_helper"
-
+=begin
 RSpec.describe "Registration requests", :type => :request do
   before(:all) do 
     User.delete_all
@@ -291,6 +291,10 @@ RSpec.describe "Registration requests", :type => :request do
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
     end
 
+    after(:example) do 
+      ActionController::Base.allow_forgery_protection = false
+    end
+
 
     context " -- fails without an api key --- " do
       it " - READ - " do  
@@ -317,7 +321,7 @@ RSpec.describe "Registration requests", :type => :request do
 
     end
 
-     context " -- invalid api key -- " do 
+    context " -- invalid api key -- " do 
 
         
 
@@ -352,9 +356,11 @@ RSpec.describe "Registration requests", :type => :request do
         
 
         it " -- CREATE REQUEST -- " do 
-            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key, :format => :json}.to_json, @headers
+            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key}.to_json, @headers
             @user_created = assigns(:user)
             @cl = assigns(:client)
+            user_json_hash = JSON.parse(response.body)
+            expect(user_json_hash.keys).to match_array(["authentication_token","es"])
             expect(@cl).not_to be_nil
             expect(@user_created).not_to be_nil
             expect(response.code).to eq("201")
@@ -371,6 +377,7 @@ RSpec.describe "Registration requests", :type => :request do
             @user_updated = assigns(:user)
             @cl = assigns(:client)
             expect(@cl).not_to be_nil
+            expect(@user_updated).not_to be_nil
             expect(response.code).to eq("204")
 
           end
@@ -412,3 +419,4 @@ RSpec.describe "Registration requests", :type => :request do
   end
   
 end
+=end

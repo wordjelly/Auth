@@ -199,5 +199,12 @@ module Auth::Concerns::UserConcern
 
 	end
 
+	##controls which fields are returned in the json response.
+	##default fields are defined in the Auth configuration default file
+	##include field names in that file.
+	def as_json(options)
+		 super(:only => [:es, :authentication_token])
+	end
+
 
 end
