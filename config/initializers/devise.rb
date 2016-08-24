@@ -285,7 +285,10 @@ DeviseController.class_eval do
 
   def render(*args)
 
-    
+   # puts "came to render"
+   # puts "redir_url--->#{@redirect_url}"
+   # puts "resource is nil---->#{resource.nil?}"
+   # puts "signed_in------>#{signed_in?}"
     if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
       session.delete(:client)
       session.delete(:redirect_url)
@@ -304,7 +307,11 @@ DeviseController.class_eval do
 
   def set_client
     if !session[:client].nil?
-      @client = Auth::Client.new(session[:client])
+      if session[:client].is_a?Hash
+         @client = Auth::Client.new(session[:client])
+      elsif session[:client].is_a? Auth::Client
+         @client = session[:client]
+      end 
       return true
     else
       if params[:api_key].nil?
@@ -336,13 +343,15 @@ DeviseController.class_eval do
 
   def set_redirect_url(client)
     
-    
+    #puts "the params redirect url is: #{params[:redirect_url]}"
+    #puts "the session redirect url is: #{session[:redirect_url]}"
     redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
 
     if !redir_url.nil? && !client.nil? && client.contains_redirect_url?(redir_url) && !(is_json_request?)
+        #puts "came to assign redir url:"
         @redirect_url = redir_url
         session[:redirect_url] = redir_url
-       
+        #puts "#{@redirect_url}"
     end
   end
 
@@ -355,7 +364,7 @@ DeviseController.class_eval do
     set_redirect_url(@client)
 
     protect_json_request
-      
+    
     
 
   end

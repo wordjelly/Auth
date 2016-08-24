@@ -7,7 +7,7 @@ module Auth::Concerns::OmniConcern
   end
 
   def passthru
-    puts "Came to passthru"
+    
   end
 
   def failure
