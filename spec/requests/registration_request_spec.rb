@@ -1,5 +1,5 @@
 require "rails_helper"
-
+=begin
 RSpec.describe "Registration requests", :type => :request do
   before(:all) do 
     User.delete_all
@@ -419,3 +419,4 @@ RSpec.describe "Registration requests", :type => :request do
   end
   
 end
+=end

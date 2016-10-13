@@ -1,5 +1,5 @@
 require "rails_helper"
-
+=begin
 ##if you want to test a controller that uses routes defined by the 
 describe Auth::ClientsController do 
 
@@ -220,5 +220,4 @@ describe Auth::ClientsController do
 
 
 end
-
-
+=end
