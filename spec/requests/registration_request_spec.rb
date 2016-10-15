@@ -1,5 +1,5 @@
 require "rails_helper"
-=begin
+
 RSpec.describe "Registration requests", :type => :request do
   before(:all) do 
     User.delete_all
@@ -7,6 +7,12 @@ RSpec.describe "Registration requests", :type => :request do
   end
 
   context " -- web app requests -- " do 
+
+    before(:example) do 
+
+      ActionController::Base.allow_forgery_protection = false
+
+    end
 
     it " -- does not need an api_key in the params -- " do 
 
@@ -419,4 +425,3 @@ RSpec.describe "Registration requests", :type => :request do
   end
   
 end
-=end

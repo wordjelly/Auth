@@ -1,5 +1,5 @@
 require "rails_helper"
-=begin
+
 RSpec.describe "session request spec", :type => :request do 
 
 	before(:example) do 
@@ -168,8 +168,8 @@ RSpec.describe "session request spec", :type => :request do
 		context " -- no api key" do 
 
 			it " -- new session returns not authenticated" do 
-				get new_user_registration_path,nil,@headers
-        		expect(response.code).to eq("401")
+				get new_user_session_path,nil,@headers
+        		expect(response.code).to eq("406")
 
 			end
 
@@ -242,4 +242,3 @@ RSpec.describe "session request spec", :type => :request do
 	end
 
 end
-=end

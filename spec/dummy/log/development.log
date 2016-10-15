@@ -34550,3 +34550,266 @@ Processing by Auth::SessionsController#new as HTML
   Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.8ms)
   Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.3ms)
 Completed 200 OK in 15ms (Views: 13.7ms)
+
+
+Started GET "/authenticate/users/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+Processing by Auth::PasswordsController#edit as HTML
+  Parameters: {"reset_password_token"=>"[FILTERED]"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.6ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/edit.html.erb within layouts/auth/application (19.0ms)
+Completed 200 OK in 426ms (Views: 415.1ms)
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-10-14 19:02:53 +0530
+
+
+Started PUT "/authenticate/users/password" for 127.0.0.1 at 2016-10-14 19:04:00 +0530
+Processing by Auth::PasswordsController#update as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"vY8I6gverIfexzNGYxioNZNAONy+D6OaSc3jGaqhom2wycd58ccvcvorKtk/AuOtGuA8D9MWX6QGB1tgIXWJ5A==", "user"=>{"reset_password_token"=>"[FILTERED]", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Change my password"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"reset_password_token"=>"5c2a6b093a9384f8ff14f9770d3f77becb747719a94f69dfc3a59548323b96dd"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.02432065s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.6ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/edit.html.erb within layouts/auth/application (3.3ms)
+Completed 200 OK in 651ms (Views: 13.3ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:04:07 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.4ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (9.2ms)
+Completed 200 OK in 31ms (Views: 29.2ms)
+
+
+Started GET "/authenticate/users/password/new" for 127.0.0.1 at 2016-10-14 19:04:09 +0530
+Processing by Auth::PasswordsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.9ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/new.html.erb within layouts/auth/application (3.5ms)
+Completed 200 OK in 16ms (Views: 15.1ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:07:58 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.2ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (7.9ms)
+Completed 200 OK in 33ms (Views: 30.7ms)
+
+
+Started GET "/authenticate/users/password/new" for 127.0.0.1 at 2016-10-14 19:08:00 +0530
+Processing by Auth::PasswordsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.5ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/new.html.erb within layouts/auth/application (4.8ms)
+Completed 200 OK in 25ms (Views: 23.5ms)
+
+
+Started POST "/authenticate/users/password" for 127.0.0.1 at 2016-10-14 19:08:06 +0530
+Processing by Auth::PasswordsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"uHmn6Gc3cOaiwXvy4HEHbZN9Hf7sgtwaba7/UDmbbjW1P2h7nS7zE4YtYm28a0z1Gt0ZLYGbICQiZEcpsk9FvA==", "user"=>{"email"=>"cocostan@gmail.com"}, "commit"=>"Send me reset password instructions"}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"cocostan@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.07876836699999999s
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"reset_password_token"=>"1759714f622b4cd65333f8b12ec1b48debd56ced835fd93c481d235feb180bd5"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000532695s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"reset_password_token"=>"1759714f622b4cd65333f8b12ec1b48debd56ced835fd93c481d235feb180bd5", "res...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000761992s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5800dfbe421aa910dbe1b375'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57ff812f421aa912432893f8'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.01646209s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00047283599999999997s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/mailer/reset_password_instructions.html.erb (1.3ms)
+
+Devise::Mailer#reset_password_instructions: processed outbound mail in 150.2ms
+
+Sent mail to cocostan@gmail.com (6.1ms)
+Date: Fri, 14 Oct 2016 19:08:06 +0530
+From: please-change-me-at-config-initializers-devise@example.com
+Reply-To: please-change-me-at-config-initializers-devise@example.com
+To: cocostan@gmail.com
+Message-ID: <5800dfbe8fb50_10dbb5f31018988@localhost.mail>
+Subject: Reset password instructions
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<p>Hello cocostan@gmail.com!</p>
+
+<p>Someone has requested a link to change your password. You can do this through the link below.</p>
+
+<p><a href="http://localhost/authenticate/users/password/edit?reset_password_token=8yUR71AkGiibQH4xC1Ca">Change my password</a></p>
+
+<p>If you didn't request this, please ignore this email.</p>
+<p>Your password won't change until you access the link above and create a new one.</p>
+
+Redirected to http://localhost:3000/authenticate/users/sign_in
+Completed 302 Found in 291ms
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:08:06 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.0ms)
+Completed 200 OK in 14ms (Views: 12.8ms)
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:10:11 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.9ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (459.5ms)
+Completed 200 OK in 619ms (Views: 607.6ms)
+
+
+Started GET "/authenticate/users/password/new" for 127.0.0.1 at 2016-10-14 19:10:13 +0530
+Processing by Auth::PasswordsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.6ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/new.html.erb within layouts/auth/application (5.0ms)
+Completed 200 OK in 23ms (Views: 22.1ms)
+
+
+Started POST "/authenticate/users/password" for 127.0.0.1 at 2016-10-14 19:10:16 +0530
+Processing by Auth::PasswordsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"pIcyBPwOLEVOoEmJzVnAmv6fPhwdihCZH7qlq51jZqOpwf2XBhevsGpMUBaRQ4sCdz86z3CT7KdQcB3SFrdNKg==", "user"=>{"email"=>"cocostan@gmail.com"}, "commit"=>"Send me reset password instructions"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"cocostan@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.045182273s
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"reset_password_token"=>"57c1c5482615f48771db505469a6d836286702993cc9ad0947ca0ecd486b3727"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.00123483s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"reset_password_token"=>"57c1c5482615f48771db505469a6d836286702993cc9ad0947ca0ecd486b3727", "res...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.00038812s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5800e040421aa9130033af39'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57ff812f421aa912432893f8'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000504291s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000414259s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/mailer/reset_password_instructions.html.erb (1.0ms)
+
+Devise::Mailer#reset_password_instructions: processed outbound mail in 162.5ms
+
+Sent mail to cocostan@gmail.com (204.6ms)
+Date: Fri, 14 Oct 2016 19:10:17 +0530
+From: please-change-me-at-config-initializers-devise@example.com
+Reply-To: please-change-me-at-config-initializers-devise@example.com
+To: cocostan@gmail.com
+Message-ID: <5800e04110e44_130010b73086754b@localhost.mail>
+Subject: Reset password instructions
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<p>Hello cocostan@gmail.com!</p>
+
+<p>Someone has requested a link to change your password. You can do this through the link below.</p>
+
+<p><a href="http://localhost:3000/authenticate/users/password/edit?reset_password_token=QSF_LgxTCPLBuQGoVWzy">Change my password</a></p>
+
+<p>If you didn't request this, please ignore this email.</p>
+<p>Your password won't change until you access the link above and create a new one.</p>
+
+Redirected to http://localhost:3000/authenticate/users/sign_in
+Completed 302 Found in 634ms
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:10:17 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.7ms)
+Completed 200 OK in 16ms (Views: 14.9ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-14 19:10:17 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"DT9s+34hZm0I9LKgrQBY/3PrvnhkMsin3YdfwAedOt0AeaNohDjlmCwYqz/xGhNn+ku6qwkrNJmSTee5jEkRVA==", "user"=>{"email"=>"", "password"=>"[FILTERED]", "dog"=>""}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 2ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"DT9s+34hZm0I9LKgrQBY/3PrvnhkMsin3YdfwAedOt0AeaNohDjlmCwYqz/xGhNn+ku6qwkrNJmSTee5jEkRVA==", "user"=>{"email"=>"", "password"=>"[FILTERED]", "dog"=>""}, "commit"=>"Log in"}
+Unpermitted parameter: dog
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.2ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (5.0ms)
+Completed 200 OK in 24ms (Views: 22.4ms)
+
+
+Started GET "/authenticate/users/password/edit?reset_password_token=[FILTERED]" for 127.0.0.1 at 2016-10-14 19:10:42 +0530
+Processing by Auth::PasswordsController#edit as HTML
+  Parameters: {"reset_password_token"=>"[FILTERED]"}
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.6ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/passwords/edit.html.erb within layouts/auth/application (8.0ms)
+Completed 200 OK in 35ms (Views: 33.1ms)
+
+
+Started PUT "/authenticate/users/password" for 127.0.0.1 at 2016-10-14 19:10:50 +0530
+Processing by Auth::PasswordsController#update as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"1Xf4vHVablTPzyFNsypRAfG6Gf3Pt+60MRE48BvB5WLYMTcvj0PtoesjONLvMBqZeBodLqKuEop+24CJkBXO6w==", "user"=>{"reset_password_token"=>"[FILTERED]", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Change my password"}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"reset_password_token"=>"57c1c5482615f48771db505469a6d836286702993cc9ad0947ca0ecd486b3727"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0008221260000000001s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"encrypted_password"=>"$2a$11$Sw7BQm1.HEN4L9wHy0stzOmvgejFl4Xrxc4yTBOKGOD/7J8k4nknq", "reset_pas...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000537971s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5800e063421aa9130033af3a'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57ff812f421aa912432893f8'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000460636s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000328985s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}}, "multi"=>false, "upsert"=>false}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000359234s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5800e063421aa9130033af3b'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57ff812f421aa912432893f8'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000396741s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000314974s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}, "$set"=>{"current_sign_in_at"=>2016-10-14 13:40:51 UTC, "sign_in_count"=>2}}, "multi"=>false, "upsert"=>f...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000409432s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('5800e063421aa9130033af3c'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('57ff812f421aa912432893f8'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000419299s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00035271099999999996s
+Redirected to http://localhost:3000/
+Completed 302 Found in 200ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (1.1ms)
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"_id"=>BSON::ObjectId('57ff812f421aa912432893f8')}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0005925990000000001s
+Completed 200 OK in 378ms (Views: 377.8ms)
+
+
+Started GET "/assets/api/v1/token_auth.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/home.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/oauth_tests.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/scaffold.self-83b741db49389dc7cfdf85bf7537a0219cce48e085c4116afc83d55c9af47c78.css?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/jquery.self-660adc51e0224b731d29f575a6f1ec167ba08ad06ed5deca4f1e8654c135bf4c.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/jquery_ujs.self-e87806d0cf4489aeb1bb7288016024e8de67fd18db693fe026fe3907581e53cd.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/api/v1/token_auth.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/home.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/oauth_tests.self-28e00b23682251cda43513cb0b57e42485259242b6a237d233164860579f285e.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/assets/application.self-ff53b6dfc1f30d348bfeedd6e052bba068a052e01ded699aa544d32242090a1f.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530

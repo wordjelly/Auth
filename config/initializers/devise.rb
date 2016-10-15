@@ -283,20 +283,30 @@ DeviseController.class_eval do
 
   respond_to :html, :json
 
-  def render(*args)
+  def ignore_json_request
+      if is_json_request?
+        render :nothing => true, :status => 406 and return
+      end
+  end
 
+  def render(*args)
+   #puts "request format is: #{request.format}"
    # puts "came to render"
    # puts "redir_url--->#{@redirect_url}"
    # puts "resource is nil---->#{resource.nil?}"
    # puts "signed_in------>#{signed_in?}"
-    if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
-      session.delete(:client)
-      session.delete(:redirect_url)
-      redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
-    else
+    if controller_name == "passwords"
+    
       super
-    end
-        
+    else
+      if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+        session.delete(:client)
+        session.delete(:redirect_url)
+        redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+      else
+        super
+      end
+    end        
 
   end
 
@@ -306,7 +316,9 @@ DeviseController.class_eval do
   end
 
   def set_client
+
     if !session[:client].nil?
+    
       if session[:client].is_a?Hash
          @client = Auth::Client.new(session[:client])
       elsif session[:client].is_a? Auth::Client
@@ -315,9 +327,11 @@ DeviseController.class_eval do
       return true
     else
       if params[:api_key].nil?
+
       else
-       
+        
         @client = Auth::Client.where(:api_key => params[:api_key]).first
+
         if !@client.nil?
           session[:client] = @client
           return true
@@ -333,7 +347,7 @@ DeviseController.class_eval do
   end
 
   def protect_json_request
-   
+    
     if is_json_request? && @client.nil?
       
       render :nothing => true , :status => :unauthorized
@@ -457,12 +471,6 @@ module Devise
 
     prepend_before_action :ignore_json_request, only: [:new]
 
-    def ignore_json_request
-      if is_json_request?
-        render :nothing => true, :status => 406 and return
-      end
-    end
-    
     private
     ##if the destory request is json, we return not servicable.
     ##otherwise we do nothing.
@@ -477,6 +485,15 @@ module Devise
     end
 
   end
+
+  PasswordsController.class_eval do 
+
+    prepend_before_action :ignore_json_request, only: [:new]
+
+
+  end
+
+
   
   module OmniAuth
     module UrlHelpers
