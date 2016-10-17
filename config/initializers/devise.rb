@@ -370,7 +370,7 @@ DeviseController.class_eval do
   end
 
   def do_before_request
-   
+    
     clear_client_and_redirect_url
    
     set_client
@@ -379,8 +379,6 @@ DeviseController.class_eval do
 
     protect_json_request
     
-    
-
   end
 
  
@@ -490,6 +488,12 @@ module Devise
 
     prepend_before_action :ignore_json_request, only: [:new]
 
+
+  end
+
+  ConfirmationsController.class_eval do 
+
+    prepend_before_action :ignore_json_request, only: [:new]
 
   end
 
