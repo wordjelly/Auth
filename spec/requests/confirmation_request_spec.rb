@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "password request spec", :type => :request do 
+RSpec.describe "confirmation request spec", :type => :request do 
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = true
@@ -16,8 +16,10 @@ RSpec.describe "password request spec", :type => :request do
 	end
 
 	after(:example) do 
-		session.delete(:client)
-		session.delete(:redirect_url)
+		
+			session.delete(:client)
+			session.delete(:redirect_url)
+		
 	end
 
 	context "-- web app requests" do 
@@ -31,20 +33,26 @@ RSpec.describe "password request spec", :type => :request do
 		context "-- no api key" do 
 
 			it "-- get request is successfull" do 
-
+				get new_user_confirmation_path,{}
+				expect(response.code).to eq("200")		
 			end
 
 			it "-- create request is successfull" do 
-
+				@u.send_confirmation_instructions
+				post user_confirmation_path,{user:{email: @u.email}}
+				expect(response.code).to eq("302")
+				##we need a user who is not yet confirmed.
+				#post user_password_path,{user: {email: @u.email}}
+				#expect(response.code).to eq("302")
+				#expect(response).to redirect_to(new_user_session_path)
 			end
-
+=begin
 			it "-- show request is successfull" do 
 
-
 			end
-
+=end
 		end
-
+=begin
 		context "-- valid api key + redirect url" do 
 
 			it "-- get request, client created, but no redirection" do 
@@ -62,9 +70,9 @@ RSpec.describe "password request spec", :type => :request do
 			end
 
 		end
-
+=end
 	end
-
+=begin
 	context "-- json requests " do 
 
 		context "-- no api key" do 
@@ -102,5 +110,5 @@ RSpec.describe "password request spec", :type => :request do
 		end
 
 	end
-
+=end
 end

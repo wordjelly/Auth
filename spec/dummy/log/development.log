@@ -34813,3 +34813,236 @@ Started GET "/assets/oauth_tests.self-28e00b23682251cda43513cb0b57e42485259242b6
 
 
 Started GET "/assets/application.self-ff53b6dfc1f30d348bfeedd6e052bba068a052e01ded699aa544d32242090a1f.js?body=1" for 127.0.0.1 at 2016-10-14 19:10:51 +0530
+
+
+Started GET "/" for 127.0.0.1 at 2016-10-18 19:39:37 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (2.7ms)
+Completed 200 OK in 819ms (Views: 819.0ms)
+
+
+Started GET "/assets/api/v1/token_auth.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:38 +0530
+
+
+Started GET "/assets/home.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:38 +0530
+
+
+Started GET "/assets/oauth_tests.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:38 +0530
+
+
+Started GET "/assets/scaffold.self-83b741db49389dc7cfdf85bf7537a0219cce48e085c4116afc83d55c9af47c78.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:38 +0530
+
+
+Started GET "/assets/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/jquery.self-660adc51e0224b731d29f575a6f1ec167ba08ad06ed5deca4f1e8654c135bf4c.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/jquery_ujs.self-e87806d0cf4489aeb1bb7288016024e8de67fd18db693fe026fe3907581e53cd.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/api/v1/token_auth.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/home.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/oauth_tests.self-28e00b23682251cda43513cb0b57e42485259242b6a237d233164860579f285e.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/assets/application.self-ff53b6dfc1f30d348bfeedd6e052bba068a052e01ded699aa544d32242090a1f.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:39 +0530
+
+
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-10-18 19:39:42 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (896.2ms)
+Completed 200 OK in 1078ms (Views: 1075.8ms)
+
+
+Started GET "/assets/auth/clients.self-b60acab5af8d245ed2b3012f77d11d8d207d8eada27756badaf4ef05770d60f6.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:43 +0530
+
+
+Started GET "/assets/auth/application.self-8f06a73c35179188914ab50e057157639fce1401c1cdca640ac9cec33746fc5b.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:43 +0530
+
+
+Started GET "/assets/auth/clients.self-19a187bec6cdb96d6de80a61c16c857c613536adf9138476bd367db38d282635.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:43 +0530
+
+
+Started GET "/assets/auth/application.self-e80e8f2318043e8af94dddc2adad5a4f09739a8ebb323b3ab31cd71d45fd9113.css?body=1" for 127.0.0.1 at 2016-10-18 19:39:43 +0530
+
+
+Started GET "/assets/auth/registrations.self-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js?body=1" for 127.0.0.1 at 2016-10-18 19:39:43 +0530
+
+
+Started POST "/authenticate/users" for 127.0.0.1 at 2016-10-18 19:39:53 +0530
+Processing by Auth::RegistrationsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"l9PABFs8nSdkyUwfMOeGaVi+bc5U546mI85KarVgVN2sD7erMiHPDtPsBO+78ZxpP0EdheMT5QKdBWP8TN7b/Q==", "user"=>{"email"=>"dagowop@gmail.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]"}, "commit"=>"Sign up"}
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dagowop@gmail.com"}, "projection"=>{"_id"=>1}, "limit"=>1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.043972393000000005s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"users", "query"=>{"authentication_token"=>"zpLfbdaj_nLm5B2yNeWj"}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00055198s
+MONGODB | localhost:27017 | dummy_development.insert | STARTED | {"insert"=>"users", "documents"=>[{"_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a'), "email"=>"dagowop@gmail.com", "encrypted_password"=>"$2a$11$ObV9bK08dUufuM.i1e3GpOPTtG0aBePJNyGTb0E8aAClqzLjro5wS", "sign_in_count"=>0, "failed_attempts"=>0, "identi...
+MONGODB | localhost:27017 | dummy_development.insert | SUCCEEDED | 0.024830706s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/mailer/confirmation_instructions.html.erb (1.1ms)
+
+Devise::Mailer#confirmation_instructions: processed outbound mail in 282.2ms
+
+Sent mail to dagowop@gmail.com (7.6ms)
+Date: Tue, 18 Oct 2016 19:39:54 +0530
+From: please-change-me-at-config-initializers-devise@example.com
+Reply-To: please-change-me-at-config-initializers-devise@example.com
+To: dagowop@gmail.com
+Message-ID: <58062d323c43b_2f08c592fc100015@localhost.mail>
+Subject: Confirmation instructions
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<p>Welcome dagowop@gmail.com!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><a href="http://localhost:3000/authenticate/users/confirmation?confirmation_token=MLv3euR9TUiCFoCxq7qs">Confirm my account</a></p>
+
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('58062d32421aa92f08d0aa4c'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.00096533s
+Redirected to http://localhost:3000/
+Completed 302 Found in 893ms
+
+
+Started GET "/" for 127.0.0.1 at 2016-10-18 19:39:54 +0530
+Processing by HomeController#index as HTML
+  Rendered home/index.html.erb within layouts/application (0.7ms)
+Completed 200 OK in 19ms (Views: 18.5ms)
+
+
+Started GET "/authenticate/users/sign_up" for 127.0.0.1 at 2016-10-18 19:41:23 +0530
+Processing by Auth::RegistrationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.1ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/registrations/new.html.erb within layouts/auth/application (6.2ms)
+Completed 200 OK in 28ms (Views: 25.7ms)
+
+
+Started GET "/authenticate/users/confirmation/new" for 127.0.0.1 at 2016-10-18 19:41:24 +0530
+Processing by Auth::ConfirmationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.9ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/confirmations/new.html.erb within layouts/auth/application (7.5ms)
+Completed 200 OK in 63ms (Views: 61.6ms)
+
+
+Started POST "/authenticate/users/confirmation" for 127.0.0.1 at 2016-10-18 19:41:29 +0530
+Processing by Auth::ConfirmationsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"+9T1CHC9XUwsnPHofdTa2nyZwtWu1bu0DYp4JQ73zXLACIKnGaAPZZu5uRj2wsDaG2aynhkh0BCzQVGz90lCUg==", "user"=>{"email"=>"dagowop@gmail.com"}, "commit"=>"Resend confirmation instructions"}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"unconfirmed_email"=>"dagowop@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000538014s
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dagowop@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.000682818s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}}, "multi"=>false, "upsert"=>false}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.000510861s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('58062d91421aa92f08d0aa4d'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.00048901s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.00032913699999999996s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/mailer/confirmation_instructions.html.erb (0.6ms)
+
+Devise::Mailer#confirmation_instructions: processed outbound mail in 10.1ms
+
+Sent mail to dagowop@gmail.com (3.7ms)
+Date: Tue, 18 Oct 2016 19:41:29 +0530
+From: please-change-me-at-config-initializers-devise@example.com
+Reply-To: please-change-me-at-config-initializers-devise@example.com
+To: dagowop@gmail.com
+Message-ID: <58062d91bf6d8_2f08c592fc100175@localhost.mail>
+Subject: Confirmation instructions
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<p>Welcome dagowop@gmail.com!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><a href="http://localhost:3000/authenticate/users/confirmation?confirmation_token=MLv3euR9TUiCFoCxq7qs">Confirm my account</a></p>
+
+Redirected to http://localhost:3000/authenticate/users/sign_in
+Completed 302 Found in 118ms
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-18 19:41:29 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (8.7ms)
+Completed 200 OK in 140ms (Views: 138.0ms)
+
+
+Started GET "/authenticate/users/confirmation/new" for 127.0.0.1 at 2016-10-18 19:42:38 +0530
+Processing by Auth::ConfirmationsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (1.8ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/confirmations/new.html.erb within layouts/auth/application (5.4ms)
+Completed 200 OK in 26ms (Views: 25.1ms)
+
+
+Started POST "/authenticate/users/confirmation" for 127.0.0.1 at 2016-10-18 19:42:41 +0530
+Processing by Auth::ConfirmationsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"BbJe7PuzVZwMfgGgJlVtRgVoJGOk4HDNdPhhEAMsmDU+bilDkq4HtbtbSVCtQ3dGYpdUKBMUG2nKM0iG+pIXFQ==", "user"=>{"email"=>"dagowop@gmail.com"}, "commit"=>"Resend confirmation instructions"}
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"unconfirmed_email"=>"dagowop@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0006075729999999999s
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{"email"=>"dagowop@gmail.com"}, "limit"=>-1}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0006771370000000001s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"users", "updates"=>[{"q"=>{"_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}, "u"=>{"$unset"=>{"version"=>true, "op_success"=>true}}, "multi"=>false, "upsert"=>false}], "ordered"=>true}
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.0004478s
+MONGODB | localhost:27017 | dummy_development.update | STARTED | {"update"=>"auth_clients", "updates"=>[{"q"=>{"user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}, "u"=>{"$setOnInsert"=>{"_id"=>BSON::ObjectId('58062dd9421aa92f08d0aa4e'), "redirect_urls"=>[], "user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a'),...
+MONGODB | localhost:27017 | dummy_development.update | SUCCEEDED | 0.0005950220000000001s
+MONGODB | localhost:27017 | dummy_development.count | STARTED | {"count"=>"auth_clients", "query"=>{"user_id"=>BSON::ObjectId('58062d31421aa92f08d0aa4a')}}
+MONGODB | localhost:27017 | dummy_development.count | SUCCEEDED | 0.000322865s
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/mailer/confirmation_instructions.html.erb (0.5ms)
+
+Devise::Mailer#confirmation_instructions: processed outbound mail in 9.6ms
+
+Sent mail to dagowop@gmail.com (670.9ms)
+Date: Tue, 18 Oct 2016 19:42:41 +0530
+From: please-change-me-at-config-initializers-devise@example.com
+Reply-To: please-change-me-at-config-initializers-devise@example.com
+To: dagowop@gmail.com
+Message-ID: <58062dd933385_2f08c592fc1002b0@localhost.mail>
+Subject: Confirmation instructions
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<p>Welcome dagowop@gmail.com!</p>
+
+<p>You can confirm your account email through the link below:</p>
+
+<p><a href="http://localhost:3000/authenticate/users/confirmation?confirmation_token=MLv3euR9TUiCFoCxq7qs">Confirm my account</a></p>
+
+Redirected to http://localhost:3000/authenticate/users/sign_in
+Completed 302 Found in 698ms
+
+
+Started GET "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-18 19:42:41 +0530
+Processing by Auth::SessionsController#new as HTML
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (0.7ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (3.5ms)
+Completed 200 OK in 15ms (Views: 13.6ms)
+
+
+Started POST "/authenticate/users/sign_in" for 127.0.0.1 at 2016-10-18 19:42:42 +0530
+Processing by Auth::SessionsController#create as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"5JuDGw0rlnmyhIGmHwER3V6cciZg9KBKdDXO8/ZMHhbfR/S0ZDbEUAWhyVaUFwvdOWMCbdcAy+7K/udlD/KRNg==", "user"=>{"email"=>"", "password"=>"[FILTERED]", "dog"=>""}, "commit"=>"Log in"}
+Completed 401 Unauthorized in 2ms
+Processing by Auth::SessionsController#new as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"5JuDGw0rlnmyhIGmHwER3V6cciZg9KBKdDXO8/ZMHhbfR/S0ZDbEUAWhyVaUFwvdOWMCbdcAy+7K/udlD/KRNg==", "user"=>{"email"=>"", "password"=>"[FILTERED]", "dog"=>""}, "commit"=>"Log in"}
+Unpermitted parameter: dog
+  Rendered /var/lib/gems/2.1.0/gems/devise-4.1.1/app/views/devise/shared/_links.html.erb (2.3ms)
+  Rendered /home/bhargav/Github/auth/app/views/auth/sessions/new.html.erb within layouts/auth/application (6.6ms)
+Completed 200 OK in 29ms (Views: 26.2ms)
+MONGODB | Adding localhost:27017 to the cluster.
+MONGODB | localhost:27017 | dummy_development.find | STARTED | {"find"=>"users", "filter"=>{}}
+MONGODB | localhost:27017 | dummy_development.find | SUCCEEDED | 0.0015543339999999999s
