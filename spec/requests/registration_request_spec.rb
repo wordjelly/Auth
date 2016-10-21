@@ -27,7 +27,7 @@ RSpec.describe "Registration requests", :type => :request do
     	it " -- creates a email_salt and authentication token on user create -- " do 
 
         
-        post user_registration_path, user: attributes_for(:user)
+        post user_registration_path, user: attributes_for(:user_confirmed)
         @user = assigns(:user)
         expect(@user.es).not_to be_nil
         expect(@user.authentication_token).not_to be_nil
@@ -36,9 +36,9 @@ RSpec.describe "Registration requests", :type => :request do
 
     	it " -- updates the email_salt and authentication token if the user changes his email -- " do 
         
-        sign_in_as_a_valid_user
+        sign_in_as_a_valid_and_confirmed_user
 
-        put "/authenticate/users/", :id => @user.id, :user => {:email => Faker::Internet.email, :current_password => 'password'}
+        put "/authenticate/users/", :id => @user.id, :user => attributes_for(:user_confirmed)
         @user_updated = assigns(:user)
 
         expect(@user_updated.es).not_to eql(@user.es)
@@ -48,7 +48,7 @@ RSpec.describe "Registration requests", :type => :request do
 
     	it " -- does not change the email salt or auth_token if other user data is updated -- " do 
 
-        sign_in_as_a_valid_user
+        sign_in_as_a_valid_and_confirmed_user
 
         put "/authenticate/users/", :id => @user.id, :user => {:name => Faker::Name.name}
         
@@ -75,7 +75,7 @@ RSpec.describe "Registration requests", :type => :request do
 
       it " -- does not create client when user is updated -- " do 
 
-        sign_in_as_a_valid_user
+        sign_in_as_a_valid_and_confirmed_user
         client = Auth::Client.find(@user.id)
         c = Auth::Client.all.count
         put "/authenticate/users/", :id => @user.id, :user => {:email => Faker::Internet.email, :current_password => 'password'}
@@ -87,18 +87,23 @@ RSpec.describe "Registration requests", :type => :request do
 
 
       it " -- destroy's client when user is destroyed -- " do 
-        post user_registration_path, user: attributes_for(:user)
-        @user = assigns(:user)
+        #puts "DOING DESTROY TESTS"
+        User.delete_all
+        sign_in_as_a_valid_and_confirmed_user
         c = Auth::Client.all.count
         u = User.all.count
+        #puts "DOING DELETE -----------------"
+        #puts @user.attributes.to_s
         delete "/authenticate/users", :id => @user.id
         c1 = Auth::Client.all.count
         u1 = User.all.count
+        #puts "user all count after deleting is: #{u1}"
         expect(u - u1).to eq(1)
         expect(c - c1).to eq(1)
       end
 
     end
+
 
     context " sets client if api key is correct --- " do 
 
@@ -275,7 +280,6 @@ RSpec.describe "Registration requests", :type => :request do
       end
 
     end
-	 
 
 
 

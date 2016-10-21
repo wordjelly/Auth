@@ -442,7 +442,8 @@ module Devise
     end
 
     def authenticate_scope!
-      
+      #puts "came to authenticate scope."
+
       do_before_request  
       if is_json_request?
         #puts "is a json request"
@@ -457,8 +458,11 @@ module Devise
           send(:sign_in,self.resource)
         end
       else
+        #puts "came to call authenticate."
         send("authenticate_#{resource_name}!", force: true)
+        #puts "finished calling authenticate."
         self.resource = send("current_#{resource_name}")
+        #puts "self resource is: #{self.resource}"
       end
 
     end

@@ -1,5 +1,5 @@
 require "rails_helper"
-
+=begin
 RSpec.feature "user visits, seeking authentication", :type => :feature do
   before(:each) do 
  	 User.delete_all
@@ -34,3 +34,4 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   end
 
 end
+=end

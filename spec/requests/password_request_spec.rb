@@ -1,5 +1,5 @@
 require "rails_helper"
-
+=begin
 RSpec.describe "password request spec", :type => :request do 
 
 	before(:example) do 
@@ -183,3 +183,4 @@ RSpec.describe "password request spec", :type => :request do
 	end
 
 end
+=end
