@@ -136,7 +136,7 @@ RSpec.describe "Registration requests", :type => :request do
 
       it " update user -- " do 
          
-         sign_in_as_a_valid_user
+         sign_in_as_a_valid_and_confirmed_user
          put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key
          @client = assigns(:client)
          expect(@client).not_to be_nil
@@ -183,13 +183,12 @@ RSpec.describe "Registration requests", :type => :request do
 
           it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url," do 
 
-            sign_in_as_a_valid_user
+          
+            sign_in_as_a_valid_and_confirmed_user
 
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => "invalid api key", redirect_url: "http://www.google.com"
             
-            @user_just_updated = assigns(:user)
-
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(new_user_session_path)
 
           end
 
@@ -198,11 +197,25 @@ RSpec.describe "Registration requests", :type => :request do
 
         context "--url in registered urls--" do 
           
-          
-
           it " -- redirects in create action -- " do 
 
-            post user_registration_path, {user: attributes_for(:user), api_key: @api_key, redirect_url: "http://www.google.com"}
+            module Devise
+
+              RegistrationsController.class_eval do
+
+                def sign_up_params
+                  ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed user directly while creating the user.
+                  params.require(:user).permit(
+                    :email, :password, :password_confirmation,
+                    :confirmed_at
+                  )
+                end
+
+              end
+
+            end
+
+            post user_registration_path, {user: attributes_for(:user_confirmed), api_key: @api_key, redirect_url: "http://www.google.com"}
             @user_just_created = assigns(:user)
             @redirect_url = assigns(:redirect_url)
             expect(@redirect_url).to be == "http://www.google.com"
@@ -212,7 +225,7 @@ RSpec.describe "Registration requests", :type => :request do
           end
 
           it "--- redirects in put action --- " do 
-            sign_in_as_a_valid_user
+            sign_in_as_a_valid_and_confirmed_user
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key, redirect_url: "http://www.google.com"
             @user_just_updated = assigns(:user)
             @redirect_url = assigns(:redirect_url)
@@ -240,7 +253,7 @@ RSpec.describe "Registration requests", :type => :request do
 
           it "---UPDATE redirects to default path --- " do 
             
-            sign_in_as_a_valid_user
+            sign_in_as_a_valid_and_confirmed_user
             
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key, redirect_url: "http://www.yahoo.com"
             
@@ -266,7 +279,7 @@ RSpec.describe "Registration requests", :type => :request do
 
           it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url" do 
 
-            sign_in_as_a_valid_user
+            sign_in_as_a_valid_and_confirmed_user
 
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com"
             

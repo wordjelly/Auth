@@ -290,13 +290,12 @@ DeviseController.class_eval do
   end
 
   def render(*args)
-   #puts "request format is: #{request.format}"
-   # puts "came to render"
-   # puts "redir_url--->#{@redirect_url}"
-   # puts "resource is nil---->#{resource.nil?}"
-   # puts "signed_in------>#{signed_in?}"
+   puts "request format is: #{request.format}"
+    puts "came to render"
+    puts "redir_url--->#{@redirect_url}"
+    puts "resource is nil---->#{resource.nil?}"
+    puts "signed_in------>#{signed_in?}"
     if controller_name == "passwords"
-    
       super
     else
       if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
@@ -325,6 +324,7 @@ DeviseController.class_eval do
          @client = session[:client]
       end 
       return true
+
     else
       if params[:api_key].nil?
 
@@ -380,8 +380,6 @@ DeviseController.class_eval do
     protect_json_request
     
   end
-
- 
 
 
   def require_no_authentication
@@ -445,6 +443,7 @@ module Devise
       #puts "came to authenticate scope."
 
       do_before_request  
+
       if is_json_request?
         #puts "is a json request"
         token = request.headers["X-#{resource_name.to_s.capitalize}-Token"]
