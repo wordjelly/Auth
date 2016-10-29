@@ -14,11 +14,14 @@ RSpec.describe "Registration requests", :type => :request do
 
     end
 
+    
+
     it " -- does not need an api_key in the params -- " do 
 
         get new_user_registration_path
         @user = assigns(:user)
-        expect(@user).not_to be_nil     
+        expect(@user).not_to be_nil
+        expect(@user.errors.full_messages).to be_empty     
 
     end
 
@@ -29,8 +32,10 @@ RSpec.describe "Registration requests", :type => :request do
         
         post user_registration_path, user: attributes_for(:user_confirmed)
         @user = assigns(:user)
+        @user.confirm!
         expect(@user.es).not_to be_nil
         expect(@user.authentication_token).not_to be_nil
+        expect(@user.errors.full_messages).to be_empty    
 
     	end
 
@@ -38,9 +43,14 @@ RSpec.describe "Registration requests", :type => :request do
         
         sign_in_as_a_valid_and_confirmed_user
 
-        put "/authenticate/users/", :id => @user.id, :user => attributes_for(:user_confirmed)
+        put "/authenticate/users/", :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"}
+        ##we find the user and confirm him.
+        ##then what 
         @user_updated = assigns(:user)
-
+        @user_updated.confirm!
+        puts @user_updated.attributes.to_s
+        expect(@user_updated.errors.full_messages).to be_empty  
+        expect(@user_updated.email).not_to eql(@user.email)  
         expect(@user_updated.es).not_to eql(@user.es)
         expect(@user_updated.authentication_token).not_to eql(@user.authentication_token)
     	
@@ -66,8 +76,23 @@ RSpec.describe "Registration requests", :type => :request do
 
       it " -- creates a client when a user is created -- " do 
 
+        module Devise
+
+          RegistrationsController.class_eval do
+
+            def sign_up_params
+              ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed user directly while creating the user.
+              params.require(:user).permit(
+                :email, :password, :password_confirmation,
+                :confirmed_at, :redirect_url, :api_key
+              )
+            end
+
+          end
+
+        end
         c = Auth::Client.all.count
-        post user_registration_path, user: attributes_for(:user)
+        post user_registration_path, user: attributes_for(:user_confirmed)
         c1 = Auth::Client.all.count
         expect(c1-c).to eql(1)
 
@@ -138,6 +163,7 @@ RSpec.describe "Registration requests", :type => :request do
          
          sign_in_as_a_valid_and_confirmed_user
          put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @api_key
+         @updated_user = assigns(:user)
          @client = assigns(:client)
          expect(@client).not_to be_nil
          
@@ -318,7 +344,7 @@ RSpec.describe "Registration requests", :type => :request do
         ActionController::Base.allow_forgery_protection = true
         User.delete_all
         Auth::Client.delete_all
-        @u = User.new(attributes_for(:user))
+        @u = User.new(attributes_for(:user_confirmed))
         @u.save
         @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
@@ -392,7 +418,7 @@ RSpec.describe "Registration requests", :type => :request do
         
 
         it " -- CREATE REQUEST -- " do 
-            post "/authenticate/users", {user: attributes_for(:user),:api_key => @ap_key}.to_json, @headers
+            post "/authenticate/users", {user: attributes_for(:user_confirmed),:api_key => @ap_key}.to_json, @headers
             @user_created = assigns(:user)
             @cl = assigns(:client)
             user_json_hash = JSON.parse(response.body)

@@ -11,8 +11,10 @@ module Auth::Concerns::UserConcern
 		include MongoidVersionedAtomic::VAtomic
 		##if devise modules are not defined, then define them, by default omniauth contains 
 		
-		after_save :create_client
+		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
+
 		after_destroy :destroy_client
+
 
 		unless self.method_defined?(:devise_modules)
 
@@ -103,7 +105,20 @@ module Auth::Concerns::UserConcern
 	    	field :es, type: String
 	    	before_save do |document|
 	    		if document.es.blank?
-	    			document.set_es
+	    			#puts "came to before save checking of document confirmed at issues."
+	    			#puts "is the document responding to confirmed at."
+	    			#puts document.respond_to? :confirmed_at
+
+	    			#puts "is the confirmed at changed."
+	    			#puts document.confirmed_at_changed?
+
+	    			if (!document.respond_to? :confirmed_at) || (document.confirmed_at_changed?)
+	    				#puts "passes checks."
+	    				document.set_es
+	    			end
+
+
+	    			
 	    		end
 	    	end
 
@@ -160,8 +175,11 @@ module Auth::Concerns::UserConcern
 	##if there is no client with this user id, then and only then will it change the api_key and again try to create a client with this user_id and this api_key.
 	##at the end it will exit, and there may or may not be a client with this user_id.
 	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
+	##api key checking includes whether the user for that key is confirmed or not.
+	##client is created irrespective of whether the user is confirmed or not.
 	def create_client
 		
+
 		##we want to create a new client, provided that there is no client for this user id.
 		##if a client already exists, then we dont want to do anything.
 		##when we create the client we want to be sure that 

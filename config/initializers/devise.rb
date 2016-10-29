@@ -290,11 +290,11 @@ DeviseController.class_eval do
   end
 
   def render(*args)
-   puts "request format is: #{request.format}"
-    puts "came to render"
-    puts "redir_url--->#{@redirect_url}"
-    puts "resource is nil---->#{resource.nil?}"
-    puts "signed_in------>#{signed_in?}"
+   #puts "request format is: #{request.format}"
+    #puts "came to render"
+    #puts "redir_url--->#{@redirect_url}"
+    #puts "resource is nil---->#{resource.nil?}"
+    #puts "signed_in------>#{signed_in?}"
     if controller_name == "passwords"
       super
     else
