@@ -48,7 +48,6 @@ RSpec.describe "Registration requests", :type => :request do
         ##then what 
         @user_updated = assigns(:user)
         @user_updated.confirm!
-        puts @user_updated.attributes.to_s
         expect(@user_updated.errors.full_messages).to be_empty  
         expect(@user_updated.email).not_to eql(@user.email)  
         expect(@user_updated.es).not_to eql(@user.es)
@@ -60,13 +59,19 @@ RSpec.describe "Registration requests", :type => :request do
 
         sign_in_as_a_valid_and_confirmed_user
 
-        put "/authenticate/users/", :id => @user.id, :user => {:name => Faker::Name.name}
+        name = Faker::Name.name
+
+        
+        put "/authenticate/users/", :id => @user.id, :user => {:name => name, :current_password => "password"}
         
         @user_updated = assigns(:user)
-        
+        ##here don't need to confirm anything because we are not changing the email.
+        expect(@user_updated.errors.full_messages).to be_empty
         expect(@user_updated.es).to eql(@user.es)
-        
+        expect(@user_updated.name).to eql(name)
         expect(@user_updated.authentication_token).to eql(@user.authentication_token)
+
+        
 
     	end
 

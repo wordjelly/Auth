@@ -1,13 +1,8 @@
 module Auth
-  class ApplicationController < ActionController::Base
+  class ApplicationController < ::ApplicationController
   	
     protect_from_forgery with: :exception
-  	
-
-  	
-  		
-  	
-   	
+  
     def from_bson(bson_doc,klass)
 
 	 	if !bson_doc.nil?
