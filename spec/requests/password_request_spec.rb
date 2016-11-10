@@ -1,12 +1,12 @@
 require "rails_helper"
-=begin
+
 RSpec.describe "password request spec", :type => :request do 
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = true
         User.delete_all
         Auth::Client.delete_all
-        @u = User.new(attributes_for(:user))
+        @u = User.new(attributes_for(:user_confirmed))
         @u.save
         @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
@@ -44,6 +44,7 @@ RSpec.describe "password request spec", :type => :request do
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to(new_user_session_path)
 				
+				
 
 	 		end
 
@@ -61,6 +62,7 @@ RSpec.describe "password request spec", :type => :request do
 			    }
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
+			    expect(@u.errors.full_messages).to be_empty 
 	 		
 	 		end
 
@@ -104,7 +106,7 @@ RSpec.describe "password request spec", :type => :request do
 			    }, redirect_url: "http://www.google.com", api_key: @ap_key}
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
-			    expect(response).to redirect_to("/")
+			    expect(response).to redirect_to(root_path)
 
 	 		end
 
@@ -183,4 +185,3 @@ RSpec.describe "password request spec", :type => :request do
 	end
 
 end
-=end

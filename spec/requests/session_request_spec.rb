@@ -7,7 +7,7 @@ RSpec.describe "session request spec", :type => :request do
 		ActionController::Base.allow_forgery_protection = true
         User.delete_all
         Auth::Client.delete_all
-        @u = User.new(attributes_for(:user))
+        @u = User.new(attributes_for(:user_confirmed))
         @u.save
         @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
@@ -37,6 +37,7 @@ RSpec.describe "session request spec", :type => :request do
 				get new_user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
+				
 
 			end
 
@@ -44,9 +45,11 @@ RSpec.describe "session request spec", :type => :request do
 			it " -- CREATE request, should redirect with the auth_token and es " do 
 				
 				post user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key, user: {email: @u.email, password: "password"}}
+				@user = assigns(:user)
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to("http://www.google.com?authentication_token=#{@u.authentication_token}&es=#{@u.es}")
-
+				expect(@user).not_to be_nil
+       			expect(@user.errors.full_messages).to be_empty 
 
 			end
 
@@ -57,7 +60,7 @@ RSpec.describe "session request spec", :type => :request do
 				delete "/authenticate/users/sign_out",{:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key}
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to("/")
-
+				expect(@user.errors.full_messages).to be_empty         		
 			end
 
 		end
@@ -73,6 +76,8 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(res).not_to be_nil
+				expect(res.errors.full_messages).to be_empty 
+
 
 			end
 
@@ -83,15 +88,19 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(res).not_to be_nil
+				expect(res.errors.full_messages).to be_empty
+
 			end
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_user
 				delete "/authenticate/users/sign_out",{:id => @user.id, api_key:"dog", redirect_url:"http://www.google.com"}
+				res = assigns(:user)
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to("/")
+
 			end
 
 
@@ -108,6 +117,7 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(res).not_to be_nil
+				expect(res.errors.full_messages).to be_empty 
 
 			end
 
@@ -118,6 +128,7 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(res).not_to be_nil
+				expect(res.errors.full_messages).to be_empty 
 			end
 
 			it " -- destory session loads" do 
@@ -141,7 +152,7 @@ RSpec.describe "session request spec", :type => :request do
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(res).not_to be_nil
-
+				expect(res.errors.full_messages).to be_empty 
 			end
 
 			it " -- create session successfully, but does not redirect" do 
@@ -149,6 +160,7 @@ RSpec.describe "session request spec", :type => :request do
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(res).not_to be_nil
+				expect(res.errors.full_messages).to be_empty 
 			end
 
 			it " -- destory session loads" do 
@@ -222,7 +234,7 @@ RSpec.describe "session request spec", :type => :request do
 				
 				
 				params = {user: {email: @u.email, password: "password"}, api_key: @ap_key}
-				#puts params.to_json
+				
 				post "/authenticate/users/sign_in", params.to_json, @headers
         		expect(response.code).to eq("201")
         		user_hash = JSON.parse(response.body)

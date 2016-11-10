@@ -11,7 +11,9 @@ RSpec.describe "Registration requests", :type => :request do
     before(:example) do 
 
       ActionController::Base.allow_forgery_protection = false
-
+      User.delete_all
+      Auth::Client.delete_all
+    
     end
 
     
@@ -44,8 +46,7 @@ RSpec.describe "Registration requests", :type => :request do
         sign_in_as_a_valid_and_confirmed_user
 
         put "/authenticate/users/", :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"}
-        ##we find the user and confirm him.
-        ##then what 
+        
         @user_updated = assigns(:user)
         @user_updated.confirm!
         expect(@user_updated.errors.full_messages).to be_empty  

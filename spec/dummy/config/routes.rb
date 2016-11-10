@@ -1,7 +1,4 @@
 Rails.application.routes.draw do
-  
- 
-  get "/" => "home#index"
 
   resources :oauth_tests do 
     collection do 
@@ -9,9 +6,10 @@ Rails.application.routes.draw do
     end
   end
   
+  root "home#index"
   mount Auth::Engine => "/authenticate", :as => 'auth'
   mount_routes Auth.configuration.auth_resources
- 
+  
   ##app-specific routes 
   namespace :api do 
 
