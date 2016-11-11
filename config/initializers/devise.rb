@@ -427,6 +427,36 @@ end
 
 module Devise
 
+  DeviseController.class_eval do 
+
+    def signed_in_root_path(resource_or_scope)
+        puts "using new methods."
+        scope = Devise::Mapping.find_scope!(resource_or_scope)
+        router_name = Devise.mappings[scope].router_name
+
+        home_path = "#{scope}_root_path"
+
+        context = router_name ? send(router_name) : self
+
+        #Devise.router_name.nil? && defined?(@devise_finalized) && self != Rails.application.try(:routes)
+
+        puts "are we in an engine"
+        puts self != Rails.application.try(:routes)
+
+
+        if context.respond_to?(home_path, true)
+          context.send(home_path)
+        elsif context.respond_to?(:root_path)
+          context.root_path
+        elsif respond_to?(:root_path)
+          root_path
+        else
+          "/"
+        end
+      end
+
+  end
+
   RegistrationsController.class_eval do 
 
     def respond_with_navigational(*args, &block)
@@ -514,7 +544,6 @@ module Devise
     end
   end
 
-  
 
   Devise.include_helpers(Devise::OmniAuth)
 
@@ -569,6 +598,11 @@ module Devise
       }
 
   end
+
+
+
+
+
 
 end
 
