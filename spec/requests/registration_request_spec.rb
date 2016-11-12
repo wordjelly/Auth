@@ -209,7 +209,7 @@ RSpec.describe "Registration requests", :type => :request do
             post user_registration_path, {user: attributes_for(:user), api_key: "invalid api_key", redirect_url: "http://www.google.com"}
             
             @user_just_created = assigns(:user)
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
 
           end
 
@@ -231,7 +231,7 @@ RSpec.describe "Registration requests", :type => :request do
             user1 = User.where(:email => @user.email).first
             #puts "this should be true" 
             expect(user1.valid_password?("dogisdead")).to eq(true)
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
           end
 
 
@@ -291,7 +291,7 @@ RSpec.describe "Registration requests", :type => :request do
             @user_just_created = assigns(:user)
             @client = assigns(:client)
             expect(@client).not_to be_nil
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
 
           end
 
@@ -305,7 +305,7 @@ RSpec.describe "Registration requests", :type => :request do
             @user_just_updated = assigns(:user)
             @client = assigns(:client)
             expect(@client).not_to be_nil
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
 
           end
 
@@ -318,7 +318,7 @@ RSpec.describe "Registration requests", :type => :request do
             post user_registration_path, {user: attributes_for(:user), redirect_url: "http://www.google.com"}
             
             @user_just_created = assigns(:user)
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
 
           end
 
@@ -329,7 +329,7 @@ RSpec.describe "Registration requests", :type => :request do
             put "/authenticate/users/", :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, redirect_url: "http://www.google.com"
             
             @user_just_updated = assigns(:user)
-            expect(response).to redirect_to("/")
+            expect(response).to redirect_to(root_path)
 
           end
 

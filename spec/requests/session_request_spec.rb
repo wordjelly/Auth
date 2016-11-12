@@ -59,7 +59,7 @@ RSpec.describe "session request spec", :type => :request do
 				sign_in_as_a_valid_user
 				delete "/authenticate/users/sign_out",{:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key}
 				expect(response.code).to eq("302")
-				expect(response).to redirect_to("/")
+				expect(response).to redirect_to(root_path)
 				expect(@user.errors.full_messages).to be_empty         		
 			end
 
@@ -99,7 +99,7 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(response.code).to eq("302")
-				expect(response).to redirect_to("/")
+				expect(response).to redirect_to(root_path)
 
 			end
 
@@ -137,7 +137,7 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(response.code).to eq("302")
-				expect(response).to redirect_to("/")
+				expect(response).to redirect_to(root_path)
 			end
 
 	
