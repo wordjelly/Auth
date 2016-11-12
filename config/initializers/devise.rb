@@ -429,8 +429,26 @@ module Devise
 
   DeviseController.class_eval do 
 
+    def after_sign_out_path_for(resource_or_scope)
+      scope = Devise::Mapping.find_scope!(resource_or_scope)
+      
+      router_name = Devise.mappings[scope].router_name
+      
+      context = router_name ? send(router_name) : self
+      
+      if self != Rails.application.try(:routes) && !main_app.nil? && main_app.respond_to?(:root_path)
+        main_app.root_path
+      else
+        context.respond_to?(:root_path) ? context.root_path : "/"
+      end
+      
+    end
+
+
+
     def signed_in_root_path(resource_or_scope)
-        puts "using new methods."
+        
+        #puts "using new methods."
         scope = Devise::Mapping.find_scope!(resource_or_scope)
         router_name = Devise.mappings[scope].router_name
 
@@ -440,14 +458,19 @@ module Devise
 
         #Devise.router_name.nil? && defined?(@devise_finalized) && self != Rails.application.try(:routes)
 
-        puts "are we in an engine"
-        puts self != Rails.application.try(:routes)
+        #puts "are we in an engine"
+        #puts self != Rails.application.try(:routes)
 
+        #if self != Rails.application.try(:routes)
 
         if context.respond_to?(home_path, true)
           context.send(home_path)
         elsif context.respond_to?(:root_path)
-          context.root_path
+          if self != Rails.application.try(:routes) && !main_app.nil? && main_app.respond_to?(:root_path)
+            main_app.root_path
+          else
+            context.root_path
+          end
         elsif respond_to?(:root_path)
           root_path
         else
@@ -458,6 +481,22 @@ module Devise
   end
 
   RegistrationsController.class_eval do 
+
+    def after_inactive_sign_up_path_for(resource)
+
+      scope = Devise::Mapping.find_scope!(resource)
+      
+      router_name = Devise.mappings[scope].router_name
+      
+      context = router_name ? send(router_name) : self
+      
+      if self != Rails.application.try(:routes) && !main_app.nil? && main_app.respond_to?(:root_path)
+        main_app.root_path
+      else
+        context.respond_to?(:root_path) ? context.root_path : "/"
+      end
+
+    end
 
     def respond_with_navigational(*args, &block)
       if is_json_request?
