@@ -20,7 +20,7 @@ RSpec.describe "password request spec", :type => :request do
 		session.delete(:client)
 		session.delete(:redirect_url)
 	end
-
+=begin
 	context "-- web app requests" do 
 
 		before(:example) do 
@@ -107,6 +107,7 @@ RSpec.describe "password request spec", :type => :request do
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
 			    expect(response).to redirect_to(root_path)
+			    expect(@u.errors.full_messages).to be_empty 
 
 	 		end
 
@@ -177,11 +178,12 @@ RSpec.describe "password request spec", :type => :request do
 			    }, redirect_url: "http://www.google.com", api_key: @ap_key}.to_json,@headers
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
+			    expect(@u.errors.full_messages).to be_empty 
 
         	end
 
 		end
 
 	end
-
+=end
 end

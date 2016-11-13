@@ -289,14 +289,20 @@ DeviseController.class_eval do
       end
   end
 
+ 
+  def redirect_to(options = {}, response_status = {})
+    ##first handle the fact that it may have been called from render itself.
+    
+    super
+  end
+
+  
   def render(*args)
-   #puts "request format is: #{request.format}"
-    #puts "came to render"
-    #puts "redir_url--->#{@redirect_url}"
-    #puts "resource is nil---->#{resource.nil?}"
-    #puts "signed_in------>#{signed_in?}"
     if controller_name == "passwords"
       super
+    elsif controller_name == "confirmations" && action_name != "show"
+      puts "hitting the block on confirmations."
+      super  
     else
       if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
         session.delete(:client)
@@ -305,8 +311,7 @@ DeviseController.class_eval do
       else
         super
       end
-    end        
-
+    end      
   end
 
   def clear_client_and_redirect_url
@@ -447,7 +452,6 @@ module Devise
 
 
     def signed_in_root_path(resource_or_scope)
-        
         #puts "using new methods."
         scope = Devise::Mapping.find_scope!(resource_or_scope)
         router_name = Devise.mappings[scope].router_name
@@ -455,13 +459,6 @@ module Devise
         home_path = "#{scope}_root_path"
 
         context = router_name ? send(router_name) : self
-
-        #Devise.router_name.nil? && defined?(@devise_finalized) && self != Rails.application.try(:routes)
-
-        #puts "are we in an engine"
-        #puts self != Rails.application.try(:routes)
-
-        #if self != Rails.application.try(:routes)
 
         if context.respond_to?(home_path, true)
           context.send(home_path)
@@ -566,6 +563,23 @@ module Devise
   ConfirmationsController.class_eval do 
 
     prepend_before_action :ignore_json_request, only: [:new]
+    
+    def show
+      self.resource = resource_class.confirm_by_token(params[:confirmation_token])
+      
+      yield resource if block_given?
+
+      if resource.errors.empty?
+        set_flash_message!(:notice, :confirmed)
+        sign_in(resource)
+
+        respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
+      else
+        respond_with_navigational(resource.errors, status: :unprocessable_entity){ render :new }
+      end
+    end
+
+    
 
   end
 
@@ -637,11 +651,6 @@ module Devise
       }
 
   end
-
-
-
-
-
 
 end
 

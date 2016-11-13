@@ -21,7 +21,7 @@ RSpec.describe "confirmation request spec", :type => :request do
 			session.delete(:redirect_url)
 		
 	end
-
+=begin
 	context "-- web app requests" do 
 
 		before(:example) do 
@@ -37,25 +37,35 @@ RSpec.describe "confirmation request spec", :type => :request do
 				expect(response.code).to eq("200")		
 			end
 
-			it "-- create request is successfull" do 
-				@u.send_confirmation_instructions
+			it "-- create request is successfull" do				
+				prev_msg_count = ActionMailer::Base.deliveries.size
 				post user_confirmation_path,{user:{email: @u.email}}
 				expect(response.code).to eq("302")
-				##we need a user who is not yet confirmed.
-				#post user_password_path,{user: {email: @u.email}}
-				#expect(response.code).to eq("302")
-				#expect(response).to redirect_to(new_user_session_path)
+				message = ActionMailer::Base.deliveries[-1].to_s
+    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
+    			confirmation_token = message[rpt_index...message.index("\"", rpt_index)]
+    			new_msg_count = ActionMailer::Base.deliveries.size
+    			expect(confirmation_token).not_to be(nil)
+    			expect(new_msg_count - prev_msg_count).to eq(1)
 			end
-=begin
-			it "-- show request is successfull" do 
 
+			it "-- show request is successfull" do 
+				##should return redirect.
+				message = ActionMailer::Base.deliveries[-1].to_s
+    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
+    			confirmation_token = message[rpt_index...message.index("\"", rpt_index)]
+    			get user_confirmation_path,{confirmation_token: confirmation_token}
+    			@u.reload
+    			expect(@u.confirmed_at).not_to be(nil)
+    			
 			end
-=end
+
 		end
-=begin
+
 		context "-- valid api key + redirect url" do 
 
 			it "-- get request, client created, but no redirection" do 
+				get new_user_confirmation_path, {redirect_url: "http://www.google.com", api_key: @ap_key}
 
 			end
 
@@ -64,15 +74,13 @@ RSpec.describe "confirmation request spec", :type => :request do
 
 			end
 
-			it "-- show request, client created, but no redirection" do 
-
-
-			end
+			##redirection on show action is tested in the feature specs.
+			##what that does is first visits the sign in page with a redirect url and api key, then goes to sign up, then signs up, then visits the confirmation_url page and is successfully redirected to the redirect url with the correct authentication_token and es.
 
 		end
-=end
+
 	end
-=begin
+
 	context "-- json requests " do 
 
 		context "-- no api key" do 
