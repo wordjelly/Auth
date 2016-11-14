@@ -39,19 +39,21 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
 
     ##visit the sign in page
     visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @api_key})
-    
+    puts "----------------FINISHED NEW USER SESSION PATH----------------"
     ##visit the sign up page.
     click_link("Sign up")
+    puts "----------------FINISHED NEW USER REGISTRATION--------------"
     fill_in('Email', :with => 'retard@gmail.com')
     fill_in('Password', :with => 'password')
     fill_in('Password confirmation', :with => 'password')
     find('input[name="commit"]').click
-
+    puts "--------------FINISHED CREATE REGISTRATION ACTION----------"
     ##now visit the confirmation url.
     u = User.where(:email => 'retard@gmail.com').first
     confirmation_token = u.confirmation_token
     puts "the confirmation token is: #{confirmation_token}"
     visit user_confirmation_path({:confirmation_token => confirmation_token})
+    puts "-------------FINISHED USER CONFIRMATION PATH --------------"
     u.reload
     ##should redirect to the redirect url.
     expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{u.es}")

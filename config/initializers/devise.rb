@@ -292,8 +292,34 @@ DeviseController.class_eval do
  
   def redirect_to(options = {}, response_status = {})
     ##first handle the fact that it may have been called from render itself.
-    
-    super
+    if options =~ /authentication_token|es/
+      #this should go be like super.
+      super
+    else
+      #puts "-----------------------------------------------------"
+      #puts "came to redirect with the follwoing options."
+      #puts "controller name is: #{controller_name}, and action: #{action_name}"
+      #puts "redirect url ===> #{@redirect_url}"
+      #puts "resource is nil ====> #{resource.nil?}"
+      #puts "resource es is ====> #{resource.es}"
+      #puts "resource authentication token ====> #{resource.authentication_token}"
+      #puts "resource is signed in? ====> #{signed_in?}"
+
+      if controller_name == "passwords"
+        super
+      elsif controller_name == "confirmations" && action_name != "show"
+        super  
+      else
+        if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+          session.delete(:client)
+          session.delete(:redirect_url)
+          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+        else
+          super
+        end
+      end    
+    end
+
   end
 
   
@@ -301,7 +327,6 @@ DeviseController.class_eval do
     if controller_name == "passwords"
       super
     elsif controller_name == "confirmations" && action_name != "show"
-      puts "hitting the block on confirmations."
       super  
     else
       if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
@@ -320,7 +345,10 @@ DeviseController.class_eval do
   end
 
   def set_client
-
+    puts "Came to set client"
+    puts "params are:"
+    puts params.to_s
+    #puts session[:client]
     if !session[:client].nil?
     
       if session[:client].is_a?Hash
@@ -331,10 +359,11 @@ DeviseController.class_eval do
       return true
 
     else
+
       if params[:api_key].nil?
 
       else
-        
+          
         @client = Auth::Client.where(:api_key => params[:api_key]).first
 
         if !@client.nil?
@@ -563,7 +592,8 @@ module Devise
   ConfirmationsController.class_eval do 
 
     prepend_before_action :ignore_json_request, only: [:new]
-    
+    prepend_before_action :do_before_request, only: [:show,:create]
+
     def show
       self.resource = resource_class.confirm_by_token(params[:confirmation_token])
       
@@ -571,9 +601,12 @@ module Devise
 
       if resource.errors.empty?
         set_flash_message!(:notice, :confirmed)
-        sign_in(resource)
-
-        respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
+        if is_json_request?
+          render :nothing => true, :status => 200 and return 
+        else
+          sign_in(resource)
+          respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
+        end
       else
         respond_with_navigational(resource.errors, status: :unprocessable_entity){ render :new }
       end

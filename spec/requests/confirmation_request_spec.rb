@@ -21,7 +21,7 @@ RSpec.describe "confirmation request spec", :type => :request do
 			session.delete(:redirect_url)
 		
 	end
-=begin
+
 	context "-- web app requests" do 
 
 		before(:example) do 
@@ -66,12 +66,21 @@ RSpec.describe "confirmation request spec", :type => :request do
 
 			it "-- get request, client created, but no redirection" do 
 				get new_user_confirmation_path, {redirect_url: "http://www.google.com", api_key: @ap_key}
+				expect(response.code).to eq("200")	
 
 			end
 
 			it "-- create request, client created, but no redirection" do 
-
-
+				prev_msg_count = ActionMailer::Base.deliveries.size
+				post user_confirmation_path,{user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key}
+				expect(response.code).to eq("302")
+				message = ActionMailer::Base.deliveries[-1].to_s
+    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
+    			confirmation_token = message[rpt_index...message.index("\"", rpt_index)]
+    			new_msg_count = ActionMailer::Base.deliveries.size
+    			expect(confirmation_token).not_to be(nil)
+    			expect(new_msg_count - prev_msg_count).to eq(1)
+    			expect(response).not_to redirect_to("http://www.google.com?authentication_token=#{@u.authentication_token}&es=#{@u.es}")
 			end
 
 			##redirection on show action is tested in the feature specs.
@@ -86,16 +95,18 @@ RSpec.describe "confirmation request spec", :type => :request do
 		context "-- no api key" do 
 
 			it "-- get request returns 406" do 
-
+				get new_user_confirmation_path,nil,@headers
+        		expect(response.code).to eq("406")
 			end
 
 			it "-- create request returns not authenticated" do 
-
+				post user_confirmation_path,{user:{email: @u.email}}.to_json,@headers
+				expect(response.code).to eq("401")
 			end
 
 			it "-- show request returns not authenticated" do 
-
-
+				get user_confirmation_path,{confirmation_token: "dog"}.to_json,@headers
+				expect(response.code).to eq("401")
 			end
 
 		end
@@ -103,20 +114,40 @@ RSpec.describe "confirmation request spec", :type => :request do
 
 		context "-- valid api key" do 
 
+
 			it "-- get request returns 406" do 
+				get new_user_confirmation_path,{api_key: @ap_key}.to_json,@headers
+        		expect(response.code).to eq("406")
+			end
+
+			it "-- create request works" do 
+				prev_msg_count = ActionMailer::Base.deliveries.size
+				
+
+				post user_confirmation_path,{user:{email: @u.email}, api_key: @ap_key}.to_json,@headers
+				
+				message = ActionMailer::Base.deliveries[-1].to_s
+    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
+    			confirmation_token = message[rpt_index...message.index("\"", rpt_index)]
+    			new_msg_count = ActionMailer::Base.deliveries.size
+    			expect(confirmation_token).not_to be(nil)
+    			expect(new_msg_count - prev_msg_count).to eq(1)
+    			expect(response.code).to eq("201")
 
 			end
 
-			it "-- create request successfull" do 
-
-			end
-
-			it "-- show request succesfull" do 
-
+			it "-- show request works --" do 
+				message = ActionMailer::Base.deliveries[-1].to_s
+    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
+    			confirmation_token = message[rpt_index...message.index("\"", rpt_index)]
+    			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key}, @headers
+    			@u.reload
+    			expect(@u.confirmed_at).not_to be(nil)
+    			expect(response.code).to eq("200")
 			end
 
 		end
 
 	end
-=end
+
 end
