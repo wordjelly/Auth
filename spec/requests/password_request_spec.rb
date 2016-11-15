@@ -20,7 +20,7 @@ RSpec.describe "password request spec", :type => :request do
 		session.delete(:client)
 		session.delete(:redirect_url)
 	end
-=begin
+
 	context "-- web app requests" do 
 
 		before(:example) do 
@@ -185,5 +185,5 @@ RSpec.describe "password request spec", :type => :request do
 		end
 
 	end
-=end
+
 end

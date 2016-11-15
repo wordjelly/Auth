@@ -345,9 +345,7 @@ DeviseController.class_eval do
   end
 
   def set_client
-    puts "Came to set client"
-    puts "params are:"
-    puts params.to_s
+   
     #puts session[:client]
     if !session[:client].nil?
     

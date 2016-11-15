@@ -5,7 +5,7 @@ RSpec.describe "Registration requests", :type => :request do
     User.delete_all
     Auth::Client.delete_all
   end
-=begin
+
   context " -- web app requests -- " do 
 
     before(:example) do 
@@ -485,5 +485,5 @@ RSpec.describe "Registration requests", :type => :request do
 
 
   end
-=end  
+
 end
