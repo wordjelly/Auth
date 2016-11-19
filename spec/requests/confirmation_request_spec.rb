@@ -143,7 +143,7 @@ RSpec.describe "confirmation request spec", :type => :request do
     			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key}, @headers
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
-    			expect(response.code).to eq("200")
+    			expect(response.code).to eq("201")
 			end
 
 		end

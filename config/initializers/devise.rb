@@ -345,7 +345,7 @@ DeviseController.class_eval do
   end
 
   def set_client
-   
+
     #puts session[:client]
     if !session[:client].nil?
     
@@ -584,6 +584,28 @@ module Devise
 
     prepend_before_action :ignore_json_request, only: [:new]
 
+  end
+
+  UnlocksController.class_eval do 
+
+    prepend_before_action :ignore_json_request, only: [:new]
+
+    def show
+     
+      self.resource = resource_class.unlock_access_by_token(params[:unlock_token])
+        
+      yield resource if block_given?
+
+      if resource.errors.empty?
+        if is_json_request?
+          render :nothing => true, :status => 201 and return 
+        end
+        set_flash_message! :notice, :unlocked
+        respond_with_navigational(resource){ redirect_to after_unlock_path_for(resource) }
+      else
+        respond_with_navigational(resource.errors, status: :unprocessable_entity){ render :new }
+      end
+    end
 
   end
 
@@ -600,7 +622,7 @@ module Devise
       if resource.errors.empty?
         set_flash_message!(:notice, :confirmed)
         if is_json_request?
-          render :nothing => true, :status => 200 and return 
+          render :nothing => true, :status => 201 and return 
         else
           sign_in(resource)
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
