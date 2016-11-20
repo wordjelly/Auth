@@ -6,7 +6,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
    	 Auth::Client.delete_all
   	 @user = User.new(attributes_for(:user_confirmed))
   	 @user.save
-  	 @cli = Auth::Client.new(:user_id => @user.id, :api_key => "test", :redirect_urls => ["http://www.google.com"])
+  	 @cli = Auth::Client.new(:resource_id => @user.id, :api_key => "test", :redirect_urls => ["http://www.google.com"])
   	 @cli.versioned_create
   	 @api_key = @cli.api_key
   end

@@ -172,8 +172,8 @@ module Auth::Concerns::UserConcern
 	##initially tries a versioned_create
 	##if the op is successfull then it breaks.
 	##if the op_count becomes zero it breaks.
-	##if there is no client with this user id, then and only then will it change the api_key and again try to create a client with this user_id and this api_key.
-	##at the end it will exit, and there may or may not be a client with this user_id.
+	##if there is no client with this user id, then and only then will it change the api_key and again try to create a client with this resource_id and this api_key.
+	##at the end it will exit, and there may or may not be a client with this resource_id.
 	##so this method basically fails silently, and so when you look at a user profiel and if you don't see an api_key, it means that there is no client for him, that is the true sign that it failed.
 	##api key checking includes whether the user for that key is confirmed or not.
 	##client is created irrespective of whether the user is confirmed or not.
@@ -187,10 +187,10 @@ module Auth::Concerns::UserConcern
 		#puts "called create client."
 
 		##first find out if there is already a client for this user id.
-		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :user_id => self.id)
+		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :resource_id => self.id)
 
 
-		c.versioned_create({:user_id => self.id})
+		c.versioned_create({:resource_id => self.id})
 		op_count = 10
 
 		
@@ -201,9 +201,9 @@ module Auth::Concerns::UserConcern
 				break
 			elsif op_count == 0
 				break
-			elsif (Auth::Client.where(:user_id => self.id).count == 0)
+			elsif (Auth::Client.where(:resource_id => self.id).count == 0)
 				c.api_key = SecureRandom.hex(32)
-				c.versioned_create({:user_id => self.id})
+				c.versioned_create({:resource_id => self.id})
 				op_count-=1
 			else
 				break

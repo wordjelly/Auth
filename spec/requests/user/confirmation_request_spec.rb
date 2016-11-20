@@ -8,7 +8,7 @@ RSpec.describe "confirmation request spec", :type => :request do
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user))
         @u.save
-        @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @ap_key = @c.api_key
@@ -33,6 +33,7 @@ RSpec.describe "confirmation request spec", :type => :request do
 		context "-- no api key" do 
 
 			it "-- get request is successfull" do 
+				
 				get new_user_confirmation_path,{}
 				expect(response.code).to eq("200")		
 			end

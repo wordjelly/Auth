@@ -23,4 +23,19 @@ FactoryGirl.define do
   	email {Faker::Internet.email}
   	current_password 'password'
   end
+
+  factory :admin, class: User do 
+    email  { Faker::Internet.email }
+    password  'password'
+    password_confirmation  'password'
+  end
+
+
+  factory :admin_confirmed, class: User do
+    email  { Faker::Internet.email }
+    password  'password'
+    password_confirmation  'password'
+    confirmed_at Time.now
+  end
+
 end

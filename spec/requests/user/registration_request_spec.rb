@@ -144,7 +144,7 @@ RSpec.describe "Registration requests", :type => :request do
         Auth::Client.delete_all
         @usr = User.new(attributes_for(:user))
         @usr.save
-        @c = Auth::Client.new(:user_id => @usr.id, :api_key => "test")
+        @c = Auth::Client.new(:resource_id => @usr.id, :api_key => "test")
         @c.versioned_create
         @api_key = @c.api_key
       end
@@ -196,7 +196,7 @@ RSpec.describe "Registration requests", :type => :request do
           Auth::Client.delete_all
           @user = User.new(attributes_for(:user))
           @user.save
-          @cli = Auth::Client.new(:user_id => @user.id, :api_key => "test", :redirect_urls => ["http://www.google.com"])
+          @cli = Auth::Client.new(:resource_id => @user.id, :api_key => "test", :redirect_urls => ["http://www.google.com"])
           @cli.versioned_create
           @api_key = @cli.api_key
 
@@ -352,7 +352,7 @@ RSpec.describe "Registration requests", :type => :request do
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
-        @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @ap_key = @c.api_key

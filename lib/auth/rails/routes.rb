@@ -51,20 +51,25 @@ module ActionDispatch::Routing
 
 				resource_class.omniauth_providers.each do |provider|
 					
-					
 					omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
 
 					common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
 
-					match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
+					if !Rails.application.routes.url_helpers.method_defined?("#{provider}_omniauth_authorize_path".to_sym)
+						match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
+					end
 
-					match "#{common_callback_path}", controller: omniauth_ctrl, action: "omni_common", via: [:get,:post], as: "#{provider}_omniauth_callback"
+					if !Rails.application.routes.url_helpers.method_defined?("#{provider}_omniauth_callback_path".to_sym)
+						match "#{common_callback_path}", controller: omniauth_ctrl, action: "omni_common", via: [:get,:post], as: "#{provider}_omniauth_callback"
+					end
 				end
 
 				oauth_failure_route_path = Auth::OmniAuth::Path.omniauth_failure_route_path(nil)
 
-				match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
-			
+				if !Rails.application.routes.url_helpers.method_defined?("omniauth_failure_path".to_sym)
+
+					match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
+				end
 		  end
 
 	  end

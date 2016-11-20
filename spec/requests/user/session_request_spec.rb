@@ -9,7 +9,7 @@ RSpec.describe "session request spec", :type => :request do
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
-        @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @ap_key = @c.api_key

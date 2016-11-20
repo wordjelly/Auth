@@ -9,7 +9,7 @@ RSpec.describe "unlock request spec", :type => :request do
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
         @u.lock_access!
-        @c = Auth::Client.new(:user_id => @u.id, :api_key => "test")
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @ap_key = @c.api_key
@@ -28,17 +28,7 @@ RSpec.describe "unlock request spec", :type => :request do
 			ActionController::Base.allow_forgery_protection = false
 
 		end
-=begin
-		context "-- no api key -- " do 
 
-			it " -- start test -- " do 
-
-
-
-			end
-
-		end
-=end
 
 		context "-- valid api key -- " do 
 
