@@ -1,5 +1,5 @@
 class Admin
   include Mongoid::Document
   include Auth::Concerns::UserConcern
-  field :role, type: String
+  field :name, type: String
 end

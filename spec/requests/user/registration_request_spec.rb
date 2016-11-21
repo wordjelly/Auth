@@ -4,6 +4,21 @@ RSpec.describe "Registration requests", :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all
+    module Devise
+
+      RegistrationsController.class_eval do
+
+        def sign_up_params
+          ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed admin directly while creating the admin.
+          params.require(:user).permit(
+            :email, :password, :password_confirmation,
+            :confirmed_at, :redirect_url, :api_key
+          )
+        end
+
+      end
+
+    end
   end
 
   context " -- web app requests -- " do 
@@ -30,9 +45,9 @@ RSpec.describe "Registration requests", :type => :request do
     context " -- email salt and auth token generation -- " do 
 
     	it " -- creates a email_salt and authentication token on user create -- " do 
-
+         ##RESETTING SIGN UP PARAMS, because in admin we had it do require(:admin)
         
-        post user_registration_path, user: attributes_for(:user_confirmed)
+        post user_registration_path, user: attributes_for(:user)
         @user = assigns(:user)
         @user.confirm!
         expect(@user.es).not_to be_nil
@@ -82,21 +97,7 @@ RSpec.describe "Registration requests", :type => :request do
 
       it " -- creates a client when a user is created -- " do 
 
-        module Devise
-
-          RegistrationsController.class_eval do
-
-            def sign_up_params
-              ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed user directly while creating the user.
-              params.require(:user).permit(
-                :email, :password, :password_confirmation,
-                :confirmed_at, :redirect_url, :api_key
-              )
-            end
-
-          end
-
-        end
+      
         c = Auth::Client.all.count
         post user_registration_path, user: attributes_for(:user_confirmed)
         c1 = Auth::Client.all.count
