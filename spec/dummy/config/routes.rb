@@ -1,10 +1,7 @@
 Rails.application.routes.draw do
 
-  resources :oauth_tests do 
-    collection do 
-      get :google_sign_in
-    end
-  end
+  resources :topics
+  
   
   root "home#index"
   mount Auth::Engine => "/authenticate", :as => 'auth'

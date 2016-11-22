@@ -33,7 +33,7 @@ RSpec.describe "session request spec", :type => :request do
 		context " -- valid api key with redirect url" do 
 
 			it " -- GET Request,should set the session variables " do 
-
+				
 				get new_admin_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil

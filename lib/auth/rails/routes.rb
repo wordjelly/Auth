@@ -75,20 +75,7 @@ module ActionDispatch::Routing
 	  end
 
 	end
-
-	# this allows us to use namespaced paths without namespacing the routes
-	def unnest_namespace
-	  current_scope = @scope.dup
-	  yield
-	ensure
-	  @scope = current_scope
-	end
-
-	# ignore error about omniauth/multiple model support
-	def set_omniauth_path_prefix!(path_prefix)
-	  ::OmniAuth.config.path_prefix = path_prefix
-	end
-
+	
   end
 end
 

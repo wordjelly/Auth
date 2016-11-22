@@ -12,4 +12,11 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit :account_update, keys: added_attrs
   end
 
+  ###NOW TESTING ALL THE PATH OVERRIDES.
+
+  git filter-branch --force --index-filter \
+'git rm --cached --ignore-unmatch ./spec/dummy/config/initializers/preinitializer.rb' \
+--prune-empty --tag-name-filter cat -- --all
+
+  
 end
