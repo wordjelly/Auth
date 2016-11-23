@@ -16,7 +16,12 @@ class ApplicationController < ActionController::Base
   ###THESE ARE OVERRIDDEN FOR ADMIN ONLY.
   ##i also have to test the path helpers.
   def after_sign_in_path_for(resource)
-    super
+    if resource.class.name.to_s == "Admin"
+      ##we wanna set a different path, and test that it goes there in the specs.
+      new_topic_path
+    else
+      super
+    end
   end
 
   def after_sign_out_path_for(resource)

@@ -3,12 +3,13 @@ require "auth/rails/routes"
 
 module Auth
   class Engine < ::Rails::Engine
-    isolate_namespace Auth
+    #isolate_namespace Auth
     config.generators do |g|
       g.test_framework :rspec
     end
   end
 
+ 
   class << self
     attr_accessor :configuration
   end

@@ -3,8 +3,6 @@ module Auth
   	
     protect_from_forgery with: :exception
   	
-  	
-
     def from_bson(bson_doc,klass)
 
 	 	if !bson_doc.nil?
@@ -35,7 +33,11 @@ module Auth
 
 	 end
 
-	
+	 protected 
+
+	 def check_method_missing
+	 	puts Rails.application.routes.url_helpers.to_s
+	 end
 
   end
 end

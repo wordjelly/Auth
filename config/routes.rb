@@ -1,9 +1,9 @@
-Auth::Engine.routes.draw do
+#Auth::Engine.routes.draw do
 
   
-  	resources :clients
+  	#resources :clients
 
 	
 	
-end
+#end
 

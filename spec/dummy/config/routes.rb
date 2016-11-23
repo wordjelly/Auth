@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   
   
   root "home#index"
-  mount Auth::Engine => "/authenticate", :as => 'auth'
+  #mount Auth::Engine => "/authenticate", :as => 'auth'
   mount_routes Auth.configuration.auth_resources
   
   ##app-specific routes 
