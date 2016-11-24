@@ -106,7 +106,7 @@ RSpec.describe "password request spec", :type => :request do
 			    }, redirect_url: "http://www.google.com", api_key: @ap_key}
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
-			    expect(response).to redirect_to(root_path)
+			    expect(response).to redirect_to(main_app.new_topic_path)
 			    expect(@u.errors.full_messages).to be_empty 
 
 	 		end

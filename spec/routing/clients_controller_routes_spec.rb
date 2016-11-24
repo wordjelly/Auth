@@ -11,7 +11,7 @@ edit_client GET    /clients/:id/edit(.:format) auth/clients#edit
 
 =end
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "routes to the list of all clients" do
     expect(:get => "clients").
       to route_to(:controller => "auth/clients", :action => "index")
@@ -19,7 +19,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "creates a new client" do
     expect(:post => "clients").
       to route_to(:controller => "auth/clients", :action => "create")
@@ -27,7 +27,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "gets a new client" do
     expect(:get => "clients/new").
       to route_to(:controller => "auth/clients", :action => "new")
@@ -35,7 +35,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "renders edit for the given client" do
     expect(:get => "clients/abc/edit").
       to route_to(:controller => "auth/clients", :action => "edit", :id => 'abc')
@@ -43,7 +43,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "shows the given client." do
     expect(:get => "clients/abc").
       to route_to(:controller => "auth/clients", :action => "show", :id => 'abc')
@@ -51,7 +51,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "updates the given client." do
     expect(:put => "clients/abc").
       to route_to(:controller => "auth/clients", :action => "update", :id => 'abc')
@@ -59,7 +59,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "updates the given client." do
     expect(:patch => "clients/abc").
       to route_to(:controller => "auth/clients", :action => "update", :id => 'abc')
@@ -67,7 +67,7 @@ RSpec.describe Auth::ClientsController, :type => :routing do
 end
 
 RSpec.describe Auth::ClientsController, :type => :routing do 
-  routes{Auth::Engine.routes}
+  #routes{Auth::Engine.routes}
   it "deletes the given client." do
     expect(:delete => "clients/abc").
       to route_to(:controller => "auth/clients", :action => "destroy", :id => 'abc')

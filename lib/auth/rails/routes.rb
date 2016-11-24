@@ -7,7 +7,7 @@ module ActionDispatch::Routing
   	##expected to be present in the preinitializer in the routes of the target app.
 	def mount_routes(app_route_resources)
 	      
-	  	  resources :clients
+	  	  resources :clients, :controller => "auth/clients"
 		  
 		  app_route_resources.each do |resource,opts| 
 
