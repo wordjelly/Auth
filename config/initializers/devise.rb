@@ -459,7 +459,7 @@ end
 module Devise
 
   DeviseController.class_eval do 
-
+=begin
     def after_sign_out_path_for(resource_or_scope)
       scope = Devise::Mapping.find_scope!(resource_or_scope)
       
@@ -500,11 +500,11 @@ module Devise
           "/"
         end
       end
-
+=end
   end
 
   RegistrationsController.class_eval do 
-
+=begin
     def after_inactive_sign_up_path_for(resource)
 
       scope = Devise::Mapping.find_scope!(resource)
@@ -520,7 +520,7 @@ module Devise
       end
 
     end
-
+=end
     def respond_with_navigational(*args, &block)
       if is_json_request?
         respond_with(*args)
