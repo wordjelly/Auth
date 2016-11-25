@@ -60,4 +60,5 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     
   end
 
+ 
 end
