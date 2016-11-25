@@ -55,7 +55,7 @@ RSpec.describe "password request spec", :type => :request do
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
-    			put "/authenticate/admins/password", admin: {
+    			put admin_password_path, admin: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
 			      password_confirmation: "newpassword",
@@ -99,7 +99,7 @@ RSpec.describe "password request spec", :type => :request do
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
     			
-    			put "/authenticate/admins/password", {admin: {
+    			put admin_password_path, {admin: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
 			      password_confirmation: "newpassword",
@@ -139,7 +139,7 @@ RSpec.describe "password request spec", :type => :request do
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
-    			put "/authenticate/admins/password", {admin: {
+    			put admin_password_path, {admin: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
 			      password_confirmation: "newpassword",
@@ -171,7 +171,7 @@ RSpec.describe "password request spec", :type => :request do
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
-    			put "/authenticate/admins/password", {admin: {
+    			put admin_password_path, {admin: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
 			      password_confirmation: "newpassword",
