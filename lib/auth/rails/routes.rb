@@ -53,7 +53,7 @@ module ActionDispatch::Routing
 
 					resource_class.omniauth_providers.each do |provider|
 						
-						omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(resource,provider)
+						omniauth_request_path = Auth::OmniAuth::Path.omniauth_request_path(nil,provider)
 
 						common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
 

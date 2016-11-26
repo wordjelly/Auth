@@ -4,7 +4,9 @@ module Auth
 
 			##the the path for the request_phase of the omniauth call.
 			def self.omniauth_request_path(resource,provider)
-				"#{omniauth_prefix_path}/#{resource_pluralized(resource)}/#{provider}"
+				resource_or_scope = resource.nil? ? ":res" : 
+				resource_pluralized(resource)
+				"#{omniauth_prefix_path}/#{resource_or_scope}/#{provider}"
 			end
 
 			##the omniauth prefix = mount_path/omniauth

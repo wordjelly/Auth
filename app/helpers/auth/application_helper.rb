@@ -1,20 +1,28 @@
 module Auth
 
   module ApplicationHelper
-=begin
-  	def method_missing method, *args, &block
-      puts "LOOKING FOR ROUTES #{method}"
-      if method.to_s.end_with?('_path') or method.to_s.end_with?('_url')
-        if main_app.respond_to?(method)
-          main_app.send(method, *args)
-        else
-          super
+
+    ##returns the name in small case of the class of the currently signed in resource
+    ##@example : will return 'user' or 'admin'
+    def get_signed_in_scope
+      if signed_in?
+        Devise.mappings.keys.each do |res|
+          l = send "#{res.to_s}_signed_in?"
+          puts l.to_s
+          if send "#{res.to_s}_signed_in?"
+            return res.to_s
+          end
         end
-      else
-        super
       end
+      return nil
     end
-=end
+
+    def current_res
+
+    end
+
+
+
   end
 
 end

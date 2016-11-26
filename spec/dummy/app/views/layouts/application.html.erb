@@ -9,6 +9,8 @@
 </head>
 <body>
 
+<% res = get_signed_in_scope %>
+<% puts "resource is : #{res}" %>
 <% if user_signed_in? %>
   Logged in as <strong><%= current_user.email %></strong>.
   <%= link_to 'Edit profile', edit_user_registration_path %> |

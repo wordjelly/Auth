@@ -67,10 +67,18 @@ module Auth::Concerns::OmniConcern
   end
 
 
+  def build_token(user_klazz)
+    loop do
+        token = SimpleTokenAuthentication::TokenGenerator.instance.generate_token
+        break token if (user_klazz.where(authentication_token: token).count == 0)
+    end
+  end
+
   def omni_common
         ##clear the omniauth state from the session.
         session.delete('omniauth.state')
         user_klazz = Object.const_get(get_model_class)
+        puts "got user class as: #{user_klazz}"
         omni_hash = get_omni_hash
 
         email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
@@ -95,8 +103,6 @@ module Auth::Concerns::OmniConcern
 
           if user.persisted?
             
-
-
             if !Auth.configuration.auth_resources[get_model_class][:skip].include? :confirmable
               user.skip_confirmation!
             end
@@ -117,7 +123,7 @@ module Auth::Concerns::OmniConcern
         elsif current_user
 
           Rails.logger.debug("it is a current user trying to sign up with oauth.")
-          ##throw him to profile, he's an asshole.
+          
           after_sign_in_path_for(current_user)        
 
         else 
@@ -146,10 +152,11 @@ module Auth::Concerns::OmniConcern
               "$setOnInsert" => {
                 "email" => email,
                 "password" =>  Devise.friendly_token(20),
-                "authentication_token" => SimpleTokenAuthentication::ActsAsTokenAuthenticatable.generate_authentication_token(SimpleTokenAuthentication::ActsAsTokenAuthenticatable.token_generator),
+                "authentication_token" => build_token(user_klazz),
                 "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email)
               }
-            }
+            },
+            user_klazz
           )
 
           ##basically if this is not nil, then 
