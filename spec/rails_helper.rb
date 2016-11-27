@@ -11,6 +11,7 @@ require 'spec_helper'
 require 'rspec/rails'
 require 'devise'
 require 'support/factory_girl'
+require 'support/omniauth_macros.rb'
 
 
 Dir[File.join(ENGINE_RAILS_ROOT, "spec/support/**/*.rb")].each {|f| require f }
@@ -32,9 +33,12 @@ Dir[File.join(ENGINE_RAILS_ROOT, "spec/support/**/*.rb")].each {|f| require f }
 #
 # Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 
+
+
 RSpec.configure do |config|
   config.include Devise::TestHelpers, type: :controller
   config.include Devise::TestHelpers, type: :view
+  config.include(OmniauthMacros)
   #config.expect_with(:rspec) { |c| c.syntax = :should }
 
  # config.include Devise::Test::ControllerHelpers, type: :view
@@ -58,3 +62,4 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 end
+OmniAuth.config.test_mode = true

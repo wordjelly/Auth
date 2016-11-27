@@ -11,29 +11,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   	 @api_key = @cli.api_key
   end
   
-=begin
-  scenario "User visits sign in page with valid api_key and redirect_url, and then clicks sign up" do
-    visit "/authenticate/users/sign_in?api_key=#{@api_key}&redirect_url=http://wwww.google.com"
-    click_link("Sign up")
-    expect(page).to have_text("client in session")
-  end
 
-  scenario "User first visits sign_in with valid api_key and redirect_url, and then goes and signs_up, expect to redirect to the redirect_url" do 
-  	
-  	visit "/authenticate/users/sign_in?api_key=#{@api_key}&redirect_url=http://www.google.com"
-    click_link("Sign up")
-    fill_in('Email', :with => 'retard@gmail.com')
-    fill_in('Password', :with => 'password')
-    fill_in('Password confirmation', :with => 'password')
-	find('input[name="commit"]').click
-	##admittedly hacky way to get the last generated user.
-	u = User.where(:email => 'retard@gmail.com').first
-
-	
-	expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{u.es}")
-	
-  end
-=end
 
   scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => get redirected to the redirection url with es and authentication_token." do
 
@@ -55,9 +33,23 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     visit user_confirmation_path({:confirmation_token => confirmation_token})
     #puts "-------------FINISHED USER CONFIRMATION PATH --------------"
     u.reload
+    fill_in('Email',:with => 'retard@gmail.com')
+    fill_in('Password', :with => 'password')
+    find('input[name="commit"]').click
+
     ##should redirect to the redirect url.
     expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{u.es}")
     
+  end
+
+  scenario "it can sign in with oauth2", :focus => true do 
+    visit new_user_registration_path
+    page.should have_content("Sign in with GoogleOauth2")
+    mock_auth_hash
+    click_link "Sign in with GoogleOauth2"
+    #page.should have_content("mockuser")  # user name
+    #page.should have_css('img', :src => 'mock_user_thumbnail_url') # user image
+    #page.should have_content("Sign out")
   end
 
  
