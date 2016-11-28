@@ -43,9 +43,11 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   end
 
   scenario "it can sign in with oauth2", :focus => true do 
+
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash
+    Rails.application.env_config["omniauth.model"] = "omniauth/users/"
     click_link "Sign in with GoogleOauth2"
     #page.should have_content("mockuser")  # user name
     #page.should have_css('img', :src => 'mock_user_thumbnail_url') # user image
