@@ -1,4 +1,4 @@
-class Auth::OmniauthCallbacksController < Auth::ApplicationController
+class Auth::OmniauthCallbacksController < DeviseController
   
   include Auth::Concerns::OmniConcern
 

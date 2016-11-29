@@ -2,17 +2,18 @@ module OmniauthMacros
   def mock_auth_hash
     # The mock_auth configuration allows you to set per-provider (or default)
     # authentication hashes to return during integration testing.
-    OmniAuth.config.mock_auth[:google_oauth2] = {
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
       'provider' => 'google_oauth2',
       'uid' => '123545',
-      'user_info' => {
+      'info' => {
         'name' => 'mockuser',
-        'image' => 'mock_user_thumbnail_url'
+        'image' => 'mock_user_thumbnail_url',
+        'email' => 'rrphotosoft@gmail.com'
       },
       'credentials' => {
         'token' => 'mock_token',
         'secret' => 'mock_secret'
       }
-    }
+    })
   end
 end

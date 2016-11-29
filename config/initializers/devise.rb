@@ -279,8 +279,33 @@ end
 DeviseController.class_eval do 
 
   skip_before_action :verify_authenticity_token, if: :is_json_request?
+  skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
   respond_to :html, :json
+
+  def set_devise_mapping_for_omniauth
+    model = nil
+    if !request.env["omniauth.model"].blank?
+      request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
+        jj = Regexp.last_match
+        model = jj[:model]
+      end
+      model = model.singularize
+      request.env["devise.mapping"] = Devise.mappings[model.to_sym]
+    end
+  end
+
+  def is_omniauth_callback?
+    set_devise_mapping_for_omniauth
+    true      
+  end
+
+  def resource=(new_resource)
+    puts "setting resource."
+    instance_variable_set(:"@#{resource_name}", new_resource)
+  end
+
+
 
   def ignore_json_request
       if is_json_request?
@@ -291,19 +316,18 @@ DeviseController.class_eval do
  
   def redirect_to(options = {}, response_status = {})
     ##first handle the fact that it may have been called from render itself.
+      puts "-----------------------------------------------------"
+      puts "came to redirect with the follwoing options."
+      puts "controller name is: #{controller_name}, and action: #{action_name}"
+      puts "redirect url ===> #{@redirect_url}"
+      puts "resource is nil ====> #{resource.nil?}"
+      puts "resource es is ====> #{resource.es}"
+      puts "resource authentication token ====> #{resource.authentication_token}"
+      puts "resource is signed in? ====> #{signed_in?}"
     if options =~ /authentication_token|es/
-      #this should go be like super.
+      #this should go be liputs "going to super"
       super
     else
-      #puts "-----------------------------------------------------"
-      #puts "came to redirect with the follwoing options."
-      #puts "controller name is: #{controller_name}, and action: #{action_name}"
-      #puts "redirect url ===> #{@redirect_url}"
-      #puts "resource is nil ====> #{resource.nil?}"
-      #puts "resource es is ====> #{resource.es}"
-      #puts "resource authentication token ====> #{resource.authentication_token}"
-      #puts "resource is signed in? ====> #{signed_in?}"
-
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"

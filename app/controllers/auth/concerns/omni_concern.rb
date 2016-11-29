@@ -3,8 +3,10 @@ module Auth::Concerns::OmniConcern
   extend ActiveSupport::Concern
 
   included do
+    attr_accessor :resource
     helper_method :omniauth_failed_path_for
   end
+
 
   def passthru
     
@@ -31,22 +33,7 @@ module Auth::Concerns::OmniConcern
     request.env["omniauth.auth"]
   end
 
-  def get_model_class
-
-    model = nil
-    
-    if !request.env["omniauth.model"].blank?
-      request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
-        jj = Regexp.last_match
-        model = jj[:model]
-      end
-      model = model.singularize
-      model[0] = model[0].capitalize
-    end
-
-    model
-
-  end
+  
 
   def failed_strategy
     request.respond_to?(:get_header) ? request.get_header("omniauth.error.strategy") : env["omniauth.error.strategy"]
@@ -84,12 +71,12 @@ module Auth::Concerns::OmniConcern
   def omni_common
         ##clear the omniauth state from the session.
         session.delete('omniauth.state')
-        model_class = get_model_class
+        model_class = request.env["devise.mapping"]
         if model_class.nil?
          redirect_to omniauth_failed_path_for("no_resource") and return 
         else
-          user_klazz = Object.const_get(get_model_class)
-          puts "got user class as: #{user_klazz}"
+          user_klazz = request.env["devise.mapping"].to
+          
           omni_hash = get_omni_hash
 
           email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
@@ -114,7 +101,7 @@ module Auth::Concerns::OmniConcern
 
             if user.persisted?
               
-              if !Auth.configuration.auth_resources[get_model_class][:skip].include? :confirmable
+              if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.class_name][:skip].include? :confirmable
                 user.skip_confirmation!
               end
               
@@ -141,8 +128,8 @@ module Auth::Concerns::OmniConcern
 
             Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
               
-
-            new_user = user_klazz.versioned_upsert_one(
+            puts "should set resource here."
+            @resource = user_klazz.versioned_upsert_one(
               {
                 "email" => email,
                 "identities" => {
@@ -172,19 +159,21 @@ module Auth::Concerns::OmniConcern
 
             ##basically if this is not nil, then 
             
-          
             ##sign in and send to the user profiles path.
 
-            if !new_user.nil? && new_user.persisted?
+            if !@resource.nil? && @resource.persisted?
 
-              new_user.create_client
+              @resource.create_client
 
-              new_user.skip_confirmation!
+              @resource.skip_confirmation!
               
               ##call the after_save_callbacks.
 
-              sign_in new_user
-              redirect_to after_sign_in_path_for(new_user)    
+              sign_in @resource
+              puts resource.errors.full_messages.to_s
+              puts "redirecting to after_sign_in_path_for"
+              puts resource.to_s
+              redirect_to after_sign_in_path_for(@resource)    
             else
               redirect_to omniauth_failed_path_for
             end

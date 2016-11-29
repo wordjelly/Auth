@@ -13,7 +13,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   
 
 
-  scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => get redirected to the redirection url with es and authentication_token." do
+  scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token." do
 
     ##visit the sign in page
     visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @api_key})
@@ -42,16 +42,27 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     
   end
 
-  scenario "it can sign in with oauth2", :focus => true do 
+  scenario "it can sign in with oauth2" do 
 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+    #Rails.application.env_config["omniauth.auth"] = 
     click_link "Sign in with GoogleOauth2"
-    #page.should have_content("mockuser")  # user name
-    #page.should have_css('img', :src => 'mock_user_thumbnail_url') # user image
-    #page.should have_content("Sign out")
+    expect(page).to have_content("Logout")
+  end
+
+  scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token", :focus => true do 
+
+    visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @api_key})
+    click_link("Sign up")
+    mock_auth_hash
+    Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+    click_link "Sign in with GoogleOauth2"
+    u = User.where(:email => 'rrphotosoft@gmail.com').first
+    expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{u.es}")
+
   end
 
  
