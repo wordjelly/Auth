@@ -300,10 +300,6 @@ DeviseController.class_eval do
     true      
   end
 
-  def resource=(new_resource)
-    puts "setting resource."
-    instance_variable_set(:"@#{resource_name}", new_resource)
-  end
 
 
 
@@ -320,10 +316,14 @@ DeviseController.class_eval do
       puts "came to redirect with the follwoing options."
       puts "controller name is: #{controller_name}, and action: #{action_name}"
       puts "redirect url ===> #{@redirect_url}"
+      puts "session redirect url is => #{session[:redirect_url]}"
       puts "resource is nil ====> #{resource.nil?}"
       puts "resource es is ====> #{resource.es}"
       puts "resource authentication token ====> #{resource.authentication_token}"
       puts "resource is signed in? ====> #{signed_in?}"
+    if !session[:redirect_url].nil? && @redirect_url.nil?
+       @redirect_url = session[:redirect_url]
+    end
     if options =~ /authentication_token|es/
       #this should go be liputs "going to super"
       super
@@ -333,7 +333,7 @@ DeviseController.class_eval do
       elsif controller_name == "confirmations" && action_name != "show"
         super  
       else
-        if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
           session.delete(:client)
           session.delete(:redirect_url)
           redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
