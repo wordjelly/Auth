@@ -12,6 +12,8 @@ module Auth
 
     ##need to check permissions of 
 
+
+
     # GET /clients
     def index
       #@clients = Client.all
@@ -55,7 +57,10 @@ module Auth
       ##this line ensures that only the redirect urls can be updated, it only considers the redirect_urls as dirty_fields.
       ##puts params.to_s
       @client.redirect_urls = client_params[:redirect_urls]
-      @client.versioned_update({"redirect_urls" => nil})
+      if !client_params[:app_ids].nil?
+        @client.app_ids << BSON::ObjectId.new.to_s
+      end
+      @client.versioned_update({"redirect_urls" => 1, "app_ids" => 1})
       respond_with @client
     end
 
@@ -83,7 +88,7 @@ module Auth
 
       # Only allow a trusted parameter "white list" through.
       def client_params
-        params.require(:client).permit({:redirect_urls => []},:user_id)
+        params.require(:client).permit({:redirect_urls => []},:user_id,{:app_ids => []})
       end
 
       def ensure_json_request  

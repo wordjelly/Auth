@@ -12,7 +12,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   end
   
 
-
+=begin
   scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token." do
 
     ##visit the sign in page
@@ -64,6 +64,21 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{u.es}")
 
   end
+    
+  scenario "user with omniauth authentication , tries to create an account with the same email" do 
 
- 
+  end
+
+  scenario "user with one oauth account, tries to use another oauth account with the same email" do 
+
+
+  end
+=end
+    
+  scenario "create client app id, create new user , confirm him, token authentication should work, on topics controller" do 
+
+    
+
+  end
+
 end

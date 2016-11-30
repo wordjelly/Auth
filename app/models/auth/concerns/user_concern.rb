@@ -89,6 +89,9 @@ module Auth::Concerns::UserConcern
 	      if !opts[:skip].include? :omniauthable
 		      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
 			  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
+		 	  field :access_token,        type: String
+		 	  field :token_expires_at,	  type: Integer
+		 	  field :token_expired,		  type: Boolean
 		  end
 
 		  
@@ -103,22 +106,12 @@ module Auth::Concerns::UserConcern
 	    	acts_as_token_authenticatable
   			field :authentication_token, type: String
 	    	field :es, type: String
+	    	field :client_authentication, type: Hash
 	    	before_save do |document|
 	    		if document.es.blank?
-	    			#puts "came to before save checking of document confirmed at issues."
-	    			#puts "is the document responding to confirmed at."
-	    			#puts document.respond_to? :confirmed_at
-
-	    			#puts "is the confirmed at changed."
-	    			#puts document.confirmed_at_changed?
-
 	    			if (!document.respond_to? :confirmed_at) || (document.confirmed_at_changed?)
-	    				#puts "passes checks."
 	    				document.set_es
 	    			end
-
-
-	    			
 	    		end
 	    	end
 
@@ -141,11 +134,11 @@ module Auth::Concerns::UserConcern
 
 	def reset_token_and_es
 		self.authentication_token = nil
-		self.es = nil
+		
 	end
 
 	def has_token_and_es
-		return !self.es.nil? && !self.authentication_token.nil?
+		return !self.authentication_token.nil?
 	end
 
 	
@@ -158,7 +151,12 @@ module Auth::Concerns::UserConcern
 	      pre_es = salt + email
 	      self.es = Digest::SHA256.hexdigest(pre_es)
 	    end
-		
+	end
+
+	def set_client_authentication(app_id)
+		if self.client_authentication[app_id].nil?
+			self.client_authentication[app_id] = SecureRandom.hex(32)
+		end
 	end
 
 

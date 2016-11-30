@@ -17,6 +17,8 @@ module Auth
     field :path, type: String
     field :redirect_urls, type: Array, default: []
     field :resource_id, type: BSON::ObjectId, default: BSON::ObjectId.new
+    field :app_ids, type: Array, default: []
+    field :current_app_id, type: String
     
     def contains_redirect_url?(url)
         return self.redirect_urls.include? url
@@ -30,6 +32,8 @@ module Auth
     def there_are_redirect_urls
         return self.redirect_urls.size > 0
     end
+
+    
 
   end
 end

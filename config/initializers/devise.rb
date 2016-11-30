@@ -297,7 +297,7 @@ DeviseController.class_eval do
 
   def is_omniauth_callback?
     set_devise_mapping_for_omniauth
-    true      
+    controller_name == "omniauth_callbacks"
   end
 
 
@@ -311,23 +311,17 @@ DeviseController.class_eval do
 
  
   def redirect_to(options = {}, response_status = {})
-    ##first handle the fact that it may have been called from render itself.
-      puts "-----------------------------------------------------"
-      puts "came to redirect with the follwoing options."
-      puts "controller name is: #{controller_name}, and action: #{action_name}"
-      puts "redirect url ===> #{@redirect_url}"
-      puts "session redirect url is => #{session[:redirect_url]}"
-      puts "resource is nil ====> #{resource.nil?}"
-      puts "resource es is ====> #{resource.es}"
-      puts "resource authentication token ====> #{resource.authentication_token}"
-      puts "resource is signed in? ====> #{signed_in?}"
+
+    ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
     if !session[:redirect_url].nil? && @redirect_url.nil?
        @redirect_url = session[:redirect_url]
     end
     if options =~ /authentication_token|es/
-      #this should go be liputs "going to super"
       super
     else
+      if !resource.nil? && !session[:client].nil?
+        resource.set_client_authentication(session[:client].current_app_id)
+      end
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
@@ -340,27 +334,32 @@ DeviseController.class_eval do
         else
           super
         end
-      end    
+      end
     end
-
   end
-
   
   def render(*args)
+    if !resource.nil? && !session[:client].nil?
+        resource.set_client_authentication(session[:client].current_app_id)
+    end
     if controller_name == "passwords"
-      super
-    elsif controller_name == "confirmations" && action_name != "show"
-      super  
-    else
-      if !@redirect_url.nil? && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
-        session.delete(:client)
-        session.delete(:redirect_url)
-        redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
-      else
         super
-      end
-    end      
+      elsif controller_name == "confirmations" && action_name != "show"
+        super  
+      else
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+          session.delete(:client)
+          session.delete(:redirect_url)
+          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+        else
+          super
+        end
+      end     
   end
+
+ 
+  
+  
 
   def clear_client_and_redirect_url
     @client = nil
@@ -381,12 +380,12 @@ DeviseController.class_eval do
 
     else
 
-      if params[:api_key].nil?
+      if params[:api_key].nil? || params[:current_app_id].nil?
 
       else
           
-        @client = Auth::Client.where(:api_key => params[:api_key]).first
-
+        @client = Auth::Client.where(:api_key => params[:api_key], :app_ids => {"$in" => [params[:current_app_id]]}).first
+        @client.current_app_id = params[:current_app_id]
         if !@client.nil?
           session[:client] = @client
           return true
@@ -424,6 +423,7 @@ DeviseController.class_eval do
     end
   end
 
+  
   def do_before_request
     
     clear_client_and_redirect_url
@@ -436,6 +436,7 @@ DeviseController.class_eval do
     
   end
 
+  
 
   def require_no_authentication
     
@@ -457,22 +458,14 @@ DeviseController.class_eval do
       warden.authenticated?(resource_name)
     end
 
-    ##you come to the sign_up or sign_in page with a redirect url
-      ## => you don't trigger the after_sign_in_path for , because that would have triggered you to get redirected to wherever you wanted with the user details.
-      ## => instead , we reset the authentication token and the es salt, and keep you on the sign_in or sign_up page, but we set the redirect url into the session, so that after you sign up/sign in successfully you will be redirected to wherever you want but by this point in time, there is a new redirect_url and es.
-    ##you come without a redirect url
-      ## => you can sign in by cookies and you will go to the after sign in path for the user.
+
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
         #puts "authenticated already"
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
-        ##someone has come to the sign up/sign in page with a redirect url , and is already authenticated, so we reset the auth tokens.
-        if resource.has_token_and_es
-          resource.reset_token_and_es
-          resource.save
-        end 
+        
       end
     end
   end

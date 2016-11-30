@@ -1,4 +1,5 @@
 class TopicsController < ApplicationController
+  include Auth::Concerns::TokenConcern
   before_action :set_topic, only: [:show, :edit, :update, :destroy]
 
   # GET /topics

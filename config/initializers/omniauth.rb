@@ -1,3 +1,37 @@
+module SimpleTokenAuthentication
+	module Configuration
+		mattr_accessor :additional_identifiers
+		@@additional_identifiers = {}
+	end
+=begin
+	Entity.class_eval
+		def header_names_for_additional_identifiers
+			if additional_identifiers = SimpleTokenAuthentication.additional_identifiers["#{name_underscore}".to_sym]
+				additional_identifiers.map{|c| c = "X-#{name_underscore.camelize}-#{c.to_s.camelize}"}
+			end
+		end
+
+		def get_additional_identifiers_from_headers(controller)
+			Hash.new[header_names_for_additional_identifiers.map{|c| 
+				 c = [c,controller.request.headers[c]]
+			}]
+		end
+	end
+
+	module TokenAuthenticationHandler
+		def token_correct?(record, entity, token_comparator)
+      		additional_identifiers = entity.get_additional_identifiers_from_headers(self)
+      		additional_identifiers.each do |key,value|
+      			return false if record.send("#{key}") != value
+      		end
+      		record && token_comparator.compare(record.authentication_token,
+                                         entity.get_token_from_params_or_headers(self))
+    	end
+	end
+=end
+end
+
+
 module OmniAuth
 	module Strategy
 
@@ -115,10 +149,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 	##{:user => 'es', :admin => 'es',......other_models => 'es'}
 	##this es is the additional identifier in addition to the authentication_token.
 	##so it has to be defined for each model.
+	##will also need to add app_id, and client id specific shit here.
+	
 	if Auth.configuration.enable_token_auth
 		SimpleTokenAuthentication.configure do |cf|
 		  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
 		  cf.identifiers = q
+		  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'aid']}]
+		  cf.additional_identifiers = q2
 		end
 	end
 

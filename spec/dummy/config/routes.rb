@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   resources :topics
   
+  resources :resource
   
   root "home#index"
   #mount Auth::Engine => "/authenticate", :as => 'auth'

@@ -4,8 +4,14 @@ module Auth::Concerns::OmniConcern
 
   included do
     attr_accessor :resource
+    ##the omniauth access token is to be stored on the user.
     helper_method :omniauth_failed_path_for
   end
+
+  #################COMMUNICATION BETWEEN OUR SERVER AND OAUTH BACKENDS
+  
+
+  #################ENDS.
 
 
   def passthru
@@ -30,6 +36,7 @@ module Auth::Concerns::OmniConcern
 
 
   def get_omni_hash
+    puts request.env["omniauth.auth"]
     request.env["omniauth.auth"]
   end
 
@@ -61,33 +68,42 @@ module Auth::Concerns::OmniConcern
   end
 
 
-  def build_token(user_klazz)
+
+
+  def build_token(resource_klazz)
     loop do
         token = SimpleTokenAuthentication::TokenGenerator.instance.generate_token
-        break token if (user_klazz.where(authentication_token: token).count == 0)
+        break token if (resource_klazz.where(authentication_token: token).count == 0)
     end
+  end
+
+  def set_access_token_and_expires_at(access_token,token_expires_at)
+      @resource.access_token = access_token
+      @resource.token_expires_at = token_expires_at
   end
 
   def omni_common
         ##clear the omniauth state from the session.
         session.delete('omniauth.state')
+        ##this is set in the devise.rb initializer, in the before_action under devise controller, which checks if it is the omniauth_callbacks controller.
         model_class = request.env["devise.mapping"]
         if model_class.nil?
          redirect_to omniauth_failed_path_for("no_resource") and return 
         else
-          user_klazz = request.env["devise.mapping"].to
+          resource_klazz = request.env["devise.mapping"].to
           
           omni_hash = get_omni_hash
 
-          email,uid,provider = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"]
+          email,uid,provider,access_token,token_expires_at = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"],omni_hash["credentials"]["token"],omni_hash["credentials"]["expires_at"]
+
 
           ##it will derive the resource class from the omni_hash referrer path.
 
           identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
 
           ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
-          existing_oauth_users = 
-          user_klazz.collection.find(
+          existing_oauth_resources = 
+          resource_klazz.collection.find(
             {"identities" =>
                    {"$elemMatch" => 
                           {"provider" => provider, "uid" => uid
@@ -95,41 +111,47 @@ module Auth::Concerns::OmniConcern
                    }
             })
        
-          if existing_oauth_users.count == 1
+          if existing_oauth_resources.count == 1
 
-            user = from_view(existing_oauth_users,user_klazz)
+            @resource = from_view(existing_oauth_resources,resource_klazz)
 
-            if user.persisted?
+            set_access_token_and_expires_at(access_token,token_expires_at)
+
+            @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
+
+
+            if @resource.op_success
               
-              if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.class_name][:skip].include? :confirmable
-                user.skip_confirmation!
+              
+              if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.name][:skip].include? :confirmable
+                @resource.skip_confirmation!
               end
               
-              Rails.logger.debug("this user already exists")
+              Rails.logger.debug("this resource already exists")
               
-              sign_in user
+              sign_in @resource
 
-              redirect_to after_sign_in_path_for(user)
+              redirect_to after_sign_in_path_for(@resource)
               
             else
              
-              redirect_to omniauth_failed_path_for
+              redirect_to omniauth_failed_path_for(resource_klazz.name)
 
             end
 
           
-          elsif current_user
+          elsif signed_in?
 
             Rails.logger.debug("it is a current user trying to sign up with oauth.")
             
-            after_sign_in_path_for(current_user)        
+            after_sign_in_path_for(current_res)        
 
           else 
 
             Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
               
-            puts "should set resource here."
-            @resource = user_klazz.versioned_upsert_one(
+            
+            @resource = resource_klazz.versioned_upsert_one(
               {
                 "email" => email,
                 "identities" => {
@@ -150,11 +172,13 @@ module Auth::Concerns::OmniConcern
                 "$setOnInsert" => {
                   "email" => email,
                   "password" =>  Devise.friendly_token(20),
-                  "authentication_token" => build_token(user_klazz),
-                  "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email)
+                  "authentication_token" => build_token(resource_klazz),
+                  "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email),
+                  "access_token" => access_token,
+                  "token_expires_at" => token_expires_at
                 }
               },
-              user_klazz
+              resource_klazz
             )
 
             ##basically if this is not nil, then 
@@ -170,20 +194,14 @@ module Auth::Concerns::OmniConcern
               ##call the after_save_callbacks.
 
               sign_in @resource
-              puts resource.errors.full_messages.to_s
-              puts "redirecting to after_sign_in_path_for"
-              puts resource.to_s
               redirect_to after_sign_in_path_for(@resource)    
             else
-              redirect_to omniauth_failed_path_for
+              redirect_to omniauth_failure_path(resource_klazz.name)
             end
 
           end
 
         end
-
-     
-
   end
 
 end
