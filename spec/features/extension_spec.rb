@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.feature "user visits, seeking authentication", :type => :feature do
+RSpec.feature "", :type => :feature, :total => true do
   before(:each) do 
  	      ActionController::Base.allow_forgery_protection = true
         User.delete_all
@@ -51,7 +51,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   end
 
 
-  scenario "it can sign in with oauth2" do 
+  scenario "it can sign in with oauth2", :base => true do 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash
@@ -61,8 +61,9 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     expect(page).to have_content("Logout")
   end
 
-  scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token", :focus => true do 
-    visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @api_key, :current_app_id => "test_app_id"})
+  scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token", :docus => true do 
+
+    visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
     click_link("Sign up")
     mock_auth_hash
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
@@ -98,7 +99,7 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
   end
 
 
-  scenario "user with one oauth account, tries to use another oauth account with the same email", :mark => true do 
+  scenario "user with one oauth account, tries to use another oauth account with the same email, fails to sign up.", :mark => true do 
 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
@@ -110,14 +111,14 @@ RSpec.feature "user visits, seeking authentication", :type => :feature do
     ActionController::Base.allow_forgery_protection = false
     click_link "Logout"
     ActionController::Base.allow_forgery_protection = true
-    puts "After google oauth these are the attributes."
-    u = User.where(:email => 'rrphotosoft@gmail.com').first
-    puts u.attributes.to_s
+
+
     visit new_user_registration_path
     mock_auth_hash_facebook
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
     click_link "Sign in with Facebook"
-    expect(page).to have_content("dog")
+
+    expect(page).to have_content("HI IT FAILED.")
 
   end
 

@@ -22,8 +22,8 @@ module OmniauthMacros
     # The mock_auth configuration allows you to set per-provider (or default)
     # authentication hashes to return during integration testing.
     OmniAuth.config.mock_auth[:facebook] = OmniAuth::AuthHash.new({
-      'provider' => 'google_oauth2',
-      'uid' => '123545',
+      'provider' => 'facebook',
+      'uid' => 'abcde',
       'info' => {
         'name' => 'mockuser',
         'image' => 'mock_user_thumbnail_url',
