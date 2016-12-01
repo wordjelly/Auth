@@ -321,16 +321,20 @@ DeviseController.class_eval do
     else
       if !resource.nil? && !session[:client].nil?
         resource.set_client_authentication(session[:client].current_app_id)
+        #resource.versioned_update({"client_authentication" => 1})
       end
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
         super  
       else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[session[:client].current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+
+          curr_app_es = resource.client_authentication[session[:client].current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
-          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+          
+          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
         else
           super
         end
@@ -342,15 +346,18 @@ DeviseController.class_eval do
     if !resource.nil? && !session[:client].nil?
         resource.set_client_authentication(session[:client].current_app_id)
     end
-    if controller_name == "passwords"
+      if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
         super  
       else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.es.nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[session[:client].current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+
+          curr_app_es = resource.client_authentication[session[:client].current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
-          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + resource.es
+          
+          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
         else
           super
         end
@@ -367,7 +374,7 @@ DeviseController.class_eval do
   end
 
   def set_client
-
+    #puts "came to set client."
     #puts session[:client]
     if !session[:client].nil?
     
@@ -379,14 +386,18 @@ DeviseController.class_eval do
       return true
 
     else
-
+      #puts "dont have client in session."
+      #puts "params api key is nil: #{params[:api_key]}"
+      #puts "params current app id is nil: #{params[:current_app_id]}"
+      #puts params.to_s
       if params[:api_key].nil? || params[:current_app_id].nil?
 
       else
-          
+        #puts "came to find client."
         @client = Auth::Client.where(:api_key => params[:api_key], :app_ids => {"$in" => [params[:current_app_id]]}).first
         @client.current_app_id = params[:current_app_id]
         if !@client.nil?
+          #puts "set session client successfully"
           session[:client] = @client
           return true
         end
@@ -497,20 +508,17 @@ module Devise
         #puts "is a json request"
         token = request.headers["X-#{resource_name.to_s.capitalize}-Token"]
         es = request.headers["X-#{resource_name.to_s.capitalize}-Es"]
+        app_id = request.headers["X-#{resource_name.to_s.capitalize}-Aid"]
         #puts "token is : #{token}, and es is :#{es}"
-        self.resource = resource_name.to_s.capitalize.constantize.where(:authentication_token => token, :es => es).first
+        self.resource = resource_name.to_s.capitalize.constantize.where("authentication_token" => token, "client_authentication.#{app_id}" => es).first
         if self.resource.nil?
-          #puts "no such resource exists."
-          render :nothing => true , :status => :unauthorized
+          send("authenticate_#{resource_name}!",force: true)
         else
           send(:sign_in,self.resource)
         end
       else
-        #puts "came to call authenticate."
         send("authenticate_#{resource_name}!", force: true)
-        #puts "finished calling authenticate."
         self.resource = send("current_#{resource_name}")
-        #puts "self resource is: #{self.resource}"
       end
 
     end
@@ -656,9 +664,9 @@ module Devise
 
     DEFAULT_PERMITTED_ATTRIBUTES =
       {
-        sign_in: [:password, :remember_me, :redirect_url, :api_key],
-        sign_up: [:password, :password_confirmation, :redirect_url, :api_key],
-        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :api_key]
+        sign_in: [:password, :remember_me, :redirect_url, :api_key, :current_app_id],
+        sign_up: [:password, :password_confirmation, :redirect_url, :api_key, :current_app_id],
+        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :api_key, :current_app_id]
       }
 
   end

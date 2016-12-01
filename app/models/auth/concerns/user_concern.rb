@@ -105,15 +105,16 @@ module Auth::Concerns::UserConcern
 	    	
 	    	acts_as_token_authenticatable
   			field :authentication_token, type: String
-	    	field :es, type: String
-	    	field :client_authentication, type: Hash
-	    	before_save do |document|
-	    		if document.es.blank?
-	    			if (!document.respond_to? :confirmed_at) || (document.confirmed_at_changed?)
-	    				document.set_es
-	    			end
-	    		end
-	    	end
+	    	#field :es, type: String
+	    	field :client_authentication, type: Hash, default: {}
+	    	field :current_app_id, type: String
+	    	#before_save do |document|
+	    	#	if document.es.blank?
+	    	#		if (!document.respond_to? :confirmed_at) || (document.confirmed_at_changed?)
+	    	#			document.set_es
+	    	#		end
+	    	#	end
+	    	#end
 
 	    end
 
@@ -154,9 +155,11 @@ module Auth::Concerns::UserConcern
 	end
 
 	def set_client_authentication(app_id)
-		if self.client_authentication[app_id].nil?
+		if self.client_authentication[app_id].nil? && self.valid?
 			self.client_authentication[app_id] = SecureRandom.hex(32)
+			self.save
 		end
+		self.current_app_id = app_id
 	end
 
 
@@ -215,11 +218,15 @@ module Auth::Concerns::UserConcern
 
 	end
 
-	##controls which fields are returned in the json response.
-	##default fields are defined in the Auth configuration default file
-	##include field names in that file.
+	
 	def as_json(options)
-		 super(:only => [:es, :authentication_token])
+		 if !self.current_app_id.nil?
+		 	json = super(:only => [:authentication_token])
+	     	json[:es] = self.client_authentication[self.current_app_id]
+	    	json
+	 	 else
+	 	 	nil
+	 	 end
 	end
 
 
