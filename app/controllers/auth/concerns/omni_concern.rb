@@ -83,11 +83,13 @@ module Auth::Concerns::OmniConcern
   end
 
   def omni_common
+        puts "came to omni common."
         ##clear the omniauth state from the session.
         session.delete('omniauth.state')
         ##this is set in the devise.rb initializer, in the before_action under devise controller, which checks if it is the omniauth_callbacks controller.
         model_class = request.env["devise.mapping"]
         if model_class.nil?
+         puts "model class is nil"
          redirect_to omniauth_failed_path_for("no_resource") and return 
         else
           resource_klazz = request.env["devise.mapping"].to
@@ -115,9 +117,15 @@ module Auth::Concerns::OmniConcern
 
             @resource = from_view(existing_oauth_resources,resource_klazz)
 
+
             set_access_token_and_expires_at(access_token,token_expires_at)
 
-            @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
+
+            puts "resource before versioned update."
+            puts @resource.attributes.to_s
+
+            @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1},false,{},{},{})
+
 
 
             if @resource.op_success
@@ -134,7 +142,7 @@ module Auth::Concerns::OmniConcern
               redirect_to after_sign_in_path_for(@resource)
               
             else
-             
+              puts "op failed"
               redirect_to omniauth_failed_path_for(resource_klazz.name)
 
             end
@@ -173,7 +181,6 @@ module Auth::Concerns::OmniConcern
                   "email" => email,
                   "password" =>  Devise.friendly_token(20),
                   "authentication_token" => build_token(resource_klazz),
-                  "es" => Digest::SHA256.hexdigest(SecureRandom.hex(32) + email),
                   "access_token" => access_token,
                   "token_expires_at" => token_expires_at
                 }
@@ -181,6 +188,8 @@ module Auth::Concerns::OmniConcern
               resource_klazz
             )
 
+            #puts "after the versioned upsert."
+            #puts @resource.attributes.to_s
             ##basically if this is not nil, then 
             
             ##sign in and send to the user profiles path.
@@ -194,6 +203,10 @@ module Auth::Concerns::OmniConcern
               ##call the after_save_callbacks.
 
               sign_in @resource
+              puts "After calling sign in resource -------------------------------------------"
+              puts @resource.attributes.to_s
+              u = User.where(:email => @resource.email).first
+              puts u.attributes.to_s
               redirect_to after_sign_in_path_for(@resource)    
             else
               redirect_to omniauth_failure_path(resource_klazz.name)

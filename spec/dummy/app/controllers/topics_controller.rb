@@ -1,5 +1,6 @@
 class TopicsController < ApplicationController
   include Auth::Concerns::TokenConcern
+  respond_to :html, :json
   before_action :set_topic, only: [:show, :edit, :update, :destroy]
 
   # GET /topics
@@ -14,6 +15,7 @@ class TopicsController < ApplicationController
   # GET /topics/new
   def new
     @topic = Topic.new
+    respond_with @topic
   end
 
   # GET /topics/1/edit

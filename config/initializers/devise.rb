@@ -300,9 +300,6 @@ DeviseController.class_eval do
     controller_name == "omniauth_callbacks"
   end
 
-
-
-
   def ignore_json_request
       if is_json_request?
         render :nothing => true, :status => 406 and return
@@ -315,22 +312,22 @@ DeviseController.class_eval do
     ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
     if !session[:redirect_url].nil? && @redirect_url.nil?
        @redirect_url = session[:redirect_url]
+       @client = Auth::Client.new(session[:client])
     end
     if options =~ /authentication_token|es/
       super
     else
-      if !resource.nil? && !session[:client].nil?
-        resource.set_client_authentication(session[:client].current_app_id)
-        #resource.versioned_update({"client_authentication" => 1})
+      if !resource.nil? && !@client.nil?
+        resource.set_client_authentication(@client.current_app_id)
       end
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
         super  
       else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[session[:client].current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
 
-          curr_app_es = resource.client_authentication[session[:client].current_app_id]
+          curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
           
@@ -343,17 +340,17 @@ DeviseController.class_eval do
   end
   
   def render(*args)
-    if !resource.nil? && !session[:client].nil?
-        resource.set_client_authentication(session[:client].current_app_id)
+    if !resource.nil? && !@client.nil?
+        resource.set_client_authentication(@client.current_app_id)
     end
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
         super  
       else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[session[:client].current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
 
-          curr_app_es = resource.client_authentication[session[:client].current_app_id]
+          curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
           
@@ -374,30 +371,30 @@ DeviseController.class_eval do
   end
 
   def set_client
-    #puts "came to set client."
-    #puts session[:client]
+    #puts "came to set client, with params"
+    #puts params.to_s
     if !session[:client].nil?
-    
+      #puts "session client is not nil"
       if session[:client].is_a?Hash
+         #puts "it was a hash."
          @client = Auth::Client.new(session[:client])
+      
       elsif session[:client].is_a? Auth::Client
+         #puts "it was a client instance."
          @client = session[:client]
       end 
+      #puts @client.class
       return true
 
     else
-      #puts "dont have client in session."
-      #puts "params api key is nil: #{params[:api_key]}"
-      #puts "params current app id is nil: #{params[:current_app_id]}"
-      #puts params.to_s
       if params[:api_key].nil? || params[:current_app_id].nil?
 
       else
-        #puts "came to find client."
+       
         @client = Auth::Client.where(:api_key => params[:api_key], :app_ids => {"$in" => [params[:current_app_id]]}).first
         @client.current_app_id = params[:current_app_id]
         if !@client.nil?
-          #puts "set session client successfully"
+          #puts "CLIENT WAS SUCCESSFULLY SET."
           session[:client] = @client
           return true
         end

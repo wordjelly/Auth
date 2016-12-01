@@ -223,6 +223,8 @@ module Auth::Concerns::UserConcern
 		 if !self.current_app_id.nil?
 		 	json = super(:only => [:authentication_token])
 	     	json[:es] = self.client_authentication[self.current_app_id]
+	     	##resetting this before returning the json value.
+	     	self.current_app_id = nil
 	    	json
 	 	 else
 	 	 	nil

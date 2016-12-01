@@ -13,16 +13,30 @@ RSpec.describe "session request spec", :type => :request do
         @c.redirect_urls = ["http://www.google.com"]
         @c.app_ids << "test_app_id"
         @c.versioned_create
+        @u.client_authentication["test_app_id"] = "test_es"
+        @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es, "X-User-Aid" => @c.app_ids[0]}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => @c.app_ids[0]}
 
 	end
 
-        context "-t" do 
+        context "-- token authentication tests " do 
 
-                it " - just works " do 
+                it " - authenticates  ",:focus => true do 
                         get new_topic_path, nil, @headers
-                        puts response.code.to_s     
+                        expect(response.code).to eq("200")
+                end
+
+                it " - does not authenticate without es", :focus => true do 
+                        @headers["X-User-Es"] = "null"
+                        get new_topic_path, nil, @headers
+                        expect(response.code).to eq("401")
+                end
+
+                it " - does not authenticate without app id", :focus => true do 
+                        @headers["X-User-Aid"] = "NULL"
+                        get new_topic_path, nil, @headers
+                        expect(response.code).to eq("401")     
                 end
 
         end

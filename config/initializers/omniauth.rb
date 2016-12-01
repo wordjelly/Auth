@@ -3,32 +3,54 @@ module SimpleTokenAuthentication
 		mattr_accessor :additional_identifiers
 		@@additional_identifiers = {}
 	end
-=begin
-	Entity.class_eval
+
+	Entity.class_eval do 
 		def header_names_for_additional_identifiers
 			if additional_identifiers = SimpleTokenAuthentication.additional_identifiers["#{name_underscore}".to_sym]
+				#puts additional_identifiers.to_s
 				additional_identifiers.map{|c| c = "X-#{name_underscore.camelize}-#{c.to_s.camelize}"}
 			end
 		end
 
 		def get_additional_identifiers_from_headers(controller)
-			Hash.new[header_names_for_additional_identifiers.map{|c| 
-				 c = [c,controller.request.headers[c]]
-			}]
+			Hash[header_names_for_additional_identifiers.map{|c| c = [c,controller.request.headers[c]]}]
 		end
 	end
 
 	module TokenAuthenticationHandler
+
+		def authenticate_entity_from_token!(entity)
+		  ##here we should find the record by the authentication token.
+		  ##then we should find
+	      record = find_record_from_identifier(entity)
+
+	      if token_correct?(record, entity, token_comparator)
+	        perform_sign_in!(record, sign_in_handler)
+	      end
+	    end
+
+	    def find_record_from_identifier(entity)
+	    	token = entity.get_token_from_params_or_headers(self)
+		    token && entity.model.find_for_authentication("authentication_token" => token)
+	    end
+
 		def token_correct?(record, entity, token_comparator)
       		additional_identifiers = entity.get_additional_identifiers_from_headers(self)
+      		
+      		identifier_param_value = entity.get_identifier_from_params_or_headers(self).presence
+
+      		identifier_param_value = integrate_with_devise_case_insensitive_keys(identifier_param_value, entity)
+
       		additional_identifiers.each do |key,value|
-      			return false if record.send("#{key}") != value
+      			a = record.client_authentication[value]
+      			if !token_comparator.compare(a,identifier_param_value)
+      				return false
+      			end
       		end
-      		record && token_comparator.compare(record.authentication_token,
-                                         entity.get_token_from_params_or_headers(self))
+      		return true
     	end
 	end
-=end
+
 end
 
 
@@ -155,7 +177,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 		SimpleTokenAuthentication.configure do |cf|
 		  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
 		  cf.identifiers = q
-		  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'aid']}]
+		  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,['aid']]}]
 		  cf.additional_identifiers = q2
 		end
 	end
