@@ -7,6 +7,7 @@ module Auth::Concerns::UserConcern
 
 	included do 
 
+		USER_INFO_FIELDS = ["name","image_url"]
 
 		include MongoidVersionedAtomic::VAtomic
 		##if devise modules are not defined, then define them, by default omniauth contains 
@@ -15,6 +16,11 @@ module Auth::Concerns::UserConcern
 
 		after_destroy :destroy_client
 
+		##BASIC USER FIELDS.
+		field :email, 				type: String, default: ""
+		field :name,				type: String, default: ""
+		field :image_url,			type: String, default: ""
+		###ENDS.
 
 		unless self.method_defined?(:devise_modules)
 
@@ -28,7 +34,6 @@ module Auth::Concerns::UserConcern
 		      devise :database_authenticatable
 		      devise :validatable
 		      devise :trackable
-			  field :email,              type: String, default: ""
 			  field :encrypted_password, type: String, default: ""
 			  field :client_id, type: BSON::ObjectId
 			  field :sign_in_count,      type: Integer, default: 0
@@ -105,16 +110,9 @@ module Auth::Concerns::UserConcern
 	    	
 	    	acts_as_token_authenticatable
   			field :authentication_token, type: String
-	    	#field :es, type: String
 	    	field :client_authentication, type: Hash, default: {}
 	    	field :current_app_id, type: String
-	    	#before_save do |document|
-	    	#	if document.es.blank?
-	    	#		if (!document.respond_to? :confirmed_at) || (document.confirmed_at_changed?)
-	    	#			document.set_es
-	    	#		end
-	    	#	end
-	    	#end
+	    	
 
 	    end
 
@@ -123,36 +121,36 @@ module Auth::Concerns::UserConcern
 	##reset the auth token if the email or password changes.
 	def email=(email)
 		super
-		reset_token_and_es
+		reset_token
 	end
 
 	def password=(password)
 		super
-		reset_token_and_es
+		reset_token
 	end
 
 
 
-	def reset_token_and_es
+	def reset_token
 		self.authentication_token = nil
 		
 	end
 
-	def has_token_and_es
-		return !self.authentication_token.nil?
-	end
+	#def has_token_and_es
+	#	return !self.authentication_token.nil?
+	#end
 
 	
 
 	##setting these as nil, forces a new auth_token and es to be generated
 	##because in the before_save hooks they are set if they are blank.
-	def set_es
-	    if !email.nil?
-	      salt = SecureRandom.hex(32)
-	      pre_es = salt + email
-	      self.es = Digest::SHA256.hexdigest(pre_es)
-	    end
-	end
+	#def set_es
+	#    if !email.nil?
+	#      salt = SecureRandom.hex(32)
+	#      pre_es = salt + email
+	#      self.es = Digest::SHA256.hexdigest(pre_es)
+	#    end
+	#end
 
 	def set_client_authentication(app_id)
 		if self.client_authentication[app_id].nil? && self.valid?
@@ -213,10 +211,22 @@ module Auth::Concerns::UserConcern
 
 		end
 
-		
-
-
 	end
+
+	###@param[Array] : array of field names that you want the values for.
+	###@return[Hash] : hash of key , value pairs containing the values that you asked for.
+	def get_user_info(keys)
+		keys.keep_if{|c| self.respnod_to(c.to_sym) && USER_INFO_FIELDS.include? c}
+		return Hash[keys.map{|c| [c,self[c]]}]
+	end
+
+
+	##FOR GETTING INFORMATION FROM THIRDY PARTY OAUTH PROVIDERS.
+	def get_info_from_oauth_provider
+		##this is where we can set the token_expired flag easily
+		
+	end
+
 
 	
 	def as_json(options)

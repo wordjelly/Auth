@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.feature "", :type => :feature, :features => true do
   before(:each) do 
- 	      ActionController::Base.allow_forgery_protection = true
+ 	  ActionController::Base.allow_forgery_protection = true
         User.delete_all
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
