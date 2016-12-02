@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.feature "", :type => :feature, :total => true do
+RSpec.feature "", :type => :feature, :features => true do
   before(:each) do 
  	      ActionController::Base.allow_forgery_protection = true
         User.delete_all
@@ -18,7 +18,7 @@ RSpec.feature "", :type => :feature, :total => true do
   
 
 
-  scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token.", :featured => true do
+  scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token." do
 
     ##visit the sign in page
     visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
@@ -51,7 +51,7 @@ RSpec.feature "", :type => :feature, :total => true do
   end
 
 
-  scenario "it can sign in with oauth2", :base => true do 
+  scenario "it can sign in with oauth2" do 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash
@@ -61,7 +61,7 @@ RSpec.feature "", :type => :feature, :total => true do
     expect(page).to have_content("Logout")
   end
 
-  scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token", :docus => true do 
+  scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token" do 
 
     visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
     click_link("Sign up")
@@ -99,7 +99,7 @@ RSpec.feature "", :type => :feature, :total => true do
   end
 
 
-  scenario "user with one oauth account, tries to use another oauth account with the same email, fails to sign up.", :mark => true do 
+  scenario "user with one oauth account, tries to use another oauth account with the same email, fails to sign up." do 
 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
@@ -117,8 +117,8 @@ RSpec.feature "", :type => :feature, :total => true do
     mock_auth_hash_facebook
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
     click_link "Sign in with Facebook"
-
-    expect(page).to have_content("HI IT FAILED.")
+    u = User.where(:email => "rrphotosoft@gmail.com").first
+    expect(current_url).to eq("http://" + self.url_options[:host] + omniauth_failure_path("User"))
 
   end
 
