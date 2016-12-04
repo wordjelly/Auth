@@ -20,12 +20,20 @@ module Auth
     field :app_ids, type: Array, default: []
     field :current_app_id, type: String
     
+    
     def contains_redirect_url?(url)
         return self.redirect_urls.include? url
     end
 
     def self.find_valid_api_key(api_key)
         c =  self.find(:api_key => api_key)
+        return c
+    end
+
+    ##USED IN DEVISE.RB -> SET_CLIENT
+    ##USED IN OMNIAUTH.RB -> CHECK_STATE
+    def self.find_valid_api_key_and_app_id(api_key,app_id)
+        c = self.where(:api_key => api_key, :app_ids => app_id).first
         return c
     end
 

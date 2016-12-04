@@ -72,6 +72,11 @@ module ActionDispatch::Routing
 
 						match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
 					end
+
+					##ROUTE DEFINED TO SHARE ACCESS TOKEN FROM THIRD PARTY PROVIDER.
+					##IT ALSO EVENTUALLY SHOULD CALL THE OMNI_COMMON_CONCERN ITSELF.
+					##if the user is already there, then it will just update the token, otherwise it will create a new user, and respond with 
+
 			  end
 
 		  end

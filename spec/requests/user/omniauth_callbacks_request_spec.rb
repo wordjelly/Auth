@@ -9,24 +9,37 @@ RSpec.describe "Registration requests", :type => :request do
     @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
     @c.redirect_urls = ["http://www.google.com"]
     @c.app_ids << "test_app_id"
+    @c.path = "omniauth/users/"
     @c.versioned_create
     @u.client_authentication["test_app_id"] = "test_es"
     @u.save
     @ap_key = @c.api_key
-
+    @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
   end
 
-  context "-- json request to callback phase" do 
- 
-  	it "-- works provided that state param is provided" do 
-  		##so we want to simulate that the first step is carried out and
-  		##we only do the callback to the server side api.
-  		##the callback is the mock auth hash.
-  		##so it should contain the additional state parameter.
-  		
-  	end
+
+  context " -- json request to callback url ", :oauth => true do 
+    it " -- works --" do 
+    OmniAuth.config.test_mode = false
+    Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+    post google_oauth2_omniauth_callback_url(:access_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+    end
 
   end
+  
+  ###THIS TEST IS ONLY APPLICABLE TO FACEBOOK , BECAUSE WE CAN SHARE THE AUTHENTICATION TOKEN BETWEEN THE ANDROID APP AND THE SERVER.
+
+  ##THE ONLY THING IS THAT IN CASE WE ALREADY HAVE A DESKTOP AUTHENTICATION FOR THIS USER, WITH AN ACCESS TOKEN, AND THEN HE TRIES TO AUTHENTICATE WITH ANDROID, OUR SERVER WILL REPLY SAYING THERE IS ALREADY AN ACCOUNT WITH THIS EMAIL.
+
+  ##HOW TO HANDLE THIS SITUATION.
+  ##provided that the uid and provider is the same he will simply get signed in.
+  ##in that case, he will behave like a signed in user, and we can use the new authentication token, instead, which we are already doing.
+  ##so we just need to simulate this one request.
+    
+  ##for the google tests we have to be able to call the test from java.
+
+
 
 
 	  

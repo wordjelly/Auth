@@ -108,6 +108,7 @@ module OmniAuth
 
 	    ##request call - modified to setup the model.
 	    def request_call
+	      ##gets.chomp
 	      setup_phase
 	      log :info, 'Request phase initiated.'
 	      # store query params from the request url, extracted in the callback_phase
@@ -143,18 +144,30 @@ module OmniAuth
 	      if !session['omniauth.model'].blank?
 	      	@env['omniauth.model'] = session.delete('omniauth.model')
 	      end
-
 	      OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
 	      callback_phase
 	    end
 
 
+
 	    def check_state
+	    	#puts "Came to check state."
 	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
-	    		c = Auth::Client.new(JSON.parse(request.params['state']))
-	    		if !Auth::Client.find_valid_api_key(c.api_key).nil?
-	    			session['omniauth.state'] = request.params['state'] = c.api_key
-	    			@env['omniauth.model'] = c.path
+	    		#puts "came to check state."
+	    		#puts "state is :#{request.params['state']}"
+	    		begin
+		    		c = Auth::Client.new(JSON.parse(request.params['state']))
+		    		if !Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id).nil?
+		    			#puts "found a valid client."
+		    			session['omniauth.state'] = request.params['state'] = c.api_key
+		    			@env['omniauth.model'] = c.path
+		    			puts "c path is: #{c.path}"
+		    			
+		    			puts "model set to:"
+		    			puts @env["omniauth.model"]
+		    		end
+	    		rescue
+	    			##should rescue situations where the json could not be parsed into a client object.
 	    		end
 	    	end
 	    end
@@ -183,7 +196,10 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 	end
 
 	
-	on_failure { |env| Auth::OmniauthCallbacksController.action(:failure).call(env) }
+	on_failure { |env|
+	  #puts "came to on faliure."
+	  #puts JSON.pretty_generate(env)
+	 Auth::OmniauthCallbacksController.action(:failure).call(env) }
 	
 	oauth_credentials = Auth.configuration.oauth_credentials.map{|k,v| [OmniAuth::Utils.camelize(k).downcase, v]}.to_h
 	oauth_keys = oauth_credentials.keys

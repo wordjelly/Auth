@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.feature "", :type => :feature, :features => true do
   before(:each) do 
- 	  ActionController::Base.allow_forgery_protection = true
+ 	    ActionController::Base.allow_forgery_protection = true
         User.delete_all
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
@@ -51,7 +51,7 @@ RSpec.feature "", :type => :feature, :features => true do
   end
 
 
-  scenario "it can sign in with oauth2" do 
+  scenario "it can sign in with oauth2", :mark => true do 
     visit new_user_registration_path
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash

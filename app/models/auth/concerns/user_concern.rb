@@ -216,8 +216,9 @@ module Auth::Concerns::UserConcern
 	###@param[Array] : array of field names that you want the values for.
 	###@return[Hash] : hash of key , value pairs containing the values that you asked for.
 	def get_user_info(keys)
-		keys.keep_if{|c| self.respnod_to(c.to_sym) && USER_INFO_FIELDS.include? c}
-		return Hash[keys.map{|c| [c,self[c]]}]
+		keys = keys.keep_if{ |c| (USER_INFO_FIELDS.include? c) && (self.respond_to(c.to_sym)) }
+
+		return Hash[keys.map{|c| [c,self.send("#{c}")]}]
 	end
 
 

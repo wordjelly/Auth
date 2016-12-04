@@ -83,9 +83,10 @@ module Auth::Concerns::OmniConcern
   end
 
   def omni_common
-        
+
+        ##do_before_request
         ##clear the omniauth state from the session.
-        session.delete('omniauth.state')
+        #session.delete('omniauth.state')
         ##this is set in the devise.rb initializer, in the before_action under devise controller, which checks if it is the omniauth_callbacks controller.
         model_class = request.env["devise.mapping"]
         if model_class.nil?
@@ -119,6 +120,9 @@ module Auth::Concerns::OmniConcern
 
             set_access_token_and_expires_at(access_token,token_expires_at)
 
+            #puts "resource before the update"
+            #puts JSON.pretty_generate(@resource.attributes)
+
             @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
 
             if @resource.op_success
@@ -134,7 +138,8 @@ module Auth::Concerns::OmniConcern
               redirect_to after_sign_in_path_for(@resource)
               
             else
-              
+
+              #puts "Failed to update the acceess token and token expires at."
               redirect_to omniauth_failed_path_for(resource_klazz.name)
 
             end
@@ -147,7 +152,7 @@ module Auth::Concerns::OmniConcern
             after_sign_in_path_for(current_res)        
 
           else 
-
+            #puts "no such user exists."
             Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
               
             
@@ -197,7 +202,7 @@ module Auth::Concerns::OmniConcern
               #puts u.attributes.to_s
               redirect_to after_sign_in_path_for(@resource)    
             else
-              puts "came to omniauth failure path."
+              #puts "came to omniauth failure path."
               redirect_to omniauth_failure_path(resource_klazz.name)
             end
 

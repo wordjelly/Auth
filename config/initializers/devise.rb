@@ -296,6 +296,7 @@ DeviseController.class_eval do
   end
 
   def is_omniauth_callback?
+    puts "this is an omniauth callbakc."
     set_devise_mapping_for_omniauth
     controller_name == "omniauth_callbacks"
   end
@@ -396,7 +397,7 @@ DeviseController.class_eval do
 
       else
        
-        @client = Auth::Client.where(:api_key => params[:api_key], :app_ids => {"$in" => [params[:current_app_id]]}).first
+        @client = Auth::Client.find_valid_api_key_and_app_id(params[:api_key], params[:current_app_id])
         @client.current_app_id = params[:current_app_id]
         if !@client.nil?
           #puts "CLIENT WAS SUCCESSFULLY SET."
