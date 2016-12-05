@@ -1,0 +1,17 @@
+<h5 class="teal-text fw-200 center m-0-top p-0-top">Enter your Email Address</h5>
+<% if !resource.nil? && resource.respond_to?("pending_reconfirmation?") %>
+	<%= form_for(resource, as: resource.class.name.underscore, url: confirmation_path(resource.class.name.underscore), remote: true, :authenticity_token => true, data: {type: "script"}, html: { method: :post, id: "login_form" }) do |f| %>
+	  <div class="row m-50-bottom">
+	  	  <div class="col l6 m6 s12 offset-l3 offset-m3">
+			  <div class="input-field m-30-top" style="margin-bottom:-30px;">
+			    <input autofocus="autofocus" type="email" value="<%= (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>" name="user[email]" id="user_email">
+			    <label for="user_email" class="">Email</label>
+			  </div>
+			  <%= render '/modals/oauth_and_submit.html.erb' %>
+			  <div class="actions">
+			    <%= f.submit "Resend confirmation instructions", style: "display:none;", id:"login_submit" %>
+			  </div>
+		  </div>
+	  </div>
+	<% end %>
+<% end %>

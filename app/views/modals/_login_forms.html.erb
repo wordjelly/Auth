@@ -1,0 +1,13 @@
+ <!-- REGISTRATION FORM. -->
+<% if !resource.nil? %>
+	<%= form_for(resource, as: resource.class.name.underscore, url: new_session_path(resource.class.name.underscore), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "login_form"}) do |f| %>
+	<div class="row" id="login_inputs">
+	  <div class="col l8 m10 s10 offset-l2 offset-m1 offset-s1">
+	    <%= render '/modals/sign_in_inputs.html.erb' %>
+	    <%= render '/modals/sign_up_inputs.html.erb' %>
+	    <%= render '/modals/oauth_and_submit.html.erb' %>
+	  </div>
+	</div>
+	<%= f.submit "Log In",  id: "login_submit", style: "display:none;" %>
+	<% end %>
+<% end %>

@@ -1,0 +1,8 @@
+<% if current_user %>
+  <!-- we store it in the sign out link -->
+  <li><%= link_to "Account", profile_user_path(current_user.id) %></li>
+  <li><%= link_to('Sign Out', destroy_user_session_path, :method => :delete, id: "sign_out") %>      </li> 
+  <li><%= link_to('New Corner', new_corner_path)  %></li>
+<% else %>
+  <li id="sign_in_nav_option"><a href="#" id="c_sign_in">Sign In</a></li>
+<% end %>

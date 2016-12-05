@@ -1,6 +1,7 @@
 require "auth/omniauth/path"
 require "auth/rails/routes"
 
+
 module Auth
   class Engine < ::Rails::Engine
     #isolate_namespace Auth

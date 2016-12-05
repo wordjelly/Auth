@@ -1,0 +1,191 @@
+if(case_it === "sign_in"){
+	//TITLE
+	$("#login_title").html("Sign In");
+	//CONTENT
+	$("#login_content").html("<%= escape_javascript(render partial: 'modals/login_default_content.html.erb') %>");
+	$("#login_forms").html("<%= escape_javascript(render partial: 'modals/login_forms.html.erb', locals: {user: login_opts['user']}) %>");
+	$("#recaptcha_tags").html("<%= escape_javascript(render partial: 'modals/recaptcha_tags.html.erb') %>");
+	//FOOTER.
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>");
+}
+else if(case_it === "sign_up_failed"){
+	//TITLE 
+	$("#login_title").html("Sign Up Failed");
+	//CONTENT
+	//set the content to the error notification, and show the error notification
+	
+	//now some logic.
+	<% if login_opts['failed_fields'].nil? || login_opts['failed_fields'].empty? %>
+			
+			$("#error_message_wrapper").show();
+			$("#login_error_message").html("Your request didn't go through, try again in some time.");
+
+	<% else %>
+	      
+	      //grecaptcha.reset();
+
+			<% login_opts['failed_fields'].stringify_keys.each do |field,message| %>
+				
+				<% if field =~ /recaptcha/ %>
+
+					
+		      		$("#login_error_message").
+		      		text("<%= escape_javascript(message)%>");
+		      		$("#login_error_message").append("<p class=\"blue-grey-text text-darken-3 fw-500\">The Captcha looks like this.</p>  <img src=\"/assets/recaptcha_for_modal.gif\" height=\"100\"/>")
+		      	<% else %>
+
+		      		var label = $('label[for="user_<%= escape_javascript(field) %>"]');
+		      		var input = $('#user_' + '<%= escape_javascript(field) %>');
+
+		      		input.attr("class","invalid");
+		      		input.attr("aria-invalid",true);
+		      		label.attr("data-error","<%= escape_javascript(message[0]) %>");
+		                  $("input[class~='valid']").each(function(index){
+		                        $(this).prop("disabled",true);
+		                  });
+		                  
+
+				<% end %>
+
+			<% end %>
+
+		
+
+	<% end %>
+
+}
+else if(case_it === "sign_up_success"){
+	//TITLE
+	$("#login_title").html("Sign Up Successfull");
+	//CONTENT
+	$("#login_content").html("<%= escape_javascript(render partial: 'modals/sign_up_success_content.html.erb', locals: {name: login_opts['name'], email: login_opts['email']}) %>");
+	//FOOTER
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>");
+	$("#show_sign_up").hide();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").show();
+}
+else if(case_it === "sign_in_success"){
+	$("#personalization").html("<%= escape_javascript(render partial: 'layouts/personalization.html.erb') %>");
+	$("#login_title").html("Sign In Successfull !");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/sign_in_success_content.html.erb' ) %>");
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>");
+	$("#show_sign_up").hide();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").hide();
+	
+}
+else if(case_it === "sign_in_failed"){
+	
+	<% if flash[:failure_message]=~/invalid/i %>
+		//both are invalid, or one is blank or something.
+		var input = $("#user_email");
+		var label = $('label[for="user_email"]');
+		input.attr("class","invalid");
+		input.attr("aria-invalid",true);
+		label.attr("data-error","Please check this field");
+		input = $("#user_password");
+		label = $('label[for="user_password"]');
+		input.attr("class","invalid");
+		input.attr("aria-invalid",true);
+		label.attr("data-error","Please check this field.");
+	<% elsif flash[:failure_message]=~/email/i %>
+		//if the error is with the email, clear the password
+		$("#user_password").val('');
+		//remove its class as being either valid or invalid
+		$('label[for="user_password"]').removeClass("valid invalid");
+		//its aria-invalid, should be false.
+		$('label[for="user_password"]').attr('aria-invalid',false);
+		//remove the data-error.
+		$('label[for="user_password"]').removeAttr('data-error');
+		//assign the label and input field to be changed.
+		var label = $('label[for="user_email"]');
+		var input = $('#user_email');
+		input.attr("class","invalid");
+		input.attr("aria-invalid",true);
+		label.attr("data-error","<%= escape_javascript(flash[:failure_message]) %>");
+	<% else %>
+		//make the email valid
+		$('label[for="user_email"]').removeClass("invalid").addClass("valid");
+		//remove the aria invalid from the label.
+		$('label[for="user_email"]').attr('aria-invalid',false);
+		//remove the data-error attribute.
+		$('label[for="user_email"]').removeAttr('data-error');
+		var label = $('label[for="user_password"]');
+		var input = $('#user_password');
+		input.attr("class","invalid");
+		input.attr("aria-invalid",true);
+		label.attr("data-error","<%= escape_javascript(flash[:failure_message]) %>");
+	<% end %>	
+	
+}
+else if(case_it === "forgot_password"){
+	$("#login_title").hide().show().html("Forgot Password");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/forgot_password_content.html.erb', locals: {resource: login_opts['resource']}) %>");
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>");
+	toggle_oauth();
+	toggle_sign_up_text("Sign In or Sign Up");
+	$("#show_sign_up").show();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").hide();
+}
+else if(case_it === "forgot_password_success"){
+	$("#login_title").hide();
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/forgot_password_success_content.html.erb', locals: {resource: login_opts['resource']}) %>");
+	$("#login_footer").hide();
+}
+else if(case_it === "forgot_password_failed"){
+	<% if !login_opts['resource'].nil? && !login_opts['resource'].errors.empty? %>
+		<% login_opts['resource'].errors.each do |attr,message| %>
+			<% if attr.to_s == "email" %>
+				var label = $('label[for="user_email"]');
+				var input = $('#user_email');
+				input.attr("class","invalid");
+				input.attr("aria-invalid",true);
+				label.attr("data-error","<%= attr.to_s.capitalize + ' ' +message %>");
+			<% end %>
+		<% end %>
+	<% else %>
+		$("#error_message_wrapper").show();
+		$("#login_error_message").html("Your request didn't go through, try again in some time.");
+	<% end %>
+}
+else if(case_it === "resend_confirmation"){
+	$("#login_title").hide().show().html("Resend Confirmation Email");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/resend_confirmation_content.html.erb', locals: {resource: login_opts['resource']}) %>");
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>");
+	toggle_oauth();
+	toggle_sign_up_text("Sign In or Sign Up");
+	$("#show_sign_up").show();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").hide();
+}
+else if(case_it === "resend_confirmation_success"){
+	$("#login_title").hide();
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/resend_confirmation_success_content.html.erb', locals: {resource: login_opts['resource']}) %>");
+	$("#login_footer").hide();
+}
+else if(case_it === "resend_confirmation_failed"){
+	<% if !login_opts['resource'].nil? && !login_opts['resource'].errors.empty? %>
+		<% login_opts['resource'].errors.each do |attr,message| %>
+			<% if attr.to_s == "email" %>
+				var label = $('label[for="user_email"]');
+				var input = $('#user_email');
+				input.attr("class","invalid");
+				input.attr("aria-invalid",true);
+				label.attr("data-error","<%= attr.to_s.capitalize + ' ' +message %>");
+			<% end %>
+		<% end %>
+	<% else %>
+		$("#error_message_wrapper").show();
+		$("#login_error_message").html("Your request didn't go through, try again in some time.");
+	<% end %>
+}
+else if(case_it === "edit_account"){
+	$("#login_title").html("Edit Account Settings");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/edit_account_content.html.erb', locals: {resource: login_opts['resource']} ) %>");
+	hide_oauth();
+	$("#login_footer").hide();
+}
+
+<!--<%= render :partial => '/corners/corner_invites_publish_add_remove_stats.html.erb', locals:{c: corner, p: show_permissions, corner_id: corner.id.to_s} %>-->

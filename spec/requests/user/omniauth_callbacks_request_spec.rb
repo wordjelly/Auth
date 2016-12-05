@@ -18,8 +18,8 @@ RSpec.describe "Registration requests", :type => :request do
   end
 
 
-  context " -- json request to callback url ", :oauth => true do 
-    it " -- works --" do 
+  context " -- google_oauth_2 ", :oauth => true do 
+    it " -- json request to callback url with state built from json encoded client, works --" do 
     OmniAuth.config.test_mode = false
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
@@ -27,6 +27,8 @@ RSpec.describe "Registration requests", :type => :request do
     end
 
   end
+
+  
   
   ###THIS TEST IS ONLY APPLICABLE TO FACEBOOK , BECAUSE WE CAN SHARE THE AUTHENTICATION TOKEN BETWEEN THE ANDROID APP AND THE SERVER.
 

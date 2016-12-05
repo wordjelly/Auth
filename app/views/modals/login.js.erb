@@ -1,0 +1,120 @@
+var case_it = "<%= case_it %>";
+console.log("case is :" + case_it);
+//controller=>sessions,action=>new,success/failure -> here meaningless
+if(case_it == "sessions_new_success"){
+	//TITLE
+	$("#login_title").html("Sign In").show();
+	//CONTENT
+	$("#login_content").html("<%= escape_javascript(render partial: 'modals/login_default_content.html.erb') %>").show();
+	$("#login_forms").html("<%= escape_javascript(render partial: 'modals/login_forms.html.erb', locals: {resource: login_opts['resource']}) %>").show();
+	$("#recaptcha_tags").html("<%= escape_javascript(render partial: 'modals/recaptcha_tags.html.erb') %>").show();
+	//FOOTER
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>").show();
+}
+else if(case_it == "sessions_create_success"){
+	mark_all_input_fields_valid();
+	$("#personalization").html("<%= escape_javascript(render partial: 'layouts/personalization.html.erb') %>");
+	$("#login_title").html("Sign In Successfull !").show();
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/sign_in_success_content.html.erb' ) %>").show();
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>").hide();
+}
+else if(case_it == "registrations_create_success"){
+	mark_all_input_fields_valid();
+	//TITLE
+	$("#login_title").html("Sign Up Successfull");
+	//CONTENT
+	var resource_active = "<%= login_opts['resource'].active_for_authentication? %>";
+
+	if(resource_active == "true"){
+		$("#login_content").html("<%= escape_javascript(render partial: 'modals/sign_up_success_content.html.erb', locals: {name: login_opts['resource'].name, email: login_opts['resource'].email}) %>").show();
+		window.location.href = "<%= profile_user_path(login_opts['resource'].id) %>";
+		$("#login_footer").html("Redirecting you to your Profile").show();
+	}
+	else{
+		$("#login_content").html("<%= escape_javascript(render partial: 'modals/sign_up_success_inactive_content.html.erb', locals: {name: login_opts['resource'].name, email: login_opts['resource'].email}) %>").show();
+		//FOOTER
+		$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>").show();
+		$("#show_sign_up").hide();
+		$("#forgot_password").hide();
+		$("#resend_confirmation_email").show();
+	}
+}
+else if(case_it == "registrations_create_failed"){
+	mark_all_input_fields_valid();
+	<% login_opts['resource'].errors.each do |attrib,message| %>
+		<% if attrib =~ /recaptcha/ %>
+			show_modal_error_message("<%= escape_javascript(message) %>");	
+		<% else %>
+			var resource_name = "<%= login_opts['resource'].class.name.underscore %>";
+			var field_id = resource_name + "_" + "<%= attrib %>";
+			invalidate_input_field(field_id,"<%= message.html_safe %>");
+		<% end %>
+	<% end %>
+	//should focus on the first invalid field.
+}
+else if(case_it == "registrations_edit_success"){
+	$("#login_title").html("Edit Account Settings");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/edit_account_content.html.erb', locals: {resource: login_opts['resource']} ) %>");
+	hide_oauth();
+	$("#login_footer").hide();
+}
+else if(case_it == "registrations_update_success"){
+	$("#login_title").html("Account Settings Successfully Updated!");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/edit_account_success_content.html.erb', locals: {resource: login_opts['resource']} ) %>");
+	hide_oauth();
+	$("#login_footer").hide();
+}
+else if(case_it == "registrations_update_failed"){
+	//first make all fields valid.
+	mark_all_input_fields_valid();
+	<% login_opts['resource'].errors.each do |attrib,message| %>
+		var resource_name = "<%= login_opts['resource'].class.name.underscore %>";
+			var field_id = resource_name + "_" + "<%= attrib %>";
+			invalidate_input_field(field_id,"<%= message.html_safe %>");
+	<% end %>
+}
+else if(case_it == "passwords_new_success"){
+	$("#login_title").show().html("Forgot Password");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/forgot_password_content.html.erb', locals: {resource: login_opts['resource']}) %>").show();
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>").show();
+	toggle_oauth();
+	toggle_sign_up_text("Sign In or Sign Up");
+	$("#show_sign_up").show();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").hide();
+}
+else if(case_it == "passwords_create_success"){
+	$("#login_title").hide();
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/forgot_password_success_content.html.erb', locals: {resource: login_opts['resource']}) %>").show();
+	$("#login_footer").hide();
+}
+else if(case_it == "passwords_create_failed"){
+	<% login_opts['resource'].errors.each do |attrib,message| %>
+		var resource_name = "<%= login_opts['resource'].class.name.underscore %>";
+			var field_id = resource_name + "_" + "<%= attrib %>";
+			invalidate_input_field(field_id,"<%= message.html_safe %>");
+	<% end %>
+}
+else if(case_it == "confirmations_new_success"){
+	$("#login_title").show().html("Resend Confirmation Email");
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/resend_confirmation_content.html.erb', locals: {resource: login_opts['resource']}) %>").show();
+	$("#login_footer").html("<%= escape_javascript(render partial: 'modals/login_navigation_options.html.erb') %>").show();
+	toggle_oauth();
+	toggle_sign_up_text("Sign In or Sign Up");
+	$("#show_sign_up").show();
+	$("#forgot_password").hide();
+	$("#resend_confirmation_email").hide();
+}
+else if(case_it == "confirmations_create_success"){
+    $("#login_title").hide();
+	$("#login_content").html("<%= escape_javascript(render partial:'modals/resend_confirmation_success_content.html.erb', locals: {resource: login_opts['resource']}) %>").show();
+	$("#login_footer").hide();
+}
+else if(case_it == "confirmations_create_failed"){
+	<% login_opts['resource'].errors.each do |attrib,message| %>
+		var resource_name = "<%= login_opts['resource'].class.name.underscore %>";
+			var field_id = resource_name + "_" + "<%= attrib %>";
+			invalidate_input_field(field_id,"<%= message.html_safe %>");
+	<% end %>
+}
+open_sign_in_modal_if_closed();

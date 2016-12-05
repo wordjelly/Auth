@@ -1,0 +1,6 @@
+1. add materialize.css stylesheet to stylesheets
+2. import ajax_error_modal
+3. add ajax_error_modal and personalization erb to layouts
+4. import spinner
+5. import other necessary js files to make you_need_to_sign_in.js work.
+6. refactor to remove references to user, and instead use resource

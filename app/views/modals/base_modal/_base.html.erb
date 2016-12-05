@@ -1,0 +1,25 @@
+<div class="modal-content">
+     <h4 class="fs-16">
+      <i class="mdi-content-clear right cursor-pointer modal-close"></i>
+     </h4>
+     <div class="row m-0-top">
+      <div class="section p-0-top" id="login_header<%= namespace %>">
+        <div class="row center">
+          <div class="col l6 offset-l3 m8 offset-m2 s12">
+            <h3 class="teal-text fw-200 m-10-bottom center" id="login_title<%= namespace %>"><%=modal_title %></h3>
+            <%= render '/modals/error_notification.html.erb' %>
+          </div>
+        </div>
+      </div>
+      <div class="section" id="login_content<%= namespace %>">
+        <% if !modal_content.nil? %>
+        <%= render modal_content %>
+        <% end %>
+      </div>
+      <div class="section p-0-top m-0-top" id="login_footer<%= namespace %>">
+        <% if !modal_footer.nil? %>
+        <%= render modal_footer %>
+        <% end %>
+      </div>
+     </div>
+</div>

@@ -11,3 +11,4 @@
 // about supported directives.
 //
 //= require_tree .
+//= require you_need_to_sign_in.js

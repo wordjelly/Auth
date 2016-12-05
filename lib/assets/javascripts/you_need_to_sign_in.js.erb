@@ -1,0 +1,303 @@
+/****
+looks for a div with the id "sign_out", if its present, then returns true, otherwise false
+*****/
+function user_signed_in(){
+	return $("#sign_out").length > 0 ? true : false;
+}
+
+/*****
+sends a get request to the particular controller.
+
+******/
+function load_forms(name){
+	if(name === "sign_in_sign_up"){
+		$.get(
+			{url : window.location.origin + "/users/sign_in",
+			 success : function( data ) {},
+			 dataType : "script"
+			});
+	}
+	else if(name === "forgot_password"){
+		$.get(
+		{url : window.location.origin + "/users/password/new",
+		 success : function(data){},
+		 dataType : "script"});
+	}
+
+	else if(name === "resend_confirmation_email"){
+		$.get(
+		{url : window.location.origin + "/users/confirmation/new",
+		 success : function(data){},
+		 dataType : "script"});
+	}
+}
+
+
+function open_sign_in_modal_if_closed(){
+	
+	if($('#sign_in_needed_modal').is(':visible')){
+
+	}
+	else{
+		$("#sign_in_needed_modal").openModal({});
+	}
+}
+
+/****
+callback used to target events that need to be protected by sign in.
+****/
+function sign_in_required(event){
+	if(user_signed_in()){
+		//console.log("user signed in");
+		return false;
+	}
+	else{
+		//console.log("user not signed in");
+		if(!!event){
+			//console.log("stopping propagation");
+			event.preventDefault();
+			event.stopPropagation();
+			event.stopImmediatePropagation();
+		}
+		load_forms("sign_in_sign_up");
+		return true;
+	}
+}
+
+var set_sign_in_modal = function(){
+	//on clearing the 
+	$("#sign_in_needed_modal").leanModal({
+		dismissible: true, 
+	    opacity: .5, 
+		in_duration: 300, 
+		out_duration: 200,
+		after_close: function(options){
+			
+		}
+	});
+
+}
+
+//NAV OPTIONS.
+/****
+on clicking show_sign_up, this handles toggling back and forth from 
+the sign_in_screen, so there is no seperate button for showing sign_in, it is just toggling the sign_up.
+****/
+$(document).on('click','#show_sign_up',function(event){
+	var current_screen = get_current_screen();
+	if(current_screen === "Forgot Password" || current_screen === "Resend Confirmation Email"){
+		load_forms("sign_in_sign_up");
+	}
+	else if(current_screen === "Sign In" || current_screen === "Sign Up"){
+		toggle_sign_in_sign_up();
+	}
+});
+
+$(document).on('click','#forgot_password',function(event){
+	load_forms("forgot_password");
+});
+
+$(document).on('click','#resend_confirmation_email',function(event){
+	load_forms("resend_confirmation_email");
+});
+
+/****
+show or hide the oauth icons and 
+****/
+var toggle_oauth = function(){
+	$('#oauth_icons').toggle();
+	$("#submit").toggleClass("l6 m6 s6 p-0-left p-0-right").toggleClass("l12 m12 s12 center");	
+	$("#submit_icon").toggleClass("right");
+}
+
+var hide_oauth = function(){
+	$('#oauth_icons').hide();
+	$('#submit').removeClass("l6 m6 s6 p-0-left p-0-right").addClass("l12 m12 s12 center");
+	$('#submit_icon').removeClass('right');
+}
+
+var show_oauth = function(){
+	$('#oauth_icons').show();
+	$('#submit').addClass("l6 m6 s6 p-0-left p-0-right").removeClass("l12 m12 s12 center");
+	$('#submit_icon').addClass('right');	
+}
+
+var toggle_sign_up_text = function(new_text){
+	var sign_up_text = $("#show_sign_up").text();
+	if(new_text != null){
+		$("#show_sign_up").text(new_text);
+		return;
+	}
+	$("#show_sign_up").text(sign_up_text == "Don't have an Account? Sign Up For Free" ? "Already Have An Account? Sign In" : "Don't have an Account? Sign Up For Free");
+}
+
+var toggle_sign_in_sign_up = function(){
+	$('#sign_up_inputs').toggle();
+	$('#sign_up_inputs').toggleClass('m-20-bottom');
+	var login_title_text = $('#login_title').text();
+    $('#login_title').text(
+        login_title_text == "Sign In" ? "Sign Up" : "Sign In");
+    toggle_oauth();
+    toggle_sign_up_text();
+}
+
+var get_current_screen = function(){
+	return $('#login_title').text();
+}
+
+/****
+provide the input id without the hash.
+****/
+var invalidate_input_field = function(input_id,error_message,add_error_message){
+	console.log("came to invalidate input field.");
+	add_error_message = add_error_message || true;
+	var input = $("#" + input_id);
+	var label = $('label[for="'+ input_id +'"]');
+	input.attr("class","invalid");
+	input.attr("aria-invalid",true);
+	if(add_error_message){
+		label.attr("data-error",error_message);
+	}
+}
+
+/*****
+focus on the first invalid field.
+@args:
+resource : resource.
+*****/
+var focus_first_invalid_field = function(resource){
+
+}
+
+/***
+provide the input id without the hash.
+***/
+var make_input_field_valid = function(input_id){
+	//provided that the field is not empty.
+	if($("#" + input_id).val()){
+		$("#" + input_id).removeClass("invalid").addClass("valid");
+		$("#" + input_id).attr("aria-invalid",false);
+		$('label[for="' + input_id + '"]').removeClass("invalid").addClass("valid");
+		//remove the aria invalid from the label.
+		$('label[for="' + input_id + '"]').attr('aria-invalid',false);
+		//remove the data-error attribute.
+		$('label[for="' + input_id + '"]').removeAttr('data-error');
+	}
+}
+
+var mark_all_input_fields_valid = function(){
+	yield_input_fields(function(field_name,field_jq_obj){
+		make_input_field_valid(field_jq_obj.attr("id"));
+	});
+}
+
+/***
+yields all the input fields of the form to a function called operation.
+operation should accept two arguments(field_name, and a jquery object representing the input field)
+***/
+var yield_input_fields = function(operation){
+	$("#login_form").find("input").each(function(index){
+         
+         if($(this).attr("id") != null && $(this).attr("id").indexOf("_") != -1){
+            
+            var field_name = ($(this).attr("id").split("_")).pop().toLowerCase();
+
+            operation(field_name,$(this));
+        }
+    });
+}
+
+/***
+here first we make each field valid, and then only invalidate the ones whose names are mentioned in the error message.
+***/
+var mark_invalid_fields_on_sign_in_failure = function(error){
+	yield_input_fields(function(field_name,field_jq_obj){
+		make_input_field_valid(field_jq_obj.attr("id"));
+        if(error.toLowerCase().indexOf(field_name) != -1){
+           //invalidate it, show the error in the error notification box.
+           invalidate_input_field(field_jq_obj.attr("id"),null,false);
+        }
+	});
+	
+}
+
+/***
+clears the input field value and makes it and its label neither valid nor
+invalid.
+***/
+var normalize_input_field = function(input_id){
+	//if the error is with the email, clear the password
+	$("#" + input_id).val('');
+	//remove its class as being either valid or invalid
+	$('label[for="' + input_id + '"]').removeClass("valid invalid");
+	//its aria-invalid, should be false.
+	$('label[for="' + input_id + '"]').attr('aria-invalid',false);
+	//remove the data-error.
+	$('label[for="' + input_id + '"]').removeAttr('data-error');
+}
+
+
+/****
+show generic error message.
+leanmodal modification has been modified to clear any error message when
+the modal is closed
+refer to leanModal_modification.js
+****/
+var show_modal_error_message = function(error_message){
+   //console.log("came to show modal error message");
+   if(!error_message){
+		error_message = "Your request didn't go through, try again in some time.";
+   }
+   //open the error notification modal if no modal is open
+   if($(".modal:visible").length == 0){
+   	toggle_ajax_error_modal();
+   }
+   $(".modal:visible").find(".error_notification").show();
+   $(".modal:visible").find(".error_message").html(error_message);
+}
+
+$(document).on('click','#submit',function(event){
+	//if the login text is "Sign_up, then submit the sign_up form"
+	//if the login text is "Sign In", then submit the sign_in form"
+	var login_type = get_current_screen();
+	
+	if(login_type == "Sign In"){
+		//the url should be 
+		$("#login_form").attr("action","/users/sign_in");
+		$("#login_submit").val("Log In");
+	}
+	else if(login_type == "Forgot Password"){
+		console.log("got the forgot password login type.");
+		$("#login_form").attr("action","/users/password");
+		$("#login_submit").val("Send me reset password instructions");
+	}
+	else if(login_type == "Resend Confirmation Email"){
+		$("#login_form").attr("action","/users/confirmation");
+		$("#login_submit").val("Resend confirmation instructions");	
+	}
+	else if(login_type == "Sign Up"){
+		$("#login_form").attr("action","/users");
+		$("#login_submit").val("Sign Up");
+	}
+	else if(login_type == "Edit Account Settings"){
+		$("#login_form").attr("action","/users");
+		$("#login_submit").val("Update");
+	}
+	//$("#login_submit").trigger("click");
+	$("#login_form").submit();
+});
+
+/***
+on clicking the 'sign_in' option in the nav bar.
+***/
+$(document).on('click','#sign_in_nav_option',function(event){
+	sign_in_required(event);
+});
+
+
+
+$(document).ready(set_sign_in_modal);
+$(document).on('page:load', set_sign_in_modal);
+
+
+
