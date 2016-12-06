@@ -7,8 +7,45 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
+<div class="row">
+    <div class="navbar-fixed">
+      <nav class="teal">
+        <div class="nav-wrapper">
+          <a href="/" class="brand-logo">WordJelly
+          
+            <div class="preloader-wrapper small active m-5-left" style="vertical-align:middle; height:18px; width:18px; display:none;" id="progress_circle">
+              <div class="spinner-layer spinner-white-only">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div><div class="gap-patch">
+                  <div class="circle"></div>
+                </div><div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+          
 
+          </a>
+
+          <ul class="right hide-on-med-and-down">
+            <li><%= link_to "Latest Corner",corners_path %></li>
+            <li><%= link_to "new image upload",new_test_path %></li>
+            <li><a href="#">WP Plugin</a></li>
+            <li><a href="components.html">Popular</a></li>
+            <span id="personalization">
+             <%= render '/layouts/personalization.html.erb' %>
+            </span>
+          </ul>
+        </div>
+    </nav>
+  </div>
+</div>
+<div class="container">
 <%= yield %>
+</div>
+<%= render :partial => "/modals/ajax_error_modal.html.erb" %>
+<%= render '/modals/sign_in_needed_modal.html.erb' %>
 
 </body>
 </html>
