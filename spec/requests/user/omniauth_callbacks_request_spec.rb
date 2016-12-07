@@ -18,7 +18,17 @@ RSpec.describe "Registration requests", :type => :request do
   end
 
 
-  context " -- google_oauth_2 ", :oauth => true do 
+  context " -- google_oauth_2 ", :oauth => true do
+    ###THERE ARE BASICALLY THREE POSSIBILITIES:
+    ##1. PARAMS CONTAIN "CODE" - THIS IS DONE WHEN YOU HAVE ASKED THE USER ON AN ANDROID APP, TO GIVE OFFLINE ACCESS. YOU WILL HAVE TO POST THIS CODE TO THE CALLBACK URL, AND THIS SHOULD BE A JSON REQUEST.
+
+    ##2. PARAMS CONTAIN "CODE" + "REDIRECT_URL" - THIS IS THE USUAL WEB APPLICATION FLOW.
+
+    ##3. PARAMS CONTAIN "ACCESS_TOKEN" - THIS IS WHEN WE HAVE ASKED USER ONLY FOR CERTAIN PERMISSIONS, AND SO NOT TOTAL SERVER-SIDE API ACCESS, AND SO IT RETURNS ONLY A USER_ID_TOKEN, WHICH HAS TO BE PASSED INTO THE CALLBACK UNDER THE PARAM_NAME OF ACCESS_TOKEN.
+
+    ##WE HAVE TO TEST POSSIBLITY ONE AND THREE.
+    ##FROM THE ANDROID APP.
+
     it " -- json request to callback url with state built from json encoded client, works --" do 
     OmniAuth.config.test_mode = false
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
@@ -28,19 +38,8 @@ RSpec.describe "Registration requests", :type => :request do
 
   end
 
-  
-  
-  ###THIS TEST IS ONLY APPLICABLE TO FACEBOOK , BECAUSE WE CAN SHARE THE AUTHENTICATION TOKEN BETWEEN THE ANDROID APP AND THE SERVER.
-
-  ##THE ONLY THING IS THAT IN CASE WE ALREADY HAVE A DESKTOP AUTHENTICATION FOR THIS USER, WITH AN ACCESS TOKEN, AND THEN HE TRIES TO AUTHENTICATE WITH ANDROID, OUR SERVER WILL REPLY SAYING THERE IS ALREADY AN ACCOUNT WITH THIS EMAIL.
-
-  ##HOW TO HANDLE THIS SITUATION.
-  ##provided that the uid and provider is the same he will simply get signed in.
-  ##in that case, he will behave like a signed in user, and we can use the new authentication token, instead, which we are already doing.
-  ##so we just need to simulate this one request.
+  ##in case of facebook the app_id as long as it is same, then posting the code to the callback endpoint should work out.
     
-  ##for the google tests we have to be able to call the test from java.
-
 
 
 
