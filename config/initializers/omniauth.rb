@@ -1,3 +1,13 @@
+module OmniAuth
+  module Strategies
+    GoogleOauth2.class_eval do 
+    	private 
+    	def callback_url
+    		options[:redirect_url] || ""
+    	end
+    end
+  end
+end
 module SimpleTokenAuthentication
 	module Configuration
 		mattr_accessor :additional_identifiers
@@ -151,12 +161,19 @@ module OmniAuth
 
 
 	    def check_state
-	    	#puts "Came to check state."
+	    	puts "Came to check state."
+	    	puts "is state blank?"
+	    	puts request.params['state'].blank?
+	    	puts "is it a json request."
+	    	puts JSON.is_json?(request.params['state'])
 	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
 	    		#puts "came to check state."
 	    		#puts "state is :#{request.params['state']}"
-	    		begin
-		    		c = Auth::Client.new(JSON.parse(request.params['state']))
+	    		#begin
+	    			q = JSON.parse(request.params['state'])
+	    			puts "parsed json"
+	    			c = Auth::Client.new(q)
+		    		#c = Auth::Client.new(JSON.parse(request.params['state']))
 		    		if !Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id).nil?
 		    			#puts "found a valid client."
 		    			session['omniauth.state'] = request.params['state'] = c.api_key
@@ -165,10 +182,13 @@ module OmniAuth
 		    			
 		    			puts "model set to:"
 		    			puts @env["omniauth.model"]
+		    		else
+		    			puts "did not find the client."
 		    		end
-	    		rescue
+	    		#rescue
 	    			##should rescue situations where the json could not be parsed into a client object.
-	    		end
+	    		#	puts "JSON could not be parsed."
+	    		#end
 	    	end
 	    end
 
