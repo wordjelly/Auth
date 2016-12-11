@@ -1,8 +1,54 @@
 module OmniAuth
   module Strategies
+  	Facebook.class_eval do 
+  		protected
+  		def build_access_token
+  			if request.params["fb_exchange_token"]
+  				##make the get request.
+  				verify_exchange_token(request.params["fb_exchange_token"])
+  			else
+  				verifier = request.params["code"]
+        		a_t = client.auth_code.get_token(verifier, {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true)), deep_symbolize(options.auth_token_params))
+  				a_t.options.merge!(access_token_options)
+  			end
+  		end
+
+  		private
+  		def verify_exchange_token(exchange_token)
+  			return false unless exchange_token 
+    		params = {:grant_type => "fb_exchange_token", "fb_exchange_token" => exchange_token}.merge(client.auth_code.client_params)
+  			a_t = client.get_token(params)
+  			puts "a_t is :#{a_t}"
+  			a_t
+  		end
+
+  		def with_authorization_code!
+  			puts "do we have the key."
+  			puts request.params.key?('fb_exchange_token')
+  			if request.params.key?('code') || request.params.key?('fb_exchange_token')
+          		yield
+	        elsif code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code']
+	          request.params['code'] = code_from_signed_request
+	          @authorization_code_from_signed_request_in_cookie = true
+	          # NOTE The code from the signed fbsr_XXX cookie is set by the FB JS SDK will confirm that the identity of the
+	          #      user contained in the signed request matches the user loading the app.
+	          original_provider_ignores_state = options.provider_ignores_state
+	          options.provider_ignores_state = true
+	          begin
+	            yield
+	          ensure
+	            request.params.delete('code')
+	            @authorization_code_from_signed_request_in_cookie = false
+	            options.provider_ignores_state = original_provider_ignores_state
+	          end
+	        else
+	          raise NoAuthorizationCodeError, 'must pass either a `code` (via URL or by an `fbsr_XXX` signed request cookie)'
+	        end
+  		end
+
+  	end
     GoogleOauth2.class_eval do 
     	def custom_build_access_token
-    		
     		access_token =
     		if verify_id_token(request.params['id_token'])
     			puts "building a dummy access token.."
@@ -36,15 +82,15 @@ module OmniAuth
     	end
 
     	def verify_id_token(id_token)
-    		puts "--------------------------------------------------------------------------Came to verify id token with id token: #{id_token}"
+    		#puts "--------------------------------------------------------------------------Came to verify id token with id token: #{id_token}"
     		return false unless id_token
     		raw_response = client.request(:get, 'https://www.googleapis.com/oauth2/v3/tokeninfo',
                                       params: { id_token: id_token }).parsed
-    		puts "raw response is:"
-    		puts raw_response.to_s
+    		#puts "raw response is:"
+    		#puts raw_response.to_s
         	if raw_response['aud'] == options.client_id || options.authorized_client_ids.include?(raw_response['aud'])
 	        	@raw_info ||= raw_response
-	        	puts "responding with true."
+	        	#puts "responding with true."
 	        	true
 	        else
 	        	false
