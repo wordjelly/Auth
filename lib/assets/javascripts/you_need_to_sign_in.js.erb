@@ -1,3 +1,9 @@
+/***
+the resource to which all the paths will refer.
+will be the downcased pluralized form
+eg: users or admins
+***/
+var resource = null;
 /****
 looks for a div with the id "sign_out", if its present, then returns true, otherwise false
 *****/
@@ -12,21 +18,21 @@ sends a get request to the particular controller.
 function load_forms(name){
 	if(name === "sign_in_sign_up"){
 		$.get(
-			{url : window.location.origin + "/users/sign_in",
+			{url : window.location.origin + "/"+ resource +"/sign_in",
 			 success : function( data ) {},
 			 dataType : "script"
 			});
 	}
 	else if(name === "forgot_password"){
 		$.get(
-		{url : window.location.origin + "/users/password/new",
+		{url : window.location.origin + "/" + resource + "/password/new",
 		 success : function(data){},
 		 dataType : "script"});
 	}
 
 	else if(name === "resend_confirmation_email"){
 		$.get(
-		{url : window.location.origin + "/users/confirmation/new",
+		{url : window.location.origin + "/" + resource + "/confirmation/new",
 		 success : function(data){},
 		 dataType : "script"});
 	}
@@ -263,24 +269,24 @@ $(document).on('click','#submit',function(event){
 	
 	if(login_type == "Sign In"){
 		//the url should be 
-		$("#login_form").attr("action","/users/sign_in");
+		$("#login_form").attr("action","/" + resource + "/sign_in");
 		$("#login_submit").val("Log In");
 	}
 	else if(login_type == "Forgot Password"){
 		console.log("got the forgot password login type.");
-		$("#login_form").attr("action","/users/password");
+		$("#login_form").attr("action","/" + resource + "/password");
 		$("#login_submit").val("Send me reset password instructions");
 	}
 	else if(login_type == "Resend Confirmation Email"){
-		$("#login_form").attr("action","/users/confirmation");
+		$("#login_form").attr("action","/" + resource + "/confirmation");
 		$("#login_submit").val("Resend confirmation instructions");	
 	}
 	else if(login_type == "Sign Up"){
-		$("#login_form").attr("action","/users");
+		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Sign Up");
 	}
 	else if(login_type == "Edit Account Settings"){
-		$("#login_form").attr("action","/users");
+		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Update");
 	}
 	//$("#login_submit").trigger("click");
@@ -290,7 +296,8 @@ $(document).on('click','#submit',function(event){
 /***
 on clicking the 'sign_in' option in the nav bar.
 ***/
-$(document).on('click','#sign_in_nav_option',function(event){
+$(document).on('click','.sign_in_nav_option',function(event){
+	resource = event.target.attr("data-resource");
 	sign_in_required(event);
 });
 

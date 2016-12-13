@@ -22,21 +22,33 @@ module Auth
       send "current_#{get_signed_in_scope}"
     end
 
-    ##check whether the access token is invalid.
-    ##if there is no token_expired value, then it is false, 
-    ##
-=begin
-    def access_token_expired?
-
-    ##if it is omniauthable.
-      if !current_res.nil? && !Auth.configuration.auth_resources[current_res.name][:skip].include? :omniauthable
-
-        resource.token_expired.nil? ? false : resource.token_expired
-        
-      end
-  
+    ##@return[String] : downcased current resource name
+    def res_name_small
+      return unless current_res
+      return current_res.class.name.downcase
     end
-=end
+
+    ##@return[String] : Upcase current resource name 
+    def res_name
+      return unless current_res
+      return current_res.class.name
+    end
+
+    ##devise path helpers
+    def profile_res_path
+      send "profile_#{current_res.res_name_small}_path"
+    end
+
+    def destroy_res_session_path
+      send "destroy_#{current_res.res_name_small}_session_path"
+    end
+
+    ##SHOULD THE RESOURCE SIGN IN OPTIONS BE SHOWN IN THE NAV BAR?
+    def resource_in_navbar?(resource)
+      return false unless resource
+      return (Auth.configuration.auth_resources[resource.class.name][:nav_bar] && Auth.enable_sign_in_modals)
+    end
+
   end
 
 end

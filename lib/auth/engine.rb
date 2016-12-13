@@ -44,6 +44,7 @@ module Auth
     attr_accessor :oauth_credentials
     attr_accessor :mount_path
     attr_accessor :auth_resources
+    attr_accessor :enable_sign_in_modals
    
 
     def initialize
@@ -51,6 +52,7 @@ module Auth
       @oauth_credentials = {}
       @mount_path = "/authenticate"
       @auth_resources = {}
+      @enable_sign_in_modals = true
     end
   end
   

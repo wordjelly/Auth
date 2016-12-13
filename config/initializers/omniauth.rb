@@ -18,13 +18,9 @@ module OmniAuth
   			return false unless exchange_token 
     		params = {:grant_type => "fb_exchange_token", "fb_exchange_token" => exchange_token}.merge(client.auth_code.client_params)
   			a_t = client.get_token(params)
-  			puts "a_t is :#{a_t}"
-  			a_t
   		end
 
   		def with_authorization_code!
-  			puts "do we have the key."
-  			puts request.params.key?('fb_exchange_token')
   			if request.params.key?('code') || request.params.key?('fb_exchange_token')
           		yield
 	        elsif code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code']

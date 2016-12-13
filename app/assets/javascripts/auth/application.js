@@ -10,5 +10,9 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require_tree .
+//= require jquery
+//= require jquery_ujs
+//= require turbolinks
 //= require you_need_to_sign_in.js
+//= require materialize-sprockets
+//= require_tree .

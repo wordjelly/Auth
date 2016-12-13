@@ -1,8 +1,13 @@
-<% if current_user %>
-  <!-- we store it in the sign out link -->
-  <li><%= link_to "Account", profile_user_path(current_user.id) %></li>
-  <li><%= link_to('Sign Out', destroy_user_session_path, :method => :delete, id: "sign_out") %>      </li> 
-  <li><%= link_to('New Corner', new_corner_path)  %></li>
+<% if current_res && resource_in_navbar?(current_res)%>
+	<li><%= link_to "Account", profile_res_path(current_res.id) %></li>
+	<li><%= link_to('Sign Out', destroy_res_session_path, :method => :delete, id: "sign_out") %></li>
 <% else %>
-  <li id="sign_in_nav_option"><a href="#" id="c_sign_in">Sign In</a></li>
+	<% if Auth.configuration.enable_sign_in_modals %>
+		<%= puts Auth.configuration.auth_resources.to_s %>
+		<% Auth.configuration.auth_resources.keys.each do |res| %>
+			<% if Auth.configuration.auth_resources[res][:nav_bar] %>
+				<li class="sign_in_nav_option" data-resource="<%= res.downcase.pluralize %>"><a href="#">Sign In</a></li>
+			<% end %>
+		<% end %>
+	<% end %>
 <% end %>

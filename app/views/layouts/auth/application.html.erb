@@ -29,12 +29,8 @@
           </a>
 
           <ul class="right hide-on-med-and-down">
-            <li><%= link_to "Latest Corner",corners_path %></li>
-            <li><%= link_to "new image upload",new_test_path %></li>
-            <li><a href="#">WP Plugin</a></li>
-            <li><a href="components.html">Popular</a></li>
             <span id="personalization">
-             <%= render '/layouts/personalization.html.erb' %>
+             <%= render 'layouts/auth/personalization.html.erb' %>
             </span>
           </ul>
         </div>
@@ -44,8 +40,8 @@
 <div class="container">
 <%= yield %>
 </div>
-<%= render :partial => "/modals/ajax_error_modal.html.erb" %>
-<%= render '/modals/sign_in_needed_modal.html.erb' %>
+<%= render :partial => "auth/modals/ajax_error_modal.html.erb" %>
+<%= render 'auth/modals/sign_in_needed_modal.html.erb' %>
 
 </body>
 </html>
