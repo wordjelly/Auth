@@ -1,3 +1,21 @@
+###AUTH
+
+##Why This Gem?
+Integrating Devise with a Rails App is still a tiresome process.
+These days, most web-services have clients on multiple platforms like Android, IOS, Chrome extensions, JS widgets etc.
+There is no rails gem that provides a simplistic and easy to configure authentication system that supports all these needs.
+Wordjelly Auth combines Devise, SimpleTokenAuthentication, OmniAuth2 and several other gems to provide a one-fits-all authentication solution.
+Furthermore, having an authentication system is not enough without a shiny front-end. Wordjelly-Auth provides users with an optional authentication layout, using MaterializeCss.
+
+The entire installation process requires just ONE inializer file. You do not need to run generators, configure heavy config.rb files, or do anything fancy to get this working. The estimated time to get this running is less than a minute.
+
+##How to use:
+
+Add 'wj-auth' to your gemfile
+
+
+
+
 ###To reference engine paths from within the engine:
 If you don't do as below, you don't get the mount path prefixed to the url.
 ```
