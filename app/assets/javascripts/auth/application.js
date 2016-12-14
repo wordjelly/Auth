@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks
-//= require you_need_to_sign_in.js
 //= require materialize-sprockets
+//= require leanModal.js
+//= require you_need_to_sign_in.js
 //= require_tree .

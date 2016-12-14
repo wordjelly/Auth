@@ -281,7 +281,7 @@ DeviseController.class_eval do
   skip_before_action :verify_authenticity_token, if: :is_json_request?
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
-  respond_to :html, :json
+  respond_to :html, :json, :js
 
   def set_devise_mapping_for_omniauth
     model = nil

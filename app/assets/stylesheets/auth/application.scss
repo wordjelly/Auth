@@ -17,3 +17,4 @@
 @import "materialize/components/color";
 $primary-color: color("blue", "lighten-2") !default;
 
+.modal { max-height: 90% !important ;}

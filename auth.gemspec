@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'thin'
   s.add_dependency 'jquery-rails'
   s.add_dependency 'valid_url'
-  s.add_dependency 'materialize-sass'
+  s.add_dependency 'materialize-sass', '0.97.1'
   s.add_dependency 'recaptcha'
   s.add_dependency "mongoid-paperclip", "~> 0.0.8"
   s.add_dependency 'remotipart', '~> 1.2', '>= 1.2.1'
