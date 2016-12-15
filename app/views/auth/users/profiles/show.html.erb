@@ -1,0 +1,5 @@
+<div class="row p-20-left p-20-right p-20-top p-40-bottom p-20-top center teal-text fw-300 fs-18 m-30-top" style="border:1px solid gainsboro; "id="info_box">
+	<%= content_tag :div,  current_res.name %>
+	<%= content_tag :div, current_res.email %>
+	<%= link_to "Edit Account Settings", edit_user_registration_path(:format => "js"), :remote => true %>
+</div>

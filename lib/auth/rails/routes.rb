@@ -48,7 +48,13 @@ module ActionDispatch::Routing
 
 
 			  resource_class = Object.const_get resource
-		
+			
+              #################################################################
+              ##
+              ## OMNIAUTH PATHS
+              ##
+              #################################################################
+
 			  if !(opts[:skip].include? :omniauthable)
 
 					resource_class.omniauth_providers.each do |provider|
@@ -72,16 +78,18 @@ module ActionDispatch::Routing
 
 						match "#{oauth_failure_route_path}", controller: omniauth_ctrl, action: "failure", via:[:get,:post], as: "omniauth_failure"
 					end
-
-					
-
 			  end
+
+			  #################################################################
+			  ##
+			  ## RESOURCE_PROFILE PATHS
+			  ##
+			  #################################################################
+
+			  #match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 
 		  end
 	  end
-
-	#end
-	
   end
 end
 

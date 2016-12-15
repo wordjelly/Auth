@@ -1,9 +1,1 @@
-#Auth::Engine.routes.draw do
-
-  
-  	#resources :clients
-
-	
-	
-#end
-
+##routes defined by engine reside in lib/auth/rails/routes.rb
