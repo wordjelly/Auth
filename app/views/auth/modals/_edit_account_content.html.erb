@@ -4,40 +4,35 @@
 		  <div class="col l8 m10 s10 offset-l2 offset-m1 offset-s1">
 		      <div class="input-field">
 	            <input <%= 
-	            	 if resource.identities.size > 0
+	            	 if resource.has_oauth_identity?
 	            	 	"disabled"
 	            	 end
-	             %> id="user_email" type="email" name="user[email]" class="virgin" autofocus="false" value="<%= 
+	             %> id="<%= resource.class.name.downcase %>_email" type="email" name="<%= resource.class.name.downcase %>[email]" class="virgin" autofocus="false" value="<%= 
 	             	
 	             		resource.email
 	             	
 	              %>"></input>
-	            <label for="user_email" autofocus="false"><%=
-	            if resource.identities.size == 0
-	             "E-mail" 
-	            end
-	             %></label>
+	            <label for="<%= resource.class.name.downcase %>_email" autofocus="false">"E-mail"</label>
 	          </div>
-	          <% if resource.identities.size == 0 %>
+	          <% if !resource.has_oauth_identity? %>
 		          <div class="input-field m-50-top">
-		            <input id="user_password" type="password" name="user[password]" class="virgin"></input>
-		            <label for="user_password">New Password</label>
+		            <input id="<%= resource.class.name.downcase %>_password" type="password" name="<%= resource.class.name.downcase %>[password]" class="virgin"></input>
+		            <label for="<%= resource.class.name.downcase %>_password">New Password</label>
 		          </div>
 
 		          <div class="input-field m-50-top">
-		            <input id="user_password_confirmation" type="password" name="user[password_confirmation]"  class="virgin">
+		            <input id="<%= resource.class.name.downcase %>_password_confirmation" type="password" name="<%= resource.class.name.downcase %>[password_confirmation]"  class="virgin">
 		            </input>
-		            <label for="user_password_confirmation">Confirm New Password</label>
+		            <label for="<%= resource.class.name.downcase %>_password_confirmation">Confirm New Password</label>
 		          </div>
 
 		          <div class="input-field m-50-top">
-		            <input id="user_current_password" type="password" name="user[current_password]"  class="virgin">
+		            <input id="<%= resource.class.name.downcase %>_current_password" type="password" name="<%= resource.class.name.downcase %>[current_password]"  class="virgin">
 		            </input>
-		            <label for="user_current_password">Your Current PassWord</label>
+		            <label for="<%= resource.class.name.downcase %>_current_password">Your Current PassWord</label>
 		          </div>
 	          <% end %>
-	          <%= puts resource.identities.size %>
-	          <%= render '/modals/oauth_and_submit.html.erb' %>
+	          <%= render 'auth/modals/oauth_and_submit.html.erb' %>
 
 		  </div>
 		</div>

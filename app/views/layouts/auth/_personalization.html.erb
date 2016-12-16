@@ -1,5 +1,5 @@
 <% if current_res && resource_in_navbar?(current_res)%>
-	<li><%= link_to "Account", profile_res_path(current_res.id) %></li>
+	<li><%= link_to "Account", profile_path(current_res.id) %></li>
 	<li><%= link_to('Sign Out', destroy_res_session_path, :method => :delete, id: "sign_out") %></li>
 <% else %>
 	<% if Auth.configuration.enable_sign_in_modals %>

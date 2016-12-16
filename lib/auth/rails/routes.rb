@@ -8,6 +8,7 @@ module ActionDispatch::Routing
 	def mount_routes(app_route_resources)
 	      
 	  	  resources :clients, :controller => "auth/clients"
+		  resources :profiles, :controller => "auth/users/profiles"
 		  
 		  app_route_resources.each do |resource,opts| 
 

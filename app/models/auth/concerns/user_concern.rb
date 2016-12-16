@@ -93,7 +93,7 @@ module Auth::Concerns::UserConcern
 	      ############################################3
 	      if !opts[:skip].include? :omniauthable
 		      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
-			  field :identities,          type: Array, default: [{"uid" => "", "provider" => "", "email" => ""}]
+			  field :identities,          type: Array, default: [Auth::Identity.new.attributes.except("_id")]
 		 	  field :access_token,        type: String
 		 	  field :token_expires_at,	  type: Integer
 		 	  field :token_expired,		  type: Boolean
@@ -242,5 +242,10 @@ module Auth::Concerns::UserConcern
 	 	 end
 	end
 
+	##returns true if there is at least one non empty oauth identity
+	def has_oauth_identity?
+		return unless self.respond_to? :identities
+		self.identities.keep_if{|c| Auth::Identity.new(c).has_provider?}.size > 0
+	end
 
 end
