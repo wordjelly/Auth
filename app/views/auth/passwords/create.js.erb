@@ -1,0 +1,12 @@
+<% if resource.errors.size > 0 %>
+	<% resource.errors.each do |attrib,message| %>
+		var resource_name = "<%= resource.class.name.underscore %>";
+		var field_id = resource_name + "_" + "<%= attrib %>";
+		invalidate_input_field(field_id,"<%= message.html_safe %>");
+	<% end %>
+<% else %>
+	$("#login_title").hide();
+	$("#login_content").html("<%= escape_javascript(render partial:'auth/modals/forgot_password_success_content.html.erb', locals: {resource: resource}) %>").show();
+	$("#login_footer").hide();
+<% end %>
+open_sign_in_modal_if_closed();
