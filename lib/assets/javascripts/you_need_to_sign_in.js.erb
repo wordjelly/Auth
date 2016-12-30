@@ -290,6 +290,7 @@ $(document).on('click','#submit',function(event){
 		$("#login_submit").val("Update");
 	}
 	//$("#login_submit").trigger("click");
+	event.preventDefault();
 	$("#login_form").submit();
 });
 
