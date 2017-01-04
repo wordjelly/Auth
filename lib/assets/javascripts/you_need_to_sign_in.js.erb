@@ -289,9 +289,11 @@ $(document).on('click','#submit',function(event){
 		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Update");
 	}
-	//$("#login_submit").trigger("click");
+
 	event.preventDefault();
-	$("#login_form").submit();
+	event.stopPropagation();
+	$("#login_submit").trigger("click");
+	return false;
 });
 
 /***

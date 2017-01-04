@@ -30,7 +30,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'omniauth-linkedin'
   s.add_dependency 'request_store'
   s.add_dependency 'thin'
-  s.add_dependency 'jquery-rails'
   s.add_dependency 'valid_url'
   s.add_dependency 'materialize-sass', '0.97.1'
   s.add_dependency 'recaptcha'
