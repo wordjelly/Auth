@@ -11,8 +11,7 @@ var validation_settings = {
   "login_form" : {
     "user_email" : {
       "validation_events":{
-        "focus" : true,
-        "keypress" : true
+        "keyup" : true
       },
       "validate_with":[
         {"required" : "true",
@@ -25,13 +24,12 @@ var validation_settings = {
     },
     "user_password":{
     	"validation_events":{
-    	  "focus":true,
-    	  "keypress":true
+    	  "keyup":true
     	},
     	"validate_with":[
-    	{"required" : "true",
-    	 "failure_message": "this field is required"
-    	}
+      	{"required" : "true",
+      	 "failure_message": "this field is required"
+      	}
       ]
     }
   }
@@ -39,7 +37,7 @@ var validation_settings = {
 
 // Initialize the validator
 try{
-	var validator = new WJ_Validator(validation_settings,"materialize",false);
+	var validator = new WJ_Validator(validation_settings,"materialize",true);
 }
 catch(err){
 	console.log(err);

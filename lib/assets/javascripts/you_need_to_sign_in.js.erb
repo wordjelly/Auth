@@ -144,7 +144,32 @@ var toggle_sign_in_sign_up = function(){
     $('#login_title').text(
         login_title_text == "Sign In" ? "Sign Up" : "Sign In");
     toggle_oauth();
+    toggle_sign_up_validation($('#login_title').text());
     toggle_sign_up_text();
+}
+
+var toggle_sign_up_validation = function(login_text){
+	if(login_text == "Sign In"){
+	  validation_settings["login_form"]["user_password"]["validate_with"] = [
+      	{"required" : "true",
+      	 "failure_message": "this field is required"
+      	}
+      ]
+	}
+	else
+	{
+	  validation_settings["login_form"]["user_password"]["validate_with"] = [
+      	{"required" : "true",
+      	 "failure_message": "this field is required"
+      	},
+      	{
+      	 "should_be_equal":"true",
+      	 "failure_message":"fields do not match",
+      	 "field_array":["user_password_confirmation"]
+      	}
+      ]  
+	}
+	validator = new WJ_Validator(validation_settings,"materialize",true);
 }
 
 var get_current_screen = function(){
