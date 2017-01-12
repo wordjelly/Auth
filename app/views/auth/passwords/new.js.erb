@@ -10,4 +10,6 @@ $("#resend_confirmation_email").hide();
 validation_settings["login_form"]["user_email"]["validate_with"] = _.filter(validation_settings["login_form"]["user_email"]["validate_with"],function(n){
 	return !("remote" in n);
 });
+validator = new WJ_Validator(validation_settings,"materialize",true);
+
 open_sign_in_modal_if_closed();
