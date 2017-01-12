@@ -39,5 +39,7 @@ module Auth
 	 	puts Rails.application.routes.url_helpers.to_s
 	 end
 
+	 
+
   end
 end

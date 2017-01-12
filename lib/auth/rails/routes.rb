@@ -8,7 +8,11 @@ module ActionDispatch::Routing
 	def mount_routes(app_route_resources)
 	      
 	  	  resources :clients, :controller => "auth/clients"
-		  resources :profiles, :controller => "auth/users/profiles"
+		  resources :profiles, :controller => "auth/users/profiles" do 
+		  	collection do 
+		  		get 'credential_exists'
+		  	end
+		  end
 		  
 		  app_route_resources.each do |resource,opts| 
 

@@ -148,13 +148,32 @@ var toggle_sign_in_sign_up = function(){
     toggle_sign_up_text();
 }
 
+var credential_exists = function(def,e){
+	var res = {
+		"url": "/profiles/credential_exists",
+		"dataType":"json",
+		"data":{
+			"credential":{
+				"resource":resource,
+				"email":$("#" + e.target.id).val(),
+				"aufbau":"dog"
+			}
+		}
+	}
+	return res;
+}
+
 var toggle_sign_up_validation = function(login_text){
 	if(login_text == "Sign In"){
 	  validation_settings["login_form"]["user_password"]["validate_with"] = [
       	{"required" : "true",
       	 "failure_message": "this field is required"
       	}
-      ]
+      ];
+      //remove the remote from the user_email part.
+      validation_settings["login_form"]["user_email"]["validate_with"] = _.filter(validation_settings["login_form"]["user_email"]["validate_with"],function(n){
+      	return !("remote" in n);
+      });
 	}
 	else
 	{
@@ -167,7 +186,11 @@ var toggle_sign_up_validation = function(login_text){
       	 "failure_message":"fields do not match",
       	 "field_array":["user_password_confirmation"]
       	}
-      ]  
+      ];
+      validation_settings["login_form"]["user_email"]["validate_with"].push({
+      	"remote" : "true",
+      	"ajax_settings" : credential_exists
+      })  
 	}
 	validator = new WJ_Validator(validation_settings,"materialize",true);
 }

@@ -296,7 +296,7 @@ DeviseController.class_eval do
   end
 
   def is_omniauth_callback?
-    puts "this is an omniauth callbakc."
+    #puts "this is an omniauth callbakc."
     set_devise_mapping_for_omniauth
     controller_name == "omniauth_callbacks"
   end
