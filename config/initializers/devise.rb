@@ -553,6 +553,9 @@ module Devise
 
   end
 
+
+  ##the solution to this problem is to change the html unlocks and confirmations "new" views
+  ##here if it comes to this point, then 
   UnlocksController.class_eval do 
 
     prepend_before_action :ignore_json_request, only: [:new]

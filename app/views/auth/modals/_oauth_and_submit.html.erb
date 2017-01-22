@@ -2,8 +2,7 @@
   
   <div class="col l6 m6 s6 left p-0-left p-0-right" id="oauth_icons">
     <% Auth.configuration.oauth_credentials.keys.each_with_index {|provider,index| %>
-      <%= puts "provider is: #{provider}" %>
-    	<a href="<%= Auth::OmniAuth::Path.omniauth_request_path(nil,provider) %>"><img src="assets/auth/<%= provider %>.svg" height="60" width="60" class="oauth_icon
+    	<a href="<%= Auth::OmniAuth::Path.omniauth_request_path(nil,provider) %>"><img src="/assets/auth/<%= provider %>.svg" height="60" width="60" class="oauth_icon
     	<% if index > 0 %>
     		m-10-left
     	<% end %>
