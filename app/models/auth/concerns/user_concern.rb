@@ -133,7 +133,6 @@ module Auth::Concerns::UserConcern
 
 	def reset_token
 		self.authentication_token = nil
-		
 	end
 
 	#def has_token_and_es
@@ -153,6 +152,7 @@ module Auth::Concerns::UserConcern
 	#end
 
 	def set_client_authentication(app_id)
+		puts "Called set client authentication"
 		if self.client_authentication[app_id].nil? && self.valid?
 			self.client_authentication[app_id] = SecureRandom.hex(32)
 			self.save
@@ -222,12 +222,7 @@ module Auth::Concerns::UserConcern
 	end
 
 
-	##FOR GETTING INFORMATION FROM THIRDY PARTY OAUTH PROVIDERS.
-	def get_info_from_oauth_provider
-		##this is where we can set the token_expired flag easily
-		
-	end
-
+	
 
 	
 	def as_json(options)

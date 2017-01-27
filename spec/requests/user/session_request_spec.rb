@@ -11,6 +11,7 @@ RSpec.describe "session request spec", :type => :request do
         @u.save
         @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
         @c.redirect_urls = ["http://www.google.com"]
+        @c.app_ids << "test_app_id"
         @c.versioned_create
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
@@ -38,7 +39,6 @@ RSpec.describe "session request spec", :type => :request do
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
 				
-
 			end
 
 			it " -- CREATE request, should redirect with the auth_token and es " do 

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Registration requests", :type => :request do
+RSpec.describe "Registration requests", :reg => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all
@@ -31,15 +31,35 @@ RSpec.describe "Registration requests", :type => :request do
     
     end
 
-    
 
     it " -- does not need an api_key in the params -- " do 
-
         get new_user_registration_path
         @user = assigns(:user)
         expect(@user).not_to be_nil
         expect(@user.errors.full_messages).to be_empty     
 
+    end
+
+    ##YOU MUST CREATE A CLIENT WITH ANOTHER USER FIRST. 
+    ##THIS CLIENT WILL HAVE TO GIVE ITSELF A REDIRECT URL.
+    ##IT WILL ALSO HAVE TO HAVE A APP_ID, WHICH IT CAN REQUEST, IN THE UPDATE CLIENT REQUEST.
+    ##THEN SEND IN THIS CLIENT WHILE CREATING THE NEW USER.
+    ##THEN THIS USER WILL HAVE A CLIENT_AUTHENTICATION -> ALONG WITH AN ES FOR THE APP ID THAT THE CLIENT SENT IN.
+    ##THAT SHOULD BE RETURNED IN THE REQUEST ,alongwith the authentcation_token for the client and the redirect_url.
+
+    context " -- auth token and client salt creation -- " do 
+      it " -- creates client authentication and auth token on user create -- " do
+
+        post user_registration_path, user: attributes_for(:user)
+        @user = assigns(:user)
+        @user.confirm!
+        puts "this is the client authentication"
+        puts @user.client_authentication.to_s
+        expect(@user.client_authentication).not_to be_nil
+        expect(@user.authentication_token).not_to be_nil
+        expect(@user.errors.full_messages).to be_empty
+
+      end
     end
 
 =begin
@@ -94,6 +114,8 @@ RSpec.describe "Registration requests", :type => :request do
 
     end
 =end
+  end
+=begin
     context " -- client create update on user create update destroy -- " do 
 
       it " -- creates a client when a user is created -- " do 
@@ -491,5 +513,5 @@ RSpec.describe "Registration requests", :type => :request do
 
 
   end
-
+=end
 end

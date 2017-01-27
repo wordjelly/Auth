@@ -47,22 +47,27 @@ module OmniAuth
     	def custom_build_access_token
     		access_token =
     		if verify_id_token(request.params['id_token'])
-    			puts "building a dummy access token.."
+    			##in this case the access token is pointless, because we dont really get any kind of access for the api, so we just build a dummy token to satisfy the way this method works, since the method is exepcte to return an access token.
+    			##refer to 
+    			##@link: https://developers.google.com/identity/sign-in/android/backend-auth
+    			##@ref: also refer to the signInActivity.java in the android app, where we pass in 'id_token.'
     			::OAuth2::AccessToken.new(client,"")
 	        elsif request.xhr? && request.params['code']
-	          puts "came to option 2"
+	          	##in this case refer to
+	          	##@link: https://developers.google.com/identity/sign-in/android/offline-access
+	          	##@ref: also refer to the signInActivity.java in the android app where we pass in 'code'
 	          verifier = request.params['code']
 	          client.auth_code.get_token(verifier, get_token_options('postmessage'), deep_symbolize(options.auth_token_params || {}))
 	        elsif request.params['code'] && request.params['redirect_uri']
-	          puts "came to option 3"
+	          #puts "came to option 3"
 	          verifier = request.params['code']
 	          redirect_uri = request.params['redirect_uri']
 	          client.auth_code.get_token(verifier, get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
 	        elsif verify_token(request.params['access_token'])
-	          puts "came to option 4"
+	          #puts "came to option 4"
 	          ::OAuth2::AccessToken.from_hash(client, request.params.dup)
 	        else
-	          puts "came to option 5"
+	          #puts "came to option 5"
 	          verifier = request.params["code"]
 	          client.auth_code.get_token(verifier, get_token_options(callback_url), deep_symbolize(options.auth_token_params))
 	        end
@@ -82,8 +87,7 @@ module OmniAuth
     		return false unless id_token
     		raw_response = client.request(:get, 'https://www.googleapis.com/oauth2/v3/tokeninfo',
                                       params: { id_token: id_token }).parsed
-    		#puts "raw response is:"
-    		#puts raw_response.to_s
+    		
         	if raw_response['aud'] == options.client_id || options.authorized_client_ids.include?(raw_response['aud'])
 	        	@raw_info ||= raw_response
 	        	#puts "responding with true."

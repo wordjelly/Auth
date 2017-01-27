@@ -4,15 +4,8 @@ module Auth::Concerns::OmniConcern
 
   included do
     attr_accessor :resource
-    ##the omniauth access token is to be stored on the user.
     helper_method :omniauth_failed_path_for
   end
-
-  #################COMMUNICATION BETWEEN OUR SERVER AND OAUTH BACKENDS
-  
-
-  #################ENDS.
-
 
   def passthru
     
@@ -29,14 +22,11 @@ module Auth::Concerns::OmniConcern
       if model == "no_resource"
         failure_message = "No resource was specified in the omniauth callback request."
       end
-
     end   
-
   end
 
 
   def get_omni_hash
-    puts request.env["omniauth.auth"]
     request.env["omniauth.auth"]
   end
 
@@ -90,7 +80,6 @@ module Auth::Concerns::OmniConcern
         ##this is set in the devise.rb initializer, in the before_action under devise controller, which checks if it is the omniauth_callbacks controller.
         model_class = request.env["devise.mapping"]
         if model_class.nil?
-        
          redirect_to omniauth_failed_path_for("no_resource") and return 
         else
           resource_klazz = request.env["devise.mapping"].to
