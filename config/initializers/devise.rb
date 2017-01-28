@@ -323,7 +323,8 @@ DeviseController.class_eval do
     if options =~ /authentication_token|es/
       super
     else
-      if !resource.nil? && !@client.nil?
+      ##as long as its not destroy.
+      if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
       end
       if controller_name == "passwords"
@@ -346,9 +347,14 @@ DeviseController.class_eval do
   end
   
   def render(*args)
-    if !resource.nil? && !@client.nil?
+    if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
     end
+      #puts "redirect url -> #{@redirect_url}"
+      #puts "resource -> #{resource.attributes.to_s}"
+      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
+      #puts "auth token -> #{resource.authentication_token}"
+      #puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
@@ -398,9 +404,9 @@ DeviseController.class_eval do
       else
        
         @client = Auth::Client.find_valid_api_key_and_app_id(params[:api_key], params[:current_app_id])
-        @client.current_app_id = params[:current_app_id]
+        
         if !@client.nil?
-          #puts "CLIENT WAS SUCCESSFULLY SET."
+          @client.current_app_id = params[:current_app_id]
           session[:client] = @client
           return true
         end

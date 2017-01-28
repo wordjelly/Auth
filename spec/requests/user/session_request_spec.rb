@@ -14,7 +14,6 @@ RSpec.describe "session request spec", :type => :request do
         @c.app_ids << "test_app_id"
         @c.versioned_create
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
 
 	end
 
@@ -35,7 +34,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- GET Request,should set the session variables " do 
 
-				get new_user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key}
+				get new_user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
 				
@@ -43,7 +42,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- CREATE request, should redirect with the auth_token and es " do 
 				
-				post user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key, user: {email: @u.email, password: "password"}}
+				post user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key, user: {email: @u.email, password: "password"}, current_app_id: @c.app_ids[0]}
 				@user = assigns(:user)
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to("http://www.google.com?authentication_token=#{@u.authentication_token}&es=#{@u.es}")
@@ -55,7 +54,7 @@ RSpec.describe "session request spec", :type => :request do
 			it " -- DESTROY Request, should not redirect. " do 
 				
 				sign_in_as_a_valid_user
-				delete destroy_user_session_path,{:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key}
+				delete destroy_user_session_path,{:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to(root_path)
 				expect(@user.errors.full_messages).to be_empty         		
@@ -68,7 +67,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- yields new session" do 
 
-				get new_user_session_path,{api_key: "dog", redirect_url:"http://www.google.com"}
+				get new_user_session_path,{api_key: "dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -80,7 +79,7 @@ RSpec.describe "session request spec", :type => :request do
 			end
 
 			it " -- create session successfully,but does not redirect" do 
-				post new_user_session_path, {user: attributes_for(:user), api_key:"dog", redirect_url:"http://www.google.com"}
+				post new_user_session_path, {user: attributes_for(:user), api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -92,7 +91,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_user
-				delete destroy_user_session_path,{:id => @user.id, api_key:"dog", redirect_url:"http://www.google.com"}
+				delete destroy_user_session_path,{:id => @user.id, api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
@@ -109,7 +108,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- yields new session" do 
 
-				get new_user_session_path,{ redirect_url:"http://www.google.com"}
+				get new_user_session_path,{ redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -120,7 +119,7 @@ RSpec.describe "session request spec", :type => :request do
 			end
 
 			it " -- create session successfully, but does not redirect" do 
-				post new_user_session_path, {user: attributes_for(:user),  redirect_url:"http://www.google.com"}
+				post new_user_session_path, {user: attributes_for(:user),  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -131,7 +130,7 @@ RSpec.describe "session request spec", :type => :request do
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_user
-				delete destroy_user_session_path,{:id => @user.id,  redirect_url:"http://www.google.com"}
+				delete destroy_user_session_path,{:id => @user.id,  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(response.code).to eq("302")
@@ -172,8 +171,6 @@ RSpec.describe "session request spec", :type => :request do
 	end
 
 	context " -- json requests " do 
-
-		
 
 		context " -- no api key" do 
 

@@ -1,6 +1,7 @@
 require "rails_helper"
 
 RSpec.feature "", :type => :feature, :features => true do
+=begin
   before(:each) do 
  	    ActionController::Base.allow_forgery_protection = true
         User.delete_all
@@ -15,8 +16,8 @@ RSpec.feature "", :type => :feature, :features => true do
         @u.save
         @ap_key = @c.api_key
   end
-  
-
+=end  
+=begin
 
   scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token." do
 
@@ -121,5 +122,5 @@ RSpec.feature "", :type => :feature, :features => true do
     expect(current_url).to eq("http://" + self.url_options[:host] + omniauth_failure_path("User"))
 
   end
-
+=end
 end

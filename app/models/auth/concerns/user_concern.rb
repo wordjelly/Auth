@@ -152,7 +152,6 @@ module Auth::Concerns::UserConcern
 	#end
 
 	def set_client_authentication(app_id)
-		puts "Called set client authentication"
 		if self.client_authentication[app_id].nil? && self.valid?
 			self.client_authentication[app_id] = SecureRandom.hex(32)
 			self.save
