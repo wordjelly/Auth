@@ -383,8 +383,7 @@ DeviseController.class_eval do
   end
 
   def set_client
-    #puts "came to set client, with params"
-    #puts params.to_s
+   
     if !session[:client].nil?
       #puts "session client is not nil"
       if session[:client].is_a?Hash

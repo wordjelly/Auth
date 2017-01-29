@@ -298,11 +298,6 @@ RSpec.describe "Registration requests", :reg => true, :type => :request do
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
     end
 
-    after(:example) do 
-      ActionController::Base.allow_forgery_protection = false
-    end
-
-
     context " -- fails without an api key --- " do
       it " - READ - " do  
         get new_user_registration_path,nil,@headers

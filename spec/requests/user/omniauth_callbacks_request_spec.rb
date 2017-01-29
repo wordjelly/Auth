@@ -26,26 +26,44 @@ RSpec.describe "Registration requests", :type => :request do
 
 
     #end
+    context " -- json requests -- " do 
+    
+        it " -- handles fake id_token -- " do 
+           
+            OmniAuth.config.test_mode = false
+           
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-    it " -- handles fake id_token -- " do 
-        OmniAuth.config.test_mode = false
-        Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
-        post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
-    end   
+            expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
+        end   
 
-    #it " -- handles fake code -- " do 
+        it " -- handles fake code -- " do 
 
+            OmniAuth.config.test_mode = false
+           
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-    #end
+            post google_oauth2_omniauth_callback_url(:code => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
-    #it " -- handles email id already exists -- " do 
+            expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
 
-    #end
+        end
 
-    #it " -- handles error in omni_concern -- " do 
+        #it " -- handles email id already exists -- " do 
 
-    #end
+        #end
+
+        it " -- handles error in omni_concern -- " do 
+            
+        end
+
+    end
+
+    context " -- web app requests -- " do 
+
+    end
 
   end	  
 

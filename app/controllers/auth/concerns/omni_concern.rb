@@ -13,16 +13,24 @@ module Auth::Concerns::OmniConcern
 
   def failure
     ##if the resource is nil in the failure url, it was made so by us after detecting that it was not sent in the callback request.
-    if failure_message.blank?
+    f = failure_message
+    if f.blank?
       model = nil
       request.url.scan(/#{Auth.configuration.mount_path}\/(?<model>[a-zA-Z_]+)\/omniauth/) do |ll|
         jj = Regexp.last_match
         model = jj[:model]
       end
       if model == "no_resource"
-        failure_message = "No resource was specified in the omniauth callback request."
+        f = "No resource was specified in the omniauth callback request."
+      else
+        f = "Credentials error."
       end
     end   
+
+    respond_to do |format|
+        format.json { render json: {"failure_message" => f}, status: :unprocessable_entity }
+    end
+
   end
 
 
