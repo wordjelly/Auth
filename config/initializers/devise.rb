@@ -309,7 +309,7 @@ DeviseController.class_eval do
 
  
   def redirect_to(options = {}, response_status = {})
-
+    
     ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
     #puts "came to redirect."
     #puts "session redirect url is: #{session[:redirect_url]}"

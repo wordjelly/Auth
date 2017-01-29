@@ -27,8 +27,8 @@ RSpec.describe "Registration requests", :type => :request do
 
     #end
     context " -- json requests -- " do 
-    
-        it " -- handles fake id_token -- " do 
+=begin
+        it " -- handles invalid id_token -- " do 
            
             OmniAuth.config.test_mode = false
            
@@ -39,7 +39,7 @@ RSpec.describe "Registration requests", :type => :request do
             expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
         end   
 
-        it " -- handles fake code -- " do 
+        it " -- handles invalid code -- " do 
 
             OmniAuth.config.test_mode = false
            
@@ -50,14 +50,25 @@ RSpec.describe "Registration requests", :type => :request do
             expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
 
         end
-
+=end
         #it " -- handles email id already exists -- " do 
 
         #end
 
         it " -- handles error in omni_concern -- " do 
             
+            ##THIS TEST PRODUCES AN ERROR IN THE OMNI_COMMON 
+
+            OmniAuth.config.test_mode = true
+           
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+            
+            puts response.body.to_s
+
         end
+
 
     end
 
