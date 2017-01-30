@@ -47,6 +47,7 @@ module OmniAuth
     	def custom_build_access_token
     		access_token =
     		if verify_id_token(request.params['id_token'])
+    			puts "id token was verified."
     			##in this case the access token is pointless, because we dont really get any kind of access for the api, so we just build a dummy token to satisfy the way this method works, since the method is exepcte to return an access token.
     			##refer to 
     			##@link: https://developers.google.com/identity/sign-in/android/backend-auth
@@ -71,6 +72,7 @@ module OmniAuth
 	          verifier = request.params["code"]
 	          client.auth_code.get_token(verifier, get_token_options(callback_url), deep_symbolize(options.auth_token_params))
 	        end
+
 	        verify_hd(access_token)
 	        access_token
     	end
@@ -83,14 +85,13 @@ module OmniAuth
     	end
 
     	def verify_id_token(id_token)
-    		#puts "--------------------------------------------------------------------------Came to verify id token with id token: #{id_token}"
+    		
     		return false unless id_token
     		raw_response = client.request(:get, 'https://www.googleapis.com/oauth2/v3/tokeninfo',
                                       params: { id_token: id_token }).parsed
     		
         	if raw_response['aud'] == options.client_id || options.authorized_client_ids.include?(raw_response['aud'])
 	        	@raw_info ||= raw_response
-	        	#puts "responding with true."
 	        	true
 	        else
 	        	false
@@ -256,15 +257,9 @@ module OmniAuth
 
 
 	    def check_state
-	    	puts "Came to check state."
-	    	puts "is state blank?"
-	    	puts request.params['state'].blank?
-	    	puts "is it a json request."
-	    	puts JSON.is_json?(request.params['state'])
+	    	
 	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
-	    		#puts "came to check state."
-	    		#puts "state is :#{request.params['state']}"
-	    		#begin
+	    		
 	    			q = JSON.parse(request.params['state'])
 	    			puts "parsed json"
 	    			c = Auth::Client.new(q)
@@ -273,10 +268,7 @@ module OmniAuth
 		    			#puts "found a valid client."
 		    			session['omniauth.state'] = request.params['state'] = c.api_key
 		    			@env['omniauth.model'] = c.path
-		    			puts "c path is: #{c.path}"
 		    			
-		    			puts "model set to:"
-		    			puts @env["omniauth.model"]
 		    		else
 		    			puts "did not find the client."
 		    		end

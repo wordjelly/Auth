@@ -25,7 +25,7 @@ module Auth::Concerns::OmniConcern
       if model == "no_resource"
         f = "No resource was specified in the omniauth callback request."
       else
-        f = "Credentials error."
+        f = model
       end
     end   
 
@@ -90,6 +90,7 @@ module Auth::Concerns::OmniConcern
         begin
           model_class = request.env["devise.mapping"]
           if model_class.nil?
+           ##COVERED IN #NO_RESOURCE_TEST.
            redirect_to omniauth_failed_path_for("no_resource") and return 
           else
             resource_klazz = request.env["devise.mapping"].to
@@ -130,7 +131,7 @@ module Auth::Concerns::OmniConcern
                   @resource.skip_confirmation!
                 end
                 
-                Rails.logger.debug("this resource already exists")
+                puts("this resource already exists")
                 
                 sign_in @resource
 
@@ -146,13 +147,13 @@ module Auth::Concerns::OmniConcern
             
             elsif signed_in?
 
-              Rails.logger.debug("it is a current user trying to sign up with oauth.")
+              puts("it is a current user trying to sign up with oauth.")
               
               after_sign_in_path_for(current_res)        
 
             else 
-              #puts "no such user exists."
-              Rails.logger.debug("no such user exists, trying to create a new user by merging the fields.")
+              
+              puts("no such user exists, trying to create a new user by merging the fields.")
                 
               
               @resource = resource_klazz.versioned_upsert_one(
@@ -195,13 +196,14 @@ module Auth::Concerns::OmniConcern
                 ##call the after_save_callbacks.
 
                 sign_in @resource
-               # puts "After calling sign in resource -------------------------------------------"
-                #puts @resource.attributes.to_s
+                puts "After calling sign in resource -------------------------------------------"
+                puts @resource.attributes.to_s
                 #u = User.where(:email => @resource.email).first
                 #puts u.attributes.to_s
-                redirect_to after_sign_in_path_for(@resource)    
+                #redirect_to after_sign_in_path_for(@resource)
+                respond_with(@resource, :status => :created, :location => after_sign_in_path_for(@resource))
               else
-                #puts "came to omniauth failure path."
+                puts "came to omniauth failure path."
                 redirect_to omniauth_failure_path(resource_klazz.name)
               end
 
@@ -209,7 +211,8 @@ module Auth::Concerns::OmniConcern
 
           end
         rescue => e
-          redirect_to omniauth_failed_path_for("processing error") and return
+          puts e.to_s
+          redirect_to omniauth_failed_path_for("error") and return
         end
   end
 

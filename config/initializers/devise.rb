@@ -296,7 +296,6 @@ DeviseController.class_eval do
   end
 
   def is_omniauth_callback?
-    #puts "this is an omniauth callbakc."
     set_devise_mapping_for_omniauth
     controller_name == "omniauth_callbacks"
   end
@@ -347,14 +346,17 @@ DeviseController.class_eval do
   end
   
   def render(*args)
+    puts *args.to_s
+    puts "came to render.-------------------------------"
+
     if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
     end
-      #puts "redirect url -> #{@redirect_url}"
-      #puts "resource -> #{resource.attributes.to_s}"
-      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
-      #puts "auth token -> #{resource.authentication_token}"
-      #puts "signed in --> #{signed_in?}"
+      puts "redirect url -> #{@redirect_url}"
+      puts "resource -> #{resource.attributes.to_s}"
+      puts "es -> #{resource.client_authentication[@client.current_app_id]}"
+      puts "auth token -> #{resource.authentication_token}"
+      puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
@@ -489,10 +491,30 @@ DeviseController.class_eval do
     end
   end
 
+  
+
+  
+
 end
 
 
 module Devise
+  module Controllers
+    module Helpers
+      ##takes care of the test case where no devise mapping is specified in the request.env.
+      ##as a result any method that is fired using this as a filter will not fire.
+      ##in this case in dummy/ApplicationController.rb, we were configuring_permitted_params if it was a devise_controller.
+      ##now this method is modified to first check if there is a devise_mapping, otherwise returns false.
+      ## ref test: omniauth_callbacks_request_spec.rb #NO RESOURCE TEST
+      def devise_controller?
+        if request.env["devise.mapping"].nil?
+          false
+        else
+          is_a?(::DeviseController)
+        end
+      end
+    end
+  end
 
 
   RegistrationsController.class_eval do 
