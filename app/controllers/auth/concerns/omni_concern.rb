@@ -3,6 +3,7 @@ module Auth::Concerns::OmniConcern
   extend ActiveSupport::Concern
 
   included do
+    prepend_before_action :do_before_request, only: [:omni_common]
     attr_accessor :resource
     helper_method :omniauth_failed_path_for
   end
@@ -83,10 +84,7 @@ module Auth::Concerns::OmniConcern
   end
 
   def omni_common
-        ##do_before_request
-        ##clear the omniauth state from the session.
-        #session.delete('omniauth.state')
-        ##this is set in the devise.rb initializer, in the before_action under devise controller, which checks if it is the omniauth_callbacks controller.
+        
         begin
           model_class = request.env["devise.mapping"]
           if model_class.nil?
@@ -94,11 +92,10 @@ module Auth::Concerns::OmniConcern
            redirect_to omniauth_failed_path_for("no_resource") and return 
           else
             resource_klazz = request.env["devise.mapping"].to
-            
+           
             omni_hash = get_omni_hash
 
             email,uid,provider,access_token,token_expires_at = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"],omni_hash["credentials"]["token"],omni_hash["credentials"]["expires_at"]
-
 
             ##it will derive the resource class from the omni_hash referrer path.
 

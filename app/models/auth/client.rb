@@ -34,6 +34,9 @@ module Auth
     ##USED IN OMNIAUTH.RB -> CHECK_STATE
     def self.find_valid_api_key_and_app_id(api_key,app_id)
         c = self.where(:api_key => api_key, :app_ids => app_id).first
+        if c
+            c.current_app_id = app_id
+        end
         return c
     end
 

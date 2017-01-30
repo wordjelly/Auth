@@ -232,6 +232,7 @@ module Auth::Concerns::UserConcern
 	     	self.current_app_id = nil
 	    	json
 	 	 else
+	 	 	puts "returning nil from json."
 	 	 	nil
 	 	 end
 	end

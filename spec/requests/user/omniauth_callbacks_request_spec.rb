@@ -94,7 +94,6 @@ RSpec.describe "Omniauth requests", :type => :request do
         it " -- creates new user if id_token is valid -- " do 
             ##WE MODIFY THE VERFIY_ID_TOKEN FUNCTION TO RETURN A VALID ID TOKEN, AND ALSO 
             
-
             module OmniAuth
                 module Strategies
                     GoogleOauth2.class_eval do 
@@ -143,10 +142,17 @@ RSpec.describe "Omniauth requests", :type => :request do
             u = User.where(:email => "rrphotosoft@gmail.com").first
             expect(u).not_to be_nil
             expect(u.identities).to eql([{"provider"=>"google_oauth2", "uid"=>"123545", "email"=>"rrphotosoft@gmail.com"}])
-            puts response.body.to_s
+            expect(JSON.parse(response.body).keys).to match_array(["authentication_token","es"])
+
         end
 
+
+
 =begin
+        ## IT CANT FIND THE CLIENT PROVIDED, THEN SHOULD RETURN SHIT.
+
+
+
         ## CREATES NEW USER IF CODE IS VALID
         it " -- creates new user if code is valid -- " do 
 

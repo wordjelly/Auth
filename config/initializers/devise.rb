@@ -346,17 +346,17 @@ DeviseController.class_eval do
   end
   
   def render(*args)
-    puts *args.to_s
-    puts "came to render.-------------------------------"
+    #puts *args.to_s
+    #puts "came to render.-------------------------------"
 
     if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
     end
-      puts "redirect url -> #{@redirect_url}"
-      puts "resource -> #{resource.attributes.to_s}"
-      puts "es -> #{resource.client_authentication[@client.current_app_id]}"
-      puts "auth token -> #{resource.authentication_token}"
-      puts "signed in --> #{signed_in?}"
+      #puts "redirect url -> #{@redirect_url}"
+      #puts "resource -> #{resource.attributes.to_s}"
+      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
+      #puts "auth token -> #{resource.authentication_token}"
+      #puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
         super
       elsif controller_name == "confirmations" && action_name != "show"
@@ -382,21 +382,23 @@ DeviseController.class_eval do
   def clear_client_and_redirect_url
     @client = nil
     @redirect_url = nil
+    session.delete('omniauth.state')
   end
 
   def set_client
    
     if !session[:client].nil?
-      #puts "session client is not nil"
+      puts "GOT SESSION CLIENT."
+      puts session[:client].to_s
       if session[:client].is_a?Hash
-         #puts "it was a hash."
+         puts "its a hash."
          @client = Auth::Client.new(session[:client])
       
       elsif session[:client].is_a? Auth::Client
-         #puts "it was a client instance."
+         puts "its a client."
          @client = session[:client]
       end 
-      #puts @client.class
+      
       return true
 
     else
@@ -407,7 +409,7 @@ DeviseController.class_eval do
         @client = Auth::Client.find_valid_api_key_and_app_id(params[:api_key], params[:current_app_id])
         
         if !@client.nil?
-          @client.current_app_id = params[:current_app_id]
+         
           session[:client] = @client
           return true
         end
@@ -605,6 +607,8 @@ module Devise
     end
 
   end
+
+
 
   ConfirmationsController.class_eval do 
 

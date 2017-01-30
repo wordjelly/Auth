@@ -247,6 +247,7 @@ module OmniAuth
 	      @env['omniauth.origin'] = session.delete('omniauth.origin')
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
+	      ##FOR THE WEB BASED SYSTEM.
 	      if !session['omniauth.model'].blank?
 	      	@env['omniauth.model'] = session.delete('omniauth.model')
 	      end
@@ -261,16 +262,16 @@ module OmniAuth
 	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
 	    		
 	    			q = JSON.parse(request.params['state'])
-	    			puts "parsed json"
 	    			c = Auth::Client.new(q)
 		    		#c = Auth::Client.new(JSON.parse(request.params['state']))
-		    		if !Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id).nil?
-		    			#puts "found a valid client."
+		    		if client = Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id)
+		    			##THIS PREVENTS CSRF ERROR.
 		    			session['omniauth.state'] = request.params['state'] = c.api_key
+		    			##THIS ONLY HAPPENS IN JSON, in web based it is derived from the request_url.
 		    			@env['omniauth.model'] = c.path
-		    			
+		    			session[:client] = client
 		    		else
-		    			puts "did not find the client."
+		    			#puts "did not find the client."
 		    		end
 	    		#rescue
 	    			##should rescue situations where the json could not be parsed into a client object.
