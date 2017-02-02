@@ -28,12 +28,11 @@ RSpec.describe "Omniauth requests", :type => :request do
     #end
     context " -- json requests -- " do 
 
-=begin
+
         it " -- handles invalid id_token -- " do 
            
             OmniAuth.config.test_mode = false
            
-            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
             post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
@@ -45,7 +44,6 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             OmniAuth.config.test_mode = false
            
-            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
             post google_oauth2_omniauth_callback_url(:code => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
@@ -57,10 +55,33 @@ RSpec.describe "Omniauth requests", :type => :request do
         it " -- redirects to omniauth failure path on any error in omni concern. -- " do 
             
             ##THIS TEST PRODUCES AN ERROR IN THE OMNI_concern def #omni_corner.rb#omni_common
+            ##because config.test_mode becomes true, so it expects the auth_hash to be provided, but somehow this is nil, so in the omni_concern, it gets auth_hash as nil and produces an error. 
 
-            OmniAuth.config.test_mode = true
-           
-            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+            OmniAuth.config.test_mode = false
+            
+            module OmniAuth
+                module Strategies
+                    GoogleOauth2.class_eval do 
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN NIL AS AUTH_HASH, SO THAT AN ERROR IS SIMULATED IN THE OMNI_COMMON DEF
+                        def auth_hash
+                            nil
+                        end
+
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
+                        private
+                        def verify_id_token(id_token)
+                            true
+                        end
+
+                        def verify_hd(access_token)
+                            true
+                        end 
+                    end
+                end
+            end
+            
 
             post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
             
@@ -80,18 +101,51 @@ RSpec.describe "Omniauth requests", :type => :request do
         ## NO RESOURCE TEST.
         it " -- redirects to omniauth_failure_path and gives failure message of 'no resource' if no resource is specified in the omniauth_callback_request. " do 
 
-            OmniAuth.config.test_mode = true
-           
-            Rails.application.env_config["omniauth.model"] = nil
+            OmniAuth.config.test_mode = false
+            
+            module OmniAuth
+                module Strategies
+                    GoogleOauth2.class_eval do 
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
+                        def auth_hash
+                            OmniAuth::AuthHash.new({
+                              'provider' => 'google_oauth2',
+                              'uid' => '123545',
+                              'info' => {
+                                'name' => 'mockuser',
+                                'image' => 'mock_user_thumbnail_url',
+                                'email' => 'rrphotosoft@gmail.com'
+                              },
+                              'credentials' => {
+                                'token' => 'mock_token',
+                                'secret' => 'mock_secret',
+                                'expires_at' => 20000
+                              }
+                            })
+                        end
 
-            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
+                        private
+                        def verify_id_token(id_token)
+                            true
+                        end
+
+                        def verify_hd(access_token)
+                            true
+                        end 
+                    end
+                end
+            end
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => nil}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
             expect(response).to redirect_to(omniauth_failure_path("no_resource"))
         end
-=end
 
         ## CREATES NEW USER IF ID_TOKEN IS VALID.
-        it " -- creates new user if id_token is valid -- " do 
+        it " -- creates new user if id_token is valid, and returns auth_token and es, because client is also correct. -- " do 
             ##WE MODIFY THE VERFIY_ID_TOKEN FUNCTION TO RETURN A VALID ID TOKEN, AND ALSO 
             
             module OmniAuth
@@ -130,10 +184,8 @@ RSpec.describe "Omniauth requests", :type => :request do
                 end
             end
 
-
             OmniAuth.config.test_mode = false
            
-            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
             post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
@@ -148,11 +200,60 @@ RSpec.describe "Omniauth requests", :type => :request do
 
 
 
-=begin
         ## IT CANT FIND THE CLIENT PROVIDED, THEN SHOULD RETURN SHIT.
+        ## TEST PASSES.
+        it " -- not able to find the client, it returns 401 unauthorized. -- " do 
+                
+            module OmniAuth
+                module Strategies
+                    GoogleOauth2.class_eval do 
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
+                        def auth_hash
+                            OmniAuth::AuthHash.new({
+                              'provider' => 'google_oauth2',
+                              'uid' => '123545',
+                              'info' => {
+                                'name' => 'mockuser',
+                                'image' => 'mock_user_thumbnail_url',
+                                'email' => 'rrphotosoft@gmail.com'
+                              },
+                              'credentials' => {
+                                'token' => 'mock_token',
+                                'secret' => 'mock_secret',
+                                'expires_at' => 20000
+                              }
+                            })
+                        end
+
+                        ##########
+                        ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
+                        private
+                        def verify_id_token(id_token)
+                            true
+                        end
+
+                        def verify_hd(access_token)
+                            true
+                        end 
+                    end
+                end
+            end
+
+            OmniAuth.config.test_mode = false
+           
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => "asshole", :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+
+            expect(response.code).to eql("401")
+            expect(response.body).to eql("")
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            expect(u).to be_nil
+        end        
 
 
-
+=begin
         ## CREATES NEW USER IF CODE IS VALID
         it " -- creates new user if code is valid -- " do 
 

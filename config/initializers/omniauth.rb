@@ -1,5 +1,52 @@
 module OmniAuth
   module Strategies
+  	OAuth2.class_eval do 
+  		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
+	        error = request.params["error_reason"] || request.params["error"]
+	        if error
+	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
+	        elsif !options.provider_ignores_state  && (request.params["state"].to_s.empty? || request.params["state"] != session.delete("omniauth.state"))
+	          headers = Hash[*env.select {|k,v| k.start_with? 'HTTP_'}
+			  .collect {|k,v| [k.sub(/^HTTP_/, ''), v]}
+			  .collect {|k,v| [k.split('_').collect(&:capitalize).join('-'), v]}
+			  .sort
+			  .flatten]
+			  if headers["Accept"] == "application/json"
+			  	self.access_token = build_access_token
+		        self.access_token = access_token.refresh! if access_token.expired?
+		        super
+			  else
+ 	          	fail!(:csrf_detected, CallbackError.new(:csrf_detected, "CSRF detected"))
+	          end
+	        else
+	          self.access_token = build_access_token
+	          self.access_token = access_token.refresh! if access_token.expired?
+	          super
+	        end
+	      rescue ::OAuth2::Error, CallbackError => e
+
+	        fail!(:invalid_credentials, e)
+	      rescue ::Timeout::Error, ::Errno::ETIMEDOUT => e
+	        fail!(:timeout, e)
+	      rescue ::SocketError => e
+	        fail!(:failed_to_connect, e)
+	    end
+	    
+	    protected
+	    class CallbackError < StandardError
+	        attr_accessor :error, :error_reason, :error_uri
+
+	        def initialize(error, error_reason = nil, error_uri = nil)
+	          self.error = error
+	          self.error_reason = error_reason
+	          self.error_uri = error_uri
+	        end
+
+	        def message
+	          [error, error_reason, error_uri].compact.join(" | ")
+	        end
+	     end
+  	end
   	Facebook.class_eval do 
   		protected
   		def build_access_token
@@ -241,13 +288,13 @@ module OmniAuth
 	    ##now the callback call
 	    # Performs the steps necessary to run the callback phase of a strategy.
 	    def callback_call
-	      check_state
+	      #check_state
 	      setup_phase
 	      log :info, 'Callback phase initiated.'
 	      @env['omniauth.origin'] = session.delete('omniauth.origin')
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
-	      ##FOR THE WEB BASED SYSTEM.
+	      ##FOR THE WEB BASED SYSTEM, remember this was set in the request call.
 	      if !session['omniauth.model'].blank?
 	      	@env['omniauth.model'] = session.delete('omniauth.model')
 	      end
@@ -256,30 +303,31 @@ module OmniAuth
 	    end
 
 
-
+=begin
 	    def check_state
-	    	
-	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state'])
+	    	puts "Came to check state---------------"
+	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state']) && request.xhr?
 	    		
 	    			q = JSON.parse(request.params['state'])
 	    			c = Auth::Client.new(q)
+	    			#request.params["state"] = ""
+		    		#session['omniauth.state'] = request.params['state']
 		    		#c = Auth::Client.new(JSON.parse(request.params['state']))
+		    		#session['omniauth.state'] = 
 		    		if client = Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id)
+		    			puts "FOUND THE CLIENT."
 		    			##THIS PREVENTS CSRF ERROR.
-		    			session['omniauth.state'] = request.params['state'] = c.api_key
+		    			#session['omniauth.state'] = request.params['state'] = c.api_key
 		    			##THIS ONLY HAPPENS IN JSON, in web based it is derived from the request_url.
 		    			@env['omniauth.model'] = c.path
 		    			session[:client] = client
 		    		else
 		    			#puts "did not find the client."
 		    		end
-	    		#rescue
-	    			##should rescue situations where the json could not be parsed into a client object.
-	    		#	puts "JSON could not be parsed."
-	    		#end
+	    		
 	    	end
 	    end
-
+=end
 
 	end
 end

@@ -3,9 +3,22 @@ module Auth::Concerns::OmniConcern
   extend ActiveSupport::Concern
 
   included do
+    prepend_before_action :set_devise_mapping_for_omniauth, only: [:omni_common]
     prepend_before_action :do_before_request, only: [:omni_common]
     attr_accessor :resource
     helper_method :omniauth_failed_path_for
+  end
+
+  def set_devise_mapping_for_omniauth
+    model = nil
+    if !request.env["omniauth.model"].blank?
+      request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
+        jj = Regexp.last_match
+        model = jj[:model]
+      end
+      model = model.singularize
+      request.env["devise.mapping"] = Devise.mappings[model.to_sym]
+    end
   end
 
   def passthru
@@ -16,6 +29,7 @@ module Auth::Concerns::OmniConcern
     ##if the resource is nil in the failure url, it was made so by us after detecting that it was not sent in the callback request.
     
     f = failure_message
+    status = :unprocessible_entity
     
     if f.blank?
       model = nil
@@ -30,8 +44,10 @@ module Auth::Concerns::OmniConcern
       end
     end   
 
+    
+    
     respond_to do |format|
-        format.json { render json: {"failure_message" => f}, status: :unprocessable_entity }
+        format.json { render json: {"failure_message" => f}, status:  status}
     end
 
   end
@@ -128,7 +144,7 @@ module Auth::Concerns::OmniConcern
                   @resource.skip_confirmation!
                 end
                 
-                puts("this resource already exists")
+                #puts("this resource already exists")
                 
                 sign_in @resource
 
@@ -144,13 +160,13 @@ module Auth::Concerns::OmniConcern
             
             elsif signed_in?
 
-              puts("it is a current user trying to sign up with oauth.")
+              #puts("it is a current user trying to sign up with oauth.")
               
               after_sign_in_path_for(current_res)        
 
             else 
               
-              puts("no such user exists, trying to create a new user by merging the fields.")
+              #puts("no such user exists, trying to create a new user by merging the fields.")
                 
               
               @resource = resource_klazz.versioned_upsert_one(
@@ -193,22 +209,23 @@ module Auth::Concerns::OmniConcern
                 ##call the after_save_callbacks.
 
                 sign_in @resource
-                puts "After calling sign in resource -------------------------------------------"
-                puts @resource.attributes.to_s
+                #puts "After calling sign in resource -------------------------------------------"
+                #puts @resource.attributes.to_s
                 #u = User.where(:email => @resource.email).first
                 #puts u.attributes.to_s
                 #redirect_to after_sign_in_path_for(@resource)
                 respond_with(@resource, :status => :created, :location => after_sign_in_path_for(@resource))
               else
-                puts "came to omniauth failure path."
+                #puts "came to omniauth failure path."
                 redirect_to omniauth_failure_path(resource_klazz.name)
               end
 
             end
 
           end
+        
         rescue => e
-          puts e.to_s
+          puts "----------GOT THE ERROR------------------"
           redirect_to omniauth_failed_path_for("error") and return
         end
   end

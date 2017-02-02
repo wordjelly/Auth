@@ -283,20 +283,10 @@ DeviseController.class_eval do
 
   respond_to :html, :json, :js
 
-  def set_devise_mapping_for_omniauth
-    model = nil
-    if !request.env["omniauth.model"].blank?
-      request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
-        jj = Regexp.last_match
-        model = jj[:model]
-      end
-      model = model.singularize
-      request.env["devise.mapping"] = Devise.mappings[model.to_sym]
-    end
-  end
+ 
 
   def is_omniauth_callback?
-    set_devise_mapping_for_omniauth
+    #set_devise_mapping_for_omniauth
     controller_name == "omniauth_callbacks"
   end
 
@@ -383,10 +373,12 @@ DeviseController.class_eval do
     @client = nil
     @redirect_url = nil
     session.delete('omniauth.state')
+    session.delete('client')
+    session.delete('omniauth.model')
   end
 
   def set_client
-   
+    puts "SETTING CLIENT."
     if !session[:client].nil?
       puts "GOT SESSION CLIENT."
       puts session[:client].to_s
@@ -402,16 +394,40 @@ DeviseController.class_eval do
       return true
 
     else
-      if params[:api_key].nil? || params[:current_app_id].nil?
+      puts "params are: #{params.to_s}"
+      state = nil
+      api_key = nil
+      current_app_id = nil
+      path = nil
+      if params[:state] && JSON.is_json?(params[:state])
+        state = JSON.parse(params[:state])
+      end
+      
+      if state
+        api_key = state["api_key"]
+        current_app_id = state["current_app_id"]
+        path = state["path"]
+      elsif params[:api_key] && params[:current_app_id]
+        api_key = params[:api_key]
+        current_app_id = params[:current_app_id]
+      else
+      end
+      
+
+      
+      
+      if api_key.nil? || current_app_id.nil?
 
       else
        
-        @client = Auth::Client.find_valid_api_key_and_app_id(params[:api_key], params[:current_app_id])
+        @client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
         
         if !@client.nil?
-         
           session[:client] = @client
+          request.env["omniauth.model"] = path
           return true
+        else
+          puts "couldnt find the client"
         end
       end
       return false
