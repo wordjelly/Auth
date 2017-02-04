@@ -1,14 +1,9 @@
-
 module OmniAuth
   module Strategy
 		##abilitiy to pass models.
 	    ##returns the models that are passed in / for which we are using omniauth.
 	    def models
 	      options[:models] || OmniAuth.config.models
-	    end
-
-	    def on_path?(path)
-	      current_path.casecmp(path).zero?
 	    end
 
 		##a modification of the on path method to check if we are on any of the defined request or callback paths.
@@ -43,14 +38,7 @@ module OmniAuth
 	    	on_any_path?(request_paths)
 	    end
 
-	    def on_callback_path?
-	    	on_any_path?(callback_paths)
-	    end
-
-	    def request_phase
-	    	redirect client.auth_code.authorize_url({:redirect_uri => callback_url}.merge(authorize_params))
-	    end
-
+	
 	    ##modified to use Auth::OmniAuth::Path
 	    def callback_path
 	      @callback_path ||= begin
@@ -107,11 +95,170 @@ module OmniAuth
 	      callback_phase
 	    end
   end
-  #module Strategies
+  
+end
 =begin
+module OAuth2Extensions
+	def self.included base
+		base.class_eval do 
+			
+		end
+	end
+end
+
+module FacebookOAuthExtensions
+	protected
+	def build_access_token
+		if request.params["fb_exchange_token"]
+			##make the get request.
+			verify_exchange_token(request.params["fb_exchange_token"])
+		else
+			verifier = request.params["code"]
+		a_t = client.auth_code.get_token(verifier, {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true)), deep_symbolize(options.auth_token_params))
+			a_t.options.merge!(access_token_options)
+		end
+	end
+
+	private
+	def verify_exchange_token(exchange_token)
+		return false unless exchange_token 
+	params = {:grant_type => "fb_exchange_token", "fb_exchange_token" => exchange_token}.merge(client.auth_code.client_params)
+		a_t = client.get_token(params)
+	end
+
+	def with_authorization_code!
+		if request.params.key?('code') || request.params.key?('fb_exchange_token')
+  		yield
+    elsif code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code']
+      request.params['code'] = code_from_signed_request
+      @authorization_code_from_signed_request_in_cookie = true
+      # NOTE The code from the signed fbsr_XXX cookie is set by the FB JS SDK will confirm that the identity of the
+      #      user contained in the signed request matches the user loading the app.
+      original_provider_ignores_state = options.provider_ignores_state
+      options.provider_ignores_state = true
+      begin
+        yield
+      ensure
+        request.params.delete('code')
+        @authorization_code_from_signed_request_in_cookie = false
+        options.provider_ignores_state = original_provider_ignores_state
+      end
+    else
+      raise NoAuthorizationCodeError, 'must pass either a `code` (via URL or by an `fbsr_XXX` signed request cookie)'
+    end
+	end
+end
+
+module GoogleOAuthExtensions
+		def self.included base 
+			base.class_eval do 
+				def custom_build_access_token
+		    		puts "Came to custome build access token."
+		    		access_token =
+		    		if verify_id_token(request.params['id_token'])
+		    			puts "came to verify_id_token"
+		    			#puts "id token was verified."
+		    			##in this case the access token is pointless, because we dont really get any kind of access for the api, so we just build a dummy token to satisfy the way this method works, since the method is exepcte to return an access token.
+		    			##refer to 
+		    			##@link: https://developers.google.com/identity/sign-in/android/backend-auth
+		    			##@ref: also refer to the signInActivity.java in the android app, where we pass in 'id_token.'
+		    			::OAuth2::AccessToken.new(client,"")
+			        elsif request.xhr? && request.params['code']
+			          ##THIS IS FOR WEB BASED JAVASCRIPT API.
+			          verifier = request.params['code']
+			          client.auth_code.get_token(verifier, get_token_options('postmessage'), deep_symbolize(options.auth_token_params || {}))
+			        elsif request.params['code'] && request.params['redirect_uri']
+			          #puts "came to option 3"
+			          puts "CODE AND REDIRECT URL."
+			          verifier = request.params['code']
+			          redirect_uri = request.params['redirect_uri']
+			          client.auth_code.get_token(verifier, get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
+			        elsif verify_token(request.params['access_token'])
+			          puts "came to option 4"
+			          ::OAuth2::AccessToken.from_hash(client, request.params.dup)
+			        else
+			        	puts "came to CODE ANALYSIS"
+			          	##in this case refer to
+			          	##@link: https://developers.google.com/identity/sign-in/android/offline-access
+			          	##@ref: also refer to the signInActivity.java in the android app where we pass in 'code'
+			          	puts "came to option 5"
+
+			          	verifier = request.params["code"]
+			          	client.auth_code.get_token(verifier, get_token_options(callback_url), deep_symbolize(options.auth_token_params))
+			        end
+
+			        verify_hd(access_token)
+			        access_token
+		    	end
+
+		    	def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
+				
+			        error = request.params["error_reason"] || request.params["error"]
+			        if error
+			          puts "there was already an error."
+			          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
+			        elsif !options.provider_ignores_state  && (request.params["state"].to_s.empty? || request.params["state"] != session.delete("omniauth.state"))
+			          headers = Hash[*env.select {|k,v| k.start_with? 'HTTP_'}
+					  .collect {|k,v| [k.sub(/^HTTP_/, ''), v]}
+					  .collect {|k,v| [k.split('_').collect(&:capitalize).join('-'), v]}
+					  .sort
+					  .flatten]
+					  if headers["Accept"] == "application/json"
+					  	puts "detected as json and came to build access_token."
+					  	self.access_token = build_access_token
+					  	puts "came past custom build."
+				        self.access_token = access_token.refresh! if access_token.expired?
+				        puts "Came past access_token."
+				        super
+					  else
+				        fail!(:csrf_detected, CallbackError.new(:csrf_detected, "CSRF detected"))
+			          end
+			        else
+			          self.access_token = custom_build_access_token
+			          self.access_token = access_token.refresh! if access_token.expired?
+			          super
+			        end
+			      rescue ::OAuth2::Error, CallbackError => e
+			        fail!(:invalid_credentials, e)
+			      rescue ::Timeout::Error, ::Errno::ETIMEDOUT => e
+			        fail!(:timeout, e)
+			      rescue ::SocketError => e
+			        fail!(:failed_to_connect, e)
+			    end
+
+		    	private 
+
+		    	def verify_id_token(id_token)
+		    		
+		    		return false unless id_token
+		    		raw_response = client.request(:get, 'https://www.googleapis.com/oauth2/v3/tokeninfo',
+		                                      params: { id_token: id_token }).parsed
+		    		
+		        	if raw_response['aud'] == options.client_id || options.authorized_client_ids.include?(raw_response['aud'])
+			        	@raw_info ||= raw_response
+			        	true
+			        else
+			        	false
+			        end
+
+		    	end 
+			end
+		end
+end
+
+OmniAuth::Strategies::GoogleOauth2.send(:include, OAuth2Extensions)
+OmniAuth::Strategies::GoogleOauth2.send(:include, GoogleOAuthExtensions)
+
+
+#OmniAuth::Strategies::Facebook.send(:include, OAuth2Extensions)
+OmniAuth::Strategies::Facebook.send(:include, FacebookOAuthExtensions)
+=end
+
+module OmniAuth
+  module Strategies
   	OAuth2.class_eval do 
   		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
-  			
+  			puts "--------- CAME TO CALLBACK PHASE ------"
 	        error = request.params["error_reason"] || request.params["error"]
 	        if error
 	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
@@ -157,7 +304,6 @@ module OmniAuth
 	        end
 	     end
   	end
-
   	Facebook.class_eval do 
   		protected
   		def build_access_token
@@ -201,12 +347,8 @@ module OmniAuth
   		end
 
   	end
-=end
-  #end
-end
-
-module GoogleOauthExtensions
-  def custom_build_access_token
+    GoogleOauth2.class_eval do 
+    	def custom_build_access_token
     		puts "Came to custome build access token."
     		puts "is the request xhr?"
     		puts request.xhr?
@@ -250,10 +392,7 @@ module GoogleOauthExtensions
 
 
     	private 
-    	def callback_url
-    		options[:redirect_url] || ""
-    	end
-
+    	
     	def verify_id_token(id_token)
     		
     		return false unless id_token
@@ -267,10 +406,14 @@ module GoogleOauthExtensions
 	        	false
 	        end
 
-    	end 
+	        
+    	end
+
+    	
+    end
+  end
 end
 
-OmniAuth::Strategies::GoogleOauth2.send(:include, GoogleOauthExtensions)
 
 module SimpleTokenAuthentication
 	module Configuration
@@ -326,10 +469,6 @@ module SimpleTokenAuthentication
 	end
 
 end
-
-
-
-
 
 
 Rails.application.config.middleware.use OmniAuth::Builder do

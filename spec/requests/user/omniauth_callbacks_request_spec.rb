@@ -29,7 +29,7 @@ RSpec.describe "Omniauth requests", :type => :request do
     context " -- json requests -- " do 
 
         context  " -- google_oauth2 test -- " do 
-
+=begin
             it " -- handles invalid id_token -- " do 
                
                 OmniAuth.config.test_mode = false
@@ -52,14 +52,11 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
-
+=end
             it " -- redirects to omniauth failure path on any error in omni concern. -- " do 
                 
-                ##THIS TEST PRODUCES AN ERROR IN THE OMNI_concern def #omni_corner.rb#omni_common
-                ##because config.test_mode becomes true, so it expects the auth_hash to be provided, but somehow this is nil, so in the omni_concern, it gets auth_hash as nil and produces an error. 
-
                 OmniAuth.config.test_mode = false
-                
+=begin
                 module OmniAuth
                     module Strategies
                         GoogleOauth2.class_eval do 
@@ -73,16 +70,18 @@ RSpec.describe "Omniauth requests", :type => :request do
                             ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
                             private
                             def verify_id_token(id_token)
+                                puts "called verify id token."
                                 true
                             end
 
                             def verify_hd(access_token)
+                                puts "Called verify hd."
                                 true
                             end 
                         end
                     end
                 end
-                
+=end                
 
                 post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
                 
@@ -90,9 +89,9 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
-
+=begin
             it " -- on visiting omniauth_failure_path(error), responds with json {failure_message: error}" do 
-
+               
                 get omniauth_failure_path("error"),nil,@headers
 
                 expect(JSON.parse(response.body)).to eql({"failure_message" => "error"}) 
@@ -507,7 +506,10 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
+=end
+
         end
+
 
         context  " -- fb test -- " do 
 
