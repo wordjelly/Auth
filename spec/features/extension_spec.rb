@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.feature "", :type => :feature, :features => true do
-=begin
+
   before(:each) do 
  	    ActionController::Base.allow_forgery_protection = true
         User.delete_all
@@ -16,7 +16,7 @@ RSpec.feature "", :type => :feature, :features => true do
         @u.save
         @ap_key = @c.api_key
   end
-=end  
+  
 =begin
 
   scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token." do
@@ -51,6 +51,8 @@ RSpec.feature "", :type => :feature, :features => true do
     
   end
 
+=end
+
 
   scenario "it can sign in with oauth2", :mark => true do 
     visit new_user_registration_path
@@ -62,6 +64,7 @@ RSpec.feature "", :type => :feature, :features => true do
     expect(page).to have_content("Logout")
   end
 
+=begin
   scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token" do 
 
     visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})

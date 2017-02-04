@@ -102,6 +102,7 @@ module Auth::Concerns::OmniConcern
   def omni_common
         
         begin
+          puts "CAME TO OMNI COMMON."
           model_class = request.env["devise.mapping"]
           if model_class.nil?
            ##COVERED IN #NO_RESOURCE_TEST.
@@ -118,15 +119,17 @@ module Auth::Concerns::OmniConcern
             identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
 
             ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
+
             existing_oauth_resources = 
             resource_klazz.collection.find(
               {"identities" =>
                      {"$elemMatch" => 
-                            {"provider" => provider, "uid" => uid
-                            }
+                            {"provider" => provider, "uid" => uid}
                      }
               })
-         
+              
+           
+
             if existing_oauth_resources.count == 1
 
               @resource = from_view(existing_oauth_resources,resource_klazz)
@@ -144,15 +147,15 @@ module Auth::Concerns::OmniConcern
                   @resource.skip_confirmation!
                 end
                 
-                #puts("this resource already exists")
+                puts("this resource already exists")
                 
                 sign_in @resource
 
-                redirect_to after_sign_in_path_for(@resource)
+                respond_with(@resource, :status => :updated, :location => after_sign_in_path_for(@resource))
                 
               else
 
-                #puts "Failed to update the acceess token and token expires at."
+                puts "Failed to update the acceess token and token expires at."
                 redirect_to omniauth_failed_path_for(resource_klazz.name)
 
               end
@@ -166,27 +169,20 @@ module Auth::Concerns::OmniConcern
 
             else 
               
-              #puts("no such user exists, trying to create a new user by merging the fields.")
+              puts("no such user exists, trying to create a new user by merging the fields.")
                 
-              
+
               @resource = resource_klazz.versioned_upsert_one(
-                { "$or" => [
-                    {"email" => email},
-                    {
-                      "identities" => {
-                        "$elemMatch" => {
-                          "uid" => uid,
-                          "provider" => provider               
-                        }
-                      }
-                    }
-                  ]
+                { 
+                    "email" => email
                 },
                 {
                   "$setOnInsert" => {
                     "email" => email,
                     "password" =>  Devise.friendly_token(20),
-                    "authentication_token" => build_token(resource_klazz),
+                    "authentication_token" => build_token(resource_klazz)
+                  },
+                   "$set" => {
                     "access_token" => access_token,
                     "token_expires_at" => token_expires_at,
                     "identities" => [identity.attributes.except("_id")]
@@ -194,11 +190,9 @@ module Auth::Concerns::OmniConcern
                 },
                 resource_klazz
               )
+              
 
-              #puts "IDENTITY AND RESOURCE FOLLOW."
-              #puts identity.to_s
-              #puts @resource.attributes.to_s
-             
+              
               if !@resource.nil? && @resource.persisted? && @resource.identities == [identity.attributes.except("_id")]
 
                 #puts "going to after sign in path for."
@@ -216,7 +210,11 @@ module Auth::Concerns::OmniConcern
                 #redirect_to after_sign_in_path_for(@resource)
                 respond_with(@resource, :status => :created, :location => after_sign_in_path_for(@resource))
               else
-                #puts "came to omniauth failure path."
+                puts "came to omniauth failure path, due to the following issues."
+                puts @resource.attributes.to_s
+                puts @resource.persisted?
+                puts @resource.identities.to_s
+                puts identity.attributes.to_s
                 redirect_to omniauth_failure_path(resource_klazz.name)
               end
 
@@ -225,7 +223,8 @@ module Auth::Concerns::OmniConcern
           end
         
         rescue => e
-          puts "----------GOT THE ERROR------------------"
+          #puts "----------GOT THE ERROR------------------"
+          #puts e.to_s
           redirect_to omniauth_failed_path_for("error") and return
         end
   end
