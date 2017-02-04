@@ -1,8 +1,117 @@
+
 module OmniAuth
-  module Strategies
+  module Strategy
+		##abilitiy to pass models.
+	    ##returns the models that are passed in / for which we are using omniauth.
+	    def models
+	      options[:models] || OmniAuth.config.models
+	    end
+
+	    def on_path?(path)
+	      current_path.casecmp(path).zero?
+	    end
+
+		##a modification of the on path method to check if we are on any of the defined request or callback paths.
+	    ##tests each of the provided paths to see if we are on it.
+	    def on_any_path?(paths)
+	      path_found = false
+	      paths.each do |path|
+	       	path_found = on_path?(path) ? true : path_found
+	      end
+	      return path_found
+	    end
+
+
+	    def request_paths
+	    	paths = []
+	  		models.each do |model|
+	  			paths << Auth::OmniAuth::Path.omniauth_request_path(model,name)
+	  		end		  	
+	  		paths
+	    end
+
+	    def callback_paths
+	    	paths = []
+	  		models.each do |model|
+	  			paths << Auth::OmniAuth::Path.omniauth_callback_path(model,name)
+	  		end		  	
+	  		paths
+	    end
+
+	    ##THESE ARE THE ONLY TWO METHODS THAT ARE ACTUALLY OVERRIDDEN.
+	    def on_request_path?
+	    	on_any_path?(request_paths)
+	    end
+
+	    def on_callback_path?
+	    	on_any_path?(callback_paths)
+	    end
+
+	    def request_phase
+	    	redirect client.auth_code.authorize_url({:redirect_uri => callback_url}.merge(authorize_params))
+	    end
+
+	    ##modified to use Auth::OmniAuth::Path
+	    def callback_path
+	      @callback_path ||= begin
+	        path = options[:callback_path] if options[:callback_path].is_a?(String)
+	        path ||= current_path if options[:callback_path].respond_to?(:call) && options[:callback_path].call(env)
+	        path ||= custom_path(:request_path)
+	        path ||= Auth::OmniAuth::Path.common_callback_path(name)
+	        path
+	      end
+	    end
+
+	    ##request call - modified to setup the model.
+	    def request_call
+	      ##gets.chomp
+	      setup_phase
+	      log :info, 'Request phase initiated.'
+	      puts request.params.to_s
+	      puts request.url.to_s
+	      # store query params from the request url, extracted in the callback_phase
+	      session['omniauth.params'] = request.params
+	      session['omniauth.model'] = request.url
+	      OmniAuth.config.before_request_phase.call(env) if OmniAuth.config.before_request_phase
+	      puts "Came pa"
+	      if options.form.respond_to?(:call)
+	        log :info, 'Rendering form from supplied Rack endpoint.'
+	        options.form.call(env)
+	      elsif options.form
+	        log :info, 'Rendering form from underlying application.'
+	        call_app!
+	      else
+	        if request.params['origin']
+	          env['rack.session']['omniauth.origin'] = request.params['origin']
+	        elsif env['HTTP_REFERER'] && !env['HTTP_REFERER'].match(/#{request_path}$/)
+	          env['rack.session']['omniauth.origin'] = env['HTTP_REFERER']
+	        end
+	        request_phase
+	      end
+	    end
+
+	    ##now the callback call
+	    # Performs the steps necessary to run the callback phase of a strategy.
+	    def callback_call
+	      #check_state
+	      setup_phase
+	      log :info, 'Callback phase initiated.'
+	      @env['omniauth.origin'] = session.delete('omniauth.origin')
+	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
+	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
+	      ##FOR THE WEB BASED SYSTEM, remember this was set in the request call.
+	      if !session['omniauth.model'].blank?
+	      	@env['omniauth.model'] = session.delete('omniauth.model')
+	      end
+	      OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
+	      callback_phase
+	    end
+  end
+  #module Strategies
+=begin
   	OAuth2.class_eval do 
   		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
-  			puts "--------- CAME TO CALLBACK PHASE ------"
+  			
 	        error = request.params["error_reason"] || request.params["error"]
 	        if error
 	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
@@ -48,6 +157,7 @@ module OmniAuth
 	        end
 	     end
   	end
+
   	Facebook.class_eval do 
   		protected
   		def build_access_token
@@ -91,8 +201,12 @@ module OmniAuth
   		end
 
   	end
-    GoogleOauth2.class_eval do 
-    	def custom_build_access_token
+=end
+  #end
+end
+
+module GoogleOauthExtensions
+  def custom_build_access_token
     		puts "Came to custome build access token."
     		puts "is the request xhr?"
     		puts request.xhr?
@@ -153,13 +267,11 @@ module OmniAuth
 	        	false
 	        end
 
-	        
-    	end
-
-    	
-    end
-  end
+    	end 
 end
+
+OmniAuth::Strategies::GoogleOauth2.send(:include, GoogleOauthExtensions)
+
 module SimpleTokenAuthentication
 	module Configuration
 		mattr_accessor :additional_identifiers
@@ -216,130 +328,7 @@ module SimpleTokenAuthentication
 end
 
 
-module OmniAuth
-	module Strategy
 
-		##abilitiy to pass models.
-	    ##returns the models that are passed in / for which we are using omniauth.
-	    def models
-	      options[:models] || OmniAuth.config.models
-	    end
-
-		##a modification of the on path method to check if we are on any of the defined request or callback paths.
-	    ##tests each of the provided paths to see if we are on it.
-	    def on_any_path?(paths)
-	      path_found = false
-	      paths.each do |path|
-	       	path_found = on_path?(path) ? true : path_found
-	      end
-	      return path_found
-	    end
-
-
-	    def request_paths
-	    	paths = []
-	  		models.each do |model|
-	  			paths << Auth::OmniAuth::Path.omniauth_request_path(model,name)
-	  		end		  	
-	  		paths
-	    end
-
-	    def callback_paths
-	    	paths = []
-	  		models.each do |model|
-	  			paths << Auth::OmniAuth::Path.omniauth_callback_path(model,name)
-	  		end		  	
-	  		paths
-	    end
-
-	    ##THESE ARE THE ONLY TWO METHODS THAT ARE ACTUALLY OVERRIDDEN.
-	    def on_request_path?
-	    	on_any_path?(request_paths)
-	    end
-
-	    ##modified to use Auth::OmniAuth::Path
-	    def callback_path
-	      @callback_path ||= begin
-	        path = options[:callback_path] if options[:callback_path].is_a?(String)
-	        path ||= current_path if options[:callback_path].respond_to?(:call) && options[:callback_path].call(env)
-	        path ||= custom_path(:request_path)
-	        path ||= Auth::OmniAuth::Path.common_callback_path(name)
-	        path
-	      end
-	    end
-
-	    ##request call - modified to setup the model.
-	    def request_call
-	      ##gets.chomp
-	      setup_phase
-	      log :info, 'Request phase initiated.'
-	      # store query params from the request url, extracted in the callback_phase
-	      session['omniauth.params'] = request.params
-	      session['omniauth.model'] = request.url
-	      OmniAuth.config.before_request_phase.call(env) if OmniAuth.config.before_request_phase
-	      
-	      if options.form.respond_to?(:call)
-	        log :info, 'Rendering form from supplied Rack endpoint.'
-	        options.form.call(env)
-	      elsif options.form
-	        log :info, 'Rendering form from underlying application.'
-	        call_app!
-	      else
-	        if request.params['origin']
-	          env['rack.session']['omniauth.origin'] = request.params['origin']
-	        elsif env['HTTP_REFERER'] && !env['HTTP_REFERER'].match(/#{request_path}$/)
-	          env['rack.session']['omniauth.origin'] = env['HTTP_REFERER']
-	        end
-	        request_phase
-	      end
-	    end
-
-	    ##now the callback call
-	    # Performs the steps necessary to run the callback phase of a strategy.
-	    def callback_call
-	      #check_state
-	      setup_phase
-	      log :info, 'Callback phase initiated.'
-	      @env['omniauth.origin'] = session.delete('omniauth.origin')
-	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
-	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
-	      ##FOR THE WEB BASED SYSTEM, remember this was set in the request call.
-	      if !session['omniauth.model'].blank?
-	      	@env['omniauth.model'] = session.delete('omniauth.model')
-	      end
-	      OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
-	      callback_phase
-	    end
-
-
-=begin
-	    def check_state
-	    	puts "Came to check state---------------"
-	    	if !request.params['state'].blank? && JSON.is_json?(request.params['state']) && request.xhr?
-	    		
-	    			q = JSON.parse(request.params['state'])
-	    			c = Auth::Client.new(q)
-	    			#request.params["state"] = ""
-		    		#session['omniauth.state'] = request.params['state']
-		    		#c = Auth::Client.new(JSON.parse(request.params['state']))
-		    		#session['omniauth.state'] = 
-		    		if client = Auth::Client.find_valid_api_key_and_app_id(c.api_key,c.current_app_id)
-		    			puts "FOUND THE CLIENT."
-		    			##THIS PREVENTS CSRF ERROR.
-		    			#session['omniauth.state'] = request.params['state'] = c.api_key
-		    			##THIS ONLY HAPPENS IN JSON, in web based it is derived from the request_url.
-		    			@env['omniauth.model'] = c.path
-		    			session[:client] = client
-		    		else
-		    			#puts "did not find the client."
-		    		end
-	    		
-	    	end
-	    end
-=end
-
-	end
-end
 
 
 
@@ -384,13 +373,13 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 
 
 	OmniAuth::Strategies.constants.each do |constant|
-
+		puts "Constant is: #{constant}"
 		provider_key = constant.to_s.downcase
 		
 	
 		if oauth_keys.include? provider_key
 
-			
+						
 			provider(constant.to_s, oauth_credentials[provider_key]["app_id"], oauth_credentials[provider_key]["app_secret"],oauth_credentials[provider_key]["options"].merge!({:path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path, :models => oauthable_models}))
 
 		end

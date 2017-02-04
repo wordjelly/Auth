@@ -69,6 +69,7 @@ module ActionDispatch::Routing
 						common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
 
 						if !Rails.application.routes.url_helpers.method_defined?("#{provider}_omniauth_authorize_path".to_sym)
+							puts "calling route for provider: #{provider}"
 							match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 						end
 

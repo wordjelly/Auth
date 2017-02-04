@@ -59,7 +59,6 @@ RSpec.feature "", :type => :feature, :features => true do
     page.should have_content("Sign in with GoogleOauth2")
     mock_auth_hash
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-    #Rails.application.env_config["omniauth.auth"] = 
     click_link "Sign in with GoogleOauth2"
     expect(page).to have_content("Logout")
   end
