@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.feature "", :type => :feature, :features => true do
+RSpec.feature "", :type => :feature, :feature => true do
 
   before(:each) do 
  	    ActionController::Base.allow_forgery_protection = true
@@ -55,12 +55,19 @@ RSpec.feature "", :type => :feature, :features => true do
 
 
   scenario "it can sign in with oauth2", :mark => true do 
+  
     visit new_user_registration_path
+  
     page.should have_content("Sign in with GoogleOauth2")
+  
     mock_auth_hash
+  
     Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+  
     click_link "Sign in with GoogleOauth2"
-    expect(page).to have_content("Logout")
+    
+    expect(page).to have_content("Sign Out")
+  
   end
 
 =begin

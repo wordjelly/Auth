@@ -101,7 +101,7 @@ module Auth::Concerns::OmniConcern
 
   def omni_common
         
-        begin
+        #begin
           puts "CAME TO OMNI COMMON."
           model_class = request.env["devise.mapping"]
           if model_class.nil?
@@ -136,8 +136,8 @@ module Auth::Concerns::OmniConcern
 
               set_access_token_and_expires_at(access_token,token_expires_at)
 
-              #puts "resource before the update"
-              #puts JSON.pretty_generate(@resource.attributes)
+              puts "resource before the update"
+              puts JSON.pretty_generate(@resource.attributes)
 
               @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
 
@@ -151,7 +151,10 @@ module Auth::Concerns::OmniConcern
                 
                 sign_in @resource
 
-                respond_with(@resource, :status => :updated, :location => after_sign_in_path_for(@resource))
+                respond_to do |format|
+                  format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                  format.json  { render json: @resource, status: :updated and return}
+                end
                 
               else
 
@@ -203,12 +206,19 @@ module Auth::Concerns::OmniConcern
                 ##call the after_save_callbacks.
 
                 sign_in @resource
-                #puts "After calling sign in resource -------------------------------------------"
+                puts "After calling sign in resource -------------------------------------------"
                 #puts @resource.attributes.to_s
                 #u = User.where(:email => @resource.email).first
                 #puts u.attributes.to_s
                 #redirect_to after_sign_in_path_for(@resource)
-                respond_with(@resource, :status => :created, :location => after_sign_in_path_for(@resource))
+                puts "came toresponf"
+                puts "the after sign in path is :"
+                puts after_sign_in_path_for(@resource)
+                #respond_with(@resource, :status => :updated, :location => after_sign_in_path_for(@resource)) and return
+                respond_to do |format|
+                  format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                  format.json  { render json: @resource, status: :created and return}
+                end
               else
                 puts "came to omniauth failure path, due to the following issues."
                 puts @resource.attributes.to_s
@@ -221,12 +231,12 @@ module Auth::Concerns::OmniConcern
             end
 
           end
-        
-        rescue => e
-          #puts "----------GOT THE ERROR------------------"
-          #puts e.to_s
-          redirect_to omniauth_failed_path_for("error") and return
-        end
+              
+        #rescue => e
+        #  puts "----------GOT THE ERROR------------------"
+        #  puts e.to_s
+        #  redirect_to omniauth_failed_path_for("error") and return
+        #end
   end
 
 end

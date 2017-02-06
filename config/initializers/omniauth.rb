@@ -258,7 +258,7 @@ module OmniAuth
   module Strategies
   	OAuth2.class_eval do 
   		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
-  			puts "--------- CAME TO CALLBACK PHASE ------"
+  			
 	        error = request.params["error_reason"] || request.params["error"]
 	        if error
 	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
@@ -349,9 +349,9 @@ module OmniAuth
   	end
     GoogleOauth2.class_eval do 
     	def custom_build_access_token
-    		puts "Came to custome build access token."
-    		puts "is the request xhr?"
-    		puts request.xhr?
+    		#puts "Came to custome build access token."
+    		#puts "is the request xhr?"
+    		#puts request.xhr?
     		access_token =
     		if verify_id_token(request.params['id_token'])
     			puts "came to verify_id_token"
@@ -478,7 +478,6 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 	##this es is the additional identifier in addition to the authentication_token.
 	##so it has to be defined for each model.
 	##will also need to add app_id, and client id specific shit here.
-	
 	if Auth.configuration.enable_token_auth
 		SimpleTokenAuthentication.configure do |cf|
 		  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]

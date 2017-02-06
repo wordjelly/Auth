@@ -29,7 +29,7 @@ RSpec.describe "Omniauth requests", :type => :request do
     context " -- json requests -- " do 
 
         context  " -- google_oauth2 test -- " do 
-=begin
+
             it " -- handles invalid id_token -- " do 
                
                 OmniAuth.config.test_mode = false
@@ -52,11 +52,11 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
-=end
+
             it " -- redirects to omniauth failure path on any error in omni concern. -- " do 
                 
                 OmniAuth.config.test_mode = false
-=begin
+
                 module OmniAuth
                     module Strategies
                         GoogleOauth2.class_eval do 
@@ -81,7 +81,7 @@ RSpec.describe "Omniauth requests", :type => :request do
                         end
                     end
                 end
-=end                
+               
 
                 post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
                 
@@ -89,7 +89,7 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
-=begin
+
             it " -- on visiting omniauth_failure_path(error), responds with json {failure_message: error}" do 
                
                 get omniauth_failure_path("error"),nil,@headers
@@ -506,7 +506,6 @@ RSpec.describe "Omniauth requests", :type => :request do
 
             end
 
-=end
 
         end
 

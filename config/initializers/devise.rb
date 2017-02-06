@@ -336,8 +336,8 @@ DeviseController.class_eval do
   end
   
   def render(*args)
-    #puts *args.to_s
-    #puts "came to render.-------------------------------"
+    puts *args.to_s
+    puts "came to render.-------------------------------"
 
     if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
@@ -348,9 +348,9 @@ DeviseController.class_eval do
       #puts "auth token -> #{resource.authentication_token}"
       #puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
-        super
+        super(*args)
       elsif controller_name == "confirmations" && action_name != "show"
-        super  
+        super(*args)
       else
         if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
 
@@ -360,7 +360,7 @@ DeviseController.class_eval do
           
           redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
         else
-          super
+          super(*args)
         end
       end     
   end
