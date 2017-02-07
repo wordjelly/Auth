@@ -12,12 +12,15 @@ module Auth
 
     ##need to check permissions of 
 
+    #def test
 
+    #end
 
     # GET /clients
     def index
       #@clients = Client.all
       #respond_with @clients
+      #redirect_to "http://www.google.com"
       render :nothing => true, :status => 200
     end
 

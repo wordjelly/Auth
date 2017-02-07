@@ -99,9 +99,16 @@ module Auth::Concerns::OmniConcern
       @resource.token_expires_at = token_expires_at
   end
 
+  #def omni_common
+  #  puts request.params.to_s
+  #  puts request.format.to_s
+  #  redirect_to "http://www.indiatimes.com?authentication_token=o5kq8zenButbcvHKQbBS&es=13881905673dce4c202b026120dd5b372aee1b306e009b21b7f03dc37475d996"
+  #end
+
+
   def omni_common
         
-        #begin
+        begin
           puts "CAME TO OMNI COMMON."
           model_class = request.env["devise.mapping"]
           if model_class.nil?
@@ -232,11 +239,11 @@ module Auth::Concerns::OmniConcern
 
           end
               
-        #rescue => e
-        #  puts "----------GOT THE ERROR------------------"
-        #  puts e.to_s
-        #  redirect_to omniauth_failed_path_for("error") and return
-        #end
+        rescue => e
+          puts "----------GOT THE ERROR------------------"
+          puts e.to_s
+          redirect_to omniauth_failed_path_for("error") and return
+        end
   end
 
 end

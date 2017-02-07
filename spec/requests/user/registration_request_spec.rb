@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Registration requests", :reg => true, :type => :request do
+RSpec.describe "Registration requests", :working => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all
@@ -39,10 +39,11 @@ RSpec.describe "Registration requests", :reg => true, :type => :request do
       Auth::Client.delete_all
       @u = User.new(attributes_for(:user_confirmed))
       @u.save
-      @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
+      @c = Auth::Client.where(:resource_id => @u.id).first
+      @c.api_key = "test"
       @c.redirect_urls = ["http://www.google.com"]
       @c.app_ids << "test_app_id"
-      @c.versioned_create
+      @c.versioned_update
       @ap_key = @c.api_key
       #@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
 

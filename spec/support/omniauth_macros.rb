@@ -1,5 +1,7 @@
 module OmniauthMacros
-  def mock_auth_hash
+  def mock_auth_hash(token=nil,expires_at=nil)
+    token ||= 'mock_token'
+    expires_at ||= 20000
     # The mock_auth configuration allows you to set per-provider (or default)
     # authentication hashes to return during integration testing.
     OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
@@ -11,12 +13,14 @@ module OmniauthMacros
         'email' => 'rrphotosoft@gmail.com'
       },
       'credentials' => {
-        'token' => 'mock_token',
+        'token' => token,
         'secret' => 'mock_secret',
-        'expires_at' => 20000
+        'expires_at' => expires_at
       }
     })
   end
+
+
 
   def mock_auth_hash_facebook
     # The mock_auth configuration allows you to set per-provider (or default)

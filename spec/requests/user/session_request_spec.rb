@@ -6,7 +6,7 @@ basically we have created one user in the before(:example) , and with it an assc
 now in all the tests, we sign in this user only, using its own client. normally we could also sign in other users using this client.
 =end
 
-RSpec.describe "session request spec",:session => true, :type => :request do 
+RSpec.describe "session request spec",:working => true, :type => :request do 
 
 	
 

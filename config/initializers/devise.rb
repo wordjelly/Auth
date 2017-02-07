@@ -296,37 +296,55 @@ DeviseController.class_eval do
       end
   end
 
- 
+  
+  
+
   def redirect_to(options = {}, response_status = {})
-    
+
+    puts "REDIRECT TO TRIGGERED"
+    puts "options #{options.to_s}"
+
     ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
-    #puts "came to redirect."
-    #puts "session redirect url is: #{session[:redirect_url]}"
-    #puts "session client is: #{session[:client]}"
+   
     if !session[:redirect_url].nil? && @redirect_url.nil?
        @redirect_url = session[:redirect_url]
        @client = Auth::Client.new(session[:client])
     end
+    #super
     #puts "redirect url was : #{@redirect_url}"
     #puts "client was: #{@client}"
+     
+     #if options =~ /authentication_token|es/
+      ##this situation is to prevnet re-redirects.
+     # puts "detected auth token and es."
+      #redirect_to(options,response_status)
+     # super
+    #end    
+
+
     if options =~ /authentication_token|es/
-      super
+      ##this situation is to prevnet re-redirects.
+      puts "detected auth token and es."
+      #redirect_to(options,response_status)
+      super(options,response_status)
     else
       ##as long as its not destroy.
       if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
       end
       if controller_name == "passwords"
-        super
+        redirect_to(options,response_status)
       elsif controller_name == "confirmations" && action_name != "show"
-        super  
+        redirect_to(options,response_status)
       else
+        puts "CAME TO CORRENT PLACE."
         if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
 
           curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
-          
+          puts "url for redirection:"
+          puts @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es,response_status
           redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
         else
           super
@@ -334,7 +352,8 @@ DeviseController.class_eval do
       end
     end
   end
-  
+ 
+
   def render(*args)
     puts *args.to_s
     puts "came to render.-------------------------------"
@@ -358,7 +377,7 @@ DeviseController.class_eval do
           session.delete(:client)
           session.delete(:redirect_url)
           
-          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
+          redirect_to (@redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
         else
           super(*args)
         end
@@ -373,28 +392,30 @@ DeviseController.class_eval do
     @client = nil
     @redirect_url = nil
     session.delete('omniauth.state')
-    session.delete('client')
-    session.delete('omniauth.model')
+
+    #session.delete('client')
+    #session.delete('omniauth.model')
   end
 
   def set_client
-    puts "SETTING CLIENT."
+    #puts "params are: #{params.to_s}"
+    #puts "SETTING CLIENT."
     if !session[:client].nil?
-      puts "GOT SESSION CLIENT."
-      puts session[:client].to_s
+      #puts "GOT SESSION CLIENT."
+      #puts session[:client].to_s
       if session[:client].is_a?Hash
-         puts "its a hash."
+         #puts "its a hash."
          @client = Auth::Client.new(session[:client])
       
       elsif session[:client].is_a? Auth::Client
-         puts "its a client."
+         #puts "its a client."
          @client = session[:client]
       end 
       
       return true
 
     else
-      puts "params are: #{params.to_s}"
+      #puts "params are: #{params.to_s}"
       state = nil
       api_key = nil
       current_app_id = nil
@@ -417,17 +438,19 @@ DeviseController.class_eval do
       
       
       if api_key.nil? || current_app_id.nil?
-
+        #puts "NO API KEY OR CURRENT APP ID."
       else
        
         @client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
+        #puts "BUILT CLIENT AS:"
+        #puts @client.attributes.to_s
         
         if !@client.nil?
           session[:client] = @client
           request.env["omniauth.model"] = path
           return true
         else
-          puts "couldnt find the client"
+          #puts "couldnt find the client"
         end
       end
       return false
@@ -450,8 +473,8 @@ DeviseController.class_eval do
 
   def set_redirect_url(client)
     
-    #puts "the params redirect url is: #{params[:redirect_url]}"
-    #puts "the session redirect url is: #{session[:redirect_url]}"
+   # puts "the params redirect url is: #{params[:redirect_url]}"
+   # puts "the session redirect url is: #{session[:redirect_url]}"
     redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
 
     if !redir_url.nil? && !client.nil? && client.contains_redirect_url?(redir_url) && !(is_json_request?)

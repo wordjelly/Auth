@@ -12,7 +12,8 @@ require 'rspec/rails'
 require 'devise'
 require 'support/factory_girl'
 require 'support/omniauth_macros.rb'
-
+require "capybara/rspec"
+require 'capybara/rails'
 
 Dir[File.join(ENGINE_RAILS_ROOT, "spec/support/**/*.rb")].each {|f| require f }
 
@@ -36,6 +37,7 @@ Dir[File.join(ENGINE_RAILS_ROOT, "spec/support/**/*.rb")].each {|f| require f }
 
 
 RSpec.configure do |config|
+  #config.include Capybara::DSL
   config.include Devise::TestHelpers, type: :controller
   config.include Devise::TestHelpers, type: :view
   config.include(OmniauthMacros)

@@ -16,6 +16,32 @@
 # users commonly want.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+
+require 'capybara-webkit'
+require 'selenium-webdriver'
+require 'capybara/rspec'
+require 'capybara/webkit/matchers'
+#Capybara.configure do |config|
+#  config.current_driver = :selenium
+#end
+#Capybara.javascript_driver = :webkit
+
+#RSpec.configure do |config|
+  #config.use_transactional_fixtures = false
+  #config.before(:each) do
+  #  DatabaseCleaner.strategy = example.metadata[:js] ? :truncation : :transaction
+  #  DatabaseCleaner.start
+  #end
+  #config.after(:each) do
+  #  DatabaseCleaner.clean
+  #end
+
+  #config.include(Capybara::Webkit::RspecMatchers, :type => :feature)
+#end
+
+
+
+
 RSpec.configure do |config|
   #config.include Auth::Engine.routes.url_helpers
   

@@ -5,6 +5,8 @@ class TopicsController < ApplicationController
 
   # GET /topics
   def index
+    #redirect_to "http://www.google.com"
+    
     @topics = Topic.all
   end
 
