@@ -24,9 +24,9 @@ require 'capybara/webkit/matchers'
 #Capybara.configure do |config|
 #  config.current_driver = :selenium
 #end
-#Capybara.javascript_driver = :webkit
+Capybara.javascript_driver = :webkit
 
-#RSpec.configure do |config|
+RSpec.configure do |config|
   #config.use_transactional_fixtures = false
   #config.before(:each) do
   #  DatabaseCleaner.strategy = example.metadata[:js] ? :truncation : :transaction
@@ -36,8 +36,8 @@ require 'capybara/webkit/matchers'
   #  DatabaseCleaner.clean
   #end
 
-  #config.include(Capybara::Webkit::RspecMatchers, :type => :feature)
-#end
+  config.include(Capybara::Webkit::RspecMatchers, :type => :feature)
+end
 
 
 
