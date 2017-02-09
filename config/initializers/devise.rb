@@ -355,11 +355,12 @@ DeviseController.class_eval do
     if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
     end
-      puts "redirect url -> #{@redirect_url}"
-      puts "resource -> #{resource.attributes.to_s}"
-      puts "es -> #{resource.client_authentication[@client.current_app_id]}"
-      puts "auth token -> #{resource.authentication_token}"
-      puts "signed in --> #{signed_in?}"
+      #puts "redirect url -> #{@redirect_url}"
+      #puts "resource -> #{resource.attributes.to_s}"
+      
+      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
+      #puts "auth token -> #{resource.authentication_token}"
+      #puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
         super(*args)
       elsif controller_name == "confirmations" && action_name != "show"

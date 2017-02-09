@@ -22,9 +22,7 @@ class Auth::Users::ProfilesController < ApplicationController
 	private
 	def permitted_params
 		if action_name.to_s == "credential_exists"
-			permit = Devise.authentication_keys
-			permit.push(:resource)
-			params.require(:credential).permit(permit)
+			params.require(:credential).permit(Devise.authentication_keys + [:resource])
 		end
 	end
 
