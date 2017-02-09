@@ -1,1 +1,4 @@
-<%= recaptcha_tags %>
+<% puts "auth recaptcha configuration is:#{Auth.configuration.recaptcha}" %>
+<% if Auth.configuration.recaptcha %>
+	<%= recaptcha_tags %>
+<% end %>

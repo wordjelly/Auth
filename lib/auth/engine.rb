@@ -45,6 +45,7 @@ module Auth
     attr_accessor :mount_path
     attr_accessor :auth_resources
     attr_accessor :enable_sign_in_modals
+    attr_accessor :recaptcha
    
 
     def initialize
@@ -53,6 +54,7 @@ module Auth
       @mount_path = "/authenticate"
       @auth_resources = {}
       @enable_sign_in_modals = true
+      @recaptcha = true
     end
   end
   

@@ -39,6 +39,12 @@ RSpec.configure do |config|
   config.include(Capybara::Webkit::RspecMatchers, :type => :feature)
 end
 
+Capybara::Webkit.configure do |config|
+  config.debug = false
+  
+  config.allow_url("www.google.com")
+  
+end
 
 
 

@@ -36,7 +36,7 @@ Devise.setup do |config|
   # session. If you need permissions, you should implement that in a before filter.
   # You can also supply a hash where the value is a boolean determining whether
   # or not authentication should be aborted when the value is not present.
-  # config.authentication_keys = [:email]
+  #config.authentication_keys = [:email]
 
   # Configure parameters from the request object used for authentication. Each entry
   # given should be a request method and it will automatically be passed to the
@@ -301,9 +301,7 @@ DeviseController.class_eval do
 
   def redirect_to(options = {}, response_status = {})
 
-    puts "REDIRECT TO TRIGGERED"
-    puts "options #{options.to_s}"
-
+   
     ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
    
     if !session[:redirect_url].nil? && @redirect_url.nil?
@@ -324,7 +322,7 @@ DeviseController.class_eval do
 
     if options =~ /authentication_token|es/
       ##this situation is to prevnet re-redirects.
-      puts "detected auth token and es."
+     
       #redirect_to(options,response_status)
       super(options,response_status)
     else
@@ -337,14 +335,13 @@ DeviseController.class_eval do
       elsif controller_name == "confirmations" && action_name != "show"
         redirect_to(options,response_status)
       else
-        puts "CAME TO CORRENT PLACE."
+        
         if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
 
           curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)
           session.delete(:redirect_url)
-          puts "url for redirection:"
-          puts @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es,response_status
+         
           redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
         else
           super
@@ -355,17 +352,14 @@ DeviseController.class_eval do
  
 
   def render(*args)
-    puts *args.to_s
-    puts "came to render.-------------------------------"
-
     if !resource.nil? && !@client.nil? && action_name != "destroy"
         resource.set_client_authentication(@client.current_app_id)
     end
-      #puts "redirect url -> #{@redirect_url}"
-      #puts "resource -> #{resource.attributes.to_s}"
-      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
-      #puts "auth token -> #{resource.authentication_token}"
-      #puts "signed in --> #{signed_in?}"
+      puts "redirect url -> #{@redirect_url}"
+      puts "resource -> #{resource.attributes.to_s}"
+      puts "es -> #{resource.client_authentication[@client.current_app_id]}"
+      puts "auth token -> #{resource.authentication_token}"
+      puts "signed in --> #{signed_in?}"
       if controller_name == "passwords"
         super(*args)
       elsif controller_name == "confirmations" && action_name != "show"
@@ -502,7 +496,7 @@ DeviseController.class_eval do
 
   def require_no_authentication
     
-    #puts "came to require no authentication."
+    
     do_before_request
     assert_is_devise_resource!
     
@@ -523,7 +517,7 @@ DeviseController.class_eval do
 
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
-        #puts "authenticated already"
+        
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -540,6 +534,11 @@ end
 
 
 module Devise
+
+  
+    
+  
+
   module Controllers
     module Helpers
       ##takes care of the test case where no devise mapping is specified in the request.env.
@@ -654,6 +653,7 @@ module Devise
     prepend_before_action :ignore_json_request, only: [:new]
     prepend_before_action :do_before_request, only: [:show,:create]
 
+
     def show
       self.resource = resource_class.confirm_by_token(params[:confirmation_token])
       
@@ -665,13 +665,13 @@ module Devise
           render :nothing => true, :status => 201 and return 
         else
           #sign_in(resource)
+          self.resource = nil
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
         end
       else
         respond_with_navigational(resource.errors, status: :unprocessable_entity){ render :new }
       end
     end
-
     
 
   end
