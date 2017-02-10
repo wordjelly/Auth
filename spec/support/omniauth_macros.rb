@@ -1,5 +1,6 @@
 module OmniauthMacros
-  def mock_auth_hash(token=nil,expires_at=nil)
+  def mock_auth_hash(token=nil,expires_at=nil,simulate_error=nil)
+    return nil if simulate_error
     token ||= 'mock_token'
     expires_at ||= 20000
     # The mock_auth configuration allows you to set per-provider (or default)
@@ -18,6 +19,10 @@ module OmniauthMacros
         'expires_at' => expires_at
       }
     })
+  end
+
+  def mock_defective_auth_hash
+    nil
   end
 
 

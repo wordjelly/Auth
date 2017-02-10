@@ -23,7 +23,7 @@ RSpec.feature "", :type => :feature, :feature => true do
 
     context " -- google oauth test -- " do 
 
-
+=begin
         scenario " -- it can sign in with oauth2 -- ", js: true do 
        
             Auth.configuration.recaptcha = false
@@ -86,7 +86,8 @@ RSpec.feature "", :type => :feature, :feature => true do
 
         end
 
-      scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token.", js: true do
+
+        scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token.", js: true do
             Auth.configuration.recaptcha = false
             ##visit the sign in page
             visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
@@ -135,10 +136,46 @@ RSpec.feature "", :type => :feature, :feature => true do
             if current_url=~/google/
                 expect("one").to eql("one")
             end
-            
-            
+                        
+        end
+=end
+        scenario "any error in omniauth -> goes to omniauth error page", js: true do 
+
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
+            mock_auth_hash(nil,nil,"simulate_error")
+          
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+
+            expect(page).to have_content("error")
+
         end
 
+=begin
+        scenario "failure to update access_token and expires_at goes to omniauth error page, with appropriate error message ", js: true do 
+
+
+        end
+
+
+        scenario "failure to create new oauth user, goes to omniauth error page, with error message ", js: true do 
+
+
+        end
+
+
+        scenario "failure to provide oauth resource, goes to omniauth error page, with no_resource error message", js: true do 
+
+
+        end
+=end
     end
 
   end

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Omniauth requests", :type => :request do
+RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => true do
   before(:each) do 
     User.delete_all
     Auth::Client.delete_all

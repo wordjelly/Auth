@@ -27,10 +27,8 @@ module Auth::Concerns::OmniConcern
 
   def failure
     ##if the resource is nil in the failure url, it was made so by us after detecting that it was not sent in the callback request.
-    
-    f = failure_message
-    status = :unprocessible_entity
-    
+=begin
+    puts "f is: #{f}"
     if f.blank?
       model = nil
       request.url.scan(/#{Auth.configuration.mount_path}\/(?<model>[a-zA-Z_]+)\/omniauth/) do |ll|
@@ -43,11 +41,12 @@ module Auth::Concerns::OmniConcern
         f = model
       end
     end   
-
-    
-    
+=end
+    f = failure_message
+    flash[:omniauth_error] = f.blank? ? notice : f
     respond_to do |format|
-        format.json { render json: {"failure_message" => f}, status:  status}
+        format.json { render json: {"failure_message" => flash[:omniauth_error]}, status: :unprocessible_entity}
+        format.html { render "auth/omniauth_callbacks/failure.html.erb" }
     end
 
   end
@@ -68,6 +67,7 @@ module Auth::Concerns::OmniConcern
     error   = exception.error_reason if exception.respond_to?(:error_reason)
     error ||= exception.error        if exception.respond_to?(:error)
     error ||= (request.respond_to?(:get_header) ? request.get_header("omniauth.error.type") : env["omniauth.error.type"]).to_s
+
     error.to_s.humanize if error
   end
 
@@ -109,16 +109,17 @@ module Auth::Concerns::OmniConcern
   def omni_common
         
         begin
-          puts "CAME TO OMNI COMMON."
+          
           model_class = request.env["devise.mapping"]
           if model_class.nil?
            ##COVERED IN #NO_RESOURCE_TEST.
-           puts "NO RESOURCE."
-           redirect_to omniauth_failed_path_for("no_resource") and return 
+          
+           redirect_to omniauth_failed_path_for("no_resource"), :notice => "No resource was specified in the omniauth callback request." and return 
           else
             resource_klazz = request.env["devise.mapping"].to
            
-            omni_hash = get_omni_hash
+            omni_hash = nil
+            
 
             email,uid,provider,access_token,token_expires_at = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"],omni_hash["credentials"]["token"],omni_hash["credentials"]["expires_at"]
 
@@ -166,8 +167,9 @@ module Auth::Concerns::OmniConcern
                 
               else
 
-                puts "Failed to update the acceess token and token expires at."
-                redirect_to omniauth_failed_path_for(resource_klazz.name)
+                
+                
+                redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to update the acceess token and token expires at"
 
               end
 
@@ -228,12 +230,7 @@ module Auth::Concerns::OmniConcern
                   format.json  { render json: @resource, status: :created and return}
                 end
               else
-                puts "came to omniauth failure path, due to the following issues."
-                puts @resource.attributes.to_s
-                puts @resource.persisted?
-                puts @resource.identities.to_s
-                puts identity.attributes.to_s
-                redirect_to omniauth_failure_path(resource_klazz.name)
+                redirect_to omniauth_failure_path(resource_klazz.name), :notice => "Failed to create new user"
               end
 
             end
@@ -241,9 +238,8 @@ module Auth::Concerns::OmniConcern
           end
               
         rescue => e
-          puts "----------GOT THE ERROR------------------"
-          puts e.to_s
-          redirect_to omniauth_failed_path_for("error") and return
+          #puts e.attributes.to_s
+          redirect_to omniauth_failed_path_for("error"), :notice => "error" and return
         end
   end
 
