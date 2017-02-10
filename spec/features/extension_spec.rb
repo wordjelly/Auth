@@ -23,51 +23,61 @@ RSpec.feature "", :type => :feature, :feature => true do
 
     context " -- google oauth test -- " do 
 
-=begin
-        scenario " -- it can sign in with oauth2 -- ", :mark => true do 
-      
-            visit new_user_registration_path
-          
-            page.should have_content("Sign in with GoogleOauth2")
-          
+
+        scenario " -- it can sign in with oauth2 -- ", js: true do 
+       
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
             mock_auth_hash
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-          
-            click_link "Sign in with GoogleOauth2"
-            
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+    
             expect(page).to have_content("Sign Out")
           
         end
 
-        scenario " -- creates new user first time with oauth, on subsequent sign in , will update access_token and expiration -- " do 
 
-            ActionController::Base.allow_forgery_protection = false
+        scenario " -- creates new user first time with oauth, on subsequent sign in , will update access_token and expiration -- ", js: true do 
 
-            visit new_user_registration_path
-          
-            page.should have_content("Sign in with GoogleOauth2")
-          
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
             mock_auth_hash
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-          
-            click_link "Sign in with GoogleOauth2"
-            
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+    
             expect(page).to have_content("Sign Out")
 
             click_link "Sign Out"
 
+            ###
+            ###
+            ###
             ### TRY TO SIGN IN AGAIN USING SAME OAUTH.
 
-            visit new_user_registration_path
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
 
             mock_auth_hash('new_token',50000)
-
+          
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-
-            click_link "Sign in with GoogleOauth2"
-
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+    
             expect(page).to have_content("Sign Out")
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
@@ -76,24 +86,6 @@ RSpec.feature "", :type => :feature, :feature => true do
 
         end
 
-
-        scenario "go to sign_up with a valid_api_key and redirect_url => do oauth2 => should get redirected to redirect url with es and authentication token"  do 
-            
-            visit new_user_registration_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
-            
-            
-            mock_auth_hash
-            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-            #visit google_oauth2_omniauth_callback_path
-            click_link "Sign in with GoogleOauth2"
-            
-            #puts page.body
-            u = User.where(:email => 'rrphotosoft@gmail.com').first
-            expected_es = u.client_authentication["test_app_id"]
-            expect(current_url).to eq("http://www.google.com/?authentication_token=#{u.authentication_token}&es=#{expected_es}")
-            
-      end        
-=end
       scenario "visit sign_in with redirect_url + valid_api_key => visit sign_up => create account pending confirmation => visit confirmation url => then sign in again => get redirected to the redirection url with es and authentication_token.", js: true do
             Auth.configuration.recaptcha = false
             ##visit the sign in page

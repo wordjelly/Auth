@@ -113,6 +113,7 @@ module Auth::Concerns::OmniConcern
           model_class = request.env["devise.mapping"]
           if model_class.nil?
            ##COVERED IN #NO_RESOURCE_TEST.
+           puts "NO RESOURCE."
            redirect_to omniauth_failed_path_for("no_resource") and return 
           else
             resource_klazz = request.env["devise.mapping"].to

@@ -5,7 +5,7 @@
 	  <div class="col l8 m10 s10 offset-l2 offset-m1 offset-s1">
 	    <%= render 'auth/modals/sign_in_inputs.html.erb', locals: {:resource => resource} %>
 	    <%= render 'auth/modals/sign_up_inputs.html.erb', locals: {:resource => resource} %>
-	    <%= render 'auth/modals/oauth_and_submit.html.erb' %>
+	    <%= render 'auth/modals/oauth_and_submit.html.erb', locals: {:resource => resource} %>
 	  </div>
 	</div>
 	<%= f.submit "Log In",  id: "login_submit", style: "display:none;" %>
