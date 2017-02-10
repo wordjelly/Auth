@@ -138,7 +138,7 @@ RSpec.feature "", :type => :feature, :feature => true do
             end
                         
         end
-=end
+
         scenario "any error in omniauth -> goes to omniauth error page", js: true do 
 
             Auth.configuration.recaptcha = false
@@ -158,19 +158,75 @@ RSpec.feature "", :type => :feature, :feature => true do
 
         end
 
+=end
 =begin
+        ##THIS IS SIMULATED BY FIRST CREATING A NEW OAUTH USER.
+        ##THEN WE SET ITS VERSION TO 0
+        ##AFTER THAT WE GO AGAIN TO OAUTH AND TRY TO SIGN IN.
+        ##SINCE VERSION IS 0, MONGOID VERSIONED ATOMIC UPDATE, WILL FAIL
+        ##THIS WILL LEAD TO A FAILURE OF THE UPDATE OF ACCESS_TOKENA AND EXPIRES_AT.
         scenario "failure to update access_token and expires_at goes to omniauth error page, with appropriate error message ", js: true do 
+                
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
 
+            click_link("Sign In")
+            wait_for_ajax
+
+            mock_auth_hash
+          
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+
+            click_link("Sign Out")
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            u.version = 0
+            u.save
+          
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
+            mock_auth_hash
+          
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click                    
+
+            expect(page).to have_content("Failed to update the acceess token and token expires at")
 
         end
+=end
 
-
+        ##try to simulate by creating a after_create callback which will delete identities, this will make it feel like the create failed, and this will lead to a failure fo the create.
         scenario "failure to create new oauth user, goes to omniauth error page, with error message ", js: true do 
+    
+            
 
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
+            mock_auth_hash
+          
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+
+            expect(page).to have_content("Failed to create new user")
 
         end
 
-
+=begin
         scenario "failure to provide oauth resource, goes to omniauth error page, with no_resource error message", js: true do 
 
 

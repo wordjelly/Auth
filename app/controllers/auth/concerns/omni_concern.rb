@@ -26,22 +26,6 @@ module Auth::Concerns::OmniConcern
   end
 
   def failure
-    ##if the resource is nil in the failure url, it was made so by us after detecting that it was not sent in the callback request.
-=begin
-    puts "f is: #{f}"
-    if f.blank?
-      model = nil
-      request.url.scan(/#{Auth.configuration.mount_path}\/(?<model>[a-zA-Z_]+)\/omniauth/) do |ll|
-        jj = Regexp.last_match
-        model = jj[:model]
-      end
-      if model == "no_resource"
-        f = "No resource was specified in the omniauth callback request."
-      else
-        f = model
-      end
-    end   
-=end
     f = failure_message
     flash[:omniauth_error] = f.blank? ? notice : f
     respond_to do |format|
@@ -99,26 +83,44 @@ module Auth::Concerns::OmniConcern
       @resource.token_expires_at = token_expires_at
   end
 
-  #def omni_common
-  #  puts request.params.to_s
-  #  puts request.format.to_s
-  #  redirect_to "http://www.indiatimes.com?authentication_token=o5kq8zenButbcvHKQbBS&es=13881905673dce4c202b026120dd5b372aee1b306e009b21b7f03dc37475d996"
-  #end
+  ## @return[Boolean] : true if the update was successfull, false otherwise
+  def update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,access_token,token_expires_at)
+    @resource = from_view(existing_oauth_resources,resource_klazz)
+
+    set_access_token_and_expires_at(access_token,token_expires_at)
+
+    @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
+
+    if @resource.op_success
+                    
+      if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.name][:skip].include? :confirmable
+        @resource.skip_confirmation!
+      end
+                      
+      sign_in @resource
+
+      true
+      
+    else
 
 
+      false
+
+    end
+  end
+ 
   def omni_common
         
-        begin
+        #begin
           
           model_class = request.env["devise.mapping"]
           if model_class.nil?
-           ##COVERED IN #NO_RESOURCE_TEST.
           
            redirect_to omniauth_failed_path_for("no_resource"), :notice => "No resource was specified in the omniauth callback request." and return 
           else
             resource_klazz = request.env["devise.mapping"].to
            
-            omni_hash = nil
+            omni_hash = get_omni_hash
             
 
             email,uid,provider,access_token,token_expires_at = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"],omni_hash["credentials"]["token"],omni_hash["credentials"]["expires_at"]
@@ -140,34 +142,16 @@ module Auth::Concerns::OmniConcern
            
 
             if existing_oauth_resources.count == 1
-
-              @resource = from_view(existing_oauth_resources,resource_klazz)
-
-              set_access_token_and_expires_at(access_token,token_expires_at)
-
-              puts "resource before the update"
-              puts JSON.pretty_generate(@resource.attributes)
-
-              @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
-
-              if @resource.op_success
-                              
-                if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.name][:skip].include? :confirmable
-                  @resource.skip_confirmation!
-                end
+              puts "------THERE ARE EXISTING OAUTH RESOURCES---------"
                 
-                puts("this resource already exists")
-                
-                sign_in @resource
+              if  update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,access_token,token_expires_at)
 
-                respond_to do |format|
-                  format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                  format.json  { render json: @resource, status: :updated and return}
-                end
-                
+                 respond_to do |format|
+                    format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                    format.json  { render json: @resource, status: :updated and return}
+                 end
+
               else
-
-                
                 
                 redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to update the acceess token and token expires at"
 
@@ -184,6 +168,38 @@ module Auth::Concerns::OmniConcern
               
               puts("no such user exists, trying to create a new user by merging the fields.")
                 
+              @resource = resource_klazz.new
+              @resource.email = email
+              @resource.password = Devise.friendly_token(20)
+              @resource.authentication_token = build_token(resource_klazz)
+              @resource.access_token = access_token
+              @resource.token_expires_at = token_expires_at
+              @resource.identities = [identity.attributes.except("_id")]
+
+              @resource.versioned_create({"email" => @resource.email})
+
+              if @resource.op_success
+
+              else
+                ##try the update
+                ##FOR TWO OMNIAUTH ACCOUNTS WITH THE SAME EMAIL.
+                ##here we are creating the second one.
+                ##NEED TO SHIFT ACCESS_TOKEN AND TOKEN_EXPIRES_AT TO THE IDENTITY, SINCE IT IS UNIQUE TO THE IDNETITY.
+                @resource = resource_klazz.where(:email => @resource.email).first
+                ##check if the id
+                @resource.identities.push(identity.attributes.except("_id"))
+                @resource.access_token = access_token
+                @resource.token_expires_at = token_expires_at
+                @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1, "identities" => 1})
+                if @resource.op_success
+                  sign_in @resource
+                  respond_to do |format|
+                    format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                    format.json  { render json: @resource, status: :updated and return}
+                  end
+                end
+              end
+
 
               @resource = resource_klazz.versioned_upsert_one(
                 { 
@@ -205,8 +221,7 @@ module Auth::Concerns::OmniConcern
               )
               
 
-              
-              if !@resource.nil? && @resource.persisted? && @resource.identities == [identity.attributes.except("_id")]
+              if @resource && @resource.persisted? && @resource.identities == [identity.attributes.except("_id")]
 
                 #puts "going to after sign in path for."
                 @resource.create_client
@@ -217,19 +232,14 @@ module Auth::Concerns::OmniConcern
 
                 sign_in @resource
                 puts "After calling sign in resource -------------------------------------------"
-                #puts @resource.attributes.to_s
-                #u = User.where(:email => @resource.email).first
-                #puts u.attributes.to_s
-                #redirect_to after_sign_in_path_for(@resource)
-                puts "came toresponf"
-                puts "the after sign in path is :"
-                puts after_sign_in_path_for(@resource)
-                #respond_with(@resource, :status => :updated, :location => after_sign_in_path_for(@resource)) and return
+               
                 respond_to do |format|
                   format.html { redirect_to after_sign_in_path_for(@resource) and return}
                   format.json  { render json: @resource, status: :created and return}
                 end
               else
+                puts "failed to create new user."
+                puts "resource_klazz is: #{resource_klazz.name}"
                 redirect_to omniauth_failure_path(resource_klazz.name), :notice => "Failed to create new user"
               end
 
@@ -237,10 +247,12 @@ module Auth::Concerns::OmniConcern
 
           end
               
-        rescue => e
-          #puts e.attributes.to_s
-          redirect_to omniauth_failed_path_for("error"), :notice => "error" and return
-        end
+        
+
+        #rescue => e
+        #  puts e.to_s
+        #  redirect_to omniauth_failed_path_for("error"), :notice => "error" and return
+        #end
   end
 
 end

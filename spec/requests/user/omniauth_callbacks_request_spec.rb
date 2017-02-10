@@ -90,13 +90,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
             end
 
 
-            it " -- on visiting omniauth_failure_path(error), responds with json {failure_message: error}" do 
-               
-                get omniauth_failure_path("error"),nil,@headers
-
-                expect(JSON.parse(response.body)).to eql({"failure_message" => "error"}) 
-
-            end
+       
 
             ## NO RESOURCE TEST.
             it " -- redirects to omniauth_failure_path and gives failure message of 'no resource' if no resource is specified in the omniauth_callback_request. " do 
