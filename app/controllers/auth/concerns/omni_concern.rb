@@ -174,7 +174,16 @@ module Auth::Concerns::OmniConcern
               if @resource.respond_to?(:confirmed_at)
                 @resource.confirmed_at = Time.now.utc  
               end
+                
+              ## skip_email_unique_validation is set to true in omni_concern in the situation:
+              ##1.there is no user with the given identity.
+              ## however it is possible that a user with this email exists.
+              ## in that case, if we try to do versioned_create, then the prepare_insert block in mongoid_versioned_atomic, runs validations. these include, checking if the email is unique, and in this case, if a user with this email already exists, then the versioned_create doesnt happen at all. We don't want to first check if there is already an account with this email, and in another step then try to do a versioned_update, because in the time in between another user could be created. So instead we simply just set #skip_email_unique_validation to true, and as a result the unique validation is skipped.
+              @resource.skip_email_unique_validation = true
               @resource.versioned_create({"email" => @resource.email})
+              ##reset so that no other issues crop up later.
+              @resource.skip_email_unique_validation = false
+              
 
               if @resource.op_success
 
@@ -211,7 +220,7 @@ module Auth::Concerns::OmniConcern
                 end
               
               else
-                puts "THERE WAS NO UPSERTED ID EITHER."
+                
                 redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
               end
 

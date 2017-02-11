@@ -263,6 +263,7 @@ module OmniAuth
 	        if error
 	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
 	        elsif !options.provider_ignores_state  && (request.params["state"].to_s.empty? || request.params["state"] != session.delete("omniauth.state"))
+	          #puts "STATE ISSUES."
 	          headers = Hash[*env.select {|k,v| k.start_with? 'HTTP_'}
 			  .collect {|k,v| [k.sub(/^HTTP_/, ''), v]}
 			  .collect {|k,v| [k.split('_').collect(&:capitalize).join('-'), v]}
@@ -273,15 +274,16 @@ module OmniAuth
 		        self.access_token = access_token.refresh! if access_token.expired?
 		        super
 			  else
+			  	#puts "came to csrf detected."
  	          	fail!(:csrf_detected, CallbackError.new(:csrf_detected, "CSRF detected"))
 	          end
 	        else
+	          #puts "didnt have any initial state issues."
 	          self.access_token = build_access_token
 	          self.access_token = access_token.refresh! if access_token.expired?
 	          super
 	        end
 	      rescue ::OAuth2::Error, CallbackError => e
-
 	        fail!(:invalid_credentials, e)
 	      rescue ::Timeout::Error, ::Errno::ETIMEDOUT => e
 	        fail!(:timeout, e)
@@ -314,14 +316,16 @@ module OmniAuth
   				verifier = request.params["code"]
         		a_t = client.auth_code.get_token(verifier, {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true)), deep_symbolize(options.auth_token_params))
   				a_t.options.merge!(access_token_options)
+  				a_t
   			end
   		end
 
   		private
   		def verify_exchange_token(exchange_token)
   			return false unless exchange_token 
-    		params = {:grant_type => "fb_exchange_token", "fb_exchange_token" => exchange_token}.merge(client.auth_code.client_params)
+    		params = {:grant_type => "fb_exchange_token", "fb_exchange_token" => exchange_token}.merge({"client_id" => options.client_id, "client_secret" => options.client_secret})
   			a_t = client.get_token(params)
+  			a_t
   		end
 
   		def with_authorization_code!

@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
- gem 'mongoid_versioned_atomic', :git => "git://github.com/wordjelly/mongoid-versioned-atomic.git"
+ gem 'mongoid_versioned_atomic', :path => "/home/bhargav/Github/mongoid_versioned_atomic"
  gem 'jquery-rails', :git => "https://github.com/wordjelly/jquery-rails-4.2.2.git"
 
 # Declare your gem's dependencies in auth.gemspec.
