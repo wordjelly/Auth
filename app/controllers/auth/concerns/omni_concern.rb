@@ -78,18 +78,23 @@ module Auth::Concerns::OmniConcern
     end
   end
 
-  def set_access_token_and_expires_at(access_token,token_expires_at)
-      @resource.access_token = access_token
-      @resource.token_expires_at = token_expires_at
+  def update_identity_information(identity_info,provider)
+      @resource.identities.map{|i|
+        if(i["provider"] && i["provider"] == provider)
+          i["access_token"] = identity_info["access_token"]
+          i["token_expires_at"] = identity_info["token_expires_at"]
+        end
+      }
   end
 
   ## @return[Boolean] : true if the update was successfull, false otherwise
-  def update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,access_token,token_expires_at)
+  def update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity_info,provider)
     @resource = from_view(existing_oauth_resources,resource_klazz)
 
-    set_access_token_and_expires_at(access_token,token_expires_at)
+    ##identity_info should be a key -> value hash, 
+    update_identity_information(identity_info,provider)
 
-    @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1})
+    @resource.versioned_update({"identities" => 1})
 
     if @resource.op_success
                     
@@ -122,29 +127,26 @@ module Auth::Concerns::OmniConcern
            
             omni_hash = get_omni_hash
             
-
-            email,uid,provider,access_token,token_expires_at = omni_hash["info"]["email"],omni_hash["uid"],omni_hash["provider"],omni_hash["credentials"]["token"],omni_hash["credentials"]["expires_at"]
-
-            ##it will derive the resource class from the omni_hash referrer path.
-
-            identity = Auth::Identity.new(:provider => provider, :uid => uid, :email => email)
+            
+            identity = Auth::Identity.new.build_from_omnihash(omni_hash)
 
             ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
-
+            puts "identity is:"
+            puts identity
             existing_oauth_resources = 
             resource_klazz.collection.find(
               {"identities" =>
                      {"$elemMatch" => 
-                            {"provider" => provider, "uid" => uid}
+                            {"provider" => identity.provider, "uid" => identity.uid}
                      }
               })
               
            
 
             if existing_oauth_resources.count == 1
-              puts "------THERE ARE EXISTING OAUTH RESOURCES---------"
+              
                 
-              if  update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,access_token,token_expires_at)
+              if  update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity.attributes.except("_id","provider","uid"),identity.provider)
 
                  respond_to do |format|
                     format.html { redirect_to after_sign_in_path_for(@resource) and return}
@@ -169,38 +171,52 @@ module Auth::Concerns::OmniConcern
               puts("no such user exists, trying to create a new user by merging the fields.")
                 
               @resource = resource_klazz.new
-              @resource.email = email
+              @resource.email = identity.email
               @resource.password = Devise.friendly_token(20)
               @resource.authentication_token = build_token(resource_klazz)
-              @resource.access_token = access_token
-              @resource.token_expires_at = token_expires_at
               @resource.identities = [identity.attributes.except("_id")]
 
               @resource.versioned_create({"email" => @resource.email})
 
               if @resource.op_success
 
-              else
-                ##try the update
-                ##FOR TWO OMNIAUTH ACCOUNTS WITH THE SAME EMAIL.
-                ##here we are creating the second one.
-                ##NEED TO SHIFT ACCESS_TOKEN AND TOKEN_EXPIRES_AT TO THE IDENTITY, SINCE IT IS UNIQUE TO THE IDNETITY.
-                @resource = resource_klazz.where(:email => @resource.email).first
-                ##check if the id
-                @resource.identities.push(identity.attributes.except("_id"))
-                @resource.access_token = access_token
-                @resource.token_expires_at = token_expires_at
-                @resource.versioned_update({"access_token" => 1, "token_expires_at" => 1, "identities" => 1})
-                if @resource.op_success
-                  sign_in @resource
-                  respond_to do |format|
-                    format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                    format.json  { render json: @resource, status: :updated and return}
+                ##do the update.
+                if @resource.matched_count == 1
+                  
+                  ##try the update
+                  ##FOR TWO OMNIAUTH ACCOUNTS WITH THE SAME EMAIL.
+                  ##here we are creating the second one.
+                  ##NEED TO SHIFT ACCESS_TOKEN AND TOKEN_EXPIRES_AT TO THE IDENTITY, SINCE IT IS UNIQUE TO THE IDNETITY.
+                  @resource = resource_klazz.where(:email => @resource.email).first
+                  ##check if the id
+                  @resource.identities.push(identity.attributes.except("_id"))
+                  @resource.versioned_update({"identities" => 1})
+                  if @resource.op_success
+                    @resource.skip_confirmation!
+                    sign_in @resource
+                    respond_to do |format|
+                      format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                      format.json  { render json: @resource, status: :updated and return}
+                    end
+                  else
+                    redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
                   end
+                ##create was successfull.
+                elsif @resource.upserted_id
+                  @resource.skip_confirmation!
+                  sign_in @resource
+                  puts @resource.errors.full_messages.to_s
+                    respond_to do |format|
+                      format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                      format.json  { render json: @resource, status: :updated and return}
+                    end                
                 end
+              
+              else
+                redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
               end
 
-
+=begin
               @resource = resource_klazz.versioned_upsert_one(
                 { 
                     "email" => email
@@ -242,6 +258,7 @@ module Auth::Concerns::OmniConcern
                 puts "resource_klazz is: #{resource_klazz.name}"
                 redirect_to omniauth_failure_path(resource_klazz.name), :notice => "Failed to create new user"
               end
+=end
 
             end
 

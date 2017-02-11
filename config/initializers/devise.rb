@@ -713,13 +713,7 @@ module Devise
     end
 
     def json_respond
-     # puts "----START---------------------------------------"
-     # request.headers.each {|key,value|
-
-      #  puts key
-      #  puts value
-
-      #}
+     
       if request.format == :json or request.content_type == 'application/json'
             return json_failure
       end

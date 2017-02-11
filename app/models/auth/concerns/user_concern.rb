@@ -94,9 +94,6 @@ module Auth::Concerns::UserConcern
 	      if !opts[:skip].include? :omniauthable
 		      devise :omniauthable, :omniauth_providers => [:google_oauth2,:facebook]
 			  field :identities,          type: Array, default: [Auth::Identity.new.attributes.except("_id")]
-		 	  field :access_token,        type: String
-		 	  field :token_expires_at,	  type: Integer
-		 	  field :token_expired,		  type: Boolean
 		  end
 
 		  

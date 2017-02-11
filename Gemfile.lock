@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/wordjelly/mongoid-versioned-atomic.git
-  revision: 34a8c0af293a104044418cce5aac118d2cc7625e
+  revision: e5a2949183fbf92d7e3c23adf273059ec7368fc4
   specs:
     mongoid_versioned_atomic (0.0.1)
       aws-sdk (~> 1.3.4)
@@ -23,6 +23,7 @@ PATH
   specs:
     auth (0.0.1)
       devise (= 4.1.1)
+      hashie (= 3.5.1)
       materialize-sass (= 0.97.1)
       mongoid-paperclip (~> 0.0.8)
       omniauth

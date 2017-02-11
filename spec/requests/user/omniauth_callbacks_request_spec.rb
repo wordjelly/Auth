@@ -30,6 +30,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
         context  " -- google_oauth2 test -- " do 
 
+
             it " -- handles invalid id_token -- " do 
                
                 OmniAuth.config.test_mode = false
@@ -138,10 +139,11 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 expect(response).to redirect_to(omniauth_failure_path("no_resource"))
             end
 
+
             ## CREATES NEW USER IF ID_TOKEN IS VALID.
             it " -- creates new user if id_token is valid, and returns auth_token and es, because client is also correct. -- " do 
                 ##WE MODIFY THE VERFIY_ID_TOKEN FUNCTION TO RETURN A VALID ID TOKEN, AND ALSO 
-                
+
                 module OmniAuth
                     module Strategies
                         GoogleOauth2.class_eval do 
@@ -188,7 +190,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 
                 u = User.where(:email => "rrphotosoft@gmail.com").first
                 expect(u).not_to be_nil
-                expect(u.identities).to eql([{"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com"}])
+                expect(u.identities).to eql([{"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 }])
                 expect(JSON.parse(response.body).keys).to match_array(["authentication_token","es"])
 
             end
@@ -245,15 +247,16 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 expect(u).to be_nil
             end        
 
+
             it " -- responds with user credentials, and updates access_token and expires at, if a user with same email and identity already exists, and he tries to sign in with oauth, provided that the id_token is valid. -- " do 
 
                 @u1 = User.new(attributes_for(:user_confirmed))
                 @u1.email = "test@gmail.com"
                 @u1.identities 
                 @u1.client_authentication["test_app_id"] = "test_es"
-                @u1.access_token = "old_access_token"
-                @u1.token_expires_at = Time.now.to_i - 100000
-                @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345').attributes.except("_id")]
+                access_token = "old_access_token"
+                token_expires_at = Time.now.to_i - 100000
+                @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345', :access_token => "old_access_token", :token_expires_at => token_expires_at).attributes.except("_id")]
                 @u1.version = 1
                 @u1.save
                 
@@ -304,8 +307,8 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 expect(json_response["authentication_token"]).to eql(@u1.authentication_token)
                 expect(json_response["es"]).to eql("test_es")
                 u = User.find(@u1.id)
-                expect(u.token_expires_at).to eql(20000)
-                expect(u.access_token).to eql("mock_token")
+                expect(u.identities[0]["token_expires_at"]).to eql(20000)
+                expect(u.identities[0]["access_token"]).to eql("mock_token")
 
             end 
 
@@ -383,9 +386,9 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 @u1.email = "test@gmail.com"
                 @u1.identities 
                 @u1.client_authentication["test_app_id"] = "test_es"
-                @u1.access_token = "old_access_token"
-                @u1.token_expires_at = Time.now.to_i - 100000
-                @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345').attributes.except("_id")]
+                access_token = "old_access_token"
+                token_expires_at = Time.now.to_i - 100000
+                @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345', :access_token => "old_access_token", :token_expires_at => token_expires_at).attributes.except("_id")]
                 @u1.version = 1
                 @u1.save
                 
@@ -441,8 +444,8 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 expect(json_response["authentication_token"]).to eql(@u1.authentication_token)
                 expect(json_response["es"]).to eql("test_es")
                 u = User.find(@u1.id)
-                expect(u.token_expires_at).to eql(20000)
-                expect(u.access_token).to eql("mock_token")
+                expect(u.identities[0]["token_expires_at"]).to eql(20000)
+                expect(u.identities[0]["access_token"]).to eql("mock_token")
 
             end
 
@@ -505,6 +508,18 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
 
         context  " -- fb test -- " do 
+
+        end
+
+        context " -- multi provider tests -- " do 
+
+            it " -- two providers with the same email -> will lead to only one user account -- " do 
+
+            end
+
+            it " -- two providers with different emails -> will lead to two user accounts -- " do 
+
+            end
 
         end
 
