@@ -23,7 +23,7 @@ RSpec.feature "", :type => :feature, :feature => true do
 
     context " -- google oauth test -- " do 
 
-=begin
+
         scenario " -- it can sign in with oauth2 -- ", js: true do 
        
             Auth.configuration.recaptcha = false
@@ -57,7 +57,6 @@ RSpec.feature "", :type => :feature, :feature => true do
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
             find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
     
-            expect(page).to have_content("Sign Out")
 
             click_link "Sign Out"
 
@@ -81,8 +80,8 @@ RSpec.feature "", :type => :feature, :feature => true do
             expect(page).to have_content("Sign Out")
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
-            expect(u.access_token).to eql('new_token')
-            expect(u.token_expires_at).to eql(50000)
+            expect(u.identities[0]["access_token"]).to eql('new_token')
+            expect(u.identities[0]["token_expires_at"]).to eql(50000)
 
         end
 
@@ -116,8 +115,6 @@ RSpec.feature "", :type => :feature, :feature => true do
             ##now visit he confirmation url.
             u = User.where(:email => 'retard@gmail.com').first
             confirmation_token = u.confirmation_token
-            puts "the confirmation token is: #{confirmation_token}"
-           
             visit user_confirmation_path({:confirmation_token => confirmation_token})
             
             u.reload
@@ -141,6 +138,7 @@ RSpec.feature "", :type => :feature, :feature => true do
 
         scenario "any error in omniauth -> goes to omniauth error page", js: true do 
 
+            OmniAuth.config.test_mode = true
             Auth.configuration.recaptcha = false
             ##visit the sign in page
             visit new_user_session_path
@@ -158,8 +156,8 @@ RSpec.feature "", :type => :feature, :feature => true do
 
         end
 
-=end
-=begin
+
+
         ##THIS IS SIMULATED BY FIRST CREATING A NEW OAUTH USER.
         ##THEN WE SET ITS VERSION TO 0
         ##AFTER THAT WE GO AGAIN TO OAUTH AND TRY TO SIGN IN.
@@ -182,10 +180,17 @@ RSpec.feature "", :type => :feature, :feature => true do
 
             click_link("Sign Out")
 
-            u = User.where(:email => "rrphotosoft@gmail.com").first
-            u.version = 0
-            u.save
-          
+            #u = User.where(:email => "rrphotosoft@gmail.com").first
+            #u.version = 0
+            #u.save
+            
+            User.class_eval do 
+                after_save :set_op_success_to_false
+                def set_op_success_to_false
+                    self.op_success = false
+                end
+            end
+
             Auth.configuration.recaptcha = false
             ##visit the sign in page
             visit new_user_session_path
@@ -199,16 +204,16 @@ RSpec.feature "", :type => :feature, :feature => true do
 
             find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click                    
 
+           
             expect(page).to have_content("Failed to update the acceess token and token expires at")
 
+            
         end
-=end
+
 
         ##try to simulate by creating a after_create callback which will delete identities, this will make it feel like the create failed, and this will lead to a failure fo the create.
         scenario "failure to create new oauth user, goes to omniauth error page, with error message ", js: true do 
-    
-            
-
+            User.skip_callback(:save, :after, :set_op_success_to_false)
             Auth.configuration.recaptcha = false
             ##visit the sign in page
             visit new_user_session_path
@@ -220,18 +225,83 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
+            User.class_eval do 
+                after_save :set_op_success_to_false
+                def set_op_success_to_false
+                   
+                    self.op_success = false
+                end
+            end
+
             find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
 
-            expect(page).to have_content("Failed to create new user")
+            expect(page).to have_content("Failed to create new identity")
+
+           
 
         end
 
-=begin
+
+        ##THIS CAN BE SIMULATED BY CALLING CONFIRM AFTER_SAVE
+        ##SIGN IN WILL FAIL IF , WE UNSET THE PASSWORD, POST_SAVE
+        scenario "failure to sign in resource after creating or updating it, will lead to appropriate error", js: true do
+            User.skip_callback(:save, :after, :set_op_success_to_false)
+           
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+
+            mock_auth_hash
+          
+            Rails.application.env_config["omniauth.model"] = "omniauth/users/"
+
+            User.class_eval do 
+                before_save :remove_confirmed_at
+                def remove_confirmed_at
+                    self.confirmed_at = nil
+                end
+            end
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+
+            ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
+            expect(page).to have_content("You have to confirm your email address before continuing.")
+            expect(page).to have_content("You need to Sign in to continue.")           
+        end
+
+
         scenario "failure to provide oauth resource, goes to omniauth error page, with no_resource error message", js: true do 
+            User.skip_callback(:save, :after, :set_op_success_to_false)
+            User.skip_callback(:save, :before, :remove_confirmed_at)
+
+            Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path
+
+            click_link("Sign In")
+            wait_for_ajax
+            Rails.application.env_config["omniauth.model"] = nil
+            mock_auth_hash
+
+            find(:xpath, "//a[@href='/authenticate/omniauth/users/google_oauth2']").click
+
+            ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
+            expect(page).to have_content("No resource was specified in the omniauth callback request.")
 
 
         end
-=end
+
+
+
+        context " -- multiple identities tests -- " do 
+
+
+
+        end
+
     end
 
   end

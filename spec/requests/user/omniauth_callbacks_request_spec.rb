@@ -375,7 +375,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
                 u = User.where(:email => "rrphotosoft@gmail.com").first
                 expect(u).not_to be_nil
-                expect(u.identities).to eql([{"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com"}])
+                expect(u.identities).to eql([{"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" => "mock_token", "token_expires_at" => 20000}])
                 expect(JSON.parse(response.body).keys).to match_array(["authentication_token","es"])
             
             end

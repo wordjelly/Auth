@@ -97,11 +97,7 @@ module Auth::Concerns::OmniConcern
     @resource.versioned_update({"identities" => 1})
 
     if @resource.op_success
-                    
-      if !Auth.configuration.auth_resources[request.env["devise.mapping"].to.name][:skip].include? :confirmable
-        @resource.skip_confirmation!
-      end
-                      
+                                        
       sign_in @resource
 
       true
@@ -116,7 +112,7 @@ module Auth::Concerns::OmniConcern
  
   def omni_common
         
-        #begin
+        begin
           
           model_class = request.env["devise.mapping"]
           if model_class.nil?
@@ -131,8 +127,8 @@ module Auth::Concerns::OmniConcern
             identity = Auth::Identity.new.build_from_omnihash(omni_hash)
 
             ##this index is used for the first query during oauth, to check whether the user already has registered using oauth with us.
-            puts "identity is:"
-            puts identity
+            #puts "identity is:"
+            #puts identity
             existing_oauth_resources = 
             resource_klazz.collection.find(
               {"identities" =>
@@ -175,7 +171,9 @@ module Auth::Concerns::OmniConcern
               @resource.password = Devise.friendly_token(20)
               @resource.authentication_token = build_token(resource_klazz)
               @resource.identities = [identity.attributes.except("_id")]
-
+              if @resource.respond_to?(:confirmed_at)
+                @resource.confirmed_at = Time.now.utc  
+              end
               @resource.versioned_create({"email" => @resource.email})
 
               if @resource.op_success
@@ -192,7 +190,6 @@ module Auth::Concerns::OmniConcern
                   @resource.identities.push(identity.attributes.except("_id"))
                   @resource.versioned_update({"identities" => 1})
                   if @resource.op_success
-                    @resource.skip_confirmation!
                     sign_in @resource
                     respond_to do |format|
                       format.html { redirect_to after_sign_in_path_for(@resource) and return}
@@ -202,9 +199,10 @@ module Auth::Concerns::OmniConcern
                     redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
                   end
                 ##create was successfull.
-                elsif @resource.upserted_id
-                  @resource.skip_confirmation!
+                elsif @resource.upserted_id 
+                  
                   sign_in @resource
+                  puts "came after sign in resource."
                   puts @resource.errors.full_messages.to_s
                     respond_to do |format|
                       format.html { redirect_to after_sign_in_path_for(@resource) and return}
@@ -213,52 +211,10 @@ module Auth::Concerns::OmniConcern
                 end
               
               else
+                puts "THERE WAS NO UPSERTED ID EITHER."
                 redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
               end
 
-=begin
-              @resource = resource_klazz.versioned_upsert_one(
-                { 
-                    "email" => email
-                },
-                {
-                  "$setOnInsert" => {
-                    "email" => email,
-                    "password" =>  Devise.friendly_token(20),
-                    "authentication_token" => build_token(resource_klazz)
-                  },
-                   "$set" => {
-                    "access_token" => access_token,
-                    "token_expires_at" => token_expires_at,
-                    "identities" => [identity.attributes.except("_id")]
-                  }
-                },
-                resource_klazz
-              )
-              
-
-              if @resource && @resource.persisted? && @resource.identities == [identity.attributes.except("_id")]
-
-                #puts "going to after sign in path for."
-                @resource.create_client
-
-                @resource.skip_confirmation!
-                
-                ##call the after_save_callbacks.
-
-                sign_in @resource
-                puts "After calling sign in resource -------------------------------------------"
-               
-                respond_to do |format|
-                  format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                  format.json  { render json: @resource, status: :created and return}
-                end
-              else
-                puts "failed to create new user."
-                puts "resource_klazz is: #{resource_klazz.name}"
-                redirect_to omniauth_failure_path(resource_klazz.name), :notice => "Failed to create new user"
-              end
-=end
 
             end
 
@@ -266,10 +222,11 @@ module Auth::Concerns::OmniConcern
               
         
 
-        #rescue => e
-        #  puts e.to_s
-        #  redirect_to omniauth_failed_path_for("error"), :notice => "error" and return
-        #end
+        rescue => e
+          puts e.to_s
+          puts e.backtrace
+          redirect_to omniauth_failed_path_for("error"), :notice => "error" and return
+        end
   end
 
 end
