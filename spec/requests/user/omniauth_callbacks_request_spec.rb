@@ -27,7 +27,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
     context " -- json requests -- " do 
 
-        context  " -- google_oauth2 test -- " do 
+        context  " -- google_oauth2 test -- ", single: true do 
 
 
             it " -- handles invalid id_token -- " do 
@@ -53,36 +53,12 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
             end
 
 
-            it " -- redirects to omniauth failure path on any error in omni concern. -- " do 
+            it " -- redirects to omniauth failure path on any error in omni concern. -- ", module_support: true do 
                 
                 OmniAuth.config.test_mode = false
 
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN NIL AS AUTH_HASH, SO THAT AN ERROR IS SIMULATED IN THE OMNI_COMMON DEF
-                            def auth_hash
-                                nil
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_id_token(id_token)
-                                puts "called verify id token."
-                                true
-                            end
-
-                            def verify_hd(access_token)
-                                puts "Called verify hd."
-                                true
-                            end 
-                        end
-                    end
-                end
+                google_oauth2_nil_hash
                
-
                 post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
                 
                 expect(response).to redirect_to(omniauth_failure_path("error"))
@@ -97,42 +73,8 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
                 OmniAuth.config.test_mode = false
                 
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_id_token(id_token)
-                                true
-                            end
-
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
-
+                google_oauth2_verify_token_true_verify_hd_true 
+                    
                 post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => nil}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
                 expect(response).to redirect_to(omniauth_failure_path("no_resource"))
@@ -143,41 +85,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
             it " -- creates new user if id_token is valid, and returns auth_token and es, because client is also correct. -- " do 
                 ##WE MODIFY THE VERFIY_ID_TOKEN FUNCTION TO RETURN A VALID ID TOKEN, AND ALSO 
 
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_id_token(id_token)
-                                true
-                            end
-
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
+                google_oauth2_verify_token_true_verify_hd_true
 
                 OmniAuth.config.test_mode = false
                
@@ -199,41 +107,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
             ## TEST PASSES.
             it " -- not able to find the client, it returns 401 unauthorized. -- " do 
                     
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_id_token(id_token)
-                                true
-                            end
-
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
+                google_oauth2_verify_token_true_verify_hd_true
 
                 OmniAuth.config.test_mode = false
                
@@ -260,41 +134,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 @u1.save
                 
                 
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'test@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_id_token(id_token)
-                                true
-                            end
-
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
+                google_oauth2_verify_token_true_verify_hd_true
 
                 OmniAuth.config.test_mode = false
                
@@ -327,47 +167,9 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
             it " -- creates new user if code is valid -- " do 
                 ## WE REOPEN AUTH_CODE
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            private
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
-
-                module OAuth2
-                    module Strategy
-                        AuthCode.class_eval do 
-                            def get_token(code, params = {}, opts = {})
-                                ::OAuth2::AccessToken.new(@client,"")
-                            end
-                        end
-                    end
-                end
-        
+                google_oauth2_verify_hd_true
+                google_oauth2_auth_code_get_token
+                
                 OmniAuth.config.test_mode = false
 
                 post google_oauth2_omniauth_callback_url(:code => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
@@ -391,47 +193,8 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
                 @u1.version = 1
                 @u1.save
                 
-                
-                module OmniAuth
-                    module Strategies
-                        GoogleOauth2.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'google_oauth2',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'test@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            private
-                            def verify_hd(access_token)
-                                true
-                            end 
-                        end
-                    end
-                end
-
-                module OAuth2
-                    module Strategy
-                        AuthCode.class_eval do 
-                            def get_token(code, params = {}, opts = {})
-                                ::OAuth2::AccessToken.new(@client,"")
-                            end
-                        end
-                    end
-                end
+                google_oauth2_verify_hd_true
+                google_oauth2_auth_code_get_token
 
                 OmniAuth.config.test_mode = false
                
@@ -450,17 +213,25 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
             it " -- creates a client after , new user is created using oauth -- " do 
 
-            end
+                ## WE REOPEN AUTH_CODE
+                google_oauth2_verify_hd_true
+                google_oauth2_auth_code_get_token
+            
+                OmniAuth.config.test_mode = false
 
-            it " -- does not update the confirmed at, if the user already exists -- " do 
+                post google_oauth2_omniauth_callback_url(:code => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
+                u = User.where(:email => "rrphotosoft@gmail.com").first
+                expect(u).not_to be_nil
+
+                client = Auth::Client.where(:resource_id => u.id)
+                expect(client).not_to be_nil
 
             end
 
         end
 
-
-        context  " -- fb test -- " do 
+        context  " -- fb test -- ", single: true do 
 
             it " -- handles invalid exchange_token -- " do 
                
@@ -473,37 +244,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
             it " -- creates a new user if the fb_exchange_token is valid, and returns auth_token and es -- " do 
 
-                module OmniAuth
-                    module Strategies
-                        Facebook.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'facebook',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_exchange_token(exchange_token)
-                                ::OAuth2::AccessToken.new(client,"")
-                            end 
-                        end
-                    end
-                end
+                facebook_oauth2_verify_fb_ex_token
 
                 OmniAuth.config.test_mode = false
 
@@ -516,32 +257,11 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
             end
 
-            
-
-
             it " -- redirects to omniauth failure path on any error in omni concern. -- " do 
                 
                 OmniAuth.config.test_mode = false
 
-                module OmniAuth
-                    module Strategies
-                        Facebook.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN NIL AS AUTH_HASH, SO THAT AN ERROR IS SIMULATED IN THE OMNI_COMMON DEF
-                            def auth_hash
-                                nil
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_exchange_token(exchange_token)
-                                ::OAuth2::AccessToken.new(client,"")
-                            end
-                        end
-                    end
-                end
-               
+                facebook_oauth2_nil_hash
 
                 post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
                 
@@ -549,54 +269,17 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
             end
 
-
-       
-
             ## NO RESOURCE TEST.
             it " -- redirects to omniauth_failure_path and gives failure message of 'no resource' if no resource is specified in the omniauth_callback_request. " do 
 
                 OmniAuth.config.test_mode = false
                 
-                module OmniAuth
-                    module Strategies
-                        Facebook.class_eval do 
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                            def auth_hash
-                                OmniAuth::AuthHash.new({
-                                  'provider' => 'facebook',
-                                  'uid' => '12345',
-                                  'info' => {
-                                    'name' => 'mockuser',
-                                    'image' => 'mock_user_thumbnail_url',
-                                    'email' => 'rrphotosoft@gmail.com'
-                                  },
-                                  'credentials' => {
-                                    'token' => 'mock_token',
-                                    'secret' => 'mock_secret',
-                                    'expires_at' => 20000
-                                  }
-                                })
-                            end
-
-                            ##########
-                            ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                            private
-                            def verify_exchange_token(exchange_token)
-                                ::OAuth2::AccessToken.new(client,"")
-                            end
-
-                            
-                        end
-                    end
-                end
+                facebook_oauth2_verify_fb_ex_token
 
                 post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => nil}.to_json),nil,@headers
 
                 expect(response).to redirect_to(omniauth_failure_path("no_resource"))
             end
-
-
 
         end
 
@@ -604,7 +287,7 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
   end
 
-  context " -- multi provider tests -- ", multi:true do 
+  context " -- multi provider tests -- ", single:true do 
 
     before(:all) do 
         
@@ -629,44 +312,9 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
         it " -- creates google_oauth2 user -- " do 
 
-            module OmniAuth
-                module Strategies
-                    GoogleOauth2.class_eval do 
-                        ##########
-                        ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                        def auth_hash
-                            OmniAuth::AuthHash.new({
-                              'provider' => 'google_oauth2',
-                              'uid' => '12345',
-                              'info' => {
-                                'name' => 'mockuser',
-                                'image' => 'mock_user_thumbnail_url',
-                                'email' => 'rrphotosoft@gmail.com'
-                              },
-                              'credentials' => {
-                                'token' => 'mock_token',
-                                'secret' => 'mock_secret',
-                                'expires_at' => 20000
-                              }
-                            })
-                        end
-
-                        ##########
-                        ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                        private
-                        def verify_id_token(id_token)
-                            true
-                        end
-
-                        def verify_hd(access_token)
-                            true
-                        end 
-                    end
-                end
-            end
-
             OmniAuth.config.test_mode = false
-           
+            
+            google_oauth2_verify_token_true_verify_hd_true 
 
             post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
 
@@ -674,64 +322,162 @@ RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => tru
 
         it " -- creates facebook user with the same email -- " do 
 
-            module OmniAuth
-                module Strategies
-                    Facebook.class_eval do 
-                        ##########
-                        ##JUST MODIFIED THIS TO RETURN THE GOOGLE_OAUTH2 AUTH HASH.
-                        def auth_hash
-                            OmniAuth::AuthHash.new({
-                              'provider' => 'facebook',
-                              'uid' => '12345',
-                              'info' => {
-                                'name' => 'mockuser',
-                                'image' => 'mock_user_thumbnail_url',
-                                'email' => 'rrphotosoft@gmail.com'
-                              },
-                              'credentials' => {
-                                'token' => 'mock_token',
-                                'secret' => 'mock_secret',
-                                'expires_at' => 20000
-                              }
-                            })
-                        end
-
-                        ##########
-                        ##JUST MODIFIED THIS TO RETURN TRUE EVERYWHERE.
-                        private
-                        def verify_exchange_token(exchange_token)
-                            ::OAuth2::AccessToken.new(client,"")
-                        end 
-                    end
-                end
-            end
+            facebook_oauth2_verify_fb_ex_token
 
             OmniAuth.config.test_mode = false
 
             existing_user_with_email = User.where(:email => "rrphotosoft@gmail.com").first
-            puts "this is the existing user."
-            puts existing_user_with_email.to_s
-
+            
 
             post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
-            puts "these are the identities."
-            puts u.identities.to_s
+            
             expect(u).not_to be_nil
             expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
             expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
         end
 
-        it " -- can sign in subsequently with google -- " do 
+        it " -- can sign in subsequently with google, updating access_token and es. -- " do 
+
+            google_oauth2_verify_token_true_verify_hd_true
+
+            OmniauthMacros::MOCK_TOKEN = 'new_mock_token'
+            OmniauthMacros::EXPIRES_AT = 40000
+
+            OmniAuth.config.test_mode = false
+           
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            
+           
+            expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"new_mock_token", "token_expires_at" => 40000 })).to be_truthy
 
         end
 
-        it " -- can sign in subsequently with facebook -- " do 
+        it " -- can sign in subsequently with facebook, updating access_token and es. -- " do 
+                            
+            facebook_oauth2_verify_fb_ex_token
 
+            OmniAuth.config.test_mode = false
+            OmniauthMacros::MOCK_TOKEN = 'new_mock_token'
+            OmniauthMacros::EXPIRES_AT = 40000
+
+            post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            
+           
+            expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"new_mock_token", "token_expires_at" => 40000 })).to be_truthy
 
         end
 
-  end	  
+  end	
+
+  context " -- confirmed_at tests --- " do 
+
+    context " -- repeated oauth sign in , does not update confirmed_at -- " do 
+        
+        before(:all) do 
+        
+            User.delete_all
+            Auth::Client.delete_all
+            @u = User.new(attributes_for(:user_confirmed))
+            @u.save
+            @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
+            @c.redirect_urls = ["http://www.google.com"]
+            @c.app_ids << "test_app_id"
+            @c.path = "omniauth/users/"
+            @c.versioned_create
+            @u.client_authentication["test_app_id"] = "test_es"
+            @u.save
+            @ap_key = @c.api_key
+            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+            @confirmed_at_times = []
+        end
+
+        it " -- first create user with google_oauth2 -- " do 
+            OmniAuth.config.test_mode = false
+            
+            google_oauth2_verify_token_true_verify_hd_true 
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+
+            user_created = User.where(:email => "rrphotosoft@gmail.com").first
+            @confirmed_at_times << user_created.confirmed_at
+
+        end
+
+        it " -- now sign in again, confirmed_at should not change  -- " do 
+            sleep(4)
+            OmniAuth.config.test_mode = false
+            
+            google_oauth2_verify_token_true_verify_hd_true 
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+            user_signed_in = User.where(:email => "rrphotosoft@gmail.com").first
+
+            @confirmed_at_times << user_signed_in.confirmed_at
+            expect(@confirmed_at_times.uniq.size).to eql(1)         
+        end
+    end
+
+
+    context " -- sign in with different identities, does not update confirmed_at -- " do 
+
+        before(:all) do 
+        
+            User.delete_all
+            Auth::Client.delete_all
+            @u = User.new(attributes_for(:user_confirmed))
+            @u.save
+            @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
+            @c.redirect_urls = ["http://www.google.com"]
+            @c.app_ids << "test_app_id"
+            @c.path = "omniauth/users/"
+            @c.versioned_create
+            @u.client_authentication["test_app_id"] = "test_es"
+            @u.save
+            @ap_key = @c.api_key
+            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+            @confirmed_at_times = []
+        end
+
+        it " -- first create user with google_oauth2 -- " do 
+            OmniAuth.config.test_mode = false
+            
+            google_oauth2_verify_token_true_verify_hd_true 
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),OmniAuth.config.mock_auth[:google_oauth2],@headers
+
+            user_created = User.where(:email => "rrphotosoft@gmail.com").first
+            @confirmed_at_times << user_created.confirmed_at
+
+        end
+
+        it " -- subsequently signs in with facebook identity --- " do 
+            sleep(5)
+            facebook_oauth2_verify_fb_ex_token
+
+            OmniAuth.config.test_mode = false
+
+            existing_user_with_email = User.where(:email => "rrphotosoft@gmail.com").first
+            
+
+            post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            @confirmed_at_times << u.confirmed_at
+            expect(@confirmed_at_times.uniq.size).to eql(1)         
+
+        end
+
+
+    end
+
+
+  end  
 
 end
