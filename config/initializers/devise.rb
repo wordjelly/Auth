@@ -327,12 +327,10 @@ DeviseController.class_eval do
       super(options,response_status)
     else
       ##as long as its not destroy.
-      if !resource.nil? && !@client.nil? && action_name != "destroy"
+      if !resource.nil? && !@client.nil? && action_name != "destroy" && !(["passwords","confirmations","unlocks"].include? controller_name)
         resource.set_client_authentication(@client.current_app_id)
       end
-      if controller_name == "passwords"
-        super(options,response_status)
-      elsif controller_name == "confirmations" && action_name != "show"
+      if (["passwords","confirmations","unlocks"].include? controller_name)
         super(options,response_status)
       else
         
@@ -352,18 +350,16 @@ DeviseController.class_eval do
  
 
   def render(*args)
-    if !resource.nil? && !@client.nil? && action_name != "destroy"
+    if !resource.nil? && !@client.nil? && action_name != "destroy" && !(["passwords","confirmations","unlocks"].include? controller_name)
         resource.set_client_authentication(@client.current_app_id)
-    end
+      end
       #puts "redirect url -> #{@redirect_url}"
       #puts "resource -> #{resource.attributes.to_s}"
       
       #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
       #puts "auth token -> #{resource.authentication_token}"
       #puts "signed in --> #{signed_in?}"
-      if controller_name == "passwords"
-        super(*args)
-      elsif controller_name == "confirmations" && action_name != "show"
+      if (["passwords","confirmations","unlocks"].include? controller_name)
         super(*args)
       else
         if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
@@ -618,6 +614,7 @@ module Devise
   PasswordsController.class_eval do 
 
     prepend_before_action :ignore_json_request, only: [:new]
+    prepend_before_action :do_before_request, only: [:show,:create]
 
   end
 
@@ -627,6 +624,8 @@ module Devise
   UnlocksController.class_eval do 
 
     prepend_before_action :ignore_json_request, only: [:new]
+    prepend_before_action :do_before_request, only: [:show,:create]
+
 
     def show
      

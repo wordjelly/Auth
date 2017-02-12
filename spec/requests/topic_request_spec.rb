@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "session request spec", :type => :request do 
+RSpec.describe "session request spec", :type => :request,topic: true do 
 
 	before(:example) do 
 
