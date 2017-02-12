@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "password request spec", :type => :request do 
+RSpec.describe "password request spec", :type => :request, password: true do 
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = true
@@ -14,7 +14,7 @@ RSpec.describe "password request spec", :type => :request do
 	    @c.app_ids << "test_app_id"
 	    @c.versioned_update
 	    @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
 
 	end
 
