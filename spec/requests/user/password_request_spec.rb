@@ -8,17 +8,19 @@ RSpec.describe "password request spec", :type => :request do
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
-        @c.redirect_urls = ["http://www.google.com"]
-        @c.versioned_create
-        @ap_key = @c.api_key
+        @c = Auth::Client.where(:resource_id => @u.id).first
+	    @c.api_key = "test"
+	    @c.redirect_urls = ["http://www.google.com"]
+	    @c.app_ids << "test_app_id"
+	    @c.versioned_update
+	    @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
 
 	end
 
 	after(:example) do 
-		session.delete(:client)
-		session.delete(:redirect_url)
+		User.delete_all
+      	Auth::Client.delete_all
 	end
 
 	context "-- web app requests" do 
@@ -73,7 +75,7 @@ RSpec.describe "password request spec", :type => :request do
 
 	 		it "-- get request does not redirect to redirect url" do 
 
-	 			get new_user_password_path,{redirect_url: "http://www.google.com", api_key: @ap_key}
+	 			get new_user_password_path,{redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 	 			expect(session[:client]).not_to be_nil
 	 			expect(session[:redirect_url]).not_to be_nil
 				expect(response.code).to eq("200")		
@@ -82,7 +84,7 @@ RSpec.describe "password request spec", :type => :request do
 
 	 		it " -- create request does not redirect to redirect url" do 
 
-	 			post user_password_path,{user: {email: @u.email}, redirect_url: "http://www.google.com", api_key: @ap_key}
+	 			post user_password_path,{user: {email: @u.email}, redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 	 			expect(session[:client]).not_to be_nil
 	 			expect(session[:redirect_url]).not_to be_nil
 				expect(response.code).to eq("302")
@@ -94,7 +96,7 @@ RSpec.describe "password request spec", :type => :request do
 	 		it "-- update request does not redirect to redirect url" do 
 	 			
 	 			old_password = @u.encrypted_password
-	 			post user_password_path, user: {email: @u.email}
+	 			post user_password_path, user: {email: @u.email}, current_app_id: @c.app_ids[0], redirect_url: "http://www.google.com"
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
@@ -153,13 +155,13 @@ RSpec.describe "password request spec", :type => :request do
 		context "-- valid api key" do 
 
 			it "-- get request succeeds" do
-				get new_user_password_path,{api_key: @ap_key},@headers
+				get new_user_password_path,{api_key: @ap_key, current_app_id: @c.app_ids[0]},@headers
         		expect(response.code).to eq("406")
         	end
 
 
         	it "-- create request succeeds" do 
-        		post user_password_path,{user: {email: @u.email}, redirect_url: "http://www.google.com", api_key: @ap_key}.to_json,@headers
+        		post user_password_path,{user: {email: @u.email}, current_app_id: @c.app_ids[0] ,api_key: @ap_key}.to_json,@headers
         		expect(response.code).to eq("201")
 
         	end
@@ -167,7 +169,7 @@ RSpec.describe "password request spec", :type => :request do
         	it "-- update request succeeds" do 
         		
         		old_password = @u.encrypted_password
-	 			post user_password_path,{user: {email: @u.email}, redirect_url: "http://www.google.com", api_key: @ap_key}.to_json,@headers
+	 			post user_password_path,{user: {email: @u.email}, current_app_id: @c.app_ids[0], api_key: @ap_key}.to_json,@headers
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
     			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]

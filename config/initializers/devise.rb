@@ -331,9 +331,9 @@ DeviseController.class_eval do
         resource.set_client_authentication(@client.current_app_id)
       end
       if controller_name == "passwords"
-        redirect_to(options,response_status)
+        super(options,response_status)
       elsif controller_name == "confirmations" && action_name != "show"
-        redirect_to(options,response_status)
+        super(options,response_status)
       else
         
         if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?

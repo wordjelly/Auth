@@ -8,6 +8,10 @@ RSpec.describe "confirmation request spec",:confirmation => true, :type => :requ
       	Auth::Client.delete_all
       	@u = User.new(attributes_for(:user))
       	@u.save
+      	##HERE THE USER IS NOT CONFIRMED, SO THE CLIENT IS NOT CREATED IN THE AFTER_sAVE BLOCK.
+      	##AS A RESULT WE MANUALLY CREATE A CLIENT.
+      	##WE USE THIS SAME CLIENT FOR THE API_KEY AND REDIRECT_URL.
+      	##NORMALLY THIS WOULD BE A CLIENT OF ANOTHER USER, ENTIRELY.
       	@c = Auth::Client.new(:resource_id => @u.id)
         @c.api_key = "test"
       	@c.redirect_urls = ["http://www.google.com"]
@@ -40,8 +44,6 @@ RSpec.describe "confirmation request spec",:confirmation => true, :type => :requ
 			it "-- create request is successfull" do				
 				prev_msg_count = ActionMailer::Base.deliveries.size
 				post user_confirmation_path,{user:{email: @u.email}}
-				puts "this is the response locatio."
-				puts response.location.to_s
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
@@ -68,14 +70,17 @@ RSpec.describe "confirmation request spec",:confirmation => true, :type => :requ
 			
 
 			it "-- get request, client created, but no redirection" do 
-				get new_user_confirmation_path, {redirect_url: "http://www.google.com", api_key: @ap_key}
+				get new_user_confirmation_path, {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(response.code).to eq("200")	
 
 			end
 
 			it "-- create request, client created, but no redirection" do 
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_confirmation_path,{user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key}
+				post user_confirmation_path,{user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				
+				expect(session[:client]).not_to be_nil
+				expect(session[:redirect_url]).not_to be_nil
 				expect(response.location=~/google/).to be_nil
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
