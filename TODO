@@ -1,2 +1,2 @@
-5. import other necessary js files to make you_need_to_sign_in.js work.
-6. refactor to remove references to user, and instead use resource
+1.when sign_in fails, typing in the email field, causes credential_check to be performed.
+2.

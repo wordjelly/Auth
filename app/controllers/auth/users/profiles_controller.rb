@@ -1,7 +1,8 @@
 class Auth::Users::ProfilesController < ApplicationController
 	respond_to :html, :json, :js
+	
 	def show
-
+		
 	end
 
 	def credential_exists

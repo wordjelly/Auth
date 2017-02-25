@@ -1,0 +1,16 @@
+/**
+.shadow {
+    padding: 5px;
+    border: 2px solid #f0f0f0;
+    border-bottom: 4px solid #ccc;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 10px;
+}
+**/
+.shadow{
+	border-radius: 50%;            
+    border-style: double;
+    border-width: 1px;
+    border-color: #00695c;
+}
