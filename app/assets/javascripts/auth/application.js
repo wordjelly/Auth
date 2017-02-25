@@ -19,7 +19,15 @@
 //= require main.js
 //= require leanModal.js
 //= require you_need_to_sign_in.js
+//= require jquery.tagcloud.js
 //= require_tree .
 $(document).ready(function(){
-	
+	$.fn.tagcloud.defaults = {
+  size: {start: 14, end: 18, unit: 'pt'},
+  color: {start: '#cde', end: '#f52'}
+};
+
+$(function () {
+  $('#whatever a').tagcloud();
+});
 });
