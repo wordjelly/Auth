@@ -20,14 +20,25 @@
 //= require leanModal.js
 //= require you_need_to_sign_in.js
 //= require jquery.tagcloud.js
+//= require trianglify.min.js
 //= require_tree .
 $(document).ready(function(){
+	/***
 	$.fn.tagcloud.defaults = {
-  size: {start: 14, end: 18, unit: 'pt'},
-  color: {start: '#cde', end: '#f52'}
-};
+  		size: {start: 14, end: 18, unit: 'pt'},
+  		color: {start: '#cde', end: '#f52'}
+	};
 
-$(function () {
-  $('#whatever a').tagcloud();
-});
+	$(function () {
+  		$('#whatever a').tagcloud();
+	});
+	***/
+	/***
+	var pattern = Trianglify({
+        width: $("#cover").outerWidth(),
+        height: $("#cover").height()
+    });
+
+    document.getElementById('cover').appendChild(pattern.svg({includeNamespace: true}));
+    **/
 });
