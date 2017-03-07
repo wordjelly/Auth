@@ -5,6 +5,14 @@ class Auth::Users::ProfilesController < ApplicationController
 		
 	end
 
+	##@used_in: jquery.calendario.js
+	##@param[Array]: Integer timestamp from, integer timestamp to
+	##@return[Hash]: timestamp => activity_object hashified.
+	def get_activities
+		
+	end
+
+	##@used_in: email check if already exists. 
 	def credential_exists
 		filt = permitted_params
 		resource = get_model(filt["resource"])
