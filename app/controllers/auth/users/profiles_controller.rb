@@ -6,12 +6,10 @@ class Auth::Users::ProfilesController < ApplicationController
 	end
 
 	##@used_in: jquery.calendario.js
-	##@param[Hash] range: from => date[format: ], to => date[format: ]
+	##@param[Hash] range: {"from" => date[format: ], "to" => date[format: ]}
 	##@return[Hash]: timestamp => activity_object hashified.
 	def get_activities(range)
-		Auth::Activity.where(:created_at.gte => range[:from], :created_at.lte => range[:to])
-		##need to write a map function to return a jsonified array 
-		##as timestamp => activity_object.
+		Auth::Activity.get_in_range(range)
 	end
 
 	##@used_in: email check if already exists. 
