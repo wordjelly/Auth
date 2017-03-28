@@ -2,22 +2,18 @@ module Auth
 	class Activity
 		include Mongoid::Document
 		include Mongoid::Timestamps
-		
+
+		field :user_id, 			type: BSON::ObjectId
 		field :image_url, 			type: String, default: "/assets/auth/activity.jpg"
 
-		##@param[Hash] range: {"from" => date[format: ], "to" => date[format: ]}
+		##@param[Hash] {range: {"from" => date[format: ], "to" => date[format: ]}, user_id: string}
 		##@return[Hash]: timestamp => activity_object hashified.
-		def self.get_in_range(range)
-			puts "came to get in range"
-			puts "range from is: #{range[:from]}"
-			puts "range to is: #{range[:to]}"
-			activities = Auth::Activity.where(:created_at.gte => range["from"], :created_at.lte => range["to"])
-			puts "activities size is: "
-			puts activities.size
-			puts "Activities entries are:"
-			puts activities.entries.to_s
+		def self.get_in_range(params)
+			puts "params coming in to the get_in_range activity function are:"
+			puts params.to_s
+			activities = Auth::Activity.where(:created_at.gte => params[:range]["from"], :created_at.lte => params[:range]["to"], :user_id => params[:user_id])			
 			activities_hash = Hash[activities.entries.map{|c| c.created_at.to_i}.zip(activities.entries.map{|c| c.as_json})]
-			puts activities_hash.to_s
+			puts JSON.pretty_generate(activities_hash)
 			return activities_hash
 		end
 		############################################################
@@ -37,6 +33,38 @@ module Auth
 
 		def self.rand_in_range(from, to)
 		  rand * (to - from) + from
+		end
+
+		##Deletes all existing activities and users in the database
+		##creates 5 activities created by one user and 5 activities created by another user. 
+		def self.create_random_activities
+			puts "deleting all existing users:" + User.delete_all.to_s
+			puts "deleting all existing activities:" + Auth::Activity.delete_all.to_s
+			puts "creating two fake users"
+			u = User.new
+			u.email = "hello@gmail.com"
+			u.password = "password"
+			u.confirm!
+			puts "saving first user:" + u.save.to_s
+			u1 = User.new
+			u1.email = "goodbye@gmail.com"
+			u1.password = "password"
+			u1.confirm!
+			puts "saving second user:" + u1.save.to_s
+			5.times do |n|
+				a = Auth::Activity.new
+				a.created_at = Auth::Activity.rand_time(n.days.ago)
+				a.user_id = u.id
+				puts "Created activity #{n} with user 1:" + a.save.to_s
+			end
+
+			5.times do |n|
+				a = Auth::Activity.new
+				a.created_at = Auth::Activity.rand_time(n.days.ago)
+				a.user_id = u1.id
+				puts "Created activity #{n} with user 2:" + a.save.to_s
+			end
+
 		end
 		#############################################################
 		## Convenience methods end here
