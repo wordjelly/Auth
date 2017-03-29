@@ -2,7 +2,7 @@ class Auth::Users::ProfilesController < ApplicationController
 	respond_to :html, :json, :js
 	
 	def show
-		
+		@resource = User.find(params[:id])
 	end
 
 	##@used_in: jquery.calendario.js
