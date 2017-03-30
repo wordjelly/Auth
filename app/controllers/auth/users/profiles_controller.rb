@@ -5,15 +5,6 @@ class Auth::Users::ProfilesController < ApplicationController
 		@resource = User.find(params[:id])
 	end
 
-	##@used_in: jquery.calendario.js
-	##@param[Hash] : params should have range key(which is itself a hash, and a user_id key which is a string.), {range: {"from" => date[format: ], "to" => date[format: ]}, user_id: String}
-	##@return[Hash]: timestamp => activity_object hashified.
-	def get_activities
-		filt_test = permitted_params
-		puts "the permitted_params are: #{filt_test}"
-		Auth::Activity.get_in_range(filt_test)
-	end
-
 	##@used_in: email check if already exists. 
 	def credential_exists
 		filt = permitted_params
@@ -33,10 +24,7 @@ class Auth::Users::ProfilesController < ApplicationController
 	private
 	def permitted_params
 		if action_name.to_s == "credential_exists"
-			params.require(:credential).permit(Devise.authentication_keys + [:resource])
-		elsif action_name.to_s == "get_activities"
-			params.require(:user_id)
-			params.require(:range).permit({:range => [:from, :to]})
+			params.require(:credential).permit(Devise.authentication_keys + [:resource])	
 		end
 	end
 

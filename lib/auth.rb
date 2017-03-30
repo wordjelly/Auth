@@ -15,6 +15,7 @@ require "materialize-sass"
 require "valid_url"
 require "recaptcha/rails"
 require "mongoid_paperclip"
+require "momentjs-rails"
 
 module Auth
 end

@@ -13,6 +13,11 @@ module ActionDispatch::Routing
 		  		get 'credential_exists'
 		  	end
 		  end
+		  resources :activities, :controller => "auth/users/activities" do 
+		  	collection do 
+		  		get 'get_activities'
+		  	end
+		  end
 		  
 		  app_route_resources.each do |resource,opts| 
 

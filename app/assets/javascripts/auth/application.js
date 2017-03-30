@@ -22,6 +22,7 @@
 //= require modernizr.custom.63321.js
 //= require data.js
 //= require jquery.calendario.js
+//= require moment
 //= require_tree .
 $(document).ready(function(){
 	/***

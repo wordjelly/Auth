@@ -21,12 +21,13 @@ Gem::Specification.new do |s|
   s.add_dependency "sass-rails"
   s.add_dependency "turbolinks"
   
+  s.add_dependency 'momentjs-rails'
   s.add_dependency 'simple_token_authentication', '~> 1.0'
   s.add_dependency 'devise', "4.1.1"
-  s.add_dependency 'omniauth'
-  s.add_dependency 'omniauth-google-oauth2'
+  s.add_dependency 'omniauth', '1.4.1'
+  s.add_dependency 'omniauth-google-oauth2', '0.4.1'
   s.add_dependency 'omniauth-twitter'
-  s.add_dependency 'omniauth-facebook'
+  s.add_dependency 'omniauth-facebook', '4.0.0'
   s.add_dependency 'omniauth-linkedin'
   s.add_dependency 'request_store'
   s.add_dependency 'thin'
