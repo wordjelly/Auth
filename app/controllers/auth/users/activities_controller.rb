@@ -7,14 +7,13 @@ class Auth::Users::ActivitiesController < ApplicationController
 	##@return[Hash]: timestamp => activity_object hashified.
 	def get_activities
 		filt_test = permitted_params
-		puts "the permitted_params are: #{filt_test}"
-		Auth::Activity.get_in_range(filt_test)
+		activities_hash = Auth::Activity.get_in_range(filt_test)
+		respond_with activities_hash
 	end
 
 	private
 	def permitted_params
-		params.require(:user_id)
-		params.require(:range).permit({:range => [:from, :to]})
+		params.permit(:user_id, range: [:from, :to])
 	end
 
 end

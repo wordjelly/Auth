@@ -6,12 +6,10 @@ module Auth
 		field :user_id, 			type: BSON::ObjectId
 		field :image_url, 			type: String, default: "/assets/auth/activity.jpg"
 
-		##@param[Hash] {range: {"from" => date[format: ], "to" => date[format: ]}, user_id: string}
+		##@param[Hash] {"range" : {"from" : unix_epoch_as_string, "to" => unix_epoch_as_string}, "user_id": string}
 		##@return[Hash]: timestamp => activity_object hashified.
 		def self.get_in_range(params)
-			puts "params coming in to the get_in_range activity function are:"
-			puts params.to_s
-			activities = Auth::Activity.where(:created_at.gte => params[:range]["from"], :created_at.lte => params[:range]["to"], :user_id => params[:user_id])			
+			activities = Auth::Activity.where(:created_at.gte => params[:range][:from].to_i, :created_at.lte => params[:range][:to].to_i, :user_id => params[:user_id])			
 			activities_hash = Hash[activities.entries.map{|c| c.created_at.to_i}.zip(activities.entries.map{|c| c.as_json})]
 			puts JSON.pretty_generate(activities_hash)
 			return activities_hash
