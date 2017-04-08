@@ -13,7 +13,7 @@ class Auth::Users::ActivitiesController < ApplicationController
 
 	private
 	def permitted_params
-		params.permit(:user_id, range: [:from, :to])
+		params.permit(:user_id, range: [:from, :to], only: [])
 	end
 
 end
