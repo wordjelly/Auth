@@ -3,7 +3,7 @@
 $(document).on("click","#get_activities",function(event){
 	var now = moment();
 	var now_start = now.unix();
-	var startDate = now.startOf("year");
+	var startDate = now.startOf("month");
 	$.get( "/activities/get_activities",
 	 	 { user_id: $("#user_data").data("resource").id, range: {from: startDate.unix(), to: now_start} , only:["image_url"]},
 	 	 function(data){
@@ -13,4 +13,6 @@ $(document).on("click","#get_activities",function(event){
 	 	 "json"
 	 	 );
 	
-})
+});
+
+
