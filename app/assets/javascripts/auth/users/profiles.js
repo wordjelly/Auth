@@ -8,20 +8,16 @@ $(document).on("click","#get_activities",function(event){
 /***
 @returns : ajax_promise
 ***/
-var get_activities = function(){
+var get_activities = function(done_function){
 	var now = moment();
 	var now_start = now.unix();
 	var startDate = now.startOf("month");
 	$.get( "/activities/get_activities",
 	 	 { user_id: $("#user_data").data("resource").id, range: {from: startDate.unix(), to: now_start} , only:["image_url"]},
-	 	 function(data){
-	 	 	console.log("response got");
-	 	 	console.log(data);
-	 	 },
+	 	 done_function,
 	 	 "json"
 	 	 );
 }
-
 
 /***
 logic:
@@ -60,6 +56,23 @@ $(document).ready(function(){
 	$( '#custom-prev' ).on( 'click', function() {
 		cal.gotoPreviousMonth( updateMonthYear );
 	} );
+
+	get_activities(function(data){
+		console.log("the data is:");
+		console.log(data);
+		for(epoch in data){
+			var dateStr = moment.utc(parseInt(epoch)*1000).format('MM-DD-YYYY');
+			//get that particular datestr data-attribute
+			var dateDiv = $("[data-strdate='" + dateStr +"']")[0];
+			var activity = data[epoch];
+			//now update the dateDiv as needed.	
+			console.log("the activity image url is:" + activity["image_url"]);
+			//$(dateDiv).css('background-image', 'url(' + activity["image_url"] + ')');
+			$(dateDiv).html("<img class='calendar_day_background_image' src='" + activity["image_url"] + "'/>");
+		}
+	});
+
+
 
 	function updateMonthYear() {				
 		$month.html( cal.getMonthName() );
