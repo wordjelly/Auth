@@ -52,6 +52,9 @@ $(document).ready(function(){
 	$year = $( '#custom-year' ).html( cal.getYear() );
 	$( '#custom-next' ).on( 'click', function() {
 		cal.gotoNextMonth( updateMonthYear );
+		//now run the get_activities_again.
+		//but it has to be able to use the month requried, and not just any month
+
 	} );
 	$( '#custom-prev' ).on( 'click', function() {
 		cal.gotoPreviousMonth( updateMonthYear );
@@ -68,7 +71,7 @@ $(document).ready(function(){
 			//now update the dateDiv as needed.	
 			console.log("the activity image url is:" + activity["image_url"]);
 			//$(dateDiv).css('background-image', 'url(' + activity["image_url"] + ')');
-			$(dateDiv).html("<img class='calendar_day_background_image' src='" + activity["image_url"] + "'/>");
+			$(dateDiv).html("<span class='helper'></span><img class='calendar_day_background_image' src='" + activity["image_url"] + "'/>");
 		}
 	});
 
