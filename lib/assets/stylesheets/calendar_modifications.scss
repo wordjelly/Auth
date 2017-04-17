@@ -1,4 +1,5 @@
 /* Custom calendar elements */
+@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css);
 
 $calendar_primary: #009688; 
 $calendar_today_color: #004d40;
@@ -96,8 +97,8 @@ $calendar_today_color: #004d40;
 	right: 5px;
 }
 
+//font-family: 'fontawesome-selected';
 .custom-header div span:before {
-	font-family: 'fontawesome-selected';
 	color: $calendar_primary;
 	position: absolute;
 	text-align: center;
@@ -189,9 +190,9 @@ $calendar_today_color: #004d40;
 /* Modifications */
 
 .fc-calendar-container {
-	height: 400px;
+	min-height:400px;
 	width: auto;
-	padding: 30px;
+	padding: 40px;
 	background: #f6f6f6;
 	box-shadow: inset 0 1px rgba(255,255,255,0.8);
 }

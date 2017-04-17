@@ -37,7 +37,19 @@ var get_activities = function(done_function,start_moment,end_moment){
 }
 
 /***
+This should be called in the following style, wherever get_activities is called
+first().then(second).then(third)
+@param done_function[fn] : 
+@param start_moment[Moment] : 
+@returns : dateStrings of most active months, as an array
+***/
+var get_most_active_months = function(done_function,start_moment){
+
+}
+
+/***
 WORDJELLY FUNCTION
+The callback function for get_activities
 @param data[Object] : object returned from server, from the get_activities call
 @return: nil
 ***/
@@ -50,6 +62,20 @@ var update_calendar_images_and_popups = function(data){
 		//now update the dateDiv as needed.	
 		$(dateDiv).html("<span class='helper'></span><img class='calendar_day_background_image' src='" + activity["image_url"] + "'/>");
 	}
+
+}
+
+
+/***
+The callback function for the get_most_active_months
+***/
+var update_most_active_months_dots = function(data){
+	//get the calendar div.
+	//then add the dots.
+	//fs-8
+	//m-15-left
+	//text-lighten or darken.
+	$(".fc-body").append("<div class='center m-10-top m-20-bottom'><i class='fa fa-circle fs-8 teal-text text-lighten-5'></i><i class='fa fa-circle fs-8 m-15-left teal-text'></i><i class='fa fa-circle fs-8 m-15-left teal-text'></i><i class='fa fa-circle fs-8 m-15-left teal-text'></i><i class='fa fa-circle fs-8 m-15-left teal-text text-lighten-3'></i><i class='fa fa-circle fs-8 m-15-left teal-text text-lighten-1'></i><i class='fa fa-circle fs-8 m-15-left teal-text '></i></div>");
 }
 
 /***
