@@ -6,7 +6,30 @@ module Auth
 		field :user_id, 			type: BSON::ObjectId
 		field :image_url, 			type: String
 
+		##db.auth_activities.aggregate( { $project: { month: {$month: "$created_at"} } },{ $group: { _id: {month: "$month"}, count: {$sum: 1} } } )
 		
+		def self.test_agg
+			Auth::Activity.collection.aggregate([
+					{
+						"$project" => {
+							month: {
+								"$month" => "$created_at"
+							}
+						}
+					},
+					{
+						"$group" => {
+							"_id" => {
+								month: "$month"
+							},
+							count: {
+								"$sum" => 1
+							}
+						}
+					}]
+				)
+		end
+
 		##@param[Hash] {"range" : {"from" : unix_epoch_as_string, "to" => unix_epoch_as_string}, "user_id": string, "only": [array_of_attributes_required]}
 		##"range" => optional,if nil or empty, "from" and "to" will be automatically assigned to beginning_of_current_month and current_time respectively
 		##"user_id" => required, will return empty hash if absent.

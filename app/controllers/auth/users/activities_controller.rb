@@ -11,6 +11,7 @@ class Auth::Users::ActivitiesController < ApplicationController
 		respond_with activities_hash
 	end
 
+	
 	private
 	def permitted_params
 		params.permit(:user_id, range: [:from, :to], only: [])
