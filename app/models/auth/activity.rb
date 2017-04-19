@@ -11,6 +11,9 @@ module Auth
 		def self.test_agg
 			Auth::Activity.collection.aggregate([
 					{
+						"$match" => Auth::Activity.where(:created_at.gte => Time.now.to_i - 100.days, :created_at.lte => Time.now.to_i).selector
+					},
+					{
 						"$project" => {
 							month: {
 								"$month" => "$created_at"
