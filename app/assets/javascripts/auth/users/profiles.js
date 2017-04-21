@@ -29,7 +29,7 @@ WORDJELLY FUNCTION
 ***/
 var get_activities = function(done_function,start_moment,end_moment){
 	//if these are null then we will get inbuilt defaults from the server.
-	$.get( "/activities/get_activities",
+	$.get( "/get_activities",
 	 	 { user_id: $("#user_data").data("resource").id, range: {from: start_moment.unix(), to: end_moment.unix()} , only:["image_url"]},
 	 	 done_function,
 	 	 "json"

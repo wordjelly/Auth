@@ -3,7 +3,9 @@ Rails.application.routes.draw do
   resources :topics
   
   
-  
+  get 'get_activities' , :action => "get_activities", :controller => "activity"
+
+
   root "home#index"
   #mount Auth::Engine => "/authenticate", :as => 'auth'
   mount_routes Auth.configuration.auth_resources
