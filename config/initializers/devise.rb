@@ -734,7 +734,7 @@ module Devise
 
     DEFAULT_PERMITTED_ATTRIBUTES =
       {
-        sign_in: [:email,:mobile,:password, :remember_me, :redirect_url, :api_key, :current_app_id],
+        sign_in: [:login,:password, :remember_me, :redirect_url, :api_key, :current_app_id],
         sign_up: [:email,:mobile,:password, :password_confirmation, :redirect_url, :api_key, :current_app_id],
         account_update: [:email,:mobile,:password, :password_confirmation, :current_password, :redirect_url, :api_key, :current_app_id]
       }
