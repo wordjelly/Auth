@@ -173,7 +173,7 @@ var toggle_sign_up_validation = function(login_text){
       	}
       ];
       //remove the remote from the user_email part.
-      validation_settings["login_form"]["user_email"]["validate_with"] = _.filter(validation_settings["login_form"]["user_email"]["validate_with"],function(n){
+      validation_settings["login_form"]["user_login"]["validate_with"] = _.filter(validation_settings["login_form"]["user_login"]["validate_with"],function(n){
       	return !("remote" in n);
       });
 	}
@@ -189,7 +189,7 @@ var toggle_sign_up_validation = function(login_text){
       	 "field_array":["user_password_confirmation"]
       	}
       ];
-      validation_settings["login_form"]["user_email"]["validate_with"].push({
+      validation_settings["login_form"]["user_login"]["validate_with"].push({
       	"remote" : "true",
       	"ajax_settings" : credential_exists
       })  
@@ -206,6 +206,11 @@ provide the input id without the hash.
 ****/
 var invalidate_input_field = function(input_id,error_message,add_error_message){
 	console.log("came to invalidate input field.");
+	console.log("input id is:" + input_id);
+	console.log("error message is:");
+	console.log(error_message);
+	console.log("add error message is:");
+	console.log(add_error_message);
 	add_error_message = add_error_message || true;
 	var input = $("#" + input_id);
 	var label = $('label[for="'+ input_id +'"]');
