@@ -19,6 +19,11 @@ module Auth::Concerns::UserConcern
 		##BASIC USER FIELDS.
 		field :email, 				type: String, default: ""
 		attr_accessor :skip_email_unique_validation
+		##mobile is to allow the user to sign in/up using his mobile number.
+		##important to note that the mobile number can change / or can be removed.
+		field :mobile, 				type: String
+		##the dummy field that aliases for email and mobile.
+		field :login,				type: String
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
 		###ENDS.
@@ -35,6 +40,8 @@ module Auth::Concerns::UserConcern
 		      devise :database_authenticatable
 		      devise :validatable
 		      devise :trackable
+		      ##setting the authentication keys parameter here.
+		      devise :authentication_keys => opts[:authentication_keys]
 			  field :encrypted_password, type: String, default: ""
 			  field :client_id, type: BSON::ObjectId
 			  field :sign_in_count,      type: Integer, default: 0
@@ -116,6 +123,16 @@ module Auth::Concerns::UserConcern
 
 	end
 
+	##FOR THE LOGIN AUTHENTICATION KEY PARAMETER, WE DEFINE GETTERS AND SETTERS
+	def login=(login)
+		@login = login
+	end
+
+	def login
+		 @login || self.email || self.mobile
+	end
+
+
 	##reset the auth token if the email or password changes.
 	def email=(email)
 		super
@@ -126,7 +143,6 @@ module Auth::Concerns::UserConcern
 		super
 		reset_token
 	end
-
 
 
 	def reset_token
@@ -249,5 +265,7 @@ module Auth::Concerns::UserConcern
 	def email_changed?
     	super && skip_email_unique_validation.nil?
 	end
+
+
 
 end
