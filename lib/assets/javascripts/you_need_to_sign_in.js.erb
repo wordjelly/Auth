@@ -137,6 +137,8 @@ var toggle_sign_up_text = function(new_text){
 	$("#show_sign_up").text(sign_up_text == "Don't have an Account? Sign Up For Free" ? "Already Have An Account? Sign In" : "Don't have an Account? Sign Up For Free");
 }
 
+/***
+***/
 var toggle_sign_in_sign_up = function(){
 	$('#sign_up_inputs').toggle();
 	$('#sign_up_inputs').toggleClass('m-20-bottom');
@@ -352,7 +354,13 @@ $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',functi
 	sign_in_required(event);
 });
 
-
+//need to decide whether the user is signing up using 
+//mobile or email.
+$('#login_form').on('ajax:beforeSend', function(event, xhr, status, error) {
+  // insert the failure message inside the "#account_settings" element
+  //$(this).append(xhr.responseText)
+  console.log("caught the before send.");
+});
 
 
 
