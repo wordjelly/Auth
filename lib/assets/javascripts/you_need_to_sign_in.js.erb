@@ -359,11 +359,20 @@ $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',functi
 	sign_in_required(event);
 });
 
-
+/***
+takes the value of the user_login field
+trims it
+then matches it with the mobile number regex
+if it matches, then makes the hidden field user[mobile]
+if it doesnt match, then makes the hidden field user[email]
+then returns true.
+***/
 $(document).on('submit','#login_form',function(event){
-	$(this).append('<input type="hidden" name="user[email]" value="'+ $("#user_login").val() +'" />');
-	console.log("the form becomes");
-	console.log($(this));
+	var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
+	var user_login = $("#user_login").val().trim();
+	var hidden_field_name = null;
+	hidden_field_name = user_login.match(mobile_number_regex) ? "user[mobile]" : "user[email]"; 
+	$(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
 	return true;
 });
 
