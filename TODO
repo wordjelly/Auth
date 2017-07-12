@@ -2,3 +2,4 @@
 2.Add a loading indicator to the calendar while the images are loading
 3.Add a navigation element, like small circles side by side, to indicate when were the last months were the user was active, and this needs to be stored in a correct way, and showed
 4.show a message saying that he has or hasnt been active this month.
+5.on clicking enter on sign up form, it submits the sign in form.

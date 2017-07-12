@@ -359,14 +359,13 @@ $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',functi
 	sign_in_required(event);
 });
 
-//need to decide whether the user is signing up using 
-//mobile or email.
-$('#login_form').on('ajax:beforeSend', function(event, xhr, status, error) {
-  // insert the failure message inside the "#account_settings" element
-  //$(this).append(xhr.responseText)
-  console.log("caught the before send.");
-});
 
+$(document).on('submit','#login_form',function(event){
+	$(this).append('<input type="hidden" name="user[email]" value="'+ $("#user_login").val() +'" />');
+	console.log("the form becomes");
+	console.log($(this));
+	return true;
+});
 
 
 $(document).ready(set_sign_in_modal);
