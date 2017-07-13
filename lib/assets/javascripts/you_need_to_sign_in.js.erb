@@ -359,6 +359,8 @@ $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',functi
 	sign_in_required(event);
 });
 
+var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
+var email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
 /***
 takes the value of the user_login field
 trims it
@@ -368,7 +370,7 @@ if it doesnt match, then makes the hidden field user[email]
 then returns true.
 ***/
 $(document).on('submit','#login_form',function(event){
-	var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
+	
 	var user_login = $("#user_login").val().trim();
 	var hidden_field_name = null;
 	hidden_field_name = user_login.match(mobile_number_regex) ? "user[mobile]" : "user[email]"; 
@@ -376,6 +378,23 @@ $(document).on('submit','#login_form',function(event){
 	return true;
 });
 
+
+var user_login_validation_function = function(def,e){
+  console.log("entereing validation function -> def object");
+  console.log(def);
+  console.log("event object -> e");
+  console.log(e);
+  if(e.target.value.trim().match(mobile_number_regex)){
+  	console.log("matches mobile number regex");
+  	return true;
+  }
+  else if(e.target.value.trim().match(email_regex)){
+  	console.log("matches email regex");
+  	return true;
+  }
+  console.log("matched no regex");
+  return false;
+}
 
 $(document).ready(set_sign_in_modal);
 $(document).on('page:load', set_sign_in_modal);
