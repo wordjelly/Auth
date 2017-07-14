@@ -731,7 +731,6 @@ module Devise
   end
 
   class ParameterSanitizer
-
     DEFAULT_PERMITTED_ATTRIBUTES =
       {
         sign_in: [:login,:password, :remember_me, :redirect_url, :api_key, :current_app_id],

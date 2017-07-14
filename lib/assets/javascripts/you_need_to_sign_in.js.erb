@@ -205,12 +205,6 @@ var get_current_screen = function(){
 provide the input id without the hash.
 ****/
 var invalidate_input_field = function(input_id,error_message,add_error_message){
-	console.log("came to invalidate input field.");
-	console.log("input id is:" + input_id);
-	console.log("error message is:");
-	console.log(error_message);
-	console.log("add error message is:");
-	console.log(add_error_message);
 	add_error_message = add_error_message || true;
 	var input = $("#" + input_id);
 	var label = $('label[for="'+ input_id +'"]');
@@ -370,7 +364,6 @@ if it doesnt match, then makes the hidden field user[email]
 then returns true.
 ***/
 $(document).on('submit','#login_form',function(event){
-	
 	var user_login = $("#user_login").val().trim();
 	var hidden_field_name = null;
 	hidden_field_name = user_login.match(mobile_number_regex) ? "user[mobile]" : "user[email]"; 
@@ -378,21 +371,16 @@ $(document).on('submit','#login_form',function(event){
 	return true;
 });
 
-
+/**
+used in file views/auth/sessions/new.js.erb
+**/
 var user_login_validation_function = function(def,e){
-  console.log("entereing validation function -> def object");
-  console.log(def);
-  console.log("event object -> e");
-  console.log(e);
   if(e.target.value.trim().match(mobile_number_regex)){
-  	console.log("matches mobile number regex");
   	return true;
   }
   else if(e.target.value.trim().match(email_regex)){
-  	console.log("matches email regex");
   	return true;
   }
-  console.log("matched no regex");
   return false;
 }
 

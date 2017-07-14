@@ -19,11 +19,12 @@ module Auth::Concerns::UserConcern
 		##BASIC USER FIELDS.
 		field :email, 				type: String, default: ""
 		attr_accessor :skip_email_unique_validation
-		##mobile is to allow the user to sign in/up using his mobile number.
-		##important to note that the mobile number can change / or can be removed.
+
+##THESE TWO ARE ONLY NEEDED IF MOBILE IS BEING USED AS AN ALTERNATIVE LOGIN METHODOLOGY		
+
 		field :mobile, 				type: String
-		##the dummy field that aliases for email and mobile.
 		field :login,				type: String
+
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
 		###ENDS.

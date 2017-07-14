@@ -5,6 +5,7 @@ class Auth::RegistrationsController < Devise::RegistrationsController
   private
 	def check_resource_errors
 		puts resource.attributes.to_s
+		puts resource.errors.full_messages.to_s
 		true
 	end
   

@@ -5,3 +5,16 @@
 5.on clicking enter on sign up form, it submits the sign in form.
 6.credential check happens repeatedly even after sign up is completed.
 7.Modify validator to accept custom validation function for email/mobile
+
+
+##SERVER SIDE ALSO RENAME MOBILE TO ADDITIONAL_LOGIN_OPTION -> change this whereever is necessary.s
+##SERVER SIDE ITS ONLY THE VALIDATIONS THAT WILL HAVE TO BE CHANGED
+##FURTHERMORE THE CHANGES IN THE CONFIRMABLE MODULE WILL ALSO HAVE TO BE CHANGED.
+##PERMITTED PARAMS SERVER SIDE FOR SIGN_UP AND ACCOUNT_UPDATE WILL HAVE TO BE CHANGED.
+---SUBCLASS THIS TO THE DUMMY APP
+
+##WEB CLIENT SIDE, THE JAVASCRIPT VALIDATIONS WHERE WE GO WITH EITHER MOBILE OR EMAIL WILL HAVE TO BE CHANGED.
+---move the toggle_sign_up_validation function to the dummy app
+---move the validator stuff in sessions/new.js.erb to the client app
+---move the on_submit login_form handler to the client app
+---move the user_login_validation_function to the client app
