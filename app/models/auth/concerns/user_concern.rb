@@ -19,11 +19,14 @@ module Auth::Concerns::UserConcern
 		##BASIC USER FIELDS.
 		field :email, 				type: String, default: ""
 		attr_accessor :skip_email_unique_validation
-
-##THESE TWO ARE ONLY NEEDED IF MOBILE IS BEING USED AS AN ALTERNATIVE LOGIN METHODOLOGY		
-
-		field :mobile, 				type: String
 		field :login,				type: String
+
+		
+
+		##additional parameter by which login can be done.
+		##it should be defined in the configuration.
+		##see spec/dummy/config/initializers/preinitializer.rb		
+		field :additional_login_param, 				type: String
 
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
@@ -42,7 +45,7 @@ module Auth::Concerns::UserConcern
 		      devise :validatable
 		      devise :trackable
 		      ##setting the authentication keys parameter here.
-		      devise :authentication_keys => opts[:authentication_keys]
+		      devise :authentication_keys => {:login => true}
 			  field :encrypted_password, type: String, default: ""
 			  field :client_id, type: BSON::ObjectId
 			  field :sign_in_count,      type: Integer, default: 0
@@ -130,7 +133,7 @@ module Auth::Concerns::UserConcern
 	end
 
 	def login
-		 @login || self.email || self.mobile
+		 @login || self.email || self.additional_login_param
 	end
 
 

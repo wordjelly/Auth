@@ -3,15 +3,15 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
   layout 'auth/application'
+  #include User::ParameterSanitizer
+  #before_action :configure_permitted_parameters, if: :devise_controller?
 
-  before_action :configure_permitted_parameters, if: :devise_controller?
-
-  def configure_permitted_parameters
+  #def configure_permitted_parameters
   	#puts "came to configure permitted parameters,"
-    added_attrs = [:name]
-    devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
-    devise_parameter_sanitizer.permit :account_update, keys: added_attrs
-  end
+    #added_attrs = [:name]
+    #devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
+    #devise_parameter_sanitizer.permit :account_update, keys: added_attrs
+  #end
 
   ###NOW TESTING ALL THE PATH OVERRIDES.
   ###THESE ARE OVERRIDDEN FOR ADMIN ONLY.
@@ -35,6 +35,16 @@ class ApplicationController < ActionController::Base
 
   def after_inactive_sign_up_path_for(resource)
     super
+  end
+
+  protected
+
+  def devise_parameter_sanitizer
+    if resource_class == User
+      User::ParameterSanitizer.new(User, :user, params)
+    else
+      super # Use the default one
+    end
   end
 
 end
