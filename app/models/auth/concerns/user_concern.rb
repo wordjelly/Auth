@@ -42,7 +42,6 @@ module Auth::Concerns::UserConcern
 	      #################################
 	      if !opts[:skip].include? :sessions
 		      devise :database_authenticatable
-		      devise :validatable
 		      devise :trackable
 		      ##setting the authentication keys parameter here.
 		      devise :authentication_keys => {:login => true}
@@ -62,6 +61,9 @@ module Auth::Concerns::UserConcern
 		  ####################################
 		  if !opts[:skip].include? :registrations
 	      	devise :registerable
+	      	devise :validatable
+	      	##add some validations for additional_login_param
+	      	validate :additional_login_param_val
 	        field :remember_created_at, type: Time
 	  	  end
 
@@ -270,6 +272,26 @@ module Auth::Concerns::UserConcern
     	super && skip_email_unique_validation.nil?
 	end
 
+	##if the additional login param key is enabled, and the additional login param has been provided in the params, then it will not validate for the presence of the email.
+	##otherwise it will validate for the presence of the email.
+	def email_required?
+		(additional_login_param_enabled? && additional_login_param_provided?) ? false : true
+	end
+
+	##@return[Boolean] : true if the Auth.config has :additional_login_param in the :login_params key for this resource, and additional_login_param_name key is also present. 
+	def additional_login_param_enabled?
+		Auth.configuration.auth_resources[self.name][:login_params].include? :additional_login_param && !Auth.configuration.auth_resources[self.name][:additional_login_param_name].nil?
+	end
+
+	##@return[Boolean] : true if the params have a additional_login_param that is not nil.
+	def additional_login_param_provided?
+		!self.additional_login_param.nil?
+	end
+
+
+	def additional_login_param_val
+
+	end
 
 
 end
