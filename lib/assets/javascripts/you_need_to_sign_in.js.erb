@@ -366,7 +366,7 @@ then returns true.
 $(document).on('submit','#login_form',function(event){
 	var user_login = $("#user_login").val().trim();
 	var hidden_field_name = null;
-	hidden_field_name = user_login.match(mobile_number_regex) ? "user[mobile]" : "user[email]"; 
+	hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
 	$(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
 	return true;
 });
