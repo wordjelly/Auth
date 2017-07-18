@@ -274,16 +274,6 @@ module Auth::Concerns::UserConcern
     	super && skip_email_unique_validation.nil?
 	end
 
-	##if the additional login param key is enabled, and the additional login param has been provided in the params, then it will not validate for the presence of the email.
-	##otherwise it will validate for the presence of the email.
-	##RAISE EMAIL BLANK VALIDATION ERROR ONLY IF ADDITIONAL PARAMETER IS NOT PROVIDED
-	##EMAIL WILL BE VALIDATED IF IT IS CHANGED FOR FORMAT AND UNIQUENESS.
-	##SO BASICALLY BOTH EMAIL AND MOBILE CAN BE CHANGED, SIMULTANEOUSLY
-	##AND STILL EMAIL WILL BE VALIDATED FOR FORMAT AND UNIQUENESS
-	def email_required?
-		additional_login_param.nil?
-	end
-
 
 	##it is required only if the email is missing.
 	def additional_login_param_required?
@@ -296,6 +286,19 @@ module Auth::Concerns::UserConcern
 
 	end
 		
+	protected
 
+	##if the additional login param key is enabled, and the additional login param has been provided in the params, then it will not validate for the presence of the email.
+	##otherwise it will validate for the presence of the email.
+	##RAISE EMAIL BLANK VALIDATION ERROR ONLY IF ADDITIONAL PARAMETER IS NOT PROVIDED
+	##EMAIL WILL BE VALIDATED IF IT IS CHANGED FOR FORMAT AND UNIQUENESS.
+	##SO BASICALLY BOTH EMAIL AND MOBILE CAN BE CHANGED, SIMULTANEOUSLY
+	##AND STILL EMAIL WILL BE VALIDATED FOR FORMAT AND UNIQUENESS
+	def email_required?
+		puts "Called email required, it should return :"
+		puts additional_login_param.nil?
+		gets.chomp
+		additional_login_param.nil?
+	end
 
 end
