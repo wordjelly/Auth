@@ -534,13 +534,12 @@ module Devise
 
   ##THIS CHANGE NEEDS TO BE MADE, IN ORDER TO CHANGE THE EMAIL_REQUIRED?
   ##PROTECTED METHOD FROM THE VALIDATABLE MODULE IN DEVISE.
-  ##EMAIL IS REQUIRED ONLY IF THE ADDITIONAL LOGIN PARAM IS NOT DEFINED
+  ##EMAIL IS REQUIRED ONLY IF THE ADDITIONAL LOGIN PARAM IS enabled , but still nil
   module Models
     module Validatable
       protected
         def email_required?
-          puts "using new email required function."
-          true
+          additional_login_param.nil?
         end 
     end
   end

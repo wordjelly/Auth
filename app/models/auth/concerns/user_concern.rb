@@ -65,7 +65,8 @@ module Auth::Concerns::UserConcern
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
 	      	validates_uniqueness_of :additional_login_param, allow_blank: true, if: :additional_login_param_changed?
             #validates_format_of     :additional_login_param, with: :additional_login_param_format, allow_blank: true, if: :additional_login_param_changed?
-	        validate :additional_login_param_format, :if => proc { additional_login_param_changed? && !additional_login_param.blank? }
+            #, :if => proc { additional_login_param_changed? && !additional_login_param.blank? }
+	        validate :additional_login_param_format, if: :additional_login_param_changed? 
 	        field :remember_created_at, type: Time
 	  	  end
 
@@ -282,23 +283,9 @@ module Auth::Concerns::UserConcern
 
 	##this method will validate the format of the additional_login_param.
 	##it can be overridden by the user to do his own custom validation.
+	##default behaviour is not to add any errors in the validation process.
 	def additional_login_param_format
-
-	end
 		
-	protected
-
-	##if the additional login param key is enabled, and the additional login param has been provided in the params, then it will not validate for the presence of the email.
-	##otherwise it will validate for the presence of the email.
-	##RAISE EMAIL BLANK VALIDATION ERROR ONLY IF ADDITIONAL PARAMETER IS NOT PROVIDED
-	##EMAIL WILL BE VALIDATED IF IT IS CHANGED FOR FORMAT AND UNIQUENESS.
-	##SO BASICALLY BOTH EMAIL AND MOBILE CAN BE CHANGED, SIMULTANEOUSLY
-	##AND STILL EMAIL WILL BE VALIDATED FOR FORMAT AND UNIQUENESS
-	def email_required?
-		puts "Called email required, it should return :"
-		puts additional_login_param.nil?
-		gets.chomp
-		additional_login_param.nil?
 	end
 
 end
