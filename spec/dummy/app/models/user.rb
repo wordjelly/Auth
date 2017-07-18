@@ -22,5 +22,13 @@ class User
 		end
   end 
 
+  ##this method will validate the format of the additional_login_param.
+  ##it can be overridden by the user to do his own custom validation.
+  ##method to be overriden from the concern
+  ##should return a regex 
+  def additional_login_param_format
+	true
+  end
+
 
 end
