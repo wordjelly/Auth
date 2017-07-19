@@ -6,36 +6,6 @@ $("#recaptcha_tags").html("<%= escape_javascript(render partial: 'auth/modals/re
 //FOOTER
 $("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb') %>").show();
 open_sign_in_modal_if_closed();
-//apply the form validtion plugin here.
-
-//the user login validation function is included in you_need_to_sign_in.js
-var validation_settings = {
-  "login_form" : {
-    "user_login" : {
-      "validation_events":{
-        "keyup" : true
-      },
-      "validate_with":[
-        {"required" : "true",
-         "failure_message": "this field is required"
-    	},
-    	{"format" : user_login_validation_function,
-    	 "failure_message": "Please enter a valid email or mobile number"
-    	}
-      ]
-    },
-    "user_password":{
-    	"validation_events":{
-    	  "keyup":true
-    	},
-    	"validate_with":[
-      	{"required" : "true",
-      	 "failure_message": "this field is required"
-      	}
-      ]
-    }
-  }
-}
 
 // Initialize the validator
 try{
@@ -44,3 +14,4 @@ try{
 catch(err){
 	console.log(err);
 }
+

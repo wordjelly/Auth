@@ -15,6 +15,7 @@
 //= require underscore
 //= require turbolinks
 //= require materialize-sprockets
+//= require application.js
 //= require spinner.js
 //= require main.js
 //= require leanModal.js

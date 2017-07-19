@@ -353,38 +353,6 @@ $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',functi
 	sign_in_required(event);
 });
 
-var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
-var email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
-/***
-takes the value of the user_login field
-trims it
-then matches it with the mobile number regex
-if it matches, then makes the hidden field user[mobile]
-if it doesnt match, then makes the hidden field user[email]
-then returns true.
-***/
-$(document).on('submit','#login_form',function(event){
-	console.log("triggered submit handler to modify the form");
-	var user_login = $("#user_login").val().trim();
-	var hidden_field_name = null;
-	hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
-	$(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
-	return true;
-});
-
-/**
-used in file views/auth/sessions/new.js.erb
-**/
-var user_login_validation_function = function(def,e,field_id){
-  
-  if($("#" + field_id).val().trim().match(mobile_number_regex)){
-  	return true;
-  }
-  else if($("#" + field_id).val().trim().match(email_regex)){
-  	return true;
-  }
-  return false;
-}
 
 $(document).ready(set_sign_in_modal);
 $(document).on('page:load', set_sign_in_modal);
