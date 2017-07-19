@@ -539,7 +539,10 @@ module Devise
     module Validatable
       protected
         def email_required?
-          additional_login_param.nil?
+          #additional_login_param.nil?
+          puts "is the additional login param nil?"
+          puts additional_login_param.nil?
+          return additional_login_param.nil?
         end 
     end
   end

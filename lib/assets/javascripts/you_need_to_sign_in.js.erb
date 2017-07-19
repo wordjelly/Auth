@@ -150,14 +150,14 @@ var toggle_sign_in_sign_up = function(){
     toggle_sign_up_text();
 }
 
-var credential_exists = function(def,e){
+var credential_exists = function(def,e,field_id){
 	var res = {
 		"url": "/profiles/credential_exists",
 		"dataType":"json",
 		"data":{
 			"credential":{
 				"resource":resource,
-				"email":$("#" + e.target.id).val(),
+				"email":$("#" + field_id).val(),
 				"aufbau":"dog"
 			}
 		}
@@ -364,6 +364,7 @@ if it doesnt match, then makes the hidden field user[email]
 then returns true.
 ***/
 $(document).on('submit','#login_form',function(event){
+	console.log("triggered submit handler to modify the form");
 	var user_login = $("#user_login").val().trim();
 	var hidden_field_name = null;
 	hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
@@ -374,11 +375,12 @@ $(document).on('submit','#login_form',function(event){
 /**
 used in file views/auth/sessions/new.js.erb
 **/
-var user_login_validation_function = function(def,e){
-  if(e.target.value.trim().match(mobile_number_regex)){
+var user_login_validation_function = function(def,e,field_id){
+  
+  if($("#" + field_id).val().trim().match(mobile_number_regex)){
   	return true;
   }
-  else if(e.target.value.trim().match(email_regex)){
+  else if($("#" + field_id).val().trim().match(email_regex)){
   	return true;
   }
   return false;

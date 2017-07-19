@@ -16,6 +16,7 @@ class Auth::Users::ProfilesController < ApplicationController
 			}
 			is_valid = (resource.or(*conditions).count == 0)
 		end
+		puts "returning is valid as: #{is_valid.to_s}"
 		respond_to do |format|
 		  format.json { render json: {"is_valid" => is_valid} }
 		end

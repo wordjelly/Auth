@@ -22,8 +22,14 @@ class User
 		end
   end 
 
+  ##here we are processing it assuming it is a mobile number
   def additional_login_param_format
-  	puts "-----------------------------YES WE ARE VALIDATING ---------------"
+  	puts "this is the additional login param: #{additional_login_param}"
+  	if !additional_login_param.blank?
+  		#if !additional_login_param =~/[0-9]+/
+  			errors.add(:additional_login_param,"please enter a valid mobile number")
+  		#end
+  	end
   end
 
 end
