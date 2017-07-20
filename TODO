@@ -3,7 +3,12 @@
 3.Add a navigation element, like small circles side by side, to indicate when were the last months were the user was active, and this needs to be stored in a correct way, and showed
 4.show a message saying that he has or hasnt been active this month.
 5.on clicking enter on sign up form, it submits the sign in form.
-
+6.sometimes the sign in modal just doesnt open
+7.we will have to have a seperate attribute that says additional_login_param confirmed, and while doing the login, it will have to be passed as an additional condition.eg : additional_param && additional_param conf OR email && email_confirmed
+8.a seperate confirm method will have to be used by the confirm part of the additional_login_param
+9.controller seperate for otp confirmations, and it will have to be serving the part where we verify the otp
+10.shift the email_required? to the user_concern
+11.
 
 
 ##FURTHERMORE THE CHANGES IN THE CONFIRMABLE MODULE WILL ALSO HAVE TO BE CHANGED.
