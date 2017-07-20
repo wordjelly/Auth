@@ -540,8 +540,6 @@ module Devise
       protected
         def email_required?
           #additional_login_param.nil?
-          puts "is the additional login param nil?"
-          puts additional_login_param.nil?
           return additional_login_param.nil?
         end 
     end
@@ -676,6 +674,8 @@ module Devise
         if is_json_request?
           render :nothing => true, :status => 201 and return 
         else
+          ##this line means that we dont sign in the user
+          ##by default when he clicks the confirmation link.
           #sign_in(resource)
           self.resource = nil
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }

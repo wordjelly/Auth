@@ -130,7 +130,22 @@ module Auth::Concerns::UserConcern
 
 	    end
 
+	    ##THIS METHOD HAD TO BE OVERRIDDEN TO FIND THE 
+	    ##the user either by additional_login_param or email.
+	    def self.find_for_database_authentication(warden_conditions)
+			puts "Came to find for database authenticable"
+			conditions = warden_conditions.dup
+			if login = conditions.delete(:login)
+				login = login.downcase
+		  		where(conditions).where('$or' => [ {:additional_login_param => /^#{Regexp.escape(login)}$/i}, {:email => /^#{Regexp.escape(login)}$/i} ]).first
+			else
+		  		where(conditions).first
+			end
+  		end
+
+
 	end
+
 
 	##FOR THE LOGIN AUTHENTICATION KEY PARAMETER, WE DEFINE GETTERS AND SETTERS
 	def login=(login)
@@ -287,5 +302,7 @@ module Auth::Concerns::UserConcern
 	def additional_login_param_format
 		
 	end
+
+	
 
 end

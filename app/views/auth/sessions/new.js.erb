@@ -9,6 +9,8 @@ open_sign_in_modal_if_closed();
 
 // Initialize the validator
 try{
+	console.log("validation settings are:");
+	console.log(validation_settings);
 	var validator = new WJ_Validator(validation_settings,"materialize",true);
 }
 catch(err){

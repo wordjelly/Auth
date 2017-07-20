@@ -35,6 +35,20 @@ $(document).on('submit','#login_form',function(event){
 	return true;
 });
 
+/***
+this function should be defined before the validation settings
+and not after it.
+***/
+var user_login_validation_function = function(def,e,field_id){
+  console.log("called user login validation funciton");
+  if($("#" + field_id).val().trim().match(mobile_number_regex)){
+    return true;
+  }
+  else if($("#" + field_id).val().trim().match(email_regex)){
+    return true;
+  }
+  return false;
+}
 
 //the user login validation function is included in you_need_to_sign_in.js
 var validation_settings = {
@@ -66,16 +80,7 @@ var validation_settings = {
 }
 
 
-var user_login_validation_function = function(def,e,field_id){
-  
-  if($("#" + field_id).val().trim().match(mobile_number_regex)){
-  	return true;
-  }
-  else if($("#" + field_id).val().trim().match(email_regex)){
-  	return true;
-  }
-  return false;
-}
+
 
 
 
