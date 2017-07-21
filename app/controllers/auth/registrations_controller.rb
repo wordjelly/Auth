@@ -1,6 +1,7 @@
 class Auth::RegistrationsController < Devise::RegistrationsController
   
   after_action :check_resource_errors
+  
 
   private
 	def check_resource_errors
@@ -8,6 +9,7 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 		puts resource.errors.full_messages.to_s
 		true
 	end
-  
+  	
+  	
 
 end

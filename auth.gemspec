@@ -38,6 +38,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'remotipart', '~> 1.2', '>= 1.2.1'
   s.add_dependency 'underscore-rails'
   s.add_dependency 'hashie','3.5.1'
+  s.add_dependency 'typhoeus'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'

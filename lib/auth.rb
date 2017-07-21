@@ -16,6 +16,7 @@ require "valid_url"
 require "recaptcha/rails"
 require "mongoid_paperclip"
 require "momentjs-rails"
+require "typhoeus"
 
 module Auth
 end

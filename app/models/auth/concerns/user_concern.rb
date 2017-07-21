@@ -27,6 +27,7 @@ module Auth::Concerns::UserConcern
 		##it should be defined in the configuration.
 		##see spec/dummy/config/initializers/preinitializer.rb		
 		field :additional_login_param, 				type: String
+		field :additional_login_param_confirmed,	type: Integer, default: 0
 
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""

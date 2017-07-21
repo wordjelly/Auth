@@ -8,7 +8,10 @@
 8.a seperate confirm method will have to be used by the confirm part of the additional_login_param
 9.controller seperate for otp confirmations, and it will have to be serving the part where we verify the otp
 10.shift the email_required? to the user_concern
-11.
+11.the css label in the login form for login => which says "email or mobile" , will have to be customizable from the user side.
+12.update credential exists function to deal with 
+13.if he changes both, email and mobile, then suppose he confirms the mobile and signs in,then he tries to confirm the email, what happens
+
 
 
 ##FURTHERMORE THE CHANGES IN THE CONFIRMABLE MODULE WILL ALSO HAVE TO BE CHANGED.
