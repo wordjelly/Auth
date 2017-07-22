@@ -28,7 +28,8 @@ module Auth::Concerns::UserConcern
 		##see spec/dummy/config/initializers/preinitializer.rb		
 		field :additional_login_param, 				type: String
 		field :additional_login_param_confirmed,	type: Integer, default: 0
-
+		
+		
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
 		###ENDS.
@@ -133,6 +134,7 @@ module Auth::Concerns::UserConcern
 
 	    ##THIS METHOD HAD TO BE OVERRIDDEN TO FIND THE 
 	    ##the user either by additional_login_param or email.
+	    ##provide additional condition that the confirmed must be true.
 	    def self.find_for_database_authentication(warden_conditions)
 			puts "Came to find for database authenticable"
 			conditions = warden_conditions.dup
@@ -144,6 +146,9 @@ module Auth::Concerns::UserConcern
 			end
   		end
 
+
+  		##override active_for_authentication? to say true if additional login param is confirmed.
+  		
 
 	end
 

@@ -46,6 +46,8 @@ module Auth
     attr_accessor :auth_resources
     attr_accessor :enable_sign_in_modals
     attr_accessor :recaptcha
+    attr_accessor :redis_config_file_location
+    attr_accessor :third_party_api_keys
    
 
     def initialize
@@ -55,6 +57,8 @@ module Auth
       @auth_resources = {}
       @enable_sign_in_modals = true
       @recaptcha = true
+      @redis_config_file_location = nil
+      @third_party_api_keys = {}
     end
   end
   
