@@ -28,7 +28,7 @@ module Auth::Concerns::UserConcern
 		##see spec/dummy/config/initializers/preinitializer.rb		
 		field :additional_login_param, 				type: String
 		field :additional_login_param_confirmed,	type: Integer, default: 0
-		
+
 		
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
@@ -146,9 +146,16 @@ module Auth::Concerns::UserConcern
 			end
   		end
 
-
-  		##override active_for_authentication? to say true if additional login param is confirmed.
   		
+  		##override active_for_authentication? to say true if additional login param is confirmed.
+		def active_for_authentication?
+			##if additional_login_param is confirmed and 
+			if additional_login_param_confirmed == 1
+				true
+			else
+				super
+			end
+		end  		
 
 	end
 

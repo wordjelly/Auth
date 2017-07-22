@@ -17,6 +17,8 @@ require "recaptcha/rails"
 require "mongoid_paperclip"
 require "momentjs-rails"
 require "typhoeus"
+require "redis"
+require "active_job"
 
 module Auth
 end
