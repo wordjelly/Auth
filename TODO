@@ -11,8 +11,13 @@
 11.the css label in the login form for login => which says "email or mobile" , will have to be customizable from the user side.
 12.update credential exists function to deal with 
 13.if he changes both, email and mobile, then suppose he confirms the mobile and signs in,then he tries to confirm the email, what happens
-
-
-
-##FURTHERMORE THE CHANGES IN THE CONFIRMABLE MODULE WILL ALSO HAVE TO BE CHANGED.
+14.on selecting autocomplete from drop-down , validation does not occur.
+15.shift devise mailer to sidekiq
+16.additional param name e.g mobile should be visible in all forms.
+17.if they sign up with oauth, how to handle mobile number verification.
+18.test modal flow when updating mobile number, because then it has to start from triggering first the send_sms_otp and then everthing else.
+19.resend otp option.
+20.show counter while waiting for otp to be seeen.
+21.what if he clicks forgot password , without verifying the otp.
+22.what about forgot password if email is verified but not otp.(so we will have to give option to select whether he wants recovery by email or password.)
 

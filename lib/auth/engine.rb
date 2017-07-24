@@ -1,6 +1,6 @@
 require "auth/omniauth/path"
 require "auth/rails/routes"
-
+require "auth/two_factor_otp"
 
 module Auth
   class Engine < ::Rails::Engine

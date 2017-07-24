@@ -27,7 +27,11 @@ module Auth::Concerns::UserConcern
 		##it should be defined in the configuration.
 		##see spec/dummy/config/initializers/preinitializer.rb		
 		field :additional_login_param, 				type: String
-		field :additional_login_param_confirmed,	type: Integer, default: 0
+		##three possibilities
+		##"pending_confirmation"
+		##"confirmed"
+		##"unconfirmed"
+		field :additional_login_param_status,	type: String, default: "unconfirmed"
 
 		
 		field :name,				type: String, default: ""
@@ -150,7 +154,7 @@ module Auth::Concerns::UserConcern
   		##override active_for_authentication? to say true if additional login param is confirmed.
 		def active_for_authentication?
 			##if additional_login_param is confirmed and 
-			if additional_login_param_confirmed == 1
+			if additional_login_param_status == "confirmed"
 				true
 			else
 				super

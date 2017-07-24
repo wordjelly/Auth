@@ -18,7 +18,7 @@ mark_all_input_fields_valid();
 		window.location.href = "<%= profile_path(resource.id) %>";
 	}
 	else{
-		$("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/sign_up_success_inactive_content.html.erb', locals: {name: resource.name, email: resource.email}) %>").show();
+		$("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/sign_up_success_inactive_content.html.erb', locals: {res: resource}) %>").show();
 		$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb') %>").show();
 		$("#show_sign_up").hide();
 		$("#forgot_password").hide();

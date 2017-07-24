@@ -2,7 +2,8 @@ class User
   include Mongoid::Document
   include Auth::Concerns::UserConcern
   include Auth::Concerns::SmsOtpConcern
-  
+  include Auth::TwoFactorOtp
+
   field :name, type: String
   field :dog, type: String
 
@@ -18,7 +19,32 @@ class User
   	end
   end 
 
-  
+  ################
+  ##
+  ## OVERRIDE SMS OTP METHODS
+  ## auth/app/models/auth/concerns/sms_otp_concern.rb
+  ## 
+  ################
 
+  def send_sms_otp
+    ##The super tap just sets the additional_param_confirmed
+    ##to 0 i.e unconfirmed.
+    
+      auth_gen(self.id,self.additional_login_param)
+    
+  end
+
+  def verify_sms_otp(user_provided_otp)
+    
+      verify(self.class,self.id,user_provided_otp)
+    
+  end
+
+  ##############
+  ##
+  ##
+  ## END OVERRIDE.
+  ##
+  ###############
 
 end
