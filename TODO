@@ -20,4 +20,6 @@
 20.show counter while waiting for otp to be seeen.
 21.what if he clicks forgot password , without verifying the otp.
 22.what about forgot password if email is verified but not otp.(so we will have to give option to select whether he wants recovery by email or password.)
+23.change uniqueness vaildation for additional_login_param to check that it is also confirmed.
+24.resend otp for mobile confirmation, should be seen in the settings page.
 

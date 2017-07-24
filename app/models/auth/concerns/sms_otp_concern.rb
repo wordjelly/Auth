@@ -7,6 +7,7 @@ module Auth::Concerns::SmsOtpConcern
 		after_save :deconfirm_additional_param, if: :additional_login_param_changed?
 		after_save :send_sms_otp, if: :additional_login_param_changed?
 		attr_accessor :otp
+		
 		def deconfirm_additional_param
 			##this is assumed as pending because we dont know exactly when the remote job will send the sms
 			##so we set this as pending.

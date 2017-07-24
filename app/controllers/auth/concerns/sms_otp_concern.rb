@@ -3,10 +3,8 @@ module Auth::Concerns::SmsOtpConcern
   extend ActiveSupport::Concern
 
   included do
-    
+   
   end
-
-  
 
   ##
   ## All the methods listed below 
@@ -21,8 +19,8 @@ module Auth::Concerns::SmsOtpConcern
   ##ideally should do the foloowing in the end
   ##json will never be involved with this action.
   ##render_partial -> whatever.
-  def show_otp_input_modal
-
+  def new_otp_input
+  	
   end
 
   ##sends the sms otp
@@ -50,6 +48,6 @@ module Auth::Concerns::SmsOtpConcern
   	
   end
 
-  
+	  
 
 end

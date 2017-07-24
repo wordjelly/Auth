@@ -25,6 +25,6 @@ Rails.application.routes.draw do
   ##sms_otp_concern in the confirmations_controller, and the model.
   get "verify_otp", :action => "verify_otp", :controller => "users/confirmations"
   get "send_sms_otp", :action => "send_sms_otp", :controller => "users/confirmations"
-  get "request_otp_input", :action => "request_otp_input", :controller => "users/confirmations"
+  get "new_otp_input", :action => "new_otp_input", :controller => "users/confirmations"
 
 end

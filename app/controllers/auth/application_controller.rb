@@ -33,6 +33,12 @@ module Auth
 
 	 end
 
+	 ##CURRENTLY BEING USED IN THE DUMMY APP IN ITS USERS/CONFIRMATIONS_CONTROLLER
+	 ##RENDERS A NOT FOUND RESPONSE, in case the user is not found.
+	 def not_found
+	 	  raise ActionController::RoutingError.new('Not Found')
+	 end
+
 	 protected 
 
 	 def check_method_missing
