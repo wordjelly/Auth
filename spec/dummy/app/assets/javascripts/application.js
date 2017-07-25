@@ -11,6 +11,7 @@
 // about supported directives.
 
 //= require jquery
+//= require pollymer.min.js
 //= require jquery_ujs
 //= require_tree .
 
@@ -83,6 +84,12 @@ var validation_settings = {
   }
 }
 
+
+//behaviour of the login_form when submitting the additional_login_parameter
+//for verification.
+$(document).on('click','#otp_submit',function(event){
+  $("#otp_form").submit();
+});
 
 
 

@@ -32,6 +32,7 @@ module Auth
 		end
 
 		def verify(resource_class,resource_id,user_provided_otp)
+			puts "came to verify the otp."
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
 				log_error_to_redis(resource_id,"no api key found for two_factor_sms_otp")
 			else
@@ -46,7 +47,11 @@ module Auth
 							##suppose here we say additional parameter confirmed
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
-							resource_class.find(resource_id).additional_param_confirmed = 1
+							resource = resource_class.find(resource_id)
+							puts "Resource is found inside the verify call:"
+							puts resource.to_s
+							resource.additional_login_param_status = 2
+							resource.save
 							clear_redis_user_otp_hash(resource_id)
 						else
 							log_error_to_redis(resource_id,response_body[:Details])
@@ -59,6 +64,7 @@ module Auth
 		end
 
 		def log_error_to_redis(resource_id,error)
+			puts "redis error is:#{error}"
 			$redis.hset(resource_id.to_s + "_two_factor_sms_otp","error",error)
 		end
 

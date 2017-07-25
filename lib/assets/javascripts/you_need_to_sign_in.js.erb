@@ -326,30 +326,45 @@ $(document).on('click','#submit',function(event){
 		//the url should be 
 		$("#login_form").attr("action","/" + resource + "/sign_in");
 		$("#login_submit").val("Log In");
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;
 	}
 	else if(login_type == "Forgot Password"){
 		console.log("got the forgot password login type.");
 		$("#login_form").attr("action","/" + resource + "/password");
 		$("#login_submit").val("Send me reset password instructions");
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;
 	}
 	else if(login_type == "Resend Confirmation Email"){
 		$("#login_form").attr("action","/" + resource + "/confirmation");
 		$("#login_submit").val("Resend confirmation instructions");	
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;
 	}
 	else if(login_type == "Sign Up"){
 		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Sign Up");
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;
 	}
 	else if(login_type == "Edit Account Settings"){
 		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Update");
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;
 	}
-
-	event.preventDefault();
-	event.stopPropagation();
-	$("#login_submit").trigger("click");
-	//$("#login_form").submit();
-	return false;
+	
 });
 
 /***

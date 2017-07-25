@@ -146,7 +146,7 @@ module Auth::Concerns::UserConcern
 			conditions = warden_conditions.dup
 			if login = conditions.delete(:login)
 				login = login.downcase
-		  		where(conditions).where('$or' => [ {:additional_login_param => /^#{Regexp.escape(login)}$/i}, {:email => /^#{Regexp.escape(login)}$/i} ]).first
+		  		where(conditions).where('$or' => [ {:additional_login_param => /^#{Regexp.escape(login)}$/i, :additional_login_param_status => 2}, {:email => /^#{Regexp.escape(login)}$/i} ]).first
 			else
 		  		where(conditions).first
 			end
@@ -156,7 +156,7 @@ module Auth::Concerns::UserConcern
   		##override active_for_authentication? to say true if additional login param is confirmed.
 		def active_for_authentication?
 			##if additional_login_param is confirmed and 
-			if additional_login_param_status == "confirmed"
+			if additional_login_param_status == 2
 				true
 			else
 				super

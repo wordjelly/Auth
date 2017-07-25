@@ -23,3 +23,8 @@
 23.change uniqueness vaildation for additional_login_param to check that it is also confirmed.
 24.resend otp for mobile confirmation, should be seen in the settings page.
 
+25.doctor -> enters patient's mobile number -> patient gets a otp,temporary password -> doctor enter's otp -> account is verified -> doctor adds tests to patients account,also permitted to view tests of earlier visits.
+
+26.reception -> enter's patients mobile number -> same flow as before.
+
+27.collection boy in doctor's office -> enter's patients email/mobile number -> 

@@ -11,7 +11,7 @@ mark_all_input_fields_valid();
 		<% end %>
 	<% end %>
 <% else %>
-	$("#login_title").html("Sign Up Successfull");
+	
 	var resource_active = "<%= resource.active_for_authentication? %>";
 	var additional_login_param_status_pending = "<%= resource.additional_login_param_status == 1 %>";
 	if(resource_active === "true"){
@@ -19,19 +19,22 @@ mark_all_input_fields_valid();
 		window.location.href = "<%= profile_path(resource.id) %>";
 	}
 	else{
-		console.log(additional_login_param_status_pending);
+		//this needs to be written in the dummy app,
+		//depending on what is the additional-login_param
+		$("#login_title").html("Verify your Account");
 		if(additional_login_param_status_pending === "true"){
-			$("#sign_in_inputs").html("<%= escape_javascript(render partial: 'auth/modals/new_otp_input.html.erb', locals: {resource: resource}) %>").show();
-			$("#sign_up_inputs").hide();
+			
+			$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_verification_partial], locals: {resource: resource}) %>").show();
+			//$("#sign_up_inputs").hide();
 			$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb', locals: {resource: resource}) %>").show();
 			$("#show_sign_up").hide();
 			$("#forgot_password").hide();
 			$("#resend_confirmation_email").hide();
-			
+
 		}
 		else
 		{   
-			console.log("executing this code as well");
+			
 			$("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/sign_up_success_inactive_content.html.erb', locals: {resource: resource}) %>").show();
 			$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb') %>").show();
 			$("#show_sign_up").hide();

@@ -23,7 +23,11 @@ Rails.application.routes.draw do
 
   ##need to add the routes for sms otp in case you are using the 
   ##sms_otp_concern in the confirmations_controller, and the model.
-  get "verify_otp", :action => "verify_otp", :controller => "users/confirmations"
+  #devise_scope :user do
+  #  get "/verify_otp" => "users/confirmations#verify_otp"
+  #end
+  get "otp_verification_result", :action => "otp_verification_result", :controller => "otp"
+  get "verify_otp", :action => "verify_otp", :controller => "otp"
   get "send_sms_otp", :action => "send_sms_otp", :controller => "users/confirmations"
   get "new_otp_input", :action => "new_otp_input", :controller => "users/confirmations"
 

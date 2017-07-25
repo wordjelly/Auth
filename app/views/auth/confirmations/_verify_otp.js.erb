@@ -1,0 +1,30 @@
+$("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/verify_otp.html.erb') %>");
+(function poll(counter){
+   setTimeout(function(){
+      $.ajax({ 
+      	data: {resource_id : "<%= resource.id.to_s %>"},
+      	url: "/otp_verification_result", 
+      	success: function(data){
+	        if(counter == null){
+	        	counter = 0;
+	        }
+	        counter++;
+	 		console.log("data returned was:");
+	 		console.log(data);	
+	        if(data["verified"] == true){
+	        	$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.")
+	        }
+		        else{
+
+		        if(counter < 10){
+		        	poll(counter);
+		   		}
+		   		else{
+		   			//do the failure function result.
+		   		}
+	   		}
+      	},
+      	dataType: "json"
+      });
+  }, 3000);
+})();

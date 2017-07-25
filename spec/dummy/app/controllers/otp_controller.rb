@@ -1,4 +1,5 @@
-class Users::ConfirmationsController < Devise::ConfirmationsController
+class OtpController < ApplicationController
+
 	include Auth::Concerns::ControllerSmsOtpConcern
 	  
 	  respond_to :html,:js,:json
@@ -28,13 +29,18 @@ class Users::ConfirmationsController < Devise::ConfirmationsController
 	  ##GET /verify_otp?resource_id=xyz&otp=1234
 	  def verify_otp
 	  	resource = User.find(params[:resource_id]) or not_found
-	  	resource.verify_sms_otp(user_provided_otp)
+	  	resource.verify_sms_otp(params[:otp])
 	  	respond_to do |format|
   		  format.json {render json: resource}
-  		 ##format.js   {render :partial => ""}
+  		  format.js   {render "auth/confirmations/_verify_otp.js.erb", locals: {resource: resource}}
   		end
 	  end
 
+
+	  def otp_verification_result
+	  	resource = User.find(params[:resource_id]) or not_found
+	  	respond_with({:verified => (resource.additional_login_param_status == 2)})
+	  end
 
 
 end
