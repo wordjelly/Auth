@@ -13,7 +13,9 @@ module Auth
 				response = Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource_phone_number}/AUTOGEN")
 				if response.code == 200
 					puts "--response code is 200"
-					response_body = JSON.parse(response.body)
+					response_body = JSON.parse(response.body).symbolize_keys
+					puts "---response body is:"
+					puts response_body.to_s
 					if response_body[:Status] == "Success"
 						puts "--response status is success"
 						$redis.hset(resource_id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
@@ -39,7 +41,7 @@ module Auth
 				else
 					response = Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{user_provided_otp}")
 					if response.code == 200
-						response_body = JSON.parse(response.body)
+						response_body = JSON.parse(response.body).symbolize_keys
 						if response_body[:Status] == "Success"
 							##suppose here we say additional parameter confirmed
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,

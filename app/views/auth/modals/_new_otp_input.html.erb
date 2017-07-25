@@ -1,19 +1,5 @@
- <!-- REGISTRATION FORM. -->
-<% if !resource.nil? %>
-	<%= form_for(resource, as: resource.class.name.underscore, url: verify_otp_path, remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}) do |f| %>
-	<div class="row" id="otp_inputs">
-	  <div class="col l8 m10 s10 offset-l2 offset-m1 offset-s1">
-	   	
-	    <div class="input-field">
-		    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[otp]" id="<%= resource.class.name.downcase %>_otp">
-		    <label for="<%= resource.class.name.downcase %>_otp" class="">Enter the OTP sent on your mobile</label>
-		</div>
-	    <div class="m-50-top row m-0-left m-0-right m-0-bottom" id="oauth_and_submit">
-	    	<i class="mdi-hardware-keyboard-tab grey-text right cursor-pointer" style="height:60px; width:60px; border:1px solid #9e9e9e; border-radius:5px; font-size:1.8em; padding-top:0.75rem; text-align:center;" id="submit_icon"></i>
-	    </div>
-	  </div>
-	</div>
-	<%= f.submit "Log In",  id: "login_submit", style: "display:none;" %>
-	<% end %>
-	Resend Otp
-<% end %>
+A SMS with an One-Time-Password was sent to <%= resource.additional_login_param %>. Please enter it below to complete verification.
+<div class="input-field">
+    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[otp]" id="<%= resource.class.name.downcase %>_otp">
+    <label for="<%= resource.class.name.downcase %>_otp" class="">Enter the OTP sent on your mobile</label>
+</div>

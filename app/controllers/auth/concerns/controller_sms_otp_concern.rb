@@ -1,4 +1,4 @@
-module Auth::Concerns::SmsOtpConcern
+module Auth::Concerns::ControllerSmsOtpConcern
 
   extend ActiveSupport::Concern
 

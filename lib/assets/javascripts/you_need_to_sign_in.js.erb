@@ -157,8 +157,7 @@ var credential_exists = function(def,e,field_id){
 		"data":{
 			"credential":{
 				"resource":resource,
-				"email":$("#" + field_id).val(),
-				"aufbau":"dog"
+				"email":$("#" + field_id).val()
 			}
 		}
 	}
@@ -173,9 +172,12 @@ var toggle_sign_up_validation = function(login_text){
       	}
       ];
       //remove the remote from the user_email part.
+      
       validation_settings["login_form"]["user_login"]["validate_with"] = _.filter(validation_settings["login_form"]["user_login"]["validate_with"],function(n){
       	return !("remote" in n);
       });
+      
+      
 	}
 	else
 	{
@@ -189,10 +191,14 @@ var toggle_sign_up_validation = function(login_text){
       	 "field_array":["user_password_confirmation"]
       	}
       ];
+      
+      
       validation_settings["login_form"]["user_login"]["validate_with"].push({
       	"remote" : "true",
       	"ajax_settings" : credential_exists
-      })  
+      });
+      
+      
 	}
 	validator = new WJ_Validator(validation_settings,"materialize",true);
 }
@@ -342,6 +348,7 @@ $(document).on('click','#submit',function(event){
 	event.preventDefault();
 	event.stopPropagation();
 	$("#login_submit").trigger("click");
+	//$("#login_form").submit();
 	return false;
 });
 

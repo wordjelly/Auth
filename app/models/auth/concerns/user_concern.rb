@@ -27,11 +27,13 @@ module Auth::Concerns::UserConcern
 		##it should be defined in the configuration.
 		##see spec/dummy/config/initializers/preinitializer.rb		
 		field :additional_login_param, 				type: String
+		
 		##three possibilities
-		##"pending_confirmation"
-		##"confirmed"
-		##"unconfirmed"
-		field :additional_login_param_status,	type: String, default: "unconfirmed"
+		##"pending" 1
+		##"confirmed" 2
+		##"unconfirmed" 0 
+		field :additional_login_param_status,	type: Integer, default: 0
+
 
 		
 		field :name,				type: String, default: ""
@@ -140,7 +142,7 @@ module Auth::Concerns::UserConcern
 	    ##the user either by additional_login_param or email.
 	    ##provide additional condition that the confirmed must be true.
 	    def self.find_for_database_authentication(warden_conditions)
-			puts "Came to find for database authenticable"
+			
 			conditions = warden_conditions.dup
 			if login = conditions.delete(:login)
 				login = login.downcase

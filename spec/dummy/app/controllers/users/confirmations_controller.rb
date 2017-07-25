@@ -1,5 +1,5 @@
 class Users::ConfirmationsController < Devise::ConfirmationsController
-	include Auth::Concerns::SmsOtpConcern
+	include Auth::Concerns::ControllerSmsOtpConcern
 	  
 	  respond_to :html,:js,:json
 

@@ -1,2 +1,6 @@
-<h5 class="teal-text center text-darken-3 fw-200">Hi <%= res.name %> We sent an email with a confirmation link to <span class="teal-text text-darken-4"><%= res.email %></span></h4>
-<h5 class="teal-text center text-darken-3 fw-200">Please click on the link to activate your account.</h4>
+<% if resource.additional_login_param_status == 1 %>
+	<%= render 'auth/modals/new_otp_input.html.erb', locals: {:resource => resource} %>
+<% else %>
+	<h5 class="teal-text center text-darken-3 fw-200">Hi <%= resource.name %> We sent an email with a confirmation link to <span class="teal-text text-darken-4"><%= resource.email %></span></h4>
+	<h5 class="teal-text center text-darken-3 fw-200">Please click on the link to activate your account.</h4>
+<% end %>

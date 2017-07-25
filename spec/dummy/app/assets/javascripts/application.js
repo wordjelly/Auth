@@ -28,11 +28,15 @@ if it doesnt match, then makes the hidden field user[email]
 then returns true.
 ***/
 $(document).on('submit','#login_form',function(event){
-	var user_login = $("#user_login").val().trim();
-	var hidden_field_name = null;
-	hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
-	$(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
-	return true;
+    var current_screen = $('#login_title').text();
+    if(current_screen == "Sign Up"){
+      //if the title of the form is sign_up then do this.
+      var user_login = $("#user_login").val().trim();    
+      var hidden_field_name = null;
+      hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
+      
+      $(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
+    }
 });
 
 /***
@@ -40,7 +44,7 @@ this function should be defined before the validation settings
 and not after it.
 ***/
 var user_login_validation_function = function(def,e,field_id){
-  console.log("called user login validation funciton");
+ 
   if($("#" + field_id).val().trim().match(mobile_number_regex)){
     return true;
   }
