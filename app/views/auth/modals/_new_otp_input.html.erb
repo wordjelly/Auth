@@ -2,9 +2,9 @@ A SMS with an One-Time-Password was sent to <%= resource.additional_login_param 
 <% if !resource.nil? %>
 	<%= form_for(resource, as: resource.class.name.underscore, url: verify_otp_path, remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
 	<div class="input-field">
-	    <input autofocus="autofocus" type="text" value="" name="otp" id="otp">
-	    <label for="otp" class="">Enter the OTP sent on your mobile</label>
-	    <input type="hidden" value="<%= resource.id.to_s %>" name="resource_id" id="resource_id"></input>
+	    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[otp]" id="<%= resource.class.name.downcase %>_otp">
+	    <label for="<%= resource.class.name.downcase %>_otp" class="">Enter the OTP sent on your mobile</label>
+	    <input type="hidden" value="<%= resource.additional_login_param %>" name="<%= resource.class.name.downcase %>[additional_login_param]" id="<%= resource.class.name.downcase %>_additional_login_param"></input>
 	</div>
 	<%= f.submit "Log In",  id: "otp_form_submit", style: "display:none;" %>
 	<% end %>

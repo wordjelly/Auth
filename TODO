@@ -28,3 +28,5 @@
 26.reception -> enter's patients mobile number -> same flow as before.
 
 27.collection boy in doctor's office -> enter's patients email/mobile number -> 
+
+28.the fields do not match thing gets triggered in the sign in form, if after registering a new user, we go back to the sign in form.

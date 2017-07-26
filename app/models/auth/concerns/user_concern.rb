@@ -33,9 +33,6 @@ module Auth::Concerns::UserConcern
 		##"confirmed" 2
 		##"unconfirmed" 0 
 		field :additional_login_param_status,	type: Integer, default: 0
-
-
-		
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
 		###ENDS.

@@ -28,9 +28,9 @@ class User
   def send_sms_otp
     ##The super tap just sets the additional_param_confirmed
     ##to 0 i.e unconfirmed.
-      #puts "sending sms otp"
       auth_gen(self.id,self.additional_login_param)
-    
+      self.skip_send_sms_otp_callback = true
+      self.save 
   end
 
   def verify_sms_otp(user_provided_otp)

@@ -5,10 +5,13 @@ module Auth::Concerns::SmsOtpConcern
 	included do 
 
 		
-		after_save :deconfirm_additional_param, if: :additional_login_param_changed?
-		after_save :send_sms_otp, if: :additional_login_param_changed?
-		
 		attr_accessor :otp
+		attr_accessor :skip_send_sms_otp_callback
+		after_save :deconfirm_additional_param, if: :param_changed_and_dont_skip
+		after_save :send_sms_otp, if: :param_changed_and_dont_skip
+		
+
+
 			
 		
 
@@ -19,7 +22,7 @@ module Auth::Concerns::SmsOtpConcern
 			##as follows
 			##self.additional_login_param_status = "unconfirmed"
 			##so now it is directly pending.
-			puts "deconfirming."
+			puts "deconfirming"
 			self.additional_login_param_status = 1
 		end
 		
@@ -31,6 +34,12 @@ module Auth::Concerns::SmsOtpConcern
 		##overridden in the model that implements this concern,
 		def verify_sms_otp
 			
+		end
+
+		private 
+
+		def param_changed_and_dont_skip
+			additional_login_param_changed? && (skip_send_sms_otp_callback.nil?)
 		end
 
 	end
