@@ -1,5 +1,5 @@
 class Auth::RegistrationsController < Devise::RegistrationsController
-  
+  include Auth::Concerns::ControllerAdditionalLoginParamConcern
   after_action :check_resource_errors
   
 

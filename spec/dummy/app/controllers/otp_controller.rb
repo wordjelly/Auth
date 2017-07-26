@@ -21,8 +21,16 @@ class OtpController < Auth::ApplicationController
 
 	  ##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
 	  def resend_sms_otp
-	  	resource_name_pluralized = permitted_params[:resource_name_pluralized]
-	  	resource = Object.const_get(resource_name_pluralized.singularize.capitalize).new
+	  	if resource_collection_path = permitted_params[:resource_collection_path]
+	  		resource_pluralized = nil
+	  		resource_collection_path.scan(/\/(?<resource_pluralized>[a-z]+)/) do |n|
+	  			jj = Regexp.last_match
+	  			resource_pluralized = jj[:resource_pluralized]
+	  		end
+	  		resource = Object.const_get(resource_pluralized.singularize.capitalize).new
+	  	else
+	  		not_found
+	  	end
 	  	respond_to do |format|
   		  format.json {head :ok }
   		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource}}
@@ -56,7 +64,7 @@ class OtpController < Auth::ApplicationController
 
 	  def permitted_params
 	  	if action_name == "resend_sms_otp"
-	  		params.permit(:resource_name_pluralized)
+	  		params.permit(:resource_collection_path)
 	  	else
 	  		params.fetch(:user,{}).permit(:additional_login_param,:otp)
 	  	end

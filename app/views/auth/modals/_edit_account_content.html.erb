@@ -25,13 +25,28 @@
 		            </input>
 		            <label for="<%= resource.class.name.downcase %>_password_confirmation">Confirm New Password</label>
 		          </div>
-
+		          <!--- -->
+		           
+		          <% if !Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_name].nil? %>
+				    <div class="input-field m-50-top">
+			            <input id="<%= resource.class.name.downcase %>_additional_login_param" type="text" name="<%= resource.class.name.downcase %>[additional_login_param]"  class="virgin" value="<%= 
+			            if !resource.additional_login_param.nil?
+			            	resource.additional_login_param
+			            end
+			             %>">
+			            </input>
+			            <label for="<%= resource.class.name.downcase %>_additional_login_param">Mobile Number</label>
+			         </div>
+				  <% end %>
+		          <!--- -->
 		          <div class="input-field m-50-top">
 		            <input id="<%= resource.class.name.downcase %>_current_password" type="password" name="<%= resource.class.name.downcase %>[current_password]"  class="virgin">
 		            </input>
 		            <label for="<%= resource.class.name.downcase %>_current_password">Your Current Password</label>
 		          </div>
 	          <% end %>
+	          <!-- add the field for the additional_login_param -->
+	          
 	          <%= render 'auth/modals/oauth_and_submit.html.erb' %>
 
 		  </div>

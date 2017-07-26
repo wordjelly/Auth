@@ -38,8 +38,14 @@ module Auth::Concerns::SmsOtpConcern
 
 		private 
 
+		##only do the callbacks if
+		##1.the param has changed
+		##AND
+		##2.we dont want to explicitly skip the callback.
+		##AND
+		##3.the new param is not blank.(we dont want to send sms otp verification to a non-existent number)
 		def param_changed_and_dont_skip
-			additional_login_param_changed? && (skip_send_sms_otp_callback.nil?)
+			additional_login_param_changed? && (skip_send_sms_otp_callback.nil?) && !additional_login_param.blank?
 		end
 
 	end

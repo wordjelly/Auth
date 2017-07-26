@@ -3,50 +3,34 @@ module Auth::Concerns::ControllerSmsOtpConcern
   extend ActiveSupport::Concern
 
   included do
-   
+      
+    ##CALLED WHEN THE USER HAS ENTERED HIS MOBILE NUMBER, SO THAT HE GETS ANOTHER OTP
+    def send_sms_otp
+      
+    end
+
+
+    ##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
+    def resend_sms_otp
+      
+    end
+
+    ##CALLED WHEN THE USER ENTERS THE OTP SENT ON HIS MOBILE
+    ##VERIFIES THE OTP WITH THE THIRD PARTY API.
+    def verify_otp
+      
+    end
+
+
+    ##SHORT-POLLING ENDPOINT TO DETERMINE IF THE OTP WAS VALID.
+    ##CALLED IN THE POST-VERIFICATION PAGE.
+    def otp_verification_result
+      
+    end
+
+
   end
 
-  ##
-  ## All the methods listed below 
-  ## are to be overriden in the confirmations controller
-  ## of the daughter app, after including this concern,
-  ## as well as the models/concerns/sms_otp_concern, in the 
-  ## relevant user model
-  ##
-  ## also add a permitted params 
-
-  ##GET /request_otp_input?resource_id=xyz, renders the otp modal.
-  ##ideally should do the foloowing in the end
-  ##json will never be involved with this action.
-  ##render_partial -> whatever.
-  def new_otp_input
-  	
-  end
-
-  ##sends the sms otp
-  ##GET /send_sms_otp?resource_id=xyz
-  ##first send the sms otp and then
-  ##here the json will still work.
-  ##respond_with (user, location: request_otp_input_path(resource_id))
-  def send_sms_otp
-
-  end
-
-
-  ##GET /verify_otp?resource_id=xyz&otp=1234
-  ##first verify , then 
-  ##something like this
-  ##
-  ##respond_to do |format|
-  ##  format.html {render_partial(this can be a js erb, designed to do the polling) :verify_otp}
-  ##  format.json {render json: @picture}
-  ##  format.xml {render xml: @picture}
-  ##end
-  ##
-  ##
-  def verify_otp
-  	
-  end
 
 	  
 

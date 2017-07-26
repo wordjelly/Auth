@@ -69,9 +69,16 @@ module Auth::Concerns::UserConcern
 	      	devise :validatable
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
 	      	validates_uniqueness_of :additional_login_param, allow_blank: true, if: :additional_login_param_changed?
-            #validates_format_of     :additional_login_param, with: :additional_login_param_format, allow_blank: true, if: :additional_login_param_changed?
-            #, :if => proc { additional_login_param_changed? && !additional_login_param.blank? }
+            
 	        validate :additional_login_param_format, if: :additional_login_param_changed? 
+
+	        ##VALIDATIONS TO BE DONE ONLY ON UPDATE
+	        validate :additional_login_param_changed_on_unconfirmed_email, :on => :update
+	        validate :email_changed_on_unconfirmed_additional_login_param, :on => :update
+	        validate :email_and_additional_login_param_both_changed, :on => :update
+
+	        
+
 	        field :remember_created_at, type: Time
 	  	  end
 
@@ -175,6 +182,11 @@ module Auth::Concerns::UserConcern
 
 	##reset the auth token if the email or password changes.
 	def email=(email)
+		super
+		reset_token
+	end
+
+	def additional_login_param=(additional_login_param)
 		super
 		reset_token
 	end
@@ -319,6 +331,45 @@ module Auth::Concerns::UserConcern
 		
 	end
 
-	
+
+	##USED AFTER UPDATE IN THE UPDATE.JS.ERB
+	##IF EMAIL IS PRESENT, THEN CHECKS IF CONFIRMED? IS TRUE
+	##AND IF 
+	def authentication_keys_confirmed?
+
+		email_confirmation_result = self.email.nil? ? true : (!self.pending_reconfirmation?)
+
+		puts "self.email.nil? #{self.email.nil?}"
+		puts "pending reconfirmation: #{self.pending_reconfirmation?}"
+		puts "email result: #{email_confirmation_result}"
+
+		puts "email confirmation result is: #{email_confirmation_result}"
+		additional_login_param_confirmation_result = 
+		self.additional_login_param.nil? ? true : self.additional_login_param_status == 2
+		puts "additional login param conf result : #{additional_login_param_confirmation_result}"
+		return email_confirmation_result && additional_login_param_confirmation_result
+	end
+
+	##if you change the additional login param while the email is either blank or not confirmed, you will get a validation error on additional_login_param
+	def additional_login_param_changed_on_unconfirmed_email
+		if additional_login_param_changed?  && (email.blank? || self.pending_reconfirmation?)
+			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]}")
+		end
+	end
+
+	##if you change the email while the additional login param is blank or not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
+	def email_changed_on_unconfirmed_additional_login_param
+		if email_changed? && (additional_login_param.blank? || additional_login_param_status != 2) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
+			errors.add(:email, "Please add or verify your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} before changing your email id")
+		end
+	end
+
+	##now what if both have changed?
+	def email_and_additional_login_param_both_changed
+		##add error saying you cannot change both at the same time.
+		if email_changed? && additional_login_param_changed?
+			errors.add(:email,"you cannot change your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
+		end
+	end
 
 end

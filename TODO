@@ -30,3 +30,5 @@
 27.collection boy in doctor's office -> enter's patients email/mobile number -> 
 
 28.the fields do not match thing gets triggered in the sign in form, if after registering a new user, we go back to the sign in form.
+
+29.variabilize the js_erb partials for the whole otp_controller.

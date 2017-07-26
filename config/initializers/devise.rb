@@ -674,10 +674,14 @@ module Devise
         if is_json_request?
           render :nothing => true, :status => 201 and return 
         else
-          ##this line means that we dont sign in the user
-          ##by default when he clicks the confirmation link.
-          #sign_in(resource)
-          self.resource = nil
+          ##when we have first signed into the accoutn, and then we want to change the email, then when we click the confirmation link for the new email, in that case, we cannot set the resource to nil, since the user is already signed in, so we do this check to see if who we have signed in , is the same as the user who has confirmed, and in that case, we just let things proceed.
+          current_resource = self.send("current_#{self.resource.class.name.downcase.to_s}")
+          
+          if current_resource && (current_resource.id.to_s == self.resource.id.to_s)
+
+          else
+            self.resource = nil
+          end
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
         end
       else
