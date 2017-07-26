@@ -28,7 +28,7 @@ Rails.application.routes.draw do
   #end
   get "otp_verification_result", :action => "otp_verification_result", :controller => "otp"
   get "verify_otp", :action => "verify_otp", :controller => "otp"
-  get "send_sms_otp", :action => "send_sms_otp", :controller => "users/confirmations"
-  get "new_otp_input", :action => "new_otp_input", :controller => "users/confirmations"
+  get "send_sms_otp", :action => "send_sms_otp", :controller => "otp"
+  get "resend_sms_otp", :action => "resend_sms_otp", :controller => "otp"
 
 end

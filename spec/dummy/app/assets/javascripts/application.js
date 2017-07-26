@@ -91,7 +91,18 @@ $(document).on('click','#otp_submit',function(event){
   $("#otp_form").submit();
 });
 
+$(document).on('click',
+  '#additional_login_param_resend_confirmation_message'
+  ,function(event){
+    //the resource is set in the engine's you_need_to_sign_in.js.
+    //it gets set whenever we click sign_in in the nav bar.
+    $.get(
+    {url : window.location.origin + "/resend_sms_otp",
+     data : {res : resource}
+     success : function(data){},
+     dataType : "script"});
 
+});
 
 
 

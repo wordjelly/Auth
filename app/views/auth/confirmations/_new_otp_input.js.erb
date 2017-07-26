@@ -1,0 +1,7 @@
+$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_new_otp_partial], locals: {resource: resource}) %>").show();
+//$("#sign_up_inputs").hide();
+$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb', locals: {resource: resource}) %>").show();
+$("#show_sign_up").hide();
+$("#forgot_password").hide();
+$("#resend_confirmation_email").hide();
+open_sign_in_modal_if_closed();

@@ -4,57 +4,50 @@ class OtpController < Auth::ApplicationController
 	  
 	  respond_to :html,:js,:json
 
-	  ##GET /request_otp_input?resource_id=xyz, renders the otp modal.
-	  ##ideally should do the foloowing in the end
-	  ##json will never be involved with this action.
-	  ##render_partial -> whatever.
-	  def new_otp_input
-	  	resource = User.find(params[:resource_id]) or not_found
-	  	respond_to do |format|
-	  	  format.json {render json: resource}
-  		  format.js   {render "/auth/confirmations/new_otp_input.js.erb"}
-	  	end
-	  end
-
-	  ##sends the sms otp
-	  ##GET /send_sms_otp?resource_id=xyz
-	  ##first send the sms otp and then
-	  ##here the json will still work.
-	  ##respond_with (user, location: request_otp_input_path(resource_id))
-	  ##depends on whether or not the 
+	  ##CALLED WHEN THE USER HAS ENTERED HIS MOBILE NUMBER, SO THAT HE GETS ANOTHER OTP
 	  def send_sms_otp
-	  	
-	  	##will first need to find_by additional_login_param and status = pending.
-	  	##protect with 
-	  	##then send to that one.
-	  	##then redirect to otp_input.
-	  	resource = User.find(params[:resource_id]) or not_found
-	  	resource.send_sms_otp
+	  	resource_params = permitted_params
+	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param]).first
+	  		resource.send_sms_otp
+	  	else
+	  		not_found
+	  	end 
 	  	respond_to do |format|
-	  		format.json {render json: resource}
-	  	end
+  		  format.json {head :ok }
+  		  format.js   {render "auth/confirmations/_new_otp_input.js.erb", locals: {resource: resource}}
+  		end
 	  end
 
 
+	  ##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
 	  def resend_sms_otp
+	  	resource_name_pluralized = permitted_params[:resource_name_pluralized]
+	  	resource = Object.const_get(resource_name_pluralized.singularize.capitalize).new
+	  	respond_to do |format|
+  		  format.json {head :ok }
+  		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource}}
+  		end
 
 	  end
 
-	  ##GET /verify_otp?resource_id=xyz&otp=1234
+	  ##CALLED WHEN THE USER ENTERS THE OTP SENT ON HIS MOBILE
+	  ##VERIFIES THE OTP WITH THE THIRD PARTY API.
 	  def verify_otp
 	  	resource_params = permitted_params
-	  	
-	  	
-	  	resource = User.where(:additional_login_param => resource_params[:additional_login_param], :additional_login_param_status => 1).first 
-	  	
-	  	resource.verify_sms_otp(resource_params[:otp])
+	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param], :additional_login_param_status => 1).first 
+	  		resource.verify_sms_otp(resource_params[:otp])
+	  	else
+	  		not_found
+	  	end
 	  	respond_to do |format|
-  		  format.json {render json: resource}
+  		  format.json { head :ok }
   		  format.js   {render "auth/confirmations/_verify_otp.js.erb", locals: {resource: resource}}
   		end
 	  end
 
 
+	  ##SHORT-POLLING ENDPOINT TO DETERMINE IF THE OTP WAS VALID.
+	  ##CALLED IN THE POST-VERIFICATION PAGE.
 	  def otp_verification_result
 	  	resource = User.find(params[:resource_id]) or not_found
 	  	respond_with({:verified => (resource.additional_login_param_status == 2)})
@@ -62,7 +55,11 @@ class OtpController < Auth::ApplicationController
 
 
 	  def permitted_params
-	  	params.fetch(:user,{}).permit(:additional_login_param,:otp)
+	  	if action_name == "resend_sms_otp"
+	  		params.permit(:resource_name_pluralized)
+	  	else
+	  		params.fetch(:user,{}).permit(:additional_login_param,:otp)
+	  	end
 	  end	
 
 end

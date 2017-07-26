@@ -1,4 +1,4 @@
-$("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/verify_otp.html.erb') %>");
+$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_verification_result_partial]) %>");
 (function poll(counter){
    setTimeout(function(){
       $.ajax({ 
@@ -9,8 +9,6 @@ $("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/ver
 	        	counter = 0;
 	        }
 	        counter++;
-	 		console.log("data returned was:");
-	 		console.log(data);	
 	        if(data["verified"] == true){
 	        	$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.")
 	        }
