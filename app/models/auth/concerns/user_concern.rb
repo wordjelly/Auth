@@ -33,6 +33,12 @@ module Auth::Concerns::UserConcern
 		##"confirmed" 2
 		##"unconfirmed" 0 
 		field :additional_login_param_status,	type: Integer, default: 0
+		
+		##when confirmation commences this is made 0
+		##when confirmation is successfully completed it is made 1
+		##this is utilized when using additional_login_param to do things like requesting a password change or 
+		attr_accessor :additional_login_param_per_request_status
+		
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""
 		###ENDS.
@@ -331,23 +337,21 @@ module Auth::Concerns::UserConcern
 		
 	end
 
+	##returns true if there is no email otherwise, if there is no unconfirmed_email
+	##currently used in this file in #authentication_keys_confirmed?
+	def email_confirmation
+		self.email.nil? ? true : (self.unconfirmed_email.nil?)
+	end
 
-	##USED AFTER UPDATE IN THE UPDATE.JS.ERB
-	##IF EMAIL IS PRESENT, THEN CHECKS IF CONFIRMED? IS TRUE
-	##AND IF 
-	def authentication_keys_confirmed?
-
-		email_confirmation_result = self.email.nil? ? true : (!self.pending_reconfirmation?)
-
-		puts "self.email.nil? #{self.email.nil?}"
-		puts "pending reconfirmation: #{self.pending_reconfirmation?}"
-		puts "email result: #{email_confirmation_result}"
-
-		puts "email confirmation result is: #{email_confirmation_result}"
-		additional_login_param_confirmation_result = 
+	## return true if there is no additional_login_param, otherwise if the additional_login_param_status == 2
+	def additional_login_param_confirmation
 		self.additional_login_param.nil? ? true : self.additional_login_param_status == 2
-		puts "additional login param conf result : #{additional_login_param_confirmation_result}"
-		return email_confirmation_result && additional_login_param_confirmation_result
+	end
+	
+	## used in auth/registrations/update.js.erb
+	## use it to chekc if the resource is fully confirmed, otherwise we redirect in the erb to whichever of the two needs to be confirmed.
+	def authentication_keys_confirmed?		
+		return email_confirmation && additional_login_param_confirmation
 	end
 
 	##if you change the additional login param while the email is either blank or not confirmed, you will get a validation error on additional_login_param

@@ -2,16 +2,26 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
 (function poll(counter){
    setTimeout(function(){
       $.ajax({ 
-      	data: {resource_id : "<%= resource.id.to_s %>"},
-      	url: "/otp_verification_result", 
+      	data: {resource_id : "<%= resource.id.to_s %>", post_verification_intent: store.get("intent")},
+      	url: "/otp_verification_result",
+      	error: function(){
+      		//remove the intent classes.
+      		store.remove("intent");
+      	} 
       	success: function(data){
+      		console.log("data returned is:");
+      		console.log(data);
 	        if(counter == null){
 	        	counter = 0;
 	        }
 	        counter++;
-	        if(data["verified"] == true){
-	        	$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.")
-	        }
+	        	if(data["verified"] == true){
+	        		$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.");
+	        		store.remove("intent");
+	        		if(data["follow_url"]){
+	        			window.location = data["follow_url"];
+	        		}
+	        	}
 		        else{
 
 		        if(counter < 10){
@@ -19,6 +29,7 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
 		   		}
 		   		else{
 		   			//do the failure function result.
+		   			store.remove("intent");
 		   		}
 	   		}
       	},

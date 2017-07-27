@@ -8,6 +8,7 @@ class OtpController < Auth::ApplicationController
 	  def send_sms_otp
 	  	resource_params = permitted_params
 	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param]).first
+	  		##it shouldn't deconfirm in this case.
 	  		resource.send_sms_otp
 	  	else
 	  		not_found
@@ -44,6 +45,9 @@ class OtpController < Auth::ApplicationController
 	  	resource_params = permitted_params
 	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param], :additional_login_param_status => 1).first 
 	  		resource.verify_sms_otp(resource_params[:otp])
+	  		##after verify, a password reset token can be set.
+	  		##then if the otp is verified, it can redirect
+	  		##to  
 	  	else
 	  		not_found
 	  	end
@@ -58,15 +62,36 @@ class OtpController < Auth::ApplicationController
 	  ##CALLED IN THE POST-VERIFICATION PAGE.
 	  def otp_verification_result
 	  	resource = User.find(params[:resource_id]) or not_found
-	  	respond_with({:verified => (resource.additional_login_param_status == 2)})
+	  	verified = resource.additional_login_param_status == 2 && resource.additional_login_param_per_request_status == 2
+	  	post_verification_intent = params[:post_verification_intent]
+	  	follow_url = nil
+	  	if verified
+		  	if post_verification_intent == "reset_password"
+		  		##if verified, then set the password token.
+		  		##and then redirect to the requisite path.
+		  		##redirect to that path using format.rules
+		  		resource.set_reset_password_token
+		  		follow_url = edit_password_path(:user,resource.reset_password_token)
+		  	elsif post_verification_intent == "unlock"
+		  		##here normally would be resource.unlock.
+		  	end
+	  	end
+	  	respond_to do |format|
+	  		format.json {:follow_url => follow_url, :verified => verified}
+	  	end
 	  end
+
+
+	 
 
 
 	  def permitted_params
 	  	if action_name == "resend_sms_otp"
+	  		##the resource_collection_path => pluralized downcased model name eg. users
 	  		params.permit(:resource_collection_path)
 	  	else
-	  		params.fetch(:user,{}).permit(:additional_login_param,:otp)
+	  		##post_verification_intent => "reset_password" OR "unlock"
+	  		params.permit(user: [:additional_login_param, :otp], :post_verification_intent)
 	  	end
 	  end	
 

@@ -48,10 +48,14 @@ module Auth
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
 							resource = resource_class.find(resource_id)
-							puts "Resource is found inside the verify call:"
-							puts resource.to_s
+							
 							resource.additional_login_param_status = 2
+							
 							resource.save
+							
+							##this is an attribute accessor so it being set to 2 means that the otp was accurately verified.
+							resource.additional_login_param_per_request_status = 2
+
 							clear_redis_user_otp_hash(resource_id)
 						else
 							log_error_to_redis(resource_id,response_body[:Details])

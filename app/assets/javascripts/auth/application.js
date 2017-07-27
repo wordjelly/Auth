@@ -26,6 +26,7 @@
 //= require moment
 //= require_tree .
 $(document).ready(function(){
+  var store = require("store");
 	/***
 	$.fn.tagcloud.defaults = {
   		size: {start: 14, end: 18, unit: 'pt'},

@@ -1,3 +1,6 @@
+if(!store){
+	store = require("store");
+}
 /***
 the resource to which all the paths will refer.
 will be the downcased pluralized form
@@ -317,6 +320,9 @@ var show_modal_error_message = function(error_message){
    $(".modal:visible").find(".error_message").html(error_message);
 }
 
+
+
+
 $(document).on('click','#submit',function(event){
 	//if the login text is "Sign_up, then submit the sign_up form"
 	//if the login text is "Sign In", then submit the sign_in form"
@@ -333,6 +339,7 @@ $(document).on('click','#submit',function(event){
 	}
 	else if(login_type == "Forgot Password"){
 		console.log("got the forgot password login type.");
+		store.set("intent","reset_password");
 		$("#login_form").attr("action","/" + resource + "/password");
 		$("#login_submit").val("Send me reset password instructions");
 		event.preventDefault();

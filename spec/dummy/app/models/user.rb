@@ -30,14 +30,7 @@ class User
     ##The super tap just sets the additional_param_confirmed
     ##to 0 i.e unconfirmed.
       auth_gen(self.id,self.additional_login_param)
-      ##we do this step because it is possible that send_sms_otp
-      ##can be called from a resend_otp requirement, in which case
-      ##the additional_login_param_status will already be 1, and we
-      ##wont need to save it.
-      if self.additional_login_param_status_changed?
-        self.skip_send_sms_otp_callback = true
-        self.save 
-      end
+      super
   end
 
   def verify_sms_otp(user_provided_otp)
