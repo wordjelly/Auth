@@ -17,7 +17,7 @@ module Auth::Concerns::UserConcern
 		after_destroy :destroy_client
 
 		##BASIC USER FIELDS.
-		field :email, 				type: String, default: ""
+		field :email, 				type: String
 		attr_accessor :skip_email_unique_validation
 		field :login,				type: String
 
@@ -79,9 +79,9 @@ module Auth::Concerns::UserConcern
 	        validate :additional_login_param_format, if: :additional_login_param_changed? 
 
 	        ##VALIDATIONS TO BE DONE ONLY ON UPDATE
-	        validate :additional_login_param_changed_on_unconfirmed_email, :on => :update
-	        validate :email_changed_on_unconfirmed_additional_login_param, :on => :update
-	        validate :email_and_additional_login_param_both_changed, :on => :update
+	        validate :additional_login_param_changed_on_unconfirmed_email,on: :update
+	        validate :email_changed_on_unconfirmed_additional_login_param,on: :update
+	        validate :email_and_additional_login_param_both_changed,on: :update
 
 	        
 
@@ -354,16 +354,16 @@ module Auth::Concerns::UserConcern
 		return email_confirmation && additional_login_param_confirmation
 	end
 
-	##if you change the additional login param while the email is either blank or not confirmed, you will get a validation error on additional_login_param
+	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
-		if additional_login_param_changed?  && (email.blank? || self.pending_reconfirmation?)
+		if additional_login_param_changed?  && (self.pending_reconfirmation?)
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]}")
 		end
 	end
 
-	##if you change the email while the additional login param is blank or not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
+	##if you change the email while the additional login param not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
 	def email_changed_on_unconfirmed_additional_login_param
-		if email_changed? && (additional_login_param.blank? || additional_login_param_status != 2) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
+		if email_changed? && (additional_login_param_status == 1) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
 			errors.add(:email, "Please add or verify your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} before changing your email id")
 		end
 	end

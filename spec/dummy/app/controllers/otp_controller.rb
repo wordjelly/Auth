@@ -3,7 +3,7 @@ class OtpController < Auth::ApplicationController
 	include Auth::Concerns::ControllerSmsOtpConcern
 	
 
-	  respond_to :html,:js,:json
+	  
 
 	  ##CALLED WHEN THE USER HAS ENTERED HIS MOBILE NUMBER, SO THAT HE GETS ANOTHER OTP
 	  def send_sms_otp
@@ -50,18 +50,18 @@ class OtpController < Auth::ApplicationController
 	  ##CALLED WHEN THE USER ENTERS THE OTP SENT ON HIS MOBILE
 	  ##VERIFIES THE OTP WITH THE THIRD PARTY API.
 	  def verify_otp
-	  	resource_params = permitted_params
-	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param], :additional_login_param_status => 1).first 
-	  		resource.verify_sms_otp(resource_params[:otp])
-	  		##after verify, a password reset token can be set.
-	  		##then if the otp is verified, it can redirect
-	  		##to  
+	  	resource_params = permitted_params.deep_symbolize_keys
+	  	puts "the resource params are:"
+	  	puts resource_params.to_s
+	  	if resource = User.where(:additional_login_param => resource_params[:user][:additional_login_param], :additional_login_param_status => 1).first 
+	  		resource.verify_sms_otp(resource_params[:user][:otp])
+	  		
 	  	else
 	  		not_found
 	  	end
 	  	respond_to do |format|
-  		  format.json { head :ok }
-  		  format.js   {render "auth/confirmations/_verify_otp.js.erb", locals: {resource: resource}}
+  		  #format.json { render :json => true }
+  		  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource}}
   		end
 	  end
 

@@ -1,13 +1,18 @@
-<%= render "auth/modals/resource_errors.html.erb", locals: {resource: resource} %>
+<%= render :partial => "auth/modals/resource_errors.js.erb", locals: {resource: resource} %>
+
 <% if resource.errors.size == 0 %>
-	
+	console.log("there were no resource erros");
 	var resource_active = "<%= resource.active_for_authentication? %>";
 	var additional_login_param_status_pending = "<%= resource.additional_login_param_status == 1 %>";
+	console.log("pending status was:");
+	console.log(additional_login_param_status_pending);
 	if(resource_active === "true"){
 		$("#login_footer").html("Redirecting you to your Profile").show();
 		window.location.href = "<%= profile_path(resource.id) %>";
+		
 	}
 	else{
+		console.log("status pending is true");
 		//this needs to be written in the dummy app,
 		//depending on what is the additional-login_param
 		$("#login_title").html("Verify your Account");

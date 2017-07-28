@@ -32,7 +32,7 @@ $(document).on('click','#login_submit',function(event){
     var current_screen = $('#login_title').text();
     if(current_screen == "Sign Up"){
       //if the title of the form is sign_up then do this.
-      var user_login = $("#" + resource_singular + "_email").val().trim();    
+      var user_login = $("#" + resource_singular + "_login").val().trim();    
       var hidden_field_name = null;
       hidden_field_name = user_login.match(mobile_number_regex) ?  (resource_singular +'[additional_login_param]') : (resource_singular + '[email]'); 
       

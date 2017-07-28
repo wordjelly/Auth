@@ -10,7 +10,9 @@ module Auth
 				log_error_to_redis(resource_id,"no api key found for two_factor_sms_otp")
 			else
 				puts "--running request"
-				response = Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource_phone_number}/AUTOGEN")
+
+				response = Auth.configuration.stub_otp_api_calls ? {:Status => "Success", :Details => "abcde"} : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource_phone_number}/AUTOGEN")
+
 				if response.code == 200
 					puts "--response code is 200"
 					response_body = JSON.parse(response.body).symbolize_keys
@@ -40,7 +42,8 @@ module Auth
 				if otp_session_id.nil?
 					log_error_to_redis(resource_id,"No otp session id found, please click \"resend otp message\" and try again")
 				else
-					response = Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{user_provided_otp}")
+
+					response = Auth.configuration.stub_otp_api_calls ? {:Status => "Success", :Details => "abcde"} : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{user_provided_otp}")
 					if response.code == 200
 						response_body = JSON.parse(response.body).symbolize_keys
 						if response_body[:Status] == "Success"
