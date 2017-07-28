@@ -1,20 +1,28 @@
 class OtpController < Auth::ApplicationController
 
 	include Auth::Concerns::ControllerSmsOtpConcern
-	  
+	
+
 	  respond_to :html,:js,:json
 
 	  ##CALLED WHEN THE USER HAS ENTERED HIS MOBILE NUMBER, SO THAT HE GETS ANOTHER OTP
 	  def send_sms_otp
 	  	resource_params = permitted_params
-	  	if resource = User.where(:additional_login_param => resource_params[:additional_login_param]).first
+	  	status = 200
+	  	
+	  	if resource = User.where(:additional_login_param => resource_params[:email]).first
 	  		##it shouldn't deconfirm in this case.
 	  		resource.send_sms_otp
-	  	else
-	  		not_found
+	  	elsif resource = User.new
+	  		
+	  		status = 400
+	  		resource.errors.add(:email,"Not found")
 	  	end 
+	  	
+	  	puts resource.attributes.to_s
+
 	  	respond_to do |format|
-  		  format.json {head :ok }
+  		  format.json {render json: {}, status: status}
   		  format.js   {render "auth/confirmations/_new_otp_input.js.erb", locals: {resource: resource}}
   		end
 	  end
@@ -62,10 +70,10 @@ class OtpController < Auth::ApplicationController
 	  ##CALLED IN THE POST-VERIFICATION PAGE.
 	  def otp_verification_result
 	  	resource = User.find(params[:resource_id]) or not_found
-	  	verified = resource.additional_login_param_status == 2 && resource.additional_login_param_per_request_status == 2
+	  	res_verified = resource.additional_login_param_status == 2 && resource.additional_login_param_per_request_status == 2
 	  	post_verification_intent = params[:post_verification_intent]
 	  	follow_url = nil
-	  	if verified
+	  	if res_verified
 		  	if post_verification_intent == "reset_password"
 		  		##if verified, then set the password token.
 		  		##and then redirect to the requisite path.
@@ -77,7 +85,7 @@ class OtpController < Auth::ApplicationController
 		  	end
 	  	end
 	  	respond_to do |format|
-	  		format.json {:follow_url => follow_url, :verified => verified}
+	  		format.json {render json: {:follow_url => follow_url, :verified => res_verified}}
 	  	end
 	  end
 
@@ -91,7 +99,8 @@ class OtpController < Auth::ApplicationController
 	  		params.permit(:resource_collection_path)
 	  	else
 	  		##post_verification_intent => "reset_password" OR "unlock"
-	  		params.permit(user: [:additional_login_param, :otp], :post_verification_intent)
+	  		##had to add email here because in the passwords form, and the unlocks form, we have to serve either additional_login_param or email, so in order to make it work with the existing devise controllers decided to keep the param coming in as email, and sending errors back also on the email attribute,[all this is only relevant to the send_sms_otp action]
+	  		params.permit({user: [:additional_login_param, :otp, :email]}, :post_verification_intent)
 	  	end
 	  end	
 

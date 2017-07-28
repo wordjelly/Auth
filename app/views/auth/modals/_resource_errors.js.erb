@@ -1,0 +1,13 @@
+mark_all_input_fields_valid();
+<% if resource.errors.size > 0 %>
+	<% resource.errors.each do |attrib,message| %>
+		<% if attrib =~ /recaptcha/ %>
+			show_modal_error_message("<%= escape_javascript(message) %>");
+		<% else %>
+			var resource_name = "<%= resource.class.name.underscore %>";
+			var field_id = resource_name + "_" + "<%= attrib %>";
+			var message = "<%= message.html_safe %>";
+			invalidate_input_field(field_id,"<%= message.html_safe %>");
+		<% end %>
+	<% end %>
+<% end %>

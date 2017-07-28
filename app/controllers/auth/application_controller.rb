@@ -3,6 +3,7 @@ module Auth
   	
     protect_from_forgery with: :exception
   	
+  
     def from_bson(bson_doc,klass)
 
 	 	if !bson_doc.nil?
@@ -38,6 +39,11 @@ module Auth
 	 def not_found
 	 	  raise ActionController::RoutingError.new('Not Found')
 	 end
+
+
+	 
+
+  	
 
 	 protected 
 

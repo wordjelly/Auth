@@ -7,6 +7,15 @@ will be the downcased pluralized form
 eg: users or admins
 ***/
 var resource = null;
+
+
+/***
+the resource singular form
+eg: user
+***/
+var resource_singular = null;
+
+
 /****
 looks for a div with the id "sign_out", if its present, then returns true, otherwise false
 *****/
@@ -379,6 +388,7 @@ on clicking the 'sign_in' option in the nav bar.
 ***/
 $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',function(event){
 	resource = $(event.target).parent().attr("data-resource");
+	resource_singular = $(event.target).parent().attr("data-resource-singular")
 	sign_in_required(event);
 });
 

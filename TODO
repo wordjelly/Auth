@@ -29,3 +29,4 @@
 
 27.add recaptcha to update form.
 28.variabalize the resource in the otp_controller routes eg: /:resource/whatever...
+29.user signed in by oauth, goes to forgot password, then what happens?

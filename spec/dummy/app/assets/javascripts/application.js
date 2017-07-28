@@ -28,16 +28,30 @@ if it matches, then makes the hidden field user[mobile]
 if it doesnt match, then makes the hidden field user[email]
 then returns true.
 ***/
-$(document).on('submit','#login_form',function(event){
+$(document).on('click','#login_submit',function(event){
     var current_screen = $('#login_title').text();
     if(current_screen == "Sign Up"){
       //if the title of the form is sign_up then do this.
-      var user_login = $("#user_login").val().trim();    
+      var user_login = $("#" + resource_singular + "_email").val().trim();    
       var hidden_field_name = null;
-      hidden_field_name = user_login.match(mobile_number_regex) ? "user[additional_login_param]" : "user[email]"; 
+      hidden_field_name = user_login.match(mobile_number_regex) ?  (resource_singular +'[additional_login_param]') : (resource_singular + '[email]'); 
       
       $(this).append('<input type="hidden" name="' + hidden_field_name + '" value="'+ user_login +'" />');
     }
+    
+    else if(current_screen == "Forgot Password"){
+      
+      var user_login = $("#" + resource_singular + "_email").val().trim();    
+      if(user_login.match(mobile_number_regex)){
+        $("#login_form").attr("action","/send_sms_otp");
+        $("#login_form").attr("method","GET");
+      }
+      else{
+        $("#login_form").attr("action","/" + resource + "/password");
+        $("#login_form").attr("method","POST"); 
+      }
+    }
+    
 });
 
 /***
