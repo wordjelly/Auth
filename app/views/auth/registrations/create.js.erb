@@ -18,7 +18,7 @@
 		$("#login_title").html("Verify your Account");
 		if(additional_login_param_status_pending === "true"){
 			
-			$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_new_otp_partial], locals: {resource: resource}) %>").show();
+			$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_new_otp_partial], locals: {resource: resource, intent: ''}) %>").show();
 			//$("#sign_up_inputs").hide();
 			$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb', locals: {resource: resource}) %>").show();
 			$("#show_sign_up").hide();

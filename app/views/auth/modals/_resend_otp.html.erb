@@ -1,6 +1,6 @@
 Please enter your 10 digit mobile number.
 <% if !resource.nil? %>
-	<%= form_for(resource, as: resource.class.name.underscore, url: send_sms_otp_path, remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
+	<%= form_for(resource, as: resource.class.name.underscore, url: send_sms_otp_url(resource.class.name.underscore.downcase.pluralize,{:intent => intent}), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
 	<div class="input-field">
 	    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[additional_login_param]" id="<%= resource.class.name.downcase %>_additional_login_param">
 	    <label for="<%= resource.class.name.downcase %>_additional_login_param" class="">Mobile Number</label>

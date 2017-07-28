@@ -34,10 +34,7 @@ module Auth::Concerns::UserConcern
 		##"unconfirmed" 0 
 		field :additional_login_param_status,	type: Integer, default: 0
 		
-		##when confirmation commences this is made 0
-		##when confirmation is successfully completed it is made 1
-		##this is utilized when using additional_login_param to do things like requesting a password change or 
-		attr_accessor :additional_login_param_per_request_status
+		
 		
 		field :name,				type: String, default: ""
 		field :image_url,			type: String, default: ""

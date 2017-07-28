@@ -140,6 +140,12 @@ var show_oauth = function(){
 	$('#submit_icon').addClass('right');	
 }
 
+/***
+This changes the text in the navigation options 
+below the form.
+It will by default make the text "Dont have an Account...."
+otherwise, it will make the text whatever is in new_text.
+***/
 var toggle_sign_up_text = function(new_text){
 	var sign_up_text = $("#show_sign_up").text();
 	if(new_text != null){
@@ -348,11 +354,11 @@ $(document).on('click','#submit',function(event){
 	}
 	else if(login_type == "Forgot Password"){
 		console.log("got the forgot password login type.");
-		store.set("intent","reset_password");
 		$("#login_form").attr("action","/" + resource + "/password");
 		$("#login_submit").val("Send me reset password instructions");
 		event.preventDefault();
 		event.stopPropagation();
+		//the application.js in the dummy app, binds to this click event, so effectively overrides anythign set here.
 		$("#login_submit").trigger("click");
 		return false;
 	}

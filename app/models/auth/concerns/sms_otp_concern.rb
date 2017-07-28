@@ -4,7 +4,7 @@ module Auth::Concerns::SmsOtpConcern
 
 	included do 
 
-		attr_accessor :otp
+		field :otp, type: Integer
 		attr_accessor :skip_send_sms_otp_callback
 		after_save :deconfirm_additional_param, if: :param_changed_and_dont_skip
 		after_save :send_sms_otp, if: :param_changed_and_dont_skip

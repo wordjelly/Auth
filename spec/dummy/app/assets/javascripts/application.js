@@ -21,6 +21,10 @@
 var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
 var email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
 /***
+WHY IS THIS NOT DONE WITH SIGN_IN?
+BECAUSE WITH SIGN_IN FORM WE SEND THE PARAM AS LOGIN
+THAT IS THEN USED IN THE FIND_FOR_DATABASE_AUTHENTICATABLE , AS PER THE DEVISE TUTORIAL.
+SO THERE WE DONT NEED TO DO THE FOLLOWING HIDDEN-FIELD-JUGGLING ETC.
 takes the value of the user_login field
 trims it
 then matches it with the mobile number regex
@@ -31,7 +35,7 @@ then returns true.
 $(document).on('click','#login_submit',function(event){
     var current_screen = $('#login_title').text();
     if(current_screen == "Sign Up"){
-      //if the title of the form is sign_up then do this.
+      //WHAT WE ARE DOING HERE IS CHECKING IF THE USER IS ENTERING A MOBILE OR A EMAIL, AND IF IT IS A MOBILE, THEN WE ARE ADDING A HIDDEN FIELD CALLED ADDITIONAL_LOGIN_PARAM and sending it alongwith the rest of the form.
       var user_login = $("#" + resource_singular + "_login").val().trim();    
       var hidden_field_name = null;
       hidden_field_name = user_login.match(mobile_number_regex) ?  (resource_singular +'[additional_login_param]') : (resource_singular + '[email]'); 
@@ -40,16 +44,31 @@ $(document).on('click','#login_submit',function(event){
     }
     
     else if(current_screen == "Forgot Password"){
-      
+      //here i am just changing the action of the form, and the method.
+      //since in case of additional_login_param, we send it to send_sms_otp + intent.
       var user_login = $("#" + resource_singular + "_email").val().trim();    
       if(user_login.match(mobile_number_regex)){
-        $("#login_form").attr("action","/send_sms_otp");
+        $("#login_form").attr("action","/" + resource + "/send_sms_otp?intent=reset_password");
         $("#login_form").attr("method","GET");
       }
       else{
         $("#login_form").attr("action","/" + resource + "/password");
         $("#login_form").attr("method","POST"); 
       }
+    }
+
+    else if(current_screen == "Unlock Your Account"){
+      //here i am just changing the action of the form, and the method.
+      //since in case of additional_login_param, we send it to send_sms_otp + intent.
+      var user_login = $("#" + resource_singular + "_email").val().trim();    
+      if(user_login.match(mobile_number_regex)){
+        $("#login_form").attr("action","/" + resource + "/send_sms_otp?intent=unlock_account");
+        $("#login_form").attr("method","GET");
+      }
+      else{
+        $("#login_form").attr("action","/" + resource + "/unlock");
+        $("#login_form").attr("method","POST"); 
+      }   
     }
     
 });
@@ -106,6 +125,9 @@ $(document).on('click','#otp_submit',function(event){
 });
 
 
+/***
+THIS STILL NEEDS TO BE TESTED.
+***/
 $(document).on('click',
   '#additional_login_param_resend_confirmation_message'
   ,function(event){
@@ -113,7 +135,7 @@ $(document).on('click',
     //it gets set whenever we click sign_in in the nav bar.
     $.get(
     {url : window.location.origin + "/resend_sms_otp",
-     data : {resource_collection_path : resource},
+     data : {resource_class : resource_singular},
      success : function(data){},
      dataType : "script"});
 

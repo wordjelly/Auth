@@ -1,6 +1,6 @@
 A SMS with an One-Time-Password was sent to <%= resource.additional_login_param %>. Please enter it below to complete verification.
 <% if !resource.nil? %>
-	<%= form_for(resource, as: resource.class.name.underscore, url: verify_otp_path, remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
+	<%= form_for(resource, as: resource.class.name.underscore, url: verify_otp_url(resource.class.name.underscore.downcase.pluralize,{:intent => intent}), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
 	<div class="input-field">
 	    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[otp]" id="<%= resource.class.name.downcase %>_otp">
 	    <label for="<%= resource.class.name.downcase %>_otp" class="">Enter the OTP sent on your mobile</label>

@@ -33,9 +33,9 @@ class User
       super
   end
 
-  def verify_sms_otp(user_provided_otp)
+  def verify_sms_otp
       
-      verify(self.class,self.id,user_provided_otp)
+      verify(self.class,self.id,self.otp)
     
   end
 

@@ -1,18 +1,14 @@
 $("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_verification_result_partial]) %>");
 (function poll(counter){
    setTimeout(function(){
-   	  var store = require("store");
-   	  var intent = store.get("intent");
       $.ajax({ 
-      	data: {resource_id : "<%= resource.id.to_s %>", post_verification_intent: intent},
-      	url: "/otp_verification_result",
+      	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {_id : "<%= resource.id.to_s %>"}, intent: "<%= intent %>"},
+      	url: "<%= Auth.configuration.mount_path %>/<%= resource.class.name.downcase.pluralize.to_s %>/otp_verification_result",
       	error: function(){
-      		//remove the intent classes.
-      		//store.remove("intent");
-      	} 
+      		
+      	}, 
       	success: function(data){
-      		console.log("data returned is:");
-      		console.log(data);
+      		
 	        if(counter == null){
 	        	counter = 0;
 	        }
@@ -39,3 +35,4 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
       });
   }, 3000);
 })();
+
