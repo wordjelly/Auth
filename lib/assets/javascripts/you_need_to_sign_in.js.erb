@@ -48,6 +48,12 @@ function load_forms(name){
 		 success : function(data){},
 		 dataType : "script"});
 	}
+	else if(name == "unlock_account"){
+		$.get(
+		{url : window.location.origin + "/" + resource + "/unlock/new",
+		 success : function(data){},
+		 dataType : "script"});	
+	}
 }
 
 
@@ -97,10 +103,18 @@ var set_sign_in_modal = function(){
 }
 
 //NAV OPTIONS.
-/****
-on clicking show_sign_up, this handles toggling back and forth from 
-the sign_in_screen, so there is no seperate button for showing sign_in, it is just toggling the sign_up.
-****/
+
+/***
+basically the following block handles making the ajax request and
+then loading the form for 
+sign_up
+sign_in
+forgot_password
+unlock_account
+resend_confirmation_email.
+basically they all make calls to load_forms, which does the ajax call
+
+***/
 $(document).on('click','#show_sign_up',function(event){
 	var current_screen = get_current_screen();
 	if(current_screen === "Forgot Password" || current_screen === "Resend Confirmation Email"){
@@ -114,6 +128,10 @@ $(document).on('click','#show_sign_up',function(event){
 $(document).on('click','#forgot_password',function(event){
 	load_forms("forgot_password");
 });
+
+$(document).on("click","#unlock_account",function(event){
+	load_forms("unlock_account");
+})
 
 $(document).on('click','#resend_confirmation_email',function(event){
 	load_forms("resend_confirmation_email");
@@ -337,7 +355,14 @@ var show_modal_error_message = function(error_message){
 
 
 
-
+/***
+all the forms in the auth/modals partials have a submit button incorporated normally in them with the id: #login_submit.
+however this is hidden by display_none.
+Instead the button that is shown has an id of #submit.
+So on clicking that we change the action of the form depending on which form is currently being show.(by get_current_screen())
+then I trigger a click on ("login_submit")
+and that automatically triggers the form_submit.
+***/
 $(document).on('click','#submit',function(event){
 	//if the login text is "Sign_up, then submit the sign_up form"
 	//if the login text is "Sign In", then submit the sign_in form"
@@ -353,7 +378,6 @@ $(document).on('click','#submit',function(event){
 		return false;
 	}
 	else if(login_type == "Forgot Password"){
-		console.log("got the forgot password login type.");
 		$("#login_form").attr("action","/" + resource + "/password");
 		$("#login_submit").val("Send me reset password instructions");
 		event.preventDefault();
@@ -386,7 +410,14 @@ $(document).on('click','#submit',function(event){
 		$("#login_submit").trigger("click");
 		return false;
 	}
-	
+	else if(login_type == "Unlock Your Account"){
+		$("#login_form").attr("action","/" + resource);
+		$("#login_submit").val("Update");
+		event.preventDefault();
+		event.stopPropagation();
+		$("#login_submit").trigger("click");
+		return false;	
+	}
 });
 
 /***

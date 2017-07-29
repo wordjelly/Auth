@@ -20,17 +20,15 @@
 /////FOR VALIDATIONS TO WORK FOR THE SIGN_IN_FORM.
 var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
 var email_regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
+
 /***
-WHY IS THIS NOT DONE WITH SIGN_IN?
+1.WHY IS THIS NOT DONE WITH SIGN_IN?
 BECAUSE WITH SIGN_IN FORM WE SEND THE PARAM AS LOGIN
 THAT IS THEN USED IN THE FIND_FOR_DATABASE_AUTHENTICATABLE , AS PER THE DEVISE TUTORIAL.
 SO THERE WE DONT NEED TO DO THE FOLLOWING HIDDEN-FIELD-JUGGLING ETC.
-takes the value of the user_login field
-trims it
-then matches it with the mobile number regex
-if it matches, then makes the hidden field user[mobile]
-if it doesnt match, then makes the hidden field user[email]
-then returns true.
+
+2.this entire handler takes over from the trigger on the login_submit, in the you_need_to_sign_in.js.erb
+and it juggles the action and the attributes as required, for the otp. 
 ***/
 $(document).on('click','#login_submit',function(event){
     var current_screen = $('#login_title').text();
@@ -127,6 +125,8 @@ $(document).on('click','#otp_submit',function(event){
 
 /***
 THIS STILL NEEDS TO BE TESTED.
+if this is clicked from forgot_password or unlock account, then
+should also send in the intent.
 ***/
 $(document).on('click',
   '#additional_login_param_resend_confirmation_message'
@@ -134,11 +134,10 @@ $(document).on('click',
     //the resource is set in the engine's you_need_to_sign_in.js.
     //it gets set whenever we click sign_in in the nav bar.
     $.get(
-    {url : window.location.origin + "/resend_sms_otp",
+    {url : "/" + resource + "/resend_sms_otp",
      data : {resource_class : resource_singular},
      success : function(data){},
      dataType : "script"});
-
 });
 
 

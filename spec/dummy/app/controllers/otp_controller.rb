@@ -29,14 +29,15 @@ class OtpController < Auth::ApplicationController
 	  			puts "resource sybmol is:"
 	  			puts @resource_symbol
 	  			##this is either the provided email(in case of forgot_password form, we pass in the additional_login_param under the email key itself.#ref auth/modals/forgot_password_content.html.erb)
-			  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]
+	  			if @resource_params[@resource_symbol]
+				  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]
 
-			  	##the otp provided by the user, only used in the verify_otp action.
-			  	@otp = @resource_params[@resource_symbol][:otp]
-			  	
-			  	##the resource_id of the user, only used in the short_polling endpoint.
-			  	@resource_id = @resource_params[@resource_symbol][:_id]
-	  	
+				  	##the otp provided by the user, only used in the verify_otp action.
+				  	@otp = @resource_params[@resource_symbol][:otp]
+				  	
+				  	##the resource_id of the user, only used in the short_polling endpoint.
+				  	@resource_id = @resource_params[@resource_symbol][:_id]
+	  			end
 
 	  		else
 	  			not_found
@@ -46,7 +47,7 @@ class OtpController < Auth::ApplicationController
 	  	end
 	  	
 	  	##the intent , passed into the send_sms_otp endpoint, and thereafter added to the verify_otp_path, in the new_otp_input.html.erb
-	  	@intent = @resource_params[:intent]
+	  	@intent = @resource_params[:intent] or ""
 	  	puts "intent is : #{@intent}"
 
 	  	##the default response status, can be changed in the action depending on individual situations.
@@ -78,6 +79,7 @@ class OtpController < Auth::ApplicationController
 
 
 	  ##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
+	  ##so what happens after resend?
 	  def resend_sms_otp
 	  	if resource = @resource_class.new
 	  	else
@@ -85,7 +87,7 @@ class OtpController < Auth::ApplicationController
 	  	end
 	  	respond_to do |format|
   		  format.json {render json: {}, status: @status}
-  		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource}}
+  		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource, intent: @intent}}
   		end
 	  end
 
@@ -119,9 +121,10 @@ class OtpController < Auth::ApplicationController
 			  		##protected method so had to do this.
 			  		raw_token = resource.send(:set_reset_password_token)
 			  		intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
-			  	elsif @intent == "unlock"
+			  	elsif @intent == "unlock_account"
 			  		##here normally would be resource.unlock.
 			  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
+			  		puts "came to unlocks."
 			  		raw, enc = Devise.token_generator.generate(resource.class, :unlock_token)
         			resource.unlock_token = enc
         			resource.save(validate: false)
