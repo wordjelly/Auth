@@ -2,21 +2,22 @@ module Auth
 	module TwoFactorOtp
 
 		##returns the string value at the errors keys in the redis hash 
-		def check_errors(resource_id)
-			$redis.hget(resource_id.to_s + "_two_factor_sms_otp","error")
+		def check_errors
+			$redis.hget(self.id.to_s + "_two_factor_sms_otp","error")
 		end
 
-		def auth_gen(resource_id,resource_phone_number)
-			puts "--entered auth gen with params #{resource_id} and phone number #{resource_phone_number}"
-			clear_redis_user_otp_hash(resource_id)
+		def auth_gen
+			
+			puts "--entered auth gen with params #{self.id} and phone number #{self.additional_login_param}"
+			clear_redis_user_otp_hash
 			puts "--came after clearing the redis hash."
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
 				puts "--no api key found"
-				log_error_to_redis(resource_id,"no api key found for two_factor_sms_otp")
+				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
 				puts "--running request"
 
-				response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource_phone_number}/AUTOGEN")
+				response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
 
 				if response.code == 200
 					puts "--response code is 200"
@@ -25,61 +26,65 @@ module Auth
 					puts response_body.to_s
 					if response_body[:Status] == "Success"
 						puts "--response status is success"
-						$redis.hset(resource_id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
+						$redis.hset(self.id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
 					else
 						puts "--response status is failure"
-						log_error_to_redis(resource_id,response_body[:Details])
+						log_error_to_redis(response_body[:Details])
 					end
 				else
 					puts "--response code is non 200"
-					log_error_to_redis(resource_id,"HTTP Error code:"+ response.code.to_s)	
+					log_error_to_redis("HTTP Error code:"+ response.code.to_s)	
 				end
 			end
 
 		end
 
-		def verify(resource_class,resource_id,user_provided_otp)
+		def verify
 			puts "came to verify the otp."
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
-				log_error_to_redis(resource_id,"no api key found for two_factor_sms_otp")
+				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
-				otp_session_id = $redis.hget(resource_id.to_s + "_two_factor_sms_otp","otp_session_id")
+				otp_session_id = $redis.hget(self.id.to_s + "_two_factor_sms_otp","otp_session_id")
 				if otp_session_id.nil?
-					log_error_to_redis(resource_id,"No otp session id found, please click \"resend otp message\" and try again")
+					log_error_to_redis("No otp session id found, please click \"resend otp message\" and try again")
 				else
 
-					response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{user_provided_otp}")
+					response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{self.otp}")
 					if response.code == 200
 						response_body = JSON.parse(response.body).symbolize_keys
 						if response_body[:Status] == "Success"
 							##suppose here we say additional parameter confirmed
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
-							resource = resource_class.find(resource_id)
 							
-							resource.additional_login_param_status = 2
-						
-							resource.save
+							self.additional_login_param_status = 2
+							puts "did the additional login param change?"
+							puts self.additional_login_param_changed?
 							
-							clear_redis_user_otp_hash(resource_id)
+							self.save
+							puts "after save "
+							puts self.errors.full_messages.to_s
+							puts "user count."
+							puts User.count.to_s
+							clear_redis_user_otp_hash
 						else
-							log_error_to_redis(resource_id,response_body[:Details])
+							log_error_to_redis(response_body[:Details])
 						end
 					else
-						log_error_to_redis(resource_id,"HTTP Error code:"+ response.code.to_s)	
+						log_error_to_redis("HTTP Error code:"+ response.code.to_s)	
 					end
 				end
 			end
 		end
 
-		def log_error_to_redis(resource_id,error)
+		def log_error_to_redis(error)
 			puts "redis error is:#{error}"
-			$redis.hset(resource_id.to_s + "_two_factor_sms_otp","error",error)
+			$redis.hset(self.id.to_s + "_two_factor_sms_otp","error",error)
 		end
 
-		def clear_redis_user_otp_hash(resource_id)
+		def clear_redis_user_otp_hash
 			puts "--came to clear redis otp hash."
-			$redis.del(resource_id.to_s + "_two_factor_sms_otp")
+			$redis.del(self.id.to_s + "_two_factor_sms_otp")
 		end
 		
 	end

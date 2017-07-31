@@ -27,21 +27,22 @@ class User
   ## 
   ################
   def send_sms_otp
-    ##The super tap just sets the additional_param_confirmed
-    ##to 0 i.e unconfirmed.
-      OtpJob.perform_later([self.class.name.to_s,JSON.generate(self.attributes),"send_sms_otp"])
+    
       super
+      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"send_sms_otp"])
+      
   end
 
   def verify_sms_otp
+
+      super
+      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp"])
       
-      verify(self.class,self.id,self.otp)
-    
   end
 
   def check_otp_errors
       ##so suppose it returns errors then what?
-      check_errors(self.id)
+      check_errors
   end
   ##############
   ##

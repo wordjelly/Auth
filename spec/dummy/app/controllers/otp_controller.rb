@@ -65,13 +65,7 @@ class OtpController < Auth::ApplicationController
 	  	conditions = @intent.blank? ? {:additional_login_param => @additional_login_param} : {:additional_login_param => @additional_login_param, :additional_login_param_status => 2}
 	  	
 	  	if resource = @resource_class.where(conditions).first
-	  		#resource.send_sms_otp
-	  		## expected array of arguments is: 
-  			## 0 => resource class as string
-  			## 1 => resource as json serialized, by calling JSON.generate()
-			## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
-			## 3 => hash of additional arguments if any
-	  		OtpJob.perform_later([resource.class.name.to_s,JSON.generate(resource.attributes),"send_sms_otp"])
+	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
 	  		resource.errors.add(:email,"Not found")
@@ -108,13 +102,7 @@ class OtpController < Auth::ApplicationController
 	  			resource.errors.add(:email,otp_error)
 	  			resource.errors.add(:additional_login_param,otp_error)
 	  		else
-	  			#resource.verify_sms_otp
-	  			## expected array of arguments is: 
-  				## 0 => resource class as string
-  				## 1 => resource as json serialized, by calling JSON.generate()
-			  	## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
-			  	## 3 => hash of additional arguments if any
-	  			OtpJob.perform_later([resource.class.name.to_s,JSON.generate(resource.attributes),"verify_sms_otp"])
+	  			resource.verify_sms_otp
 	  		end
 	  	else
 	  		@status = 400
@@ -132,33 +120,42 @@ class OtpController < Auth::ApplicationController
 	  	intent_url = nil
 	  	res_verified = false
 	  	##first check the errors
-	  	if otp_error = resource.check_otp_errors
-	  		@status = 422
-	  		resource.errors.add(:email,otp_error)
-	  		resource.errors.add(:additional_login_param,otp_error)
-	  	elsif @resource_id && resource = User.where(:_id => @resource_id, :otp => @otp).first
 	  		
-	  		res_verified = resource.additional_login_param_status == 2
+	  	if @resource_id && resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
 	  		
-		  	if res_verified && @intent
-			  	if @intent == "reset_password"
-			  		##protected method so had to do this.
-			  		raw_token = resource.send(:set_reset_password_token)
-			  		intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
-			  	elsif @intent == "unlock_account"
-			  		##here normally would be resource.unlock.
-			  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
-			  		puts "came to unlocks."
-			  		raw, enc = Devise.token_generator.generate(resource.class, :unlock_token)
-        			resource.unlock_token = enc
-        			resource.save(validate: false)
-        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
+	  		if otp_error = resource.check_otp_errors
+	  			@status = 422
+		  		resource.errors.add(:additional_login_param,otp_error)
+	  		else
+
+	  			res_verified = resource.additional_login_param_status == 2
+	  		
+			  	if res_verified && @intent
+				  	if @intent == "reset_password"
+				  		##protected method so had to do this.
+				  		raw_token = resource.send(:set_reset_password_token)
+				  		intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
+				  	elsif @intent == "unlock_account"
+				  		##here normally would be resource.unlock.
+				  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
+				  		puts "came to unlocks."
+				  		raw, enc = Devise.token_generator.generate(resource.class, :unlock_token)
+	        			resource.unlock_token = enc
+	        			resource.save(validate: false)
+	        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
+				  	end
 			  	end
-		  	end
+			end
+		else
+			resource = @resource_class.new
+			@status = 422
+			resource.errors.add(:additional_login_param,"resource not found")
 		end
+
 	  	respond_to do |format|
 	  		format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages}, status: @status}
 	  	end
+
 	  end
 
 	  def permitted_params

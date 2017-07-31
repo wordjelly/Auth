@@ -29,21 +29,17 @@ class OtpJob < ActiveJob::Base
   	puts args.to_s
   	puts "here are the new args."
   	resource_class = args[0]
-  	resource_attrs = JSON.parse(args[1])
+  	resource_id = args[1]
   	job_type = args[2]
 
 	if resource_class && Auth.configuration.auth_resources[resource_class]
-		puts "conditions satisified."
 		resource_class = resource_class.constantize
-		resource = resource_class.new(resource_attrs)
-		puts "resource is:"
-		puts resource.to_s
+		resource = resource_class.find(resource_id)
+		
 		if job_type == "send_sms_otp"
-			puts "came to send sms otp."
-			resource.auth_gen(resource.id,resource.additional_login_param)
+			resource.auth_gen
 		elsif job_type == "verify_sms_otp"
-			puts "came to verify sms otp"
-			resource.verify_sms_otp
+			resource.verify
 		end
 	end
 
