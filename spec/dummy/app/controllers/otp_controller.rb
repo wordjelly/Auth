@@ -65,14 +65,20 @@ class OtpController < Auth::ApplicationController
 	  	conditions = @intent.blank? ? {:additional_login_param => @additional_login_param} : {:additional_login_param => @additional_login_param, :additional_login_param_status => 2}
 	  	
 	  	if resource = @resource_class.where(conditions).first
-	  		resource.send_sms_otp
+	  		#resource.send_sms_otp
+	  		## expected array of arguments is: 
+  			## 0 => resource class as string
+  			## 1 => resource as json serialized, by calling JSON.generate()
+			## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
+			## 3 => hash of additional arguments if any
+	  		OtpJob.perform_later([resource.class.to_s,JSON.generate(resource.attributes),"send_sms_otp"])
 	  	elsif resource = @resource_class.new
-	  		status = 400
+	  		@status = 422
 	  		resource.errors.add(:email,"Not found")
 	  		resource.errors.add(:additional_login_param,"Not found")
 	  	end 
 	  	respond_to do |format|
-  		  format.json {render json: {}, status: @status}
+  		  format.json {render json: resource.to_json, status: @status}
   		  format.js   {render :partial => "auth/confirmations/new_otp_input.js.erb", locals: {resource: resource, intent: @intent}}
   		end
 	  end
@@ -83,10 +89,10 @@ class OtpController < Auth::ApplicationController
 	  def resend_sms_otp
 	  	if resource = @resource_class.new
 	  	else
-	  		status = 400
+	  		@status = 400
 	  	end
 	  	respond_to do |format|
-  		  format.json {render json: {}, status: @status}
+  		  format.json {render json: resource.to_json, status: @status}
   		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource, intent: @intent}}
   		end
 	  end
@@ -96,12 +102,25 @@ class OtpController < Auth::ApplicationController
 	  def verify_otp
 	  	if resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
 	  		resource.otp = @otp
-	  		resource.verify_sms_otp
+	  		##there are no errors, so we proceed with verification.
+	  		if otp_error = resource.check_otp_errors
+	  			@status = 422
+	  			resource.errors.add(:email,otp_error)
+	  			resource.errors.add(:additional_login_param,otp_error)
+	  		else
+	  			#resource.verify_sms_otp
+	  			## expected array of arguments is: 
+  				## 0 => resource class as string
+  				## 1 => resource as json serialized, by calling JSON.generate()
+			  	## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
+			  	## 3 => hash of additional arguments if any
+	  			OtpJob.perform_later([resource.class.to_s,JSON.generate(resource.attributes),"verify_sms_otp"])
+	  		end
 	  	else
-	  		status = 400
+	  		@status = 400
 	  	end
 	  	respond_to do |format|
-  		  format.json {render json: {}, status: @status}
+  		  format.json {render json: resource.to_json, status: @status}
   		  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource, intent: @intent, otp: @otp}}
   		end
 	  end
@@ -112,7 +131,12 @@ class OtpController < Auth::ApplicationController
 	  def otp_verification_result
 	  	intent_url = nil
 	  	res_verified = false
-	  	if @resource_id && resource = User.where(:_id => @resource_id, :otp => @otp).first
+	  	##first check the errors
+	  	if otp_error = resource.check_otp_errors
+	  		@status = 422
+	  		resource.errors.add(:email,otp_error)
+	  		resource.errors.add(:additional_login_param,otp_error)
+	  	elsif @resource_id && resource = User.where(:_id => @resource_id, :otp => @otp).first
 	  		
 	  		res_verified = resource.additional_login_param_status == 2
 	  		
@@ -133,7 +157,7 @@ class OtpController < Auth::ApplicationController
 		  	end
 		end
 	  	respond_to do |format|
-	  		format.json {render json: {:follow_url => intent_url, :verified => res_verified}}
+	  		format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages}, status: @status}
 	  	end
 	  end
 

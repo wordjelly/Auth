@@ -39,6 +39,10 @@ class User
     
   end
 
+  def check_otp_errors
+      ##so suppose it returns errors then what?
+      check_errors(self.id)
+  end
   ##############
   ##
   ##

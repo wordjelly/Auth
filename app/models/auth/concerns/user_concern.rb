@@ -293,18 +293,25 @@ module Auth::Concerns::UserConcern
 
 	
 
-	
+	##for the api responses.
+	##if there is a current_app_id, then it will respond with the 
+	##authentication-token and es
+	##if there is none, then it will return nil.
+	##it should return the errors irrespective of these settings.
 	def as_json(options)
+		 json = nil
 		 if !self.current_app_id.nil?
 		 	json = super(:only => [:authentication_token])
 	     	json[:es] = self.client_authentication[self.current_app_id]
 	     	##resetting this before returning the json value.
 	     	self.current_app_id = nil
-	    	json
 	 	 else
 	 	 	puts "returning nil from json."
-	 	 	nil
 	 	 end
+	 	 if self.errors.full_messages.size > 0
+	 	 	json[:errors] = self.errors.full_messages
+	 	 end
+	 	 json
 	end
 
 	##returns true if there is at least one non empty oauth identity

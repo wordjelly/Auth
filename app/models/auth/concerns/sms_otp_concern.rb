@@ -12,8 +12,26 @@ module Auth::Concerns::SmsOtpConcern
 		
 	end
 
+	##ALL THESE METHODS ARE OVERRIDEN IN THE MODEL THAT IMPLEMENTS
+	##THIS CONCERN
+	##THE MODEL SHOULD CALL THE METHODS OF THE RESPECTIVE ADAPTER
+	##THAT IS USED FOR OTP.
+	##INSIDE OF THESE METHOD.
+	##E.G
+	##USER MODEL
+		## def send_sms_otp
+			## adapter.send_sms_otp
+			## super
+		## end
+	##END
 
-	##these are overriden in the MODEL that implements this concern. 
+
+	def check_otp_errors
+		
+	end
+
+
+	
 	def send_sms_otp
 		##the user model will call the initial step of actually sending the sms otp.
 		

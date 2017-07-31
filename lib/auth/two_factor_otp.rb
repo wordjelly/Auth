@@ -1,6 +1,11 @@
 module Auth
 	module TwoFactorOtp
 
+		##returns the string value at the errors keys in the redis hash 
+		def check_errors(resource_id)
+			$redis.hget(resource_id.to_s + "_two_factor_sms_otp","error")
+		end
+
 		def auth_gen(resource_id,resource_phone_number)
 			puts "--entered auth gen with params #{resource_id} and phone number #{resource_phone_number}"
 			clear_redis_user_otp_hash(resource_id)

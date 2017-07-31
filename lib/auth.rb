@@ -1,3 +1,4 @@
+##here we have to add the external dependencies.
 require "auth/engine"
 require 'omniauth'
 require 'omniauth-google-oauth2'
