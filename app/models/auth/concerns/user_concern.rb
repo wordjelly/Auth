@@ -168,7 +168,29 @@ module Auth::Concerns::UserConcern
 			else
 				super
 			end
-		end  		
+		end 
+
+		##this method takes the credential params which are expected to be something like:
+		##{:email => "test", :resource => "authenticate/users"}
+		##
+		##basically it takes each of the login params defined in the
+		##preinitializer for this resource, and then makes the conditions for all of them
+		##for eg: if the login_params are "email,additional_login_param", then it will make the conditions look for both of them, for the same parameter that comes in .
+		##conditions => [{"email" => "test"},{"additional_login_params" => "test"}]
+		##these are then returned to the controller to be searched.
+		def self.credential_exists(credential_params)
+			
+			login_params = Auth.configuration.auth_resources[self.name.to_s][:login_params]
+			puts "login params are: #{login_params}"
+			credential = credential_params.select{|c,v| login_params.include? c.to_sym}.values[0]
+			puts "credential is : #{credential}"
+			conditions = login_params.map{|key|
+				key = {key => credential}
+			}
+			puts "conditions are: #{conditions.to_s}"
+
+			puts conditions.to_s
+		end 		
 
 	end
 

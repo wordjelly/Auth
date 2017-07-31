@@ -29,7 +29,7 @@ class User
   def send_sms_otp
     ##The super tap just sets the additional_param_confirmed
     ##to 0 i.e unconfirmed.
-      auth_gen(self.id,self.additional_login_param)
+      OtpJob.perform_later([self.class.name.to_s,JSON.generate(self.attributes),"send_sms_otp"])
       super
   end
 

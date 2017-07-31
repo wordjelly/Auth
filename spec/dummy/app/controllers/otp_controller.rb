@@ -71,7 +71,7 @@ class OtpController < Auth::ApplicationController
   			## 1 => resource as json serialized, by calling JSON.generate()
 			## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
 			## 3 => hash of additional arguments if any
-	  		OtpJob.perform_later([resource.class.to_s,JSON.generate(resource.attributes),"send_sms_otp"])
+	  		OtpJob.perform_later([resource.class.name.to_s,JSON.generate(resource.attributes),"send_sms_otp"])
 	  	elsif resource = @resource_class.new
 	  		@status = 422
 	  		resource.errors.add(:email,"Not found")
@@ -114,7 +114,7 @@ class OtpController < Auth::ApplicationController
   				## 1 => resource as json serialized, by calling JSON.generate()
 			  	## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
 			  	## 3 => hash of additional arguments if any
-	  			OtpJob.perform_later([resource.class.to_s,JSON.generate(resource.attributes),"verify_sms_otp"])
+	  			OtpJob.perform_later([resource.class.name.to_s,JSON.generate(resource.attributes),"verify_sms_otp"])
 	  		end
 	  	else
 	  		@status = 400

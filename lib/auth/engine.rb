@@ -3,7 +3,7 @@
 require "auth/omniauth/path"
 require "auth/rails/routes"
 require "auth/two_factor_otp"
-require "auth/job_exception_handler.rb"
+require "auth/job_exception_handler"
 
 module Auth
   class Engine < ::Rails::Engine
