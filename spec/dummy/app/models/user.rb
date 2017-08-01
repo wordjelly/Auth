@@ -27,7 +27,6 @@ class User
   ## 
   ################
   def send_sms_otp
-    
       super
       OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"send_sms_otp"])
       

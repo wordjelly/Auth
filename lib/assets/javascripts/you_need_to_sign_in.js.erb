@@ -253,7 +253,12 @@ var invalidate_input_field = function(input_id,error_message,add_error_message){
 	input.attr("class","invalid");
 	input.attr("aria-invalid",true);
 	if(add_error_message){
-		label.attr("data-error",error_message);
+		if($(label).length > 0){
+			label.attr("data-error",error_message);
+		}
+		else{
+			show_modal_error_message(error_message);
+		}
 	}
 }
 
@@ -334,6 +339,23 @@ var normalize_input_field = function(input_id){
 }
 
 
+function tryParseJSON (jsonString){
+    try {
+        var o = JSON.parse(jsonString);
+
+        // Handle non-exception-throwing cases:
+        // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
+        // but... JSON.parse(null) returns null, and typeof null === "object", 
+        // so we must check for that, too. Thankfully, null is falsey, so this suffices:
+        if (o && typeof o === "object") {
+            return o;
+        }
+    }
+    catch (e) { }
+
+    return false;
+};
+
 /****
 show generic error message.
 leanmodal modification has been modified to clear any error message when
@@ -350,6 +372,13 @@ var show_modal_error_message = function(error_message){
    	toggle_ajax_error_modal();
    }
    $(".modal:visible").find(".error_notification").show();
+   //check if the error message is valid json and if yes, then 
+   //does it have an errors key
+   //if yes, show that as the error.
+   var json = tryParseJSON(error_message);
+   if(json && json["errors"]){
+   		error_message = json["errors"][0];
+   }
    $(".modal:visible").find(".error_message").html(error_message);
 }
 

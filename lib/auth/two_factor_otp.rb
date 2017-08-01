@@ -58,14 +58,10 @@ module Auth
 							##and dont touch anything else.
 							
 							self.additional_login_param_status = 2
-							puts "did the additional login param change?"
-							puts self.additional_login_param_changed?
+							
 							
 							self.save
-							puts "after save "
-							puts self.errors.full_messages.to_s
-							puts "user count."
-							puts User.count.to_s
+							
 							clear_redis_user_otp_hash
 						else
 							log_error_to_redis(response_body[:Details])

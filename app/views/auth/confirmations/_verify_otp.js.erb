@@ -1,3 +1,5 @@
+<%= render :partial => "auth/modals/resource_errors.js.erb", locals: {resource: resource} %>
+<% if resource.errors.size == 0 %>
 $("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_verification_result_partial]) %>");
 (function poll(counter){
    setTimeout(function(){
@@ -5,7 +7,11 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
       	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {_id : "<%= resource.id.to_s %>"}, intent: "<%= intent %>"},
       	url: "<%= Auth.configuration.mount_path %>/<%= resource.class.name.downcase.pluralize.to_s %>/otp_verification_result",
       	error: function(){
-      		
+      		//errors are not handled here, because spinner.js
+      		//catches any non 200/201 status and interprets it as an error
+      		//thereafter directly show_error_modal is called.
+      		//i could have written logic specific for otp_verification_result, by checking if it is there in the request_url, but did not do so, because otp is not always going to be in the engine, so otp should not be hardcoded anywhere.
+      		//the error lands up being shown inside show_error_modal, by means of json parsing the incoming string, and showing json[:errors] as the error message.
       	}, 
       	success: function(data){
       		
@@ -22,17 +28,17 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
 	        	}
 		        else{
 
-		        if(counter < 10){
-		        	poll(counter);
-		   		}
-		   		else{
-		   			//do the failure function result.
-		   			//store.remove("intent");
-		   		}
-	   		}
+			        if(counter < 10){
+			        	poll(counter);
+			   		}
+			   		else{
+			   				
+			   		}
+
+	   			}
       	},
       	dataType: "json"
       });
   }, 3000);
 })();
-
+<% end %>

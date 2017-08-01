@@ -1,12 +1,6 @@
 class OtpController < Auth::ApplicationController
 
-	
-	
-	  ##actions before each request
-	  ##permitted_params.deep_symbolize
-	  ##set response status
-	  ##set intent
-
+	  ##refer to auth/applicationcontroller for the not_found def, and its rescue block.
 	  before_filter :initialize_vars
 
 	  def initialize_vars
@@ -17,6 +11,7 @@ class OtpController < Auth::ApplicationController
 	  	##eg: resource is provided in the route as : users, so 
 	  	##@resource_class => User
 	  	##@resource_symbol =>  :user
+
 	  	if collection = @resource_params[:resource]
 	  		##check that the resource exists in the auth_configuration
 	  		if Auth.configuration.auth_resources[collection.singularize.capitalize]
@@ -31,6 +26,8 @@ class OtpController < Auth::ApplicationController
 	  			##this is either the provided email(in case of forgot_password form, we pass in the additional_login_param under the email key itself.#ref auth/modals/forgot_password_content.html.erb)
 	  			if @resource_params[@resource_symbol]
 				  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]
+				  	##DOING FOR PURPOSES OF TEST.
+				  	
 
 				  	##the otp provided by the user, only used in the verify_otp action.
 				  	@otp = @resource_params[@resource_symbol][:otp]
@@ -40,6 +37,7 @@ class OtpController < Auth::ApplicationController
 	  			end
 
 	  		else
+	  			##have to have some way of showing these errors.
 	  			not_found
 	  		end
 	  	else
@@ -68,7 +66,6 @@ class OtpController < Auth::ApplicationController
 	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
-	  		resource.errors.add(:email,"Not found")
 	  		resource.errors.add(:additional_login_param,"Not found")
 	  	end 
 	  	respond_to do |format|
@@ -80,11 +77,9 @@ class OtpController < Auth::ApplicationController
 
 	  ##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
 	  ##so what happens after resend?
+	  ##this is similar to calling new on the resource.
 	  def resend_sms_otp
-	  	if resource = @resource_class.new
-	  	else
-	  		@status = 400
-	  	end
+	  	resource = @resource_class.new
 	  	respond_to do |format|
   		  format.json {render json: resource.to_json, status: @status}
   		  format.js   {render "auth/confirmations/_resend_otp.js.erb", locals: {resource: resource, intent: @intent}}
@@ -99,12 +94,13 @@ class OtpController < Auth::ApplicationController
 	  		##there are no errors, so we proceed with verification.
 	  		if otp_error = resource.check_otp_errors
 	  			@status = 422
-	  			resource.errors.add(:email,otp_error)
 	  			resource.errors.add(:additional_login_param,otp_error)
 	  		else
 	  			resource.verify_sms_otp
 	  		end
 	  	else
+	  		resource = @resource_class.new
+	  		resource.errors.add(:additional_login_param,"Not Found")
 	  		@status = 400
 	  	end
 	  	respond_to do |format|
@@ -116,11 +112,18 @@ class OtpController < Auth::ApplicationController
 
 	  ##SHORT-POLLING ENDPOINT TO DETERMINE IF THE OTP WAS VALID.
 	  ##CALLED IN THE POST-VERIFICATION PAGE.
+	  ##error returns for this def are different, because it is requested using json from the verify_otp.js.erb partial
+	  ##as a result, in case there is an error in the controller action itslef below(eg. wherever there is a 422/400), then the following happens.
+	  ##spinner.js
+      ##//catches any non 200/201 status and interprets it as an error
+      ##//thereafter directly show_error_modal is called.
+      ##//i could have written logic specific for otp_verification_result, by checking if it is there in the request_url, but did not do so, because otp is not always going to be in the engine, so otp should not be hardcoded anywhere.
+      ##//the error lands up being shown inside show_error_modal, by means of json parsing the incoming string, and showing json[:errors] as the error message.
+	  ##on the other hand, if there is any othe rtype of error in the before_filter initialize_vars, then that raises a not_found and is handled by rendering a json response with errors, and a 422 so again it is handled by spinner as above.
 	  def otp_verification_result
 	  	intent_url = nil
 	  	res_verified = false
 	  	##first check the errors
-	  		
 	  	if @resource_id && resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
 	  		
 	  		if otp_error = resource.check_otp_errors
@@ -149,7 +152,7 @@ class OtpController < Auth::ApplicationController
 		else
 			resource = @resource_class.new
 			@status = 422
-			resource.errors.add(:additional_login_param,"resource not found")
+			resource.errors.add(:additional_login_param,"Not Found")
 		end
 
 	  	respond_to do |format|

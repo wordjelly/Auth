@@ -3,6 +3,13 @@ module Auth
   	
     protect_from_forgery with: :exception
   	
+    rescue_from ActionController::RoutingError do |e|
+  		respond_to do |format|
+	       format.json {render json: {:errors => "Not Found"}, status: 422}
+  		   format.js   {render :partial => "auth/modals/resource_errors.js.erb", locals: {:errors => ["Not Found"]}}
+	    end
+  	end  
+
   
     def from_bson(bson_doc,klass)
 
@@ -34,8 +41,9 @@ module Auth
 
 	 end
 
-	 ##CURRENTLY BEING USED IN THE DUMMY APP IN ITS USERS/CONFIRMATIONS_CONTROLLER
+	 ##CURRENTLY BEING USED IN THE DUMMY APP IN OTP_CONTROLLER
 	 ##RENDERS A NOT FOUND RESPONSE, in case the user is not found.
+	 ##
 	 def not_found
 	 	  raise ActionController::RoutingError.new('Not Found')
 	 end

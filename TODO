@@ -4,13 +4,10 @@
 4.show a message saying that he has or hasnt been active this month.
 5.on clicking enter on sign up form, it submits the sign in form.
 6.sometimes the sign in modal just doesnt open
-7.we will have to have a seperate attribute that says additional_login_param confirmed, and while doing the login, it will have to be passed as an additional condition.eg : additional_param && additional_param conf OR email && email_confirmed
-8.a seperate confirm method will have to be used by the confirm part of the additional_login_param
-9.controller seperate for otp confirmations, and it will have to be serving the part where we verify the otp
+
 10.shift the email_required? to the user_concern
 11.the css label in the login form for login => which says "email or mobile" , will have to be customizable from the user side.
-12.update credential exists function to deal with 
-13.if he changes both, email and mobile, then suppose he confirms the mobile and signs in,then he tries to confirm the email, what happens
+
 14.on selecting autocomplete from drop-down , validation does not occur.
 15.shift devise mailer to sidekiq
 16.additional param name e.g mobile should be visible in all forms.
@@ -23,11 +20,17 @@
 
 24.variabilize the js_erb partials for the whole otp_controller.
 
-25.Add verify_mobile and verify_email buttons in update form, also make UI change to move label above field in form, when field is already populated
-
-26.shift form to html view, and redirect there after sign in, depending upon requirement.
-
 27.add recaptcha to update form.
-28.variabalize the resource in the otp_controller routes eg: /:resource/whatever...
+
 29.user signed in by oauth, goes to forgot password, then what happens?
 30.unconfirmed account -> goes to forgot password.
+
+FOR TODAY:
+
+1.show the errors of the otp controller, especially simulate redis error, and its display
+2.test delayed job with forgot_password and unlocks controller
+3.fix credential exists
+4.shift form to html view, and redirect there after sign in, depending upon requirement -> for eg we want to ask for age, sex., and that he cannot go forward without that.
+5.Add verify_mobile and verify_email buttons in update form, also make UI change to move label above field in form, when field is already populated
+
++ 2 symptoms
