@@ -137,6 +137,30 @@ $(document).on('click','#resend_confirmation_email',function(event){
 	load_forms("resend_confirmation_email");
 });
 
+/***
+for the update form, where we give them an option to directly resend the unconfirmed email.
+suppose that it could not be found then what happens.
+***/
+$(document).on('click','.resend_confirmation_email',function(event){
+	//this element should have the data-attribute called unconfirmed email already set on it., and ajax request has to be made POST, to the confirmations path, using that email, and the correct resource_param name.
+	console.log("clicked resend confirmation email");
+	var unconfirmed_email = $(this).attr("data-unconfirmed-email");
+	var param = resource_singular + "[email]";
+	var data_h = {};
+	data_h[param] = unconfirmed_email;
+	console.log("data is:");
+	console.log(data_h);
+	$.get(
+		{url : window.location.origin + "/"+ resource +"/confirmation",
+		 data : data_h,
+		 success : function( data ) {},
+		 dataType : "script",
+		 method : "POST"
+		}
+	);
+
+});
+
 /****
 show or hide the oauth icons and 
 ****/
@@ -239,14 +263,27 @@ var toggle_sign_up_validation = function(login_text){
 	validator = new WJ_Validator(validation_settings,"materialize",true);
 }
 
+/****
+if the sign in modal is open, then this returns the text in the 
+login_title div.
+if the sign in modal is not open, then this will return 
+****/
 var get_current_screen = function(){
-	return $('#login_title').text();
+	//if the modal is open then 
+	if($('#sign_in_needed_modal').is(':visible')){
+		return $('#login_title').text();
+	}
+	else{
+		return $("#page_title").text();
+	}
 }
 
 /****
 provide the input id without the hash.
 ****/
 var invalidate_input_field = function(input_id,error_message,add_error_message){
+	console.log("input id :" + input_id);
+	console.log("error message is:" + error_message);
 	add_error_message = add_error_message || true;
 	var input = $("#" + input_id);
 	var label = $('label[for="'+ input_id +'"]');
@@ -432,6 +469,7 @@ $(document).on('click','#submit',function(event){
 		return false;
 	}
 	else if(login_type == "Edit Account Settings"){
+		console.log("detected the login type correctly");
 		$("#login_form").attr("action","/" + resource);
 		$("#login_submit").val("Update");
 		event.preventDefault();
@@ -454,7 +492,8 @@ on clicking the 'sign_in' option in the nav bar.
 ***/
 $(document).on('click','.sign_in_nav_option,.profile_nav_option,.sign_in',function(event){
 	resource = $(event.target).parent().attr("data-resource");
-	resource_singular = $(event.target).parent().attr("data-resource-singular")
+	resource_singular = $(event.target).parent().attr("data-resource-singular");
+	console.log("assigned resource as:" + resource);
 	sign_in_required(event);
 });
 

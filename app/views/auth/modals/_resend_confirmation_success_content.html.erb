@@ -1,5 +1,5 @@
 <% if !resource.nil? %>
-	<h5 class="teal-text fw-200 center m-0-top p-0-top">We sent an Email with confirmation instructions to <%= content_tag(:span, resource.email,{:class => "pink-text text-darken-2 fw-400"}) %></h5>
+	<h5 class="teal-text fw-200 center m-0-top p-0-top">We sent an Email with confirmation instructions to <%= content_tag(:span, resource.unconfirmed_email,{:class => "pink-text text-darken-2 fw-400"}) %></h5>
 	<div class="row m-30-top center">
 		<div class="col l6 m12 s12 offset-l3">
 			<i class="mdi-communication-email fs-150"></i>

@@ -1,14 +1,16 @@
 <div class="m-50-top row m-0-left m-0-right m-0-bottom" id="oauth_and_submit">
-  
-  <div class="col l6 m6 s6 left p-0-left p-0-right" id="oauth_icons">
-    <% Auth.configuration.oauth_credentials.keys.each_with_index {|provider,index| %>
-    	<a href="<%= Auth::OmniAuth::Path.omniauth_request_path(resource.class.name.to_s,provider) %>"><img src="/assets/auth/<%= provider %>.svg" height="60" width="60" class="oauth_icon
-    	<% if index > 0 %>
-    		m-10-left
-    	<% end %>
-    	"/></a>
-    <% } %>
-  </div>
+  <% if defined?(skip_oauth_options) != nil && skip_oauth_options == true %>
+  <% else %>
+    <div class="col l6 m6 s6 left p-0-left p-0-right" id="oauth_icons">
+      <% Auth.configuration.oauth_credentials.keys.each_with_index {|provider,index| %>
+      	<a href="<%= Auth::OmniAuth::Path.omniauth_request_path(resource.class.name.to_s,provider) %>"><img src="/assets/auth/<%= provider %>.svg" height="60" width="60" class="oauth_icon
+      	<% if index > 0 %>
+      		m-10-left
+      	<% end %>
+      	"/></a>
+      <% } %>
+    </div>
+  <% end %>
 
   <div class="col l6 m6 s6 p-0-left p-0-right" id="submit">
     

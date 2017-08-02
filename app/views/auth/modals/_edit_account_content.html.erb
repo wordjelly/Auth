@@ -13,6 +13,13 @@
 	             	
 	              %>"></input>
 	            <label for="<%= resource.class.name.downcase %>_email" autofocus="false">"E-mail"</label>
+	            <!-- if there is an unconfirmed email, then show it here with a link to resend confirmation email to it -->
+	            <% if !resource.unconfirmed_email.nil? %>
+	            	<%= content_tag(:span,"Your email") %>
+	            	<%= content_tag(:span,resource.unconfirmed_email,:id => "unconfirmed_email") %>
+	            	<%= content_tag(:span," is pending confirmation") %>
+	            	<%= content_tag(:div,"Resend Confirmation Email", :class => "resend_confirmation_email", :data => {:unconfirmed_email => resource.unconfirmed_email}) %>
+	            <% end %>
 	          </div>
 	          <% if !resource.has_oauth_identity? %>
 		          <div class="input-field m-50-top">
@@ -46,9 +53,8 @@
 		          </div>
 	          <% end %>
 	          <!-- add the field for the additional_login_param -->
-	          
-	          <%= render 'auth/modals/oauth_and_submit.html.erb' %>
-
+	          <!-- passed in skip_oauth_options so that it doesn't show the oauth icons here -->
+	          <%= render :partial => 'auth/modals/oauth_and_submit.html.erb', locals: {skip_oauth_options: true} %>
 		  </div>
 		</div>
 		<%= f.submit "Update",  id: "login_submit", style: "display:none;" %>

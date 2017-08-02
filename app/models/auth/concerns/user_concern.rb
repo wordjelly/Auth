@@ -363,15 +363,19 @@ module Auth::Concerns::UserConcern
 		
 	end
 
-	##returns true if there is no email otherwise, if there is no unconfirmed_email
+	##returns true if there is an email, and no unconfirmed email
+	## OR 
+	## both email and unconfirmed email are nil AND additional_login_param has been confirmed already.
 	##currently used in this file in #authentication_keys_confirmed?
 	def email_confirmation
-		self.email.nil? ? true : (self.unconfirmed_email.nil?)
+		(self.unconfirmed_email.nil? && !self.email.nil?) || (self.email.nil? && self.unconfirmed_email.nil? && self.additional_login_param_status == 2)
 	end
 
-	## return true if there is no additional_login_param, otherwise if the additional_login_param_status == 2
+	## if the additional_login_param_status == 2
+	## OR
+	## additional_login_param is nil AND email is not nil AND unconfirmed email is nil
 	def additional_login_param_confirmation
-		self.additional_login_param.nil? ? true : self.additional_login_param_status == 2
+		self.additional_login_param_status == 2 || (self.additional_login_param.nil? && !self.email.nil? && self.unconfirmed_email.nil?)
 	end
 	
 	## used in auth/registrations/update.js.erb

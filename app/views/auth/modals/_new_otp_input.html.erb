@@ -1,4 +1,7 @@
 A SMS with an One-Time-Password was sent to <%= resource.additional_login_param %>. Please enter it below to complete verification.
+<% if defined?(intent) == nil %>
+	<% intent = "" %>
+<% end %>
 <% if !resource.nil? %>
 	<%= form_for(resource, as: resource.class.name.underscore, url: verify_otp_url(resource.class.name.underscore.downcase.pluralize,{:intent => intent}), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
 	<div class="input-field">

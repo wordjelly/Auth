@@ -24,11 +24,27 @@
 
 29.user signed in by oauth, goes to forgot password, then what happens?
 30.unconfirmed account -> goes to forgot password.
+31. email confirmation being sent with mobile sign up.
+
+
+CART ENDPOINTS:
+##every user has a cart already built in.
+##do we need a seperate cart model?
+##no just create a cart_controller with these endpoints, and have 
+##a array for product ids, so what i will need is a product model that has a method that serializes and deserializes and finds it on needing it.
+
+1.post_products
+2.show_shopping_cart
+3.remove_products
+4.checkout -> go to payumoney api
+5.payment_successfull_endpoint
+6.payment_failed_endpoint
+7.refund_endpoints
+8.payment_status endpoints
 
 FOR TODAY:
 
-1.show the errors of the otp controller, especially simulate redis error, and its display
-2.test delayed job with forgot_password and unlocks controller
+
 3.fix credential exists
 4.shift form to html view, and redirect there after sign in, depending upon requirement -> for eg we want to ask for age, sex., and that he cannot go forward without that.
 5.Add verify_mobile and verify_email buttons in update form, also make UI change to move label above field in form, when field is already populated
