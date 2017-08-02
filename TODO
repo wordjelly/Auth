@@ -25,6 +25,7 @@
 29.user signed in by oauth, goes to forgot password, then what happens?
 30.unconfirmed account -> goes to forgot password.
 31. email confirmation being sent with mobile sign up.
+32. in the case where there is an unconfirmed email,and we just submit the update form with an empty email, in that case, the success callback says that an email was sent to the unconfirmed email. This is actually not the case. so should we check if email changed and set to nothing? or how to check if confirmation instructions were sent? confirmation_sent_at was changed?
 
 
 CART ENDPOINTS:

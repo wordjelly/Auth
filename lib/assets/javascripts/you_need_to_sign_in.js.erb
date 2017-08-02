@@ -143,13 +143,10 @@ suppose that it could not be found then what happens.
 ***/
 $(document).on('click','.resend_confirmation_email',function(event){
 	//this element should have the data-attribute called unconfirmed email already set on it., and ajax request has to be made POST, to the confirmations path, using that email, and the correct resource_param name.
-	console.log("clicked resend confirmation email");
-	var unconfirmed_email = $(this).attr("data-unconfirmed-email");
+	var unconfirmed_email = $("#" + resource_singular + "_unconfirmed_email").attr("data-unconfirmed-email");
 	var param = resource_singular + "[email]";
 	var data_h = {};
 	data_h[param] = unconfirmed_email;
-	console.log("data is:");
-	console.log(data_h);
 	$.get(
 		{url : window.location.origin + "/"+ resource +"/confirmation",
 		 data : data_h,
