@@ -3,6 +3,7 @@ class User
   include Auth::Concerns::UserConcern
   include Auth::Concerns::SmsOtpConcern
   include Auth::TwoFactorOtp
+  include GlobalID::Identification
 
   field :name, type: String
   field :dog, type: String
@@ -42,6 +43,10 @@ class User
   def check_otp_errors
       ##so suppose it returns errors then what?
       check_errors
+  end
+
+  def send_devise_notification(notification, *args)
+    devise_mailer.send(notification, self, *args).deliver_later
   end
   ##############
   ##

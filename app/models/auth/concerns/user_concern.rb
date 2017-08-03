@@ -17,7 +17,7 @@ module Auth::Concerns::UserConcern
 
 		before_save do |document|
 			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
-			if document.additional_login_param_changed?
+			if document.additional_login_param_changed? && !document.attr_blank_to_blank?("additional_login_param")
 				document.additional_login_param_status = 1
 			end
 		end
@@ -79,6 +79,9 @@ module Auth::Concerns::UserConcern
 	      	devise :registerable
 	      	devise :validatable
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
+
+
+	      	##IT ALLOWS A BLANK OR EMPTY ADDITIONAL LOGIN PARAM TO GO INTO THE DATABASE,BUT ONLY SENDS THE SMS_OTP IF THE PARAM IS NOT BLANK
 	      	validates_uniqueness_of :additional_login_param, allow_blank: true, if: :additional_login_param_changed?
             
 	        validate :additional_login_param_format, if: :additional_login_param_changed? 
@@ -401,10 +404,24 @@ module Auth::Concerns::UserConcern
 		end
 	end
 
+	##has the attribute gone from blank to blank?
+	##what happens is that if submit the update form, it submits empty strings for input fields which we dont fill. so suppose you change the adiditonal_login_param , it will submit email as "", in that case , earlier the email was nil, and now it becomes "", so that is detected as an email change and it feels like both email and additional param have changed and triggers the validation #email_and_additional_login_param_both_changed, so we dont want that to happen, so we check if the param has gone from being blank to blank in the below validation.
+	##@param attr[String] : the param name.
+	def attr_blank_to_blank?(attr)
+		if self.respond_to?(attr)
+			if (self.send("#{attr}_was").blank? && self.send("#{attr}").blank?)
+				puts "it was blank and it is blank."
+				true
+			end
+		end
+	end
+
 	##now what if both have changed?
 	def email_and_additional_login_param_both_changed
 		##add error saying you cannot change both at the same time.
-		if email_changed? && additional_login_param_changed?
+		##additional login param can change as long as neither goes from nil to blank or blank to nil.
+
+		if email_changed? && !attr_blank_to_blank?("email") && additional_login_param_changed? && !attr_blank_to_blank?("additional_login_param")
 			errors.add(:email,"you cannot change your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
 		end
 	end

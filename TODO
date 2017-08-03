@@ -36,6 +36,8 @@
 
 38. abstract otp_controller into a concern
 
+39. sidekiq is down error?
+
 CART ENDPOINTS:
 ##every user has a cart already built in.
 ##do we need a seperate cart model?

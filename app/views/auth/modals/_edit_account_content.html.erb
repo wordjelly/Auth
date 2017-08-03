@@ -14,9 +14,9 @@
 	              %>"></input>
 	            <label for="<%= resource.class.name.downcase %>_email" autofocus="false">"E-mail"</label>
 	            <!-- if there is an unconfirmed email, then show it here with a link to resend confirmation email to it -->
-	            <% if !resource.unconfirmed_email.nil? %>
+	            <% if !resource.confirmed? || resource.pending_reconfirmation?  %>
 	            	<%= content_tag(:span,"Your email") %>
-	            	<%= content_tag(:span,resource.unconfirmed_email,:id => "#{resource.class.name.downcase}_unconfirmed_email", :data => {:unconfirmed_email => resource.unconfirmed_email}) %>
+	            	<%= content_tag(:span,(resource.unconfirmed_email || resource.email ),:id => "#{resource.class.name.downcase}_unconfirmed_email", :data => {:unconfirmed_email => (resource.unconfirmed_email || resource.email )}) %>
 	            	<%= content_tag(:span," is pending confirmation") %>
 	            	<%= content_tag(:div,"Resend Confirmation Email", :class => "resend_confirmation_email") %>
 	            <% end %>
