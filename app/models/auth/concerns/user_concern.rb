@@ -14,6 +14,14 @@ module Auth::Concerns::UserConcern
 		
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
 
+
+		before_save do |document|
+			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
+			if document.additional_login_param_changed?
+				document.additional_login_param_status = 1
+			end
+		end
+
 		after_destroy :destroy_client
 
 		##BASIC USER FIELDS.
@@ -179,17 +187,12 @@ module Auth::Concerns::UserConcern
 		##conditions => [{"email" => "test"},{"additional_login_params" => "test"}]
 		##these are then returned to the controller to be searched.
 		def self.credential_exists(credential_params)
-			
 			login_params = Auth.configuration.auth_resources[self.name.to_s][:login_params]
-			puts "login params are: #{login_params}"
 			credential = credential_params.select{|c,v| login_params.include? c.to_sym}.values[0]
-			puts "credential is : #{credential}"
 			conditions = login_params.map{|key|
 				key = {key => credential}
 			}
-			puts "conditions are: #{conditions.to_s}"
-
-			puts conditions.to_s
+			conditions
 		end 		
 
 	end

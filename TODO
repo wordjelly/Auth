@@ -25,8 +25,16 @@
 29.user signed in by oauth, goes to forgot password, then what happens?
 30.unconfirmed account -> goes to forgot password.
 31. email confirmation being sent with mobile sign up.
-32. in the case where there is an unconfirmed email,and we just submit the update form with an empty email, in that case, the success callback says that an email was sent to the unconfirmed email. This is actually not the case. so should we check if email changed and set to nothing? or how to check if confirmation instructions were sent? confirmation_sent_at was changed?
 
+34. sign out authenticity error
+
+35. resend otp when account already confirmed.
+
+36. after it shows message saying you need to confirm email, it wipes out the email and also does not show pending email. need to work on this. ? maybe call reload?
+
+37. rate limit.
+
+38. abstract otp_controller into a concern
 
 CART ENDPOINTS:
 ##every user has a cart already built in.
@@ -43,11 +51,3 @@ CART ENDPOINTS:
 7.refund_endpoints
 8.payment_status endpoints
 
-FOR TODAY:
-
-
-3.fix credential exists
-4.shift form to html view, and redirect there after sign in, depending upon requirement -> for eg we want to ask for age, sex., and that he cannot go forward without that.
-5.Add verify_mobile and verify_email buttons in update form, also make UI change to move label above field in form, when field is already populated
-
-+ 2 symptoms

@@ -21,7 +21,15 @@ $("#login_content").html("<%= escape_javascript(render partial: Auth.configurati
 	        counter++;
 	        	if(data["verified"] == true){
 	        		$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.");
-	        		//store.remove("intent");
+	        			
+	        		/***
+	        		hide the additional login param block if its additional_login_param value is the same as whatever is this resource's.
+	        		***/
+	        		var confirmed_additional_login_param = "<%= resource.additional_login_param %>";
+	        		if(confirmed_additional_login_param == $("#additional_login_param_resend_block").attr("data-additional-login-param")){
+	        			$("#additional_login_param_resend_block").hide();
+	        		}
+	        		//if this is same as whatever is showing in the data_additional_login_param of class
 	        		if(data["follow_url"]){
 	        			window.location = data["follow_url"];
 	        		}

@@ -59,7 +59,6 @@ module Auth
 							
 							self.additional_login_param_status = 2
 							
-							
 							self.save
 							
 							clear_redis_user_otp_hash

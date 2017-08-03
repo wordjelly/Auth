@@ -135,11 +135,21 @@ $(document).on('click',
     //it gets set whenever we click sign_in in the nav bar.
     $.get(
     {url : "/" + resource + "/resend_sms_otp",
-     data : {resource_class : resource_singular},
+     data : {},
      success : function(data){},
      dataType : "script"});
 });
 
+$(document).on('click','.additional_login_param_resend_confirmation_message',function(event){
+  var data_h = {};
+  data_h[resource_singular] = {};
+  data_h[resource_singular]["additional_login_param"] = $(this).attr("data-additional-login-param");
+  $.get(
+    {url : "/" + resource + "/send_sms_otp",
+     data : data_h,
+     success : function(data){},
+     dataType : "script"});
+});
 
 
 

@@ -26,7 +26,7 @@ class OtpController < Auth::ApplicationController
 	  			##this is either the provided email(in case of forgot_password form, we pass in the additional_login_param under the email key itself.#ref auth/modals/forgot_password_content.html.erb)
 	  			if @resource_params[@resource_symbol]
 				  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]
-				  	##DOING FOR PURPOSES OF TEST.
+				  	
 				  	
 
 				  	##the otp provided by the user, only used in the verify_otp action.
@@ -62,7 +62,11 @@ class OtpController < Auth::ApplicationController
 	  	##on the other hand in case there is no intent, like in case of resend_otp -> then we can only check if we have an account with this mobile number or not, no need to check for verification.
 	  	conditions = @intent.blank? ? {:additional_login_param => @additional_login_param} : {:additional_login_param => @additional_login_param, :additional_login_param_status => 2}
 	  	
-	  	if resource = @resource_class.where(conditions).first
+	  	if @additional_login_param.nil?
+	  		@status = 422
+	  		resource = @resource_class.new
+	  		resource.errors.add(:additional_login_param,"Not found")
+	  	elsif resource = @resource_class.where(conditions).first
 	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
@@ -164,7 +168,7 @@ class OtpController < Auth::ApplicationController
 	  def permitted_params
 	  	if action_name == "resend_sms_otp"
 	  		##the resource_collection_path => pluralized downcased model name eg. users
-	  		params.permit(:resource, :intent)
+	  		params.permit(:intent)
 	  	else
 	  		##post_verification_intent => "reset_password" OR "unlock"
 	  		##had to add email here because in the passwords form, and the unlocks form, we have to serve either additional_login_param or email, so in order to make it work with the existing devise controllers decided to keep the param coming in as email, and sending errors back also on the email attribute,[all this is only relevant to the send_sms_otp action]
