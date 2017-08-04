@@ -3,7 +3,6 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   extend ActiveSupport::Concern
 
   included do
-    respond_to :html,:js,:json
     before_filter :initialize_vars
     before_filter :user_owns_cart_item, :on => [:update,:destroy]
   end
@@ -38,11 +37,8 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   ##if the cart_item does not match the user id, then it will go to not_found
   def user_owns_cart_item
-    if @cart_item.user_id != @user.id.to_s
-      not_found
-    end
+    @cart_item.user_id == @user.id.to_s or not_found
   end
-
 
 
   ##expects the product id, user_id is the logged in user, and quantity 
@@ -67,7 +63,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   def destroy
     resp = @cart_item.destroy
     respond_to do |format|
-      
+
     end
   end
 
