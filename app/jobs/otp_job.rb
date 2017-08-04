@@ -26,12 +26,12 @@ class OtpJob < ActiveJob::Base
   ## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
   ## 3 => hash of additional arguments if any
   def perform(args)
-  	puts args.to_s
-  	puts "here are the new args."
+  	
   	resource_class = args[0]
   	resource_id = args[1]
   	job_type = args[2]
-
+    params = (args.size == 4) ? JSON.parse(args[3]).deep_symbolize_keys : nil 
+    
 	if resource_class && Auth.configuration.auth_resources[resource_class]
 		resource_class = resource_class.constantize
 		resource = resource_class.find(resource_id)
@@ -39,7 +39,7 @@ class OtpJob < ActiveJob::Base
 		if job_type == "send_sms_otp"
 			resource.auth_gen
 		elsif job_type == "verify_sms_otp"
-			resource.verify
+			resource.verify(params[:otp])
 		end
 	end
 

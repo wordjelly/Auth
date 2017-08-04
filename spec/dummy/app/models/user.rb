@@ -33,10 +33,10 @@ class User
       
   end
 
-  def verify_sms_otp
+  def verify_sms_otp(otp)
 
-      super
-      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp"])
+      super(otp)
+      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp",JSON.generate({:otp => otp})])
       
   end
 

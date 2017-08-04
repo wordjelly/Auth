@@ -35,6 +35,7 @@ RSpec.describe "confirmation request spec",:confirmation => true, :type => :requ
 
     end
 
+##DO TODAY
     context "-- redirection to redirect url" do 
 
     end
@@ -42,6 +43,7 @@ RSpec.describe "confirmation request spec",:confirmation => true, :type => :requ
     context "-- authentication token " do 
 
     end
+##DO TODAY
 
     context "-- user previously created with oauth " do 
 

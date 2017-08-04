@@ -39,8 +39,8 @@ module Auth
 
 		end
 
-		def verify
-			puts "came to verify the otp."
+		def verify(otp)
+			puts "came to verify the otp with otp :#{otp}"
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
 				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
@@ -56,10 +56,12 @@ module Auth
 							##suppose here we say additional parameter confirmed
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
+							self.otp = otp
 							
 							self.additional_login_param_status = 2
 							
 							self.save
+								
 							
 							clear_redis_user_otp_hash
 						else

@@ -17,7 +17,7 @@ module Auth::Concerns::UserConcern
 
 		before_save do |document|
 			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
-			if document.additional_login_param_changed? && !document.attr_blank_to_blank?("additional_login_param")
+			if document.additional_login_param_changed? && !document.additional_login_param.blank?
 				document.additional_login_param_status = 1
 			end
 		end
@@ -327,14 +327,14 @@ module Auth::Concerns::UserConcern
 	##if there is none, then it will return nil.
 	##it should return the errors irrespective of these settings.
 	def as_json(options)
-		 json = nil
-		 if !self.current_app_id.nil?
+		 json = {:nothing => true}
+		 if !self.current_app_id.nil? && at_least_one_authentication_key_confirmed?
 		 	json = super(:only => [:authentication_token])
 	     	json[:es] = self.client_authentication[self.current_app_id]
 	     	##resetting this before returning the json value.
 	     	self.current_app_id = nil
 	 	 else
-	 	 	puts "returning nil from json."
+	 	 	
 	 	 end
 	 	 if self.errors.full_messages.size > 0
 	 	 	json[:errors] = self.errors.full_messages
@@ -369,25 +369,32 @@ module Auth::Concerns::UserConcern
 		
 	end
 
-	##returns true if there is an email, and no unconfirmed email
+	## confirmed?
 	## OR 
 	## both email and unconfirmed email are nil AND additional_login_param has been confirmed already.
 	##currently used in this file in #authentication_keys_confirmed?
-	def email_confirmation
-		(self.unconfirmed_email.nil? && !self.email.nil?) || (self.email.nil? && self.unconfirmed_email.nil? && self.additional_login_param_status == 2)
+	def email_confirmed_or_does_not_exist
+		(self.confirmed?) ||  (self.email.nil? && self.unconfirmed_email.nil?)
 	end
 
 	## if the additional_login_param_status == 2
-	## OR
-	## additional_login_param is nil AND email is not nil AND unconfirmed email is nil
-	def additional_login_param_confirmation
-		self.additional_login_param_status == 2 || (self.additional_login_param.nil? && !self.email.nil? && self.unconfirmed_email.nil?)
+	def additional_login_param_confirmed_or_does_not_exist
+		self.additional_login_param_status == 2 || self.additional_login_param_status == 0
 	end
 	
+	## at least one authentication_key should be confirmed.
+	## so even if we change the other one, we still return the remote authentication options even when that one is still unconfirmed.
+	## used in lib/devise to decide whether to return the auth token and es and redirect.
+	## used in self.as_json, to see whether to return the auth_token and es.
+	def at_least_one_authentication_key_confirmed?
+		self.confirmed? || self.additional_login_param_status == 2
+	end
+
 	## used in auth/registrations/update.js.erb
 	## use it to chekc if the resource is fully confirmed, otherwise we redirect in the erb to whichever of the two needs to be confirmed.
-	def authentication_keys_confirmed?		
-		return email_confirmation && additional_login_param_confirmation
+	def authentication_keys_confirmed?	
+		
+		return email_confirmed_or_does_not_exist && additional_login_param_confirmed_or_does_not_exist
 	end
 
 	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param

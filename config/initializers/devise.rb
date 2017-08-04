@@ -277,7 +277,7 @@ end
 
 
 DeviseController.class_eval do 
-
+  
   skip_before_action :verify_authenticity_token, if: :is_json_request?
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
@@ -287,7 +287,8 @@ DeviseController.class_eval do
 
   def is_omniauth_callback?
     #set_devise_mapping_for_omniauth
-    controller_name == "omniauth_callbacks"
+   
+    controller_name == "omniauth_callbacks" 
   end
 
   def ignore_json_request
@@ -301,7 +302,7 @@ DeviseController.class_eval do
 
   def redirect_to(options = {}, response_status = {})
 
-   
+    #puts "came to redirect"
     ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
    
     if !session[:redirect_url].nil? && @redirect_url.nil?
@@ -319,7 +320,7 @@ DeviseController.class_eval do
      # super
     #end    
 
-
+    ##HAVE NO IDEA WHAT THIS IS , AT THE MOMENT.
     if options =~ /authentication_token|es/
       ##this situation is to prevnet re-redirects.
      
@@ -334,7 +335,7 @@ DeviseController.class_eval do
         super(options,response_status)
       else
         
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in? && resource.at_least_one_authentication_key_confirmed?
 
           curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)
@@ -350,9 +351,11 @@ DeviseController.class_eval do
  
 
   def render(*args)
+    #puts "came to render"
     if !resource.nil? && !@client.nil? && action_name != "destroy" && !(["passwords","confirmations","unlocks"].include? controller_name)
         resource.set_client_authentication(@client.current_app_id)
       end
+      #puts "client is: #{@client}"
       #puts "redirect url -> #{@redirect_url}"
       #puts "resource -> #{resource.attributes.to_s}"
       
@@ -362,7 +365,7 @@ DeviseController.class_eval do
       if (["passwords","confirmations","unlocks"].include? controller_name)
         super(*args)
       else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in?
+        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in? && resource.at_least_one_authentication_key_confirmed?
 
           curr_app_es = resource.client_authentication[@client.current_app_id]
           session.delete(:client)

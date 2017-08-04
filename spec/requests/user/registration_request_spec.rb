@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Registration requests", :working => true, :type => :request do
+RSpec.describe "Registration requests", :registration => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all
@@ -12,7 +12,7 @@ RSpec.describe "Registration requests", :working => true, :type => :request do
           ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed admin directly while creating the admin.
           params.require(:user).permit(
             :email, :password, :password_confirmation,
-            :confirmed_at, :redirect_url, :api_key
+            :confirmed_at, :redirect_url, :api_key, :additional_login_param
           )
         end
 
@@ -354,8 +354,15 @@ RSpec.describe "Registration requests", :working => true, :type => :request do
 
       context " -- valid api key -- " do 
         
+        it " -- CREATE UNCONFIRMED EMAIL ACCOUNT - does not return auth_token and es ", :now => true do 
+            post user_registration_path, {user: attributes_for(:user),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            @user_created = assigns(:user)
+            @cl = assigns(:client)
+            user_json_hash = JSON.parse(response.body)
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end        
 
-        it " -- CREATE REQUEST -- " do 
+        it " -- CREATE CONFIRMED EMAIL ACCOUNT - returns the auth token and es -- ", :now => true do  
             post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
             @user_created = assigns(:user)
             @cl = assigns(:client)
@@ -366,6 +373,17 @@ RSpec.describe "Registration requests", :working => true, :type => :request do
             expect(response.code).to eq("201")
         end
 
+        it " -- CREATE UNCONFIRMED MOBILE ACCOUNT - does not return auth_token and es ", :now => true do 
+
+            post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            @user_created = assigns(:user)
+            @cl = assigns(:client)
+            user_json_hash = JSON.parse(response.body)
+            puts user_json_hash.to_s
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end        
+
+        
         
 
         context " --- UPDATE REQUEST --- " do 

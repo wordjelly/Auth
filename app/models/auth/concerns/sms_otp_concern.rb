@@ -58,7 +58,7 @@ module Auth::Concerns::SmsOtpConcern
 =end		
 	##overridden in the model that implements this concern,
 	##whoever calls this method , must set the self.additional_login_param_pre_request_status to 2, at the end of successfull verification,since this is needed for password recovery, unlocks mechanisms.
-	def verify_sms_otp
+	def verify_sms_otp(otp)
 		
 	end
 

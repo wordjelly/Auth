@@ -6,7 +6,10 @@ class TestsController < ApplicationController
     @tests = Test.all.page 1
     ##we can group them by the date on the view side
     ##for eg:
-    ##test.each do ||
+    ##test.each do |t|
+    ##if t.date.new>
+    ## -> add a seperator
+    ##
   end
 
   # GET /tests/1

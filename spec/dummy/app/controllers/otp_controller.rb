@@ -46,7 +46,7 @@ class OtpController < Auth::ApplicationController
 	  	
 	  	##the intent , passed into the send_sms_otp endpoint, and thereafter added to the verify_otp_path, in the new_otp_input.html.erb
 	  	@intent = @resource_params[:intent] or ""
-	  	puts "intent is : #{@intent}"
+	  	
 
 	  	##the default response status, can be changed in the action depending on individual situations.
 	  	@response_status = 200
@@ -94,13 +94,13 @@ class OtpController < Auth::ApplicationController
 	  ##VERIFIES THE OTP WITH THE THIRD PARTY API.
 	  def verify_otp
 	  	if resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
-	  		resource.otp = @otp
+	  		
 	  		##there are no errors, so we proceed with verification.
 	  		if otp_error = resource.check_otp_errors
 	  			@status = 422
 	  			resource.errors.add(:additional_login_param,otp_error)
 	  		else
-	  			resource.verify_sms_otp
+	  			resource.verify_sms_otp(@otp)
 	  		end
 	  	else
 	  		resource = @resource_class.new
@@ -128,6 +128,7 @@ class OtpController < Auth::ApplicationController
 	  	intent_url = nil
 	  	res_verified = false
 	  	##first check the errors
+	  	
 	  	if @resource_id && resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
 	  		
 	  		if otp_error = resource.check_otp_errors
@@ -160,7 +161,13 @@ class OtpController < Auth::ApplicationController
 		end
 
 	  	respond_to do |format|
-	  		format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages}, status: @status}
+	  		#format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
+	  		##handle the redirect here.
+	  		##just set the redirect url as the intent url,
+	  		##and otherwise set the client_authentication, and then return the authentication token and es.
+	  		##abstract the devise_controller before request methods into a concern and use them in common.
+  		  format.json {render json: resource.to_json, status: @status}
+
 	  	end
 
 	  end
