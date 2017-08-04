@@ -9,10 +9,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	included do 
 
 		##the id of the product to which this cart item refers.
-		field :product_id, type: BSON::ObjectId
+		field :product_id, type: String
 
 		##the user id who is buying this product.
-		field :user_id, type: BSON::ObjectId
+		field :user_id, type: String
 			
 		##the number of this product that are being added to the cart
 		field :quantity, type: Integer, default: 1
@@ -23,7 +23,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 		##is it being discounted, can be from 0 -> 100 percent discount
 		field :discount, type: Float
 
-
+		##discount code to offer discounts
+		field :discount_code, type: String
 	end
 
 end
