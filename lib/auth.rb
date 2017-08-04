@@ -20,6 +20,8 @@ require "momentjs-rails"
 require "typhoeus"
 require "redis"
 require "active_job"
+require "kaminari/mongoid"
+require "kaminari/actionview"
 
 module Auth
 end

@@ -3,7 +3,10 @@ class TestsController < ApplicationController
 
   # GET /tests
   def index
-    @tests = Test.all
+    @tests = Test.all.page 1
+    ##we can group them by the date on the view side
+    ##for eg:
+    ##test.each do ||
   end
 
   # GET /tests/1

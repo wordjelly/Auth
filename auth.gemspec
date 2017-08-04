@@ -42,6 +42,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'sidekiq','3.2.5'
   s.add_dependency 'redis'
   s.add_dependency 'i18n','0.8.1'
+  s.add_dependency 'kaminari-mongoid'
+  s.add_dependency 'kaminari-actionview'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'
