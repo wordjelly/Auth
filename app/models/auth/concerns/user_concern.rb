@@ -328,7 +328,7 @@ module Auth::Concerns::UserConcern
 	##it should return the errors irrespective of these settings.
 	def as_json(options)
 		 json = {:nothing => true}
-		 if !self.current_app_id.nil? && at_least_one_authentication_key_confirmed?
+		 if self.current_app_id && at_least_one_authentication_key_confirmed?
 		 	json = super(:only => [:authentication_token])
 	     	json[:es] = self.client_authentication[self.current_app_id]
 	     	##resetting this before returning the json value.
@@ -432,5 +432,33 @@ module Auth::Concerns::UserConcern
 			errors.add(:email,"you cannot change your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
 		end
 	end
+
+	def set_client_authentication?(act_name,cont_name,client)
+		
+		client && act_name != "destroy" && !(["passwords","confirmations","unlocks"].include? cont_name)
+		
+		
+	end
+
+
+	##this def is used to determine if the auth_token and es should
+	##be sent back.
+	def reply_with_auth_token_es?(client)
+		 ##we have a client authentication for the client.
+         ##we have an authentication token
+         ##we are signed_in
+         ##we have at least one authentication_key confirmed.
+         
+         client && client_authentication[client.current_app_id] && authentication_token && signed_in? && at_least_one_authentication_key_confirmed?
+	end
+
+	##just a combination of having the redirect_url and the above method.
+	def reply_with_redirect_url_and_auth_token_and_es?(redirect_url,client)
+		redirect_url && reply_with_auth_token_es?(client)
+	end
+
+	##
+
+	
 
 end

@@ -38,6 +38,11 @@
 
 39. sidekiq is down error?
 
+40. write method to convert intent url to redirect url
+
+41. make the otp test pass when we do otp_verification_result, by modifying the expected array return.
+
+
 CART ENDPOINTS:
 ##every user has a cart already built in.
 ##do we need a seperate cart model?

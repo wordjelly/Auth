@@ -278,222 +278,93 @@ end
 
 DeviseController.class_eval do 
   
-  skip_before_action :verify_authenticity_token, if: :is_json_request?
+  include Auth::Concerns::DeviseConcern  
+  
+  ##add to devise concern.
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
-  respond_to :html, :json, :js
-
  
-
-  def is_omniauth_callback?
-    #set_devise_mapping_for_omniauth
-   
-    controller_name == "omniauth_callbacks" 
-  end
-
-  def ignore_json_request
-      if is_json_request?
-        render :nothing => true, :status => 406 and return
-      end
-  end
-
-  
-  
 
   def redirect_to(options = {}, response_status = {})
 
-    #puts "came to redirect"
-    ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
-   
-    if !session[:redirect_url].nil? && @redirect_url.nil?
-       @redirect_url = session[:redirect_url]
-       @client = Auth::Client.new(session[:client])
-    end
-    #super
-    #puts "redirect url was : #{@redirect_url}"
-    #puts "client was: #{@client}"
-     
-     #if options =~ /authentication_token|es/
-      ##this situation is to prevnet re-redirects.
-     # puts "detected auth token and es."
-      #redirect_to(options,response_status)
-     # super
-    #end    
-
-    ##HAVE NO IDEA WHAT THIS IS , AT THE MOMENT.
-    if options =~ /authentication_token|es/
-      ##this situation is to prevnet re-redirects.
-     
-      #redirect_to(options,response_status)
-      super(options,response_status)
-    else
-      ##as long as its not destroy.
-      if !resource.nil? && !@client.nil? && action_name != "destroy" && !(["passwords","confirmations","unlocks"].include? controller_name)
-        resource.set_client_authentication(@client.current_app_id)
+      #puts "came to redirect"
+      ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
+      
+      ##THIS SHOULD NO LONGER HAPPEN, I DONT WANT ANYONE TO BE AABLE TO VISIT THE WORDJELLY PAGE WITH A REDIRECT URL AND 
+      if !session[:redirect_url].nil? && @redirect_url.nil?
+         @redirect_url = session[:redirect_url]
+         @client = Auth::Client.new(session[:client])
       end
-      if (["passwords","confirmations","unlocks"].include? controller_name)
+      #super
+      #puts "redirect url was : #{@redirect_url}"
+      #puts "client was: #{@client}"
+       
+       #if options =~ /authentication_token|es/
+        ##this situation is to prevnet re-redirects.
+       # puts "detected auth token and es."
+        #redirect_to(options,response_status)
+       # super
+      #end    
+
+      ##HAVE NO IDEA WHAT THIS IS , AT THE MOMENT.
+      if options =~ /authentication_token|es/
+        ##this situation is to prevnet re-redirects.
+       
+        #redirect_to(options,response_status)
         super(options,response_status)
       else
-        
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in? && resource.at_least_one_authentication_key_confirmed?
-
-          curr_app_es = resource.client_authentication[@client.current_app_id]
-          session.delete(:client)
-          session.delete(:redirect_url)
-         
-          redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
-        else
-          super
+        ##as long as its not destroy.
+        if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
+          resource.set_client_authentication(@client.current_app_id)
         end
-      end
-    end
-  end
- 
-
-  def render(*args)
-    #puts "came to render"
-    if !resource.nil? && !@client.nil? && action_name != "destroy" && !(["passwords","confirmations","unlocks"].include? controller_name)
-        resource.set_client_authentication(@client.current_app_id)
-      end
-      #puts "client is: #{@client}"
-      #puts "redirect url -> #{@redirect_url}"
-      #puts "resource -> #{resource.attributes.to_s}"
-      
-      #puts "es -> #{resource.client_authentication[@client.current_app_id]}"
-      #puts "auth token -> #{resource.authentication_token}"
-      #puts "signed in --> #{signed_in?}"
-      if (["passwords","confirmations","unlocks"].include? controller_name)
-        super(*args)
-      else
-        if (!@redirect_url.nil?) && !resource.nil? && !resource.client_authentication[@client.current_app_id].nil? && !resource.authentication_token.nil? && signed_in? && resource.at_least_one_authentication_key_confirmed?
-
-          curr_app_es = resource.client_authentication[@client.current_app_id]
-          session.delete(:client)
-          session.delete(:redirect_url)
+        if (["passwords","confirmations","unlocks"].include? controller_name)
+          super(options,response_status)
+        else
           
-          redirect_to (@redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
-        else
-          super(*args)
-        end
-      end     
-  end
+          ##we have a redirect url
+          ##we have a client authentication for the client.
+          ##we have an authentication token
+          ##we are signed_in
+          ##we have at least one authentication_key confirmed.
+          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client])
 
+            curr_app_es = resource.client_authentication[@client.current_app_id]
+            session.delete(:client)
+            session.delete(:redirect_url)
+           
+            redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
+          else
+            super
+          end
+        end
+      end
+  end
  
-  
-  
-
-  def clear_client_and_redirect_url
-    @client = nil
-    @redirect_url = nil
-    session.delete('omniauth.state')
-
-    #session.delete('client')
-    #session.delete('omniauth.model')
-  end
-
-  def set_client
-    #puts "params are: #{params.to_s}"
-    #puts "SETTING CLIENT."
-    if !session[:client].nil?
-      #puts "GOT SESSION CLIENT."
-      #puts session[:client].to_s
-      if session[:client].is_a?Hash
-         #puts "its a hash."
-         @client = Auth::Client.new(session[:client])
-      
-      elsif session[:client].is_a? Auth::Client
-         #puts "its a client."
-         @client = session[:client]
-      end 
-      
-      return true
-
-    else
-      #puts "params are: #{params.to_s}"
-      state = nil
-      api_key = nil
-      current_app_id = nil
-      path = nil
-      if params[:state] && JSON.is_json?(params[:state])
-        state = JSON.parse(params[:state])
-      end
-      
-      if state
-        api_key = state["api_key"]
-        current_app_id = state["current_app_id"]
-        path = state["path"]
-      elsif params[:api_key] && params[:current_app_id]
-        api_key = params[:api_key]
-        current_app_id = params[:current_app_id]
-      else
-      end
-      
-
-      
-      
-      if api_key.nil? || current_app_id.nil?
-        #puts "NO API KEY OR CURRENT APP ID."
-      else
-       
-        @client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
-        #puts "BUILT CLIENT AS:"
-        #puts @client.attributes.to_s
-        
-        if !@client.nil?
-          session[:client] = @client
-          request.env["omniauth.model"] = path
-          return true
+  def render(*args)
+      puts "came to render with client :#{@client.to_s}"
+       if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
+         resource.set_client_authentication(session[:client].current_app_id)
+       end
+   
+        if (["passwords","confirmations","unlocks"].include? controller_name)
+            super(*args)
         else
-          #puts "couldnt find the client"
-        end
-      end
-      return false
-    end
-  end
+            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client])
 
-  def is_json_request?
-    
-    return (request.format.symbol == :json) ? true : false
-  end
-
-  def protect_json_request
-    
-    if is_json_request? && @client.nil?
-      
-      render :nothing => true , :status => :unauthorized
-
-    end
-  end
-
-  def set_redirect_url(client)
-    
-   # puts "the params redirect url is: #{params[:redirect_url]}"
-   # puts "the session redirect url is: #{session[:redirect_url]}"
-    redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
-
-    if !redir_url.nil? && !client.nil? && client.contains_redirect_url?(redir_url) && !(is_json_request?)
-        #puts "came to assign redir url:"
-        @redirect_url = redir_url
-        session[:redirect_url] = redir_url
-        #puts "#{@redirect_url}"
-    end
-  end
-
-  
-  def do_before_request
-    
-    clear_client_and_redirect_url
-   
-    set_client
-   
-    set_redirect_url(@client)
-
-    protect_json_request
-    
+              curr_app_es = resource.client_authentication[@client.current_app_id]
+              session.delete(:client)
+              session.delete(:redirect_url)
+              
+              redirect_to (@redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
+            else
+              super(*args)
+            end
+        end     
   end
 
   
 
+  ##add to devise_concern.
   def require_no_authentication
     
     
@@ -525,10 +396,6 @@ DeviseController.class_eval do
       end
     end
   end
-
-  
-
-  
 
 end
 

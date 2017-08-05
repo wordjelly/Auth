@@ -1,7 +1,10 @@
 class OtpController < Auth::ApplicationController
 
+	  include Auth::Concerns::DeviseConcern
 	  ##refer to auth/applicationcontroller for the not_found def, and its rescue block.
+	  before_filter :do_before_request, :only => [:otp_verification_result]
 	  before_filter :initialize_vars
+
 
 	  def initialize_vars
 	  	##deep symbolize the incoming params after passing through permitted params.
@@ -160,13 +163,22 @@ class OtpController < Auth::ApplicationController
 			resource.errors.add(:additional_login_param,"Not Found")
 		end
 
+
+		puts "session client is:"
+		puts session[:client]
+
+		resource.set_client_authentication(session[:client].current_app_id) if resource.set_client_authentication?(action_name,controller_name,session[:client])
+		
+
+
+
 	  	respond_to do |format|
-	  		#format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
+	  	  format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
 	  		##handle the redirect here.
 	  		##just set the redirect url as the intent url,
 	  		##and otherwise set the client_authentication, and then return the authentication token and es.
 	  		##abstract the devise_controller before request methods into a concern and use them in common.
-  		  format.json {render json: resource.to_json, status: @status}
+  		  #format.json {render json: resource.to_json, status: @status}
 
 	  	end
 
@@ -179,7 +191,7 @@ class OtpController < Auth::ApplicationController
 	  	else
 	  		##post_verification_intent => "reset_password" OR "unlock"
 	  		##had to add email here because in the passwords form, and the unlocks form, we have to serve either additional_login_param or email, so in order to make it work with the existing devise controllers decided to keep the param coming in as email, and sending errors back also on the email attribute,[all this is only relevant to the send_sms_otp action]
-	  		params.permit({user: [:additional_login_param, :otp, :email, :_id]}, :intent, :resource)
+	  		params.permit({user: [:additional_login_param, :otp, :email, :_id]}, :intent, :resource,:api_key,:current_app_id)
 	  	end
 	  end	
 

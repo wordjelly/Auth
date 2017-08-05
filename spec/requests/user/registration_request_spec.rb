@@ -362,7 +362,7 @@ RSpec.describe "Registration requests", :registration => true, :type => :request
             expect(user_json_hash.keys).to match_array(["nothing"])
         end        
 
-        it " -- CREATE CONFIRMED EMAIL ACCOUNT - returns the auth token and es -- ", :now => true do  
+        it " -- CREATE CONFIRMED EMAIL ACCOUNT - returns the auth token and es -- ", :nowie => true do  
             post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
             @user_created = assigns(:user)
             @cl = assigns(:client)

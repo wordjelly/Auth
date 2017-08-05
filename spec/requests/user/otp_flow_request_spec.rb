@@ -63,7 +63,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
 
     it " -- short polls for verification status, returns auth_token, es"  do 	
     	u = User.where(:additional_login_param => "123456789").first
-    	get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp}}),nil,@headers
+    	get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
     	user_json_hash = JSON.parse(response.body)
     	expect(user_json_hash).to match_array(["authentication_token","es"])
     end
