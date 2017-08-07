@@ -443,8 +443,9 @@ module SimpleTokenAuthentication
 		def authenticate_entity_from_token!(entity)
 		  ##here we should find the record by the authentication token.
 		  ##then we should find
+		  puts "the entity is: #{entity.to_s}"
 	      record = find_record_from_identifier(entity)
-
+	      puts "record is: #{record}"
 	      if token_correct?(record, entity, token_comparator)
 	        perform_sign_in!(record, sign_in_handler)
 	      end
@@ -456,6 +457,7 @@ module SimpleTokenAuthentication
 	    end
 
 		def token_correct?(record, entity, token_comparator)
+			return false unless record
       		additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
       		identifier_param_value = entity.get_identifier_from_params_or_headers(self).presence

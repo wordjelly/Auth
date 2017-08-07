@@ -42,6 +42,7 @@
 
 41. make the otp test pass when we do otp_verification_result, by modifying the expected array return.
 
+42. permitted params have to be hard coded somewhere in the devise_concern, to allow the app_id and the api_key.
 
 CART ENDPOINTS:
 ##every user has a cart already built in.

@@ -164,10 +164,9 @@ class OtpController < Auth::ApplicationController
 		end
 
 
-		puts "session client is:"
-		puts session[:client]
+		
 
-		resource.set_client_authentication(session[:client].current_app_id) if resource.set_client_authentication?(action_name,controller_name,session[:client])
+		resource.set_client_authentication(session[:client]) if resource.set_client_authentication?(action_name,controller_name,session[:client])
 		
 
 

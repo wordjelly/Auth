@@ -248,7 +248,12 @@ module Auth::Concerns::UserConcern
 	#    end
 	#end
 
-	def set_client_authentication(app_id)
+	def set_client_authentication(client)
+		puts "the client is a hash: #{client.is_a? Hash}:"
+		puts client.to_s
+
+		client = Auth::Client.new(client) if client.is_a? Hash
+		app_id = client.current_app_id
 		if self.client_authentication[app_id].nil? && self.valid?
 			self.client_authentication[app_id] = SecureRandom.hex(32)
 			

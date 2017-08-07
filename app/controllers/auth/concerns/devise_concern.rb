@@ -49,17 +49,17 @@ module Auth::Concerns::DeviseConcern
 
     def set_client
 	    
-	    if !session[:client].nil?
+	    if session[:client]
 	      #puts "GOT SESSION CLIENT."
 	      #puts session[:client].to_s
-	      if session[:client].is_a?Hash
-	         #puts "its a hash."
-	         @client = Auth::Client.new(session[:client])
+	      #if session[:client].is_a?Hash
+	      #   #puts "its a hash."
+	      #   @client = Auth::Client.new(session[:client])
 	      
-	      elsif session[:client].is_a? Auth::Client
+	      #elsif session[:client].is_a? Auth::Client
 	         #puts "its a client."
-	         @client = session[:client]
-	      end 
+	      #   @client = session[:client]
+	      #end 
 	      
 	      return true
 
@@ -89,16 +89,9 @@ module Auth::Concerns::DeviseConcern
 	      if api_key.nil? || current_app_id.nil?
 	        
 	      else
-	       
-	        @client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
-	       
-	        
-	        if !@client.nil?
-	          session[:client] = @client
+	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          request.env["omniauth.model"] = path
 	          return true
-	        else
-	          
 	        end
 	      end
 	      return false
@@ -112,22 +105,22 @@ module Auth::Concerns::DeviseConcern
 
 	def protect_json_request
 	    
-	    if is_json_request? && @client.nil?
+	    if is_json_request? && session[:client].nil?
 	      
 	      render :nothing => true , :status => :unauthorized
 
 	    end
 	end
 
-    def set_redirect_url(client)
+    def set_redirect_url
     
         # puts "the params redirect url is: #{params[:redirect_url]}"
         # puts "the session redirect url is: #{session[:redirect_url]}"
         redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
 
-	    if !redir_url.nil? && !client.nil? && client.contains_redirect_url?(redir_url) && !(is_json_request?)
+	    if redir_url && session[:client] && client.contains_redirect_url?(redir_url) && !(is_json_request?)
 	        #puts "came to assign redir url:"
-	        @redirect_url = redir_url
+	        #@redirect_url = redir_url
 	        session[:redirect_url] = redir_url
 	        #puts "#{@redirect_url}"
 	    end
@@ -140,7 +133,7 @@ module Auth::Concerns::DeviseConcern
    
        set_client
    
-       set_redirect_url(@client)
+       set_redirect_url
 
        protect_json_request
     

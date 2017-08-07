@@ -2,9 +2,9 @@
 module Auth::Concerns::Shopping::CartItemConcern
 
 	extend ActiveSupport::Concern
-
-	include Auth::Concerns::ProductConcern
-	include Mongoid::TimeStamps
+	include Mongoid::Document
+	include Mongoid::Timestamps
+	include Auth::Concerns::Shopping::ProductConcern
 
 	included do 
 
@@ -12,7 +12,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :product_id, type: String
 
 		##the user id who is buying this product.
-		field :user_id, type: String
+		field :resource_id, type: String
 			
 		##the number of this product that are being added to the cart
 		field :quantity, type: Integer, default: 1

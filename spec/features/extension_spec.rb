@@ -579,6 +579,63 @@ RSpec.feature "", :type => :feature, :feature => true do
   end
 
 
+  context " -- topic web app request spec ", :topic_feature => true do 
+
+    scenario "visit topic part after signing in, and everythign should work." , js: true do 
+        ActionController::Base.allow_forgery_protection = false
+        Auth.configuration.recaptcha = false
+            ##visit the sign in page
+            visit new_user_session_path({:api_key => @ap_key, :current_app_id => "test_app_id"})
+
+            puts "----------------FINISHED NEW USER SESSION PATH----------------"
+            ##visit the sign up page.
+            click_link("Sign In")
+            wait_for_ajax
+            ##modal should open.
+            ##then 
+            ## SET RECAPTCHA TO FALSE SO THAT IT DOESNT INTERFERE WITH THE REQUEST RESPONSE.
+            
+            find("#show_sign_up").click
+            #puts "----------------VISITED NEW USER REGISTRATION--------------"
+            fill_in('Email', :with => 'retard@gmail.com')
+            fill_in('Password', :with => 'password')
+            fill_in('Password confirmation', :with => 'password')
+            wait_for_ajax
+            find("#submit").trigger("click")
+            wait_for_ajax
+            ##now visit he confirmation url.
+            u = User.where(:email => 'retard@gmail.com').first
+            confirmation_token = u.confirmation_token
+            visit user_confirmation_path({:confirmation_token => confirmation_token})
+            
+            u.reload
+            
+            click_link("Sign In")
+            wait_for_ajax
+
+            #puts u.attributes.to_s
+            puts " ----------------- trying to sign in with new user ------------------------------"
+            fill_in('Email',:with => 'retard@gmail.com')
+            fill_in('Password', :with => 'password')
+            find("#submit").trigger("click")
+            puts "sleeping"
+            sleep(5)
+            puts "visiting new topic path."
+            visit new_topic_path
+            expect(page).to have_text("Sign Out")
+    end
+
+    scenario "visit topic path without signing in, should redirect to sign in or sign up" , js: true , topic_feature: true do 
+        visit new_topic_path
+        puts page.text
+        expect(page).to have_text("You need to Sign in to continue.")
+
+    end
+                        
+
+  end
+
+
 
   
 

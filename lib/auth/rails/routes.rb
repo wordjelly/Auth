@@ -23,15 +23,15 @@ module ActionDispatch::Routing
 		  get "#{Auth.configuration.mount_path}/:resource/resend_sms_otp", :action => "resend_sms_otp", :controller => "otp", :as => "resend_sms_otp"
 
 		 ###CART ITEM ROUTES
-		 post "#{Auth.configuration.mount_path}/:resource/cart_items", :action => "create", :controller => "otp", :as => "create_cart_item"
+		 post "#{Auth.configuration.mount_path}/cart_items", :action => "create", :controller => "otp", :as => "create_cart_item"
 
-		 post "#{Auth.configuration.mount_path}/:resource/cart_items/:id", :action => "update", :controller => "otp", :as => "update_cart_item"
+		 post "#{Auth.configuration.mount_path}/cart_items/:id", :action => "update", :controller => "otp", :as => "update_cart_item"
 
-		 get "#{Auth.configuration.mount_path}/:resource/cart_items/:id", :action => "show", :controller => "otp", :as => "show_cart_item"
+		 get "#{Auth.configuration.mount_path}/cart_items/:id", :action => "show", :controller => "otp", :as => "show_cart_item"
 
-		 delete "#{Auth.configuration.mount_path}/:resource/cart_items/:id", :action => "destroy", :controller => "otp", :as => "destroy_cart_item"		 
+		 delete "#{Auth.configuration.mount_path}/cart_items/:id", :action => "destroy", :controller => "otp", :as => "destroy_cart_item"		 
 
-		 get "#{Auth.configuration.mount_path}/:resource/cart_items", :action => "index", :controller => "otp", :as => "cart_items" 
+		 get "#{Auth.configuration.mount_path}/cart_items", :action => "index", :controller => "otp", :as => "cart_items" 
 
 		  
 		  app_route_resources.each do |resource,opts| 

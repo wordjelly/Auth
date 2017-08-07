@@ -20,15 +20,27 @@ RSpec.describe "session request spec", :type => :request,topic: true do
 
 	end
 
-        context "-- token authentication tests " do 
+        ##here we try to test , if signing in a user still allows access to this resource, without using tokens, while using the web interface, this is tested in the feature specs.
+        context "-- WEB APP TESTS, WITHOUT TOKEN " do 
 
-                it " - authenticates  ",:focus => true do 
+                
+
+        end
+
+        context "-- API JSON token authentication tests " do 
+
+                it " - authenticates  ",:topic_focus => true do 
                         get new_topic_path, nil, @headers
                         expect(response.code).to eq("200")
                 end
 
-                it " - does not authenticate without es", :focus => true do 
-                        @headers["X-User-Es"] = "null"
+                it " - authenticates and sets resource ", :topic_focus => true do 
+                        get new_topic_path, nil, @headers
+                        expect(assigns(:resource)).to be_truthy      
+                end
+
+                it " - does not authenticate without es", :defocus => true do 
+                        @headers.delete("X-User-Token")
                         get new_topic_path, nil, @headers
                         expect(response.code).to eq("401")
                 end
