@@ -405,17 +405,6 @@ module Devise
   ##THIS CHANGE NEEDS TO BE MADE, IN ORDER TO CHANGE THE EMAIL_REQUIRED?
   ##PROTECTED METHOD FROM THE VALIDATABLE MODULE IN DEVISE.
   ##EMAIL IS REQUIRED ONLY IF THE ADDITIONAL LOGIN PARAM IS enabled , but still nil
-  module Models
-    module Validatable
-      protected
-        def email_required?
-          #additional_login_param.nil?
-          return additional_login_param.nil?
-        end 
-    end
-  end
-  
-
   module Controllers
     module Helpers
       ##takes care of the test case where no devise mapping is specified in the request.env.

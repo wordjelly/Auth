@@ -78,6 +78,10 @@ module Auth::Concerns::UserConcern
 		  if !opts[:skip].include? :registrations
 	      	devise :registerable
 	      	devise :validatable
+	      	def email_required?
+          		#additional_login_param.nil?
+          		return additional_login_param.nil?
+        	end 
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
 
 
@@ -89,9 +93,7 @@ module Auth::Concerns::UserConcern
 	        ##VALIDATIONS TO BE DONE ONLY ON UPDATE
 	        validate :additional_login_param_changed_on_unconfirmed_email,on: :update
 	        validate :email_changed_on_unconfirmed_additional_login_param,on: :update
-	        validate :email_and_additional_login_param_both_changed,on: :update
-
-	        
+	        validate :email_and_additional_login_param_both_changed,on: [:update,:create]
 
 	        field :remember_created_at, type: Time
 	  	  end
@@ -117,6 +119,11 @@ module Auth::Concerns::UserConcern
 			  field :confirmed_at,         type: Time
 			  field :confirmation_sent_at, type: Time
 			  field :unconfirmed_email,    type: String # Only if using reconfirmable
+
+			  def confirmation_required?
+          		!confirmed? && (self.email || self.unconfirmed_email)
+        	  end
+
 	      end
 
 
@@ -434,7 +441,7 @@ module Auth::Concerns::UserConcern
 		##additional login param can change as long as neither goes from nil to blank or blank to nil.
 
 		if email_changed? && !attr_blank_to_blank?("email") && additional_login_param_changed? && !attr_blank_to_blank?("additional_login_param")
-			errors.add(:email,"you cannot change your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
+			errors.add(:email,"you cannot update your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
 		end
 	end
 

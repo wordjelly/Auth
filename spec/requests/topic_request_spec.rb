@@ -20,12 +20,7 @@ RSpec.describe "session request spec", :type => :request,topic: true do
 
 	end
 
-        ##here we try to test , if signing in a user still allows access to this resource, without using tokens, while using the web interface, this is tested in the feature specs.
-        context "-- WEB APP TESTS, WITHOUT TOKEN " do 
-
-                
-
-        end
+     
 
         context "-- API JSON token authentication tests " do 
 

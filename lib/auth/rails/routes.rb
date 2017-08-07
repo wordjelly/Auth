@@ -14,25 +14,19 @@ module ActionDispatch::Routing
 		  	end
 		  end
 		  
-		  ##need to add the routes for sms otp in case you are using the 
-		  ##sms_otp_concern in the model, and use any controller in your own app that implements the otp_concern from Auth::Controllers::Concerns.
-		  ##see the User model in the dummy app in this engine.
-		  get "#{Auth.configuration.mount_path}/:resource/otp_verification_result", :action => "otp_verification_result", :controller => "otp", :as => "otp_verification_result"
-		  get "#{Auth.configuration.mount_path}/:resource/verify_otp", :action => "verify_otp", :controller => "otp", :as => "verify_otp"
-		  get "#{Auth.configuration.mount_path}/:resource/send_sms_otp", :action => "send_sms_otp", :controller => "otp", :as => "send_sms_otp"
-		  get "#{Auth.configuration.mount_path}/:resource/resend_sms_otp", :action => "resend_sms_otp", :controller => "otp", :as => "resend_sms_otp"
+		 if Auth.configuration.otp_controller
+			 get "#{Auth.configuration.mount_path}/:resource/otp_verification_result", :action => "otp_verification_result", :controller => "#{Auth.configuration.otp_controller}", :as => "otp_verification_result"
+			  get "#{Auth.configuration.mount_path}/:resource/verify_otp", :action => "verify_otp", :controller => "#{Auth.configuration.otp_controller}", :as => "verify_otp"
+			  get "#{Auth.configuration.mount_path}/:resource/send_sms_otp", :action => "send_sms_otp", :controller => "#{Auth.configuration.otp_controller}", :as => "send_sms_otp"
+			  get "#{Auth.configuration.mount_path}/:resource/resend_sms_otp", :action => "resend_sms_otp", :controller => "#{Auth.configuration.otp_controller}", :as => "resend_sms_otp"
+		  end
 
 		 ###CART ITEM ROUTES
-		 post "#{Auth.configuration.mount_path}/cart_items", :action => "create", :controller => "otp", :as => "create_cart_item"
-
-		 post "#{Auth.configuration.mount_path}/cart_items/:id", :action => "update", :controller => "otp", :as => "update_cart_item"
-
-		 get "#{Auth.configuration.mount_path}/cart_items/:id", :action => "show", :controller => "otp", :as => "show_cart_item"
-
-		 delete "#{Auth.configuration.mount_path}/cart_items/:id", :action => "destroy", :controller => "otp", :as => "destroy_cart_item"		 
-
-		 get "#{Auth.configuration.mount_path}/cart_items", :action => "index", :controller => "otp", :as => "cart_items" 
-
+		 if Auth.configuration.cart_item_controller
+		 	 scope :path => "#{Auth.configuration.mount_path}" do
+			    resources :cart_items, controller: "#{Auth.configuration.cart_item_controller}"  
+			 end
+		 end
 		  
 		  app_route_resources.each do |resource,opts| 
 

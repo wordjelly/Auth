@@ -84,7 +84,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
     ##so to update , we will have to permit the id, to be sent in.
     params.require(:cart_item)
-    param.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:_id)
+    param.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:id)
   end
 
 end
