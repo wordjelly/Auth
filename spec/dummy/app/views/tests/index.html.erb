@@ -18,7 +18,7 @@
         <td><%= test.name %></td>
         <td><%= link_to 'Show', test %></td>
         <td><%= link_to 'Edit', edit_test_path(test) %></td>
-        <td><%= link_to 'Add to Cart',cart_items_path({:cart_item => Shopping::CartItem.new(:product_id => test.id.to_s).attributes}), method: :post %></td>
+        <td><%= link_to 'Add to Cart',shopping_cart_items_path({:cart_item => Shopping::CartItem.new(:product_id => test.id.to_s).attributes}), method: :post %></td>
         <td></td>
         <td><%= link_to 'Destroy', test, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>

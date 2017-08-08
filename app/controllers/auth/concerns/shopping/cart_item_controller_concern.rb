@@ -27,13 +27,8 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   ##if the cart_item does not match the resource id, then it will go to not_found
   def resource_owns_cart_item?
-    puts "Came to resource owns cart item."
-    ##this can be overriden to give administrators the ability to see the resource/update/modify whatever.
-    if resource_id = permitted_params[:cart_item][:resource_id] && @resource 
-      ##check if this is the same as the currently signed in resource.
-      return resource_id == @resource.id.to_s
-    end
-    not_found("You don't have permission to change or view this cart item")
+    ##check if this is the same as the currently signed in resource.
+    not_found("You don't have permission to change or view this cart item") if (@cart_item.resource_id != @resource.id.to_s)
   end
 
   ##iterates all the authentication resources in the config.
@@ -87,7 +82,6 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   def permitted_params
     ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
     ##so to update , we will have to permit the id, to be sent in.
-    params.require(:cart_item)
     params.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:id)
   end
 

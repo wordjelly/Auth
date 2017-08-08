@@ -1,0 +1,12 @@
+<p id="notice"><%= notice %></p>
+
+<% @cart_item.attributes.keys.each do |f| %>
+<p>
+  <strong><%= f.to_s %></strong>
+  <%= @cart_item.send("#{f}") %>
+</p>
+<% end %>
+
+<%= link_to 'Edit', edit_shopping_cart_item_path(@cart_item) %> |
+<%= link_to 'Back', shopping_cart_items_path %>
+
