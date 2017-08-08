@@ -8,31 +8,31 @@ module Auth
 
 		def auth_gen
 			
-			puts "--entered auth gen with params #{self.id} and phone number #{self.additional_login_param}"
+			#puts "--entered auth gen with params #{self.id} and phone number #{self.additional_login_param}"
 			clear_redis_user_otp_hash
-			puts "--came after clearing the redis hash."
+			#puts "--came after clearing the redis hash."
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
-				puts "--no api key found"
+				#puts "--no api key found"
 				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
-				puts "--running request"
+				#puts "--running request"
 
 				response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
 
 				if response.code == 200
-					puts "--response code is 200"
+					#puts "--response code is 200"
 					response_body = JSON.parse(response.body).symbolize_keys
-					puts "---response body is:"
-					puts response_body.to_s
+					#puts "---response body is:"
+					#puts response_body.to_s
 					if response_body[:Status] == "Success"
-						puts "--response status is success"
+						#puts "--response status is success"
 						$redis.hset(self.id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
 					else
-						puts "--response status is failure"
+						#puts "--response status is failure"
 						log_error_to_redis(response_body[:Details])
 					end
 				else
-					puts "--response code is non 200"
+					#puts "--response code is non 200"
 					log_error_to_redis("HTTP Error code:"+ response.code.to_s)	
 				end
 			end
@@ -40,7 +40,7 @@ module Auth
 		end
 
 		def verify(otp)
-			puts "came to verify the otp with otp :#{otp}"
+			#puts "came to verify the otp with otp :#{otp}"
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
 				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
@@ -75,12 +75,12 @@ module Auth
 		end
 
 		def log_error_to_redis(error)
-			puts "redis error is:#{error}"
+			#puts "redis error is:#{error}"
 			$redis.hset(self.id.to_s + "_two_factor_sms_otp","error",error)
 		end
 
 		def clear_redis_user_otp_hash
-			puts "--came to clear redis otp hash."
+			#puts "--came to clear redis otp hash."
 			$redis.del(self.id.to_s + "_two_factor_sms_otp")
 		end
 		

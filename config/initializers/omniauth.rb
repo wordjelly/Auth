@@ -438,6 +438,13 @@ module SimpleTokenAuthentication
 		end
 	end
 
+	module ActsAsTokenAuthenticatable
+		##this method is called whenever the email or the additional_login_param or the password is changed.
+		def regenerate_token
+			self.authentication_token = generate_authentication_token(token_generator)
+		end	
+	end
+
 	module TokenAuthenticationHandler
 
 		def authenticate_entity_from_token!(entity)

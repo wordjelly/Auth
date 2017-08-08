@@ -341,7 +341,7 @@ DeviseController.class_eval do
   end
  
   def render(*args)
-      puts "came to render with client :#{@client.to_s}"
+     # puts "came to render with client :#{@client.to_s}"
        if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
          resource.set_client_authentication(session[:client])
        end
@@ -436,7 +436,7 @@ module Devise
     end
 
     def authenticate_scope!
-      #puts "came to authenticate scope."
+      puts "came to authenticate scope."
 
       do_before_request  
 
@@ -446,13 +446,26 @@ module Devise
         es = request.headers["X-#{resource_name.to_s.capitalize}-Es"]
         app_id = request.headers["X-#{resource_name.to_s.capitalize}-Aid"]
         #puts "token is : #{token}, and es is :#{es}"
-        self.resource = resource_name.to_s.capitalize.constantize.where("authentication_token" => token, "client_authentication.#{app_id}" => es).first
-        if self.resource.nil?
-          send("authenticate_#{resource_name}!",force: true)
+        
+        if !(token && es && app_id)
+            #puts "either token or app id or es was missing."
+            send("authenticate_#{resource_name}!",force: true)
         else
-          send(:sign_in,self.resource)
+          self.resource = resource_name.to_s.capitalize.constantize.where("authentication_token" => token, "client_authentication.#{app_id}" => es).first
+
+          if self.resource.nil?
+            #puts "didnt find any such resource."
+            send("authenticate_#{resource_name}!",force: true)
+          else
+
+            #puts "found sucha resource,"
+            #puts "auth token is: #{self.resource.authentication_token}"
+            #puts "client authentication is: #{self.resource.client_authentication}"
+            send(:sign_in,self.resource)
+          end
         end
       else
+        #puts "wasnt a json request."
         send("authenticate_#{resource_name}!", force: true)
         self.resource = send("current_#{resource_name}")
       end

@@ -9,7 +9,7 @@ class OtpController < Auth::ApplicationController
 	  def initialize_vars
 	  	##deep symbolize the incoming params after passing through permitted params.
 	  	@resource_params = permitted_params.deep_symbolize_keys
-	  	puts @resource_params.to_s
+	  	#puts @resource_params.to_s
 	  	##if the resource is defined, assign the class and the symbol for use further in the file
 	  	##eg: resource is provided in the route as : users, so 
 	  	##@resource_class => User
@@ -21,11 +21,11 @@ class OtpController < Auth::ApplicationController
 	  			@resource_class = collection.singularize.capitalize.constantize
 	  			@resource_symbol = collection.singularize.to_sym
 	  					
-	  			puts "resource class is:"
-	  			puts @resource_class
+	  			#puts "resource class is:"
+	  			#puts @resource_class
 
-	  			puts "resource sybmol is:"
-	  			puts @resource_symbol
+	  			#puts "resource sybmol is:"
+	  			#puts @resource_symbol
 	  			##this is either the provided email(in case of forgot_password form, we pass in the additional_login_param under the email key itself.#ref auth/modals/forgot_password_content.html.erb)
 	  			if @resource_params[@resource_symbol]
 				  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]
@@ -149,7 +149,7 @@ class OtpController < Auth::ApplicationController
 				  	elsif @intent == "unlock_account"
 				  		##here normally would be resource.unlock.
 				  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
-				  		puts "came to unlocks."
+				  		#puts "came to unlocks."
 				  		raw, enc = Devise.token_generator.generate(resource.class, :unlock_token)
 	        			resource.unlock_token = enc
 	        			resource.save(validate: false)

@@ -120,9 +120,10 @@ module Auth::Concerns::UserConcern
 			  field :confirmation_sent_at, type: Time
 			  field :unconfirmed_email,    type: String # Only if using reconfirmable
 
-			  def confirmation_required?
-          		!confirmed? && (self.email || self.unconfirmed_email)
-        	  end
+			  ##this is what was overriden to ensure that confirmation_token and confirmation_sent_at are not set if we create an accoutn with just the mobile, but that caused active_for_authentication? to always return true, and so we had to let it be as is.
+			  #def confirmation_required?
+          	  #	!confirmed? && (self.email || self.unconfirmed_email)
+        	  #end
 
 	      end
 
@@ -182,8 +183,10 @@ module Auth::Concerns::UserConcern
 		def active_for_authentication?
 			##if additional_login_param is confirmed and 
 			if additional_login_param_status == 2
+				
 				true
 			else
+				
 				super
 			end
 		end 
@@ -221,23 +224,22 @@ module Auth::Concerns::UserConcern
 	##reset the auth token if the email or password changes.
 	def email=(email)
 		super
-		reset_token
+		##method is defined in lib/omniauth#Simpletokenauthentication
+		regenerate_token
 	end
 
 	def additional_login_param=(additional_login_param)
 		super
-		reset_token
+		regenerate_token
 	end
 
 	def password=(password)
 		super
-		reset_token
+		regenerate_token
 	end
 
 
-	def reset_token
-		self.authentication_token = nil
-	end
+	
 
 	#def has_token_and_es
 	#	return !self.authentication_token.nil?
@@ -256,9 +258,7 @@ module Auth::Concerns::UserConcern
 	#end
 
 	def set_client_authentication(client)
-		puts "the client is a hash: #{client.is_a? Hash}:"
-		puts client.to_s
-
+		
 		client = Auth::Client.new(client) if client.is_a? Hash
 		app_id = client.current_app_id
 		if self.client_authentication[app_id].nil? && self.valid?
@@ -405,7 +405,6 @@ module Auth::Concerns::UserConcern
 	## used in auth/registrations/update.js.erb
 	## use it to chekc if the resource is fully confirmed, otherwise we redirect in the erb to whichever of the two needs to be confirmed.
 	def authentication_keys_confirmed?	
-		
 		return email_confirmed_or_does_not_exist && additional_login_param_confirmed_or_does_not_exist
 	end
 
@@ -429,7 +428,7 @@ module Auth::Concerns::UserConcern
 	def attr_blank_to_blank?(attr)
 		if self.respond_to?(attr)
 			if (self.send("#{attr}_was").blank? && self.send("#{attr}").blank?)
-				puts "it was blank and it is blank."
+				
 				true
 			end
 		end
