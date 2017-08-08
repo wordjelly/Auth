@@ -6,30 +6,34 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ##this ensures api access to this controller.
     include Auth::Concerns::TokenConcern
     before_filter :initialize_vars
-    before_filter :resource_owns_cart_item, :on => [:update,:destroy,:show]
+    before_filter :resource_owns_cart_item?, :only => [:update,:destroy,:show]
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
   #if no id is provided then creates a new cart_item from the permitted params, but excluding the id key.
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
-    @cart_item = permitted_params[:id] ? self.find(permitted_params[:id]) : self.new(permitted_params[:cart_item])
-    collection = permitted_params[:resource] or not_found
-    Auth.configuration.auth_resources[collection.singularize.capitalize] or not_found
-    #@resource_class = collection.singularize.capitalize.constantize
-    #@resource_symbol = collection.singularize.to_sym
-    #@resource = self.send("current_#{resource_class.downcase}")
-    resource_owns_cart_item? or not_found
+    if @cart_item_class = Auth.configuration.cart_item_class
+      begin
+        @cart_item_class = @cart_item_class.constantize
+      rescue
+        not_found("error instatiating class from cart item class")
+      end
+    else
+      not_found("cart item class not specified in configuration")
+    end
+    @cart_item = permitted_params[:id] ? @cart_item_class.find(permitted_params[:id]) : @cart_item_class.new(permitted_params[:cart_item])
   end
 
   ##if the cart_item does not match the resource id, then it will go to not_found
   def resource_owns_cart_item?
+    puts "Came to resource owns cart item."
     ##this can be overriden to give administrators the ability to see the resource/update/modify whatever.
     if resource_id = permitted_params[:cart_item][:resource_id] && @resource 
       ##check if this is the same as the currently signed in resource.
       return resource_id == @resource.id.to_s
     end
-    false
+    not_found("You don't have permission to change or view this cart item")
   end
 
   ##iterates all the authentication resources in the config.
@@ -68,7 +72,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##we will have a cart item that is new and useless, and a resource.
   ##so we just need a query to show all the cart items of this resource
   def index
-    @cart_items = self.where(:resource_id => @resource.id.to_s)
+    @cart_items = @cart_item_class.where(:resource_id => @resource.id.to_s)
   end
 
 
@@ -84,7 +88,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
     ##so to update , we will have to permit the id, to be sent in.
     params.require(:cart_item)
-    param.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:id)
+    params.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:id)
   end
 
 end

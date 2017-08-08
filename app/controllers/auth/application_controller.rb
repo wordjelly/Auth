@@ -4,9 +4,11 @@ module Auth
     protect_from_forgery with: :exception
   	
     rescue_from ActionController::RoutingError do |e|
+    	puts "e is : #{e.to_s}"
   		respond_to do |format|
 	       format.json {render json: {:errors => "Not Found"}, status: 422}
   		   format.js   {render :partial => "auth/modals/resource_errors.js.erb", locals: {:errors => ["Not Found"]}}
+	       format.html {render :text => e}
 	    end
   	end  
 
@@ -44,8 +46,8 @@ module Auth
 	 ##CURRENTLY BEING USED IN THE DUMMY APP IN OTP_CONTROLLER
 	 ##RENDERS A NOT FOUND RESPONSE, in case the user is not found.
 	 ##
-	 def not_found
-	 	  raise ActionController::RoutingError.new('Not Found')
+	 def not_found(error = 'Not Found')
+	 	  raise ActionController::RoutingError.new(error)
 	 end
 
 

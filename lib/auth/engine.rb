@@ -54,6 +54,7 @@ module Auth
     attr_accessor :stub_otp_api_calls
     attr_accessor :otp_controller
     attr_accessor :cart_item_controller
+    attr_accessor :cart_item_class
 
     def initialize
       @enable_token_auth = true
@@ -67,6 +68,7 @@ module Auth
       @stub_otp_api_calls = false
       @otp_controller = nil
       @cart_item_controller = nil
+      @cart_item_class = "CartItem"
     end
   end
   

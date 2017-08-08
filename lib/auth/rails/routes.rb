@@ -23,8 +23,21 @@ module ActionDispatch::Routing
 
 		 ###CART ITEM ROUTES
 		 if Auth.configuration.cart_item_controller
-		 	 scope :path => "#{Auth.configuration.mount_path}" do
-			    resources :cart_items, controller: "#{Auth.configuration.cart_item_controller}"  
+		 	 scope_path = "/"
+		 	 as_prefix = nil
+		 	 cart_items_collection = nil
+		 	 Auth.configuration.cart_item_class.underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<cart_items_collection>[A-Za-z_]+)$/) do |match|
+		 	 		if Regexp.last_match[:scope_path]
+		 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
+		 	 			as_prefix = Regexp.last_match[:scope_path]
+		 	 		end
+		 	 		cart_items_collection = Regexp.last_match[:cart_items_collection]
+		 	 end
+		 	 if cart_items_collection
+		 	 	puts "scope path is: #{scope_path}"
+		 	 	scope :path => scope_path, :as => as_prefix do 
+			    	resources cart_items_collection.to_sym, controller: "#{Auth.configuration.cart_item_controller}"
+			    end  
 			 end
 		 end
 		  
