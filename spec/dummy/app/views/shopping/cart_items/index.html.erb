@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Your Tests Cart looks like this</h1>
+
+<table>
+  <thead>
+    <tr>
+      <% Auth.configuration.cart_item_class.constantize.fields.keys.sort.each do |key| %>
+        <th><%= key %></th>
+      <% end %>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @cart_items.each do |cart_item| %>
+      <tr>
+
+        <% Auth.configuration.cart_item_class.constantize.fields.keys.sort.each do |field| %>
+          <td><%= cart_item.send("#{field}") or "" %></td>
+        <% end %>
+        
+        <td><%= check_box_tag "Select" %>
+            <%= label_tag "Select" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'Add Another Test', new_shopping_cart_item_path %>

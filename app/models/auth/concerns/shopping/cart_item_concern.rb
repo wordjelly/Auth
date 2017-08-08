@@ -27,4 +27,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :discount_code, type: String
 	end
 
+	
+	
 end

@@ -67,7 +67,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##we will have a cart item that is new and useless, and a resource.
   ##so we just need a query to show all the cart items of this resource
   def index
-    @cart_items = @cart_item_class.where(:resource_id => @resource.id.to_s)
+    @cart_items = @cart_item_class.where(:resource_id => @resource.id.to_s).page 1
   end
 
 
