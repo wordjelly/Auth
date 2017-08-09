@@ -42,29 +42,63 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         
     end
 
-    it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
-    	post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-        @user_created = assigns(:user)
-        @cl = assigns(:client)
-        user_json_hash = JSON.parse(response.body)
-        expect(user_json_hash.keys).to match_array(["nothing"])
+    context " -- basic otp flow --" do
+
+        it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
+        	post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            @user_created = assigns(:user)
+            @cl = assigns(:client)
+            user_json_hash = JSON.parse(response.body)
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end
+
+        it " -- accepts otp at the verify otp endpoint -- " do 
+        	user_attrs = attributes_for(:user_mobile)
+        	a = {}
+        	a[:user] = {:additional_login_param => "123456789"}
+    		get verify_otp_url({:resource => "users",:user => {:additional_login_param => "123456789", :otp => @otp}}),nil,@headers
+    		user_json_hash = JSON.parse(response.body)
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end
+
+        it " -- short polls for verification status, returns auth_token, es"  do 	
+        	u = User.where(:additional_login_param => "123456789").first
+        	get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+        	user_json_hash = JSON.parse(response.body)
+        	puts user_json_hash.to_s
+            expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+        end
+
     end
 
-    it " -- accepts otp at the verify otp endpoint -- " do 
-    	user_attrs = attributes_for(:user_mobile)
-    	a = {}
-    	a[:user] = {:additional_login_param => "123456789"}
-		get verify_otp_url({:resource => "users",:user => {:additional_login_param => "123456789", :otp => @otp}}),nil,@headers
-		user_json_hash = JSON.parse(response.body)
-        expect(user_json_hash.keys).to match_array(["nothing"])
+    context " -- resend otp flow -- " do 
+
+
     end
 
-    it " -- short polls for verification status, returns auth_token, es"  do 	
-    	u = User.where(:additional_login_param => "123456789").first
-    	get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
-    	user_json_hash = JSON.parse(response.body)
-    	puts user_json_hash.to_s
-        expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+
+    context " -- invalid otp flow -- " do 
+
+
+    end
+
+    context " -- forgot password flow -- " do 
+
+
+    end
+
+    context  " -- unlock account flow -- " do 
+
+
+    end
+
+    context " -- no otp resource on path --- " do 
+
+    end
+
+    context " -- nil values --- " do 
+        
+
     end
 
   end

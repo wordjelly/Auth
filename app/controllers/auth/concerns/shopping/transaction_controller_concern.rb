@@ -6,23 +6,25 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
 
   end
 
-  ##payment can be made to the transaction
-  ##expect to have an amount || cart item, and compulsarily a method
-  ##the method will redirect to either gateway payment or cash payment 
-  ##or cheque payment
-  def pay
-
+  def gateway_pay_success_callback
+    ##will be called if the payment gateway payment succeeds.
+    ##and then it should also add a couple of fields, that do stuff like balanace.
+    ##
   end
 
-  def pay_gateway
+  def gateway_pay_failure_callback
+    ##will be called if the payment gateway payment fails for any reason.
+  end
+
+  def pay_by_gateway
   	##will redirect to the payment gateway page.
   end
 
-  def pay_cash
+  def pay_by_cash
   	##will pop up screen requiring a authorization to accept payment
   end
 
-  def pay_cheque
+  def pay_by_cheque
   	##will pop up screen requiring a authorizatino to accept payment.
   end
 
@@ -70,6 +72,12 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
   ##transaction object id.
   def destroy
 
+  end
+
+  def permitted_params
+    ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
+    ##so to update , we will have to permit the id, to be sent in.
+    params.permit({transaction: [:add_cart_item_ids,:remove_cart_item_ids,:preferred_payment_stage,:transaction_status]},:id)
   end
 
 end

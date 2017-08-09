@@ -339,6 +339,7 @@ module Auth::Concerns::UserConcern
 	##if there is none, then it will return nil.
 	##it should return the errors irrespective of these settings.
 	def as_json(options)
+		 
 		 json = {:nothing => true}
 		 if self.current_app_id && at_least_one_authentication_key_confirmed?
 		 	json = super(:only => [:authentication_token])

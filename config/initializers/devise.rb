@@ -287,7 +287,7 @@ DeviseController.class_eval do
 
   def redirect_to(options = {}, response_status = {})
 
-      #puts "came to redirect"
+      
       ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
       
       ##THIS SHOULD NO LONGER HAPPEN, I DONT WANT ANYONE TO BE AABLE TO VISIT THE WORDJELLY PAGE WITH A REDIRECT URL AND 
@@ -341,7 +341,7 @@ DeviseController.class_eval do
   end
  
   def render(*args)
-     # puts "came to render with client :#{@client.to_s}"
+      
        if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
          resource.set_client_authentication(session[:client])
        end
@@ -357,6 +357,7 @@ DeviseController.class_eval do
               
               redirect_to (session[:redirect_url] + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
             else
+             
               super(*args)
             end
         end     
@@ -436,7 +437,7 @@ module Devise
     end
 
     def authenticate_scope!
-      puts "came to authenticate scope."
+      #puts "came to authenticate scope."
 
       do_before_request  
 
