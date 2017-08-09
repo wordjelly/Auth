@@ -426,6 +426,19 @@ module Devise
 
   RegistrationsController.class_eval do 
 
+    ##had to do this, cuz after update, the authentication token changes, and that needs to be communicated back to the client, or they will never be able to update or access the resource again.
+    def respond_with(*args)
+      if is_json_request?
+        if args[0] && args[0].respond_to?(:authentication_token)
+          render :json => args[0] 
+        else
+          super(*args)
+        end
+      else
+        super(*args)
+      end
+    end
+
     def respond_with_navigational(*args, &block)
       if is_json_request?
         respond_with(*args)
