@@ -2,8 +2,8 @@
 module Auth::Concerns::Shopping::CartItemConcern
 
 	extend ActiveSupport::Concern
-	include Mongoid::Document
-	include Mongoid::Timestamps
+	
+	
 	include Auth::Concerns::Shopping::ProductConcern
 
 	included do 
@@ -18,7 +18,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :quantity, type: Integer, default: 1
 
 		##when it is paid for, a transaction should get generated.
-		field :transaction_id, type: String
+		field :parent_id, type: String
 
 		##is it being discounted, can be from 0 -> 100 percent discount
 		field :discount, type: Float

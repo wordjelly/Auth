@@ -2,6 +2,8 @@
 module Auth::Concerns::Shopping::ProductConcern
 
 	extend ActiveSupport::Concern
+	
+	
 
 	included do 
 		
