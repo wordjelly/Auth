@@ -42,9 +42,6 @@ module Auth::Concerns::DeviseConcern
 	    	session.delete("client")
 	    	session.delete("redirect_url")
 	    end
-	    #session.delete('client')
-	    #session.delete('redirect_url')
-	    #session.delete('omniauth.model')
 	end
 
     def set_client

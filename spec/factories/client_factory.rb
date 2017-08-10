@@ -5,14 +5,14 @@ FactoryGirl.define do
   end
 
   factory :user_mobile, class: User do 
-    additional_login_param  "123456789"
+    additional_login_param  {Faker::Number.number(10).to_s}
     password  'password'
     password_confirmation  'password'
   end
 
 
   factory :user_mobile_confirmed, class: User do
-    additional_login_param  "123456789"
+    additional_login_param  {Faker::Number.number(10).to_s}
     password  'password'
     password_confirmation  'password'
     additional_login_param_status 2

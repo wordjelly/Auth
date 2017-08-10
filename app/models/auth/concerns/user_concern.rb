@@ -341,13 +341,12 @@ module Auth::Concerns::UserConcern
 	def as_json(options)
 		 
 		 json = {:nothing => true}
-		 if self.current_app_id && at_least_one_authentication_key_confirmed?
+		
+		 if self.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
 		 	json = super(:only => [:authentication_token])
 	     	json[:es] = self.client_authentication[self.current_app_id]
 	     	##resetting this before returning the json value.
 	     	self.current_app_id = nil
-	 	 else
-	 	 	
 	 	 end
 	 	 if self.errors.full_messages.size > 0
 	 	 	json[:errors] = self.errors.full_messages

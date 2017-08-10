@@ -16,7 +16,7 @@ module Auth
 				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
 				#puts "--running request"
-
+				
 				response = Auth.configuration.stub_otp_api_calls ? OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => "abcde"})}) : Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
 
 				if response.code == 200

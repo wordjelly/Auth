@@ -2,7 +2,7 @@ class OtpController < Auth::ApplicationController
 
 	  include Auth::Concerns::DeviseConcern
 	  ##refer to auth/applicationcontroller for the not_found def, and its rescue block.
-	  before_filter :do_before_request, :only => [:otp_verification_result]
+	  before_filter :do_before_request
 	  before_filter :initialize_vars
 
 
@@ -41,10 +41,10 @@ class OtpController < Auth::ApplicationController
 
 	  		else
 	  			##have to have some way of showing these errors.
-	  			not_found
+	  			not_found("provided resource not found in app")
 	  		end
 	  	else
-	  		not_found
+	  		not_found("no resource collection provided")
 	  	end
 	  	
 	  	##the intent , passed into the send_sms_otp endpoint, and thereafter added to the verify_otp_path, in the new_otp_input.html.erb
@@ -68,12 +68,12 @@ class OtpController < Auth::ApplicationController
 	  	if @additional_login_param.nil?
 	  		@status = 422
 	  		resource = @resource_class.new
-	  		resource.errors.add(:additional_login_param,"Not found")
+	  		resource.errors.add(:additional_login_param,"Additional login param not provided")
 	  	elsif resource = @resource_class.where(conditions).first
 	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
-	  		resource.errors.add(:additional_login_param,"Not found")
+	  		resource.errors.add(:additional_login_param,"Could not find a resource with that additional login param")
 	  	end 
 	  	respond_to do |format|
   		  format.json {render json: resource.to_json, status: @status}
@@ -165,6 +165,7 @@ class OtpController < Auth::ApplicationController
 
 
 		
+		
 
 		resource.set_client_authentication(session[:client]) if resource.set_client_authentication?(action_name,controller_name,session[:client])
 		
@@ -186,7 +187,7 @@ class OtpController < Auth::ApplicationController
 	  def permitted_params
 	  	if action_name == "resend_sms_otp"
 	  		##the resource_collection_path => pluralized downcased model name eg. users
-	  		params.permit(:intent)
+	  		params.permit(:intent,:resource,:api_key,:current_app_id)
 	  	else
 	  		##post_verification_intent => "reset_password" OR "unlock"
 	  		##had to add email here because in the passwords form, and the unlocks form, we have to serve either additional_login_param or email, so in order to make it work with the existing devise controllers decided to keep the param coming in as email, and sending errors back also on the email attribute,[all this is only relevant to the send_sms_otp action]
