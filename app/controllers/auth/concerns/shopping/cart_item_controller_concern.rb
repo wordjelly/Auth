@@ -4,9 +4,11 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   included do
     ##this ensures api access to this controller.
+    include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
+    before_filter :do_before_request 
     before_filter :initialize_vars
-    before_filter :resource_owns_cart_item?, :only => [:update,:destroy,:show]
+    #before_filter :resource_owns_cart_item?, :except => [:create]
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -22,13 +24,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     else
       not_found("cart item class not specified in configuration")
     end
-    @cart_item = permitted_params[:id] ? @cart_item_class.find(permitted_params[:id]) : @cart_item_class.new(permitted_params[:cart_item])
-  end
-
-  ##if the cart_item does not match the resource id, then it will go to not_found
-  def resource_owns_cart_item?
-    ##check if this is the same as the currently signed in resource.
-    not_found("You don't have permission to change or view this cart item") if (@cart_item.resource_id != @resource.id.to_s)
+    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item(permitted_params[:id],@resource) : @cart_item_class.new(permitted_params[:cart_item])
   end
 
   ##iterates all the authentication resources in the config.
@@ -45,18 +41,20 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##expects the product id, resource_id is the logged in resource, and quantity 
   def create
     ##ensure that the cart item is new
-    @cart_item.new_record? or not_found
+    @cart_item.new_record? or not_found("this is not a new record")
     @cart_item.resource_id = @resource.id.to_s
-    @cart_item.save!
+    @cart_item.save
     respond_with @cart_item
   end
 
   ##only permits the quantity to be changed, transaction id is internally assigned and can never be changed by the external world.
   def update
-    !@cart_item.new_record? or not_found
-    @cart_item.quantity = permitted_params[:cart_item][:quantity] || @cart_item.quantity
-    @cart_item.discount_code = permitted_params[:cart_item][:quantity] || @cart_item.discount_code
-    @cart_item.save!
+    not_found if @cart_item.nil?
+    !@cart_item.new_record? or not_found("please provide a valid id for the update")
+    @cart_item.resource_id = @resource.id.to_s
+    @cart_item.quantity = permitted_params[:cart_item][:quantity] || @cart_item.quantity 
+    @cart_item.discount_code = permitted_params[:cart_item][:discount] || @cart_item.discount
+    @cart_item.save
     respond_with @cart_item
   end
 
@@ -67,22 +65,22 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##we will have a cart item that is new and useless, and a resource.
   ##so we just need a query to show all the cart items of this resource
   def index
-    @cart_items = @cart_item_class.where(:resource_id => @resource.id.to_s).page 1
+    @cart_items = @cart_item_class.find_cart_items(@resource).page 1
   end
 
 
   ##can be removed.
+  ##responds with 204, and empty response body, if all is ok.
   def destroy
-    resp = @cart_item.destroy
-    respond_to do |format|
-
-    end
+    not_found if @cart_item.nil?
+    @cart_item.destroy
+    respond_with @cart_item
   end
 
   def permitted_params
     ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
     ##so to update , we will have to permit the id, to be sent in.
-    params.permit({cart_item: [:product_id,:resource_id,:discount_code,:quantity]},:id)
+    params.permit({cart_item: [:product_id,:discount_code,:quantity,:price,:name]},:id)
   end
 
 end

@@ -101,7 +101,7 @@ module Auth::Concerns::DeviseConcern
     end
 
 	def protect_json_request
-	    
+	   
 	    if is_json_request? && session[:client].nil?
 	      
 	      render :nothing => true , :status => :unauthorized

@@ -4,8 +4,11 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
 
   included do
     ##this ensures api access to this controller.
+    include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
+    before_filter :do_before_request
     before_filter :initialize_vars
+
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -22,7 +25,7 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
       begin
         @cart_item_class = @cart_item_class.constantize
         if @id
-          @cart_items = @cart_item_class.where(:parent_id => permitted_params[:id])
+          @cart_items = @cart_item_class.find_cart_items(resource,@id)
         end
       rescue
         not_found("error instatiating class from cart item class")
@@ -68,6 +71,7 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
         cart_item.parent_id = @id if @id
         cart_item.name = @name if @name
         cart_item.notes = @notes if @notes
+        cart_item.resource_id = @resource.id.to_s 
         cart_item.save
         cart_item   
       end
@@ -80,6 +84,7 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
     items_to_be_removed.map {|id|
       if cart_item = @cart_item_class.find(id)
         cart_item.parent_id = nil
+        cart_item.resource_id = @resource.id.to_s
         cart_item.save
         cart_item
       end

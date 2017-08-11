@@ -46,7 +46,9 @@
 46.a salary can be a product, with an id and a price.
 47.suppose payment object can accept optional money paid to, there should also be acknowledgement.
 48.product should get a vendor_id, which has to be a registered user.
-
+49.user can just use his own client.
+50.what if client id becomes nil.
+51.remember to allow in the website only permitted client ids(i.e the one from the app.)
 CART ENDPOINTS:
 ##every user has a cart already built in.
 ##do we need a seperate cart model?

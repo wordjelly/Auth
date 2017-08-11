@@ -6,9 +6,9 @@ module Auth
     rescue_from ActionController::RoutingError do |e|
     	puts "e is : #{e.to_s}"
   		respond_to do |format|
-	       format.json {render json: {:errors => "Not Found"}, status: 422}
-  		   format.js   {render :partial => "auth/modals/resource_errors.js.erb", locals: {:errors => ["Not Found"]}}
-	       format.html {render :text => e}
+	       format.json {render json: {:errors => e.to_s}, status: 422}
+  		   format.js   {render :partial => "auth/modals/resource_errors.js.erb", locals: {:errors => [e.to_s]}}
+	       format.html {render :text => e.to_s}
 	    end
   	end  
 

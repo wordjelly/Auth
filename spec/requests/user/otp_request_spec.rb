@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "confirmation request spec",:confirmation => true, :type => :request do 
+RSpec.describe "otp request spec",:otp_request => true, :type => :request do 
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = false

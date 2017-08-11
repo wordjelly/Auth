@@ -1,4 +1,13 @@
 FactoryGirl.define do
+
+  factory :cart_item, class:Shopping::CartItem do 
+    product_id {BSON::ObjectId.new.to_s}
+    quantity 1
+    discount_code {Faker::App.name}
+    price {Faker::Number.decimal(2)}
+    name {Faker::Food.ingredient}
+  end
+
   factory :client, class: Auth::Client do
     redirect_urls ["http://www.google.com"]
     user_id BSON::ObjectId.new
