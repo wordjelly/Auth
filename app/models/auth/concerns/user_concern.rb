@@ -351,6 +351,9 @@ module Auth::Concerns::UserConcern
 	 	 if self.errors.full_messages.size > 0
 	 	 	json[:errors] = self.errors.full_messages
 	 	 end
+	 	 if self.intent_token
+	 	 	json[:intent_token] = self.intent_token
+	 	 end
 	 	 json
 	end
 

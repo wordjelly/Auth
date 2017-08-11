@@ -52,6 +52,7 @@ module Auth
     attr_accessor :redis_config_file_location
     attr_accessor :third_party_api_keys
     attr_accessor :stub_otp_api_calls
+    attr_accessor :simulate_invalid_otp
     attr_accessor :otp_controller
     attr_accessor :cart_item_controller
     attr_accessor :cart_item_class
@@ -69,6 +70,8 @@ module Auth
       @otp_controller = nil
       @cart_item_controller = nil
       @cart_item_class = "CartItem"
+      @simulate_invalid_otp = false
+
     end
   end
   

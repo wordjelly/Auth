@@ -39,7 +39,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         @otp = 1234
-        
+        Auth.configuration.stub_otp_api_calls = true
     end
 
     context " -- on creating account -- " do 
@@ -54,65 +54,77 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
     	
 
         context " -- flow test --- " do 
-            context " --- create and confirm an account with a mobile number,add an unconfirmed email,try to change the mobile -> should fail ---" do 
+            context " --- create and confirm an account with a mobile number,add an unconfirmed email,try to change the mobile -> should fail ---", :problem => true do 
                 
-                it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
-                    post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-                    @user_created = assigns(:user)
-                    @cl = assigns(:client)
-                    user_json_hash = JSON.parse(response.body)
-                    expect(user_json_hash.keys).to match_array(["nothing"])
-                end
+                 before(:all) do 
+                    $otp_session_id = nil
+                 end
 
-                it " -- accepts otp at the verify otp endpoint -- " do 
-                    #user_attrs = attributes_for(:user_mobile)
-                    #a = {}
-                    #a[:user] = {:additional_login_param => "123456789"}
-                    get verify_otp_url({:resource => "users",:user => {:additional_login_param => "123456789", :otp => @otp}}),nil,@headers
-                    user_json_hash = JSON.parse(response.body)
-                    expect(user_json_hash.keys).to match_array(["nothing"])
-                end
+                 after(:all) do 
+                    $otp_session_id = nil
+                 end
 
-                it " -- short polls for verification status, returns auth_token, es"  do    
-                    u = User.where(:additional_login_param => "123456789").first
-                    get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
-                    user_json_hash = JSON.parse(response.body)
+                    it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
+            
+                        post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                        @user_created = assigns(:user)
+                        @cl = assigns(:client)
+                        user_json_hash = JSON.parse(response.body)
+                        expect(user_json_hash.keys).to match_array(["nothing"])
                     
-                    expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
-                end
+                    end
 
-                it "-- update with a valid email. -- " do 
-                    u = User.where(:additional_login_param => "123456789").first
-                    a = {:id => u.id.to_s, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
-                               
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => u.authentication_token, "X-User-Es" => u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
-                    @user_updated = assigns(:user)
+                    it " -- accepts otp at the verify otp endpoint -- " do 
 
-                    puts "THE RESPONSE BODY IN THE UPDATE RESPONSE WAS: #{response.body.to_s}"
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                        
+                        get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                        
+                        expect(user_json_hash.keys).to match_array(["nothing"])
+                    end
 
-                    expect(@user_updated.unconfirmed_email).to eq("rihanna@gmail.com")
-                    expect(@user_updated.errors).to be_empty
-                    expect(response.code).to eq("204")
+                    it " -- short polls for verification status, returns auth_token, es"  do    
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        
+                       
+                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                       
+                        expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+                    end
 
 
-                end
-
-                it " -- has errors if we try to update the mobile now -- " do 
-
-                    u = User.where(:additional_login_param => "123456789").first
-                    
+                    it "-- update with a valid email. -- " do 
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                    
+                        a = {:id => @last_user_created.id.to_s, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+                               
+                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+                        @user_updated = assigns(:user)
 
-                    a = {:id => u.id, :user => {:additional_login_param => "13123130u3094", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+                        puts "THE RESPONSE BODY IN THE UPDATE RESPONSE WAS: #{response.body.to_s}"
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => u.authentication_token, "X-User-Es" => u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
-                    @user_updated = assigns(:user)
-                    expect(@user_updated.errors).not_to be_empty
-                    expect(response.code).to eq("422")
+                        expect(@user_updated.unconfirmed_email).to eq("rihanna@gmail.com")
+                        expect(@user_updated.errors).to be_empty
+                        expect(response.code).to eq("200")
 
 
-                end
+                    end
 
+                    it " -- has errors if we try to update the mobile now -- " do 
+
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                       
+
+                        a = {:id => @last_user_created.id, :user => {:additional_login_param => "9822028511", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+
+                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+                        @user_updated = assigns(:user)
+                        expect(@user_updated.errors).not_to be_empty
+                        
+                    end
             end
 
             
@@ -129,7 +141,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
             ##should return auth_token and es
             ##now add mobile unconfirmed
             ##should return auth_token and es -> but auth_token should be different from earlier one.
-            context " -- regeneration and return of auth_token and es even when unconfirmed additional_login_param added ", :testy => true do 
+            context " -- regeneration and return of auth_token and es even when unconfirmed additional_login_param added ", :problem => true do 
                 
 
                 before(:all) do 
@@ -163,7 +175,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                 end
 
                 it " -- updates with a mobile number " do 
-                    @last_user_created = User.order_by(:created_at => 'desc').first
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                     auth_token = @last_user_created.authentication_token
                     es = @last_user_created.client_authentication["test_app_id"]
                     
@@ -180,7 +192,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
             end
 
-            context " -- regeneration and return of auth_token and es even when unconfirmed email is added ", :email_testy => true do 
+            context " -- regeneration and return of auth_token and es even when unconfirmed email is added " do 
 
                 before(:all) do 
 
@@ -201,38 +213,44 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                 end 
 
                 it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
-                    post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-                    @user_created = assigns(:user)
-                    @cl = assigns(:client)
-                    user_json_hash = JSON.parse(response.body)
-                    expect(user_json_hash.keys).to match_array(["nothing"])
-                end
-
-                it " -- accepts otp at the verify otp endpoint -- " do 
-                    #user_attrs = attributes_for(:user_mobile)
-                    #a = {}
-                    #a[:user] = {:additional_login_param => "123456789"}
-                    get verify_otp_url({:resource => "users",:user => {:additional_login_param => "123456789", :otp => @otp}}),nil,@headers
-                    user_json_hash = JSON.parse(response.body)
-                    expect(user_json_hash.keys).to match_array(["nothing"])
-                end
-
-                it " -- short polls for verification status, returns auth_token, es"  do    
-                    u = User.where(:additional_login_param => "123456789").first
-                    get otp_verification_result_url({:resource => "users",:user => {:_id => u.id.to_s, :otp => @otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
-                    user_json_hash = JSON.parse(response.body)
+            
+                        post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                        @user_created = assigns(:user)
+                        @cl = assigns(:client)
+                        user_json_hash = JSON.parse(response.body)
+                        expect(user_json_hash.keys).to match_array(["nothing"])
                     
-                    expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
-                end
+                    end
+
+                    it " -- accepts otp at the verify otp endpoint -- " do 
+
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                        
+                        get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                        
+                        expect(user_json_hash.keys).to match_array(["nothing"])
+                    end
+
+                    it " -- short polls for verification status, returns auth_token, es"  do    
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        
+                       
+                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                       
+                        expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+                    end
 
 
                 it " -- does not return auth_token or es in case of any validation errors " do 
 
-                    @last_user_created = User.order_by(:created_at => 'desc').first
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                     auth_token = @last_user_created.authentication_token
                    
                     es = @last_user_created.client_authentication["test_app_id"]
-                    
+                    ##here the current password is intentionally not sent to simulate a situation where there will be some validation errors.
                     a = {:id => @last_user_created.id.to_s, :user => {:email => "doggon@gmail.com"}, api_key: @ap_key, :current_app_id => "test_app_id"}
 
                     put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
@@ -244,7 +262,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                 it " -- returns auth token and es, after adding an email account, and even before confirmation " do 
 
-                    @last_user_created = User.order_by(:created_at => 'desc').first
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                     auth_token = @last_user_created.authentication_token
                    
                     es = @last_user_created.client_authentication["test_app_id"]
