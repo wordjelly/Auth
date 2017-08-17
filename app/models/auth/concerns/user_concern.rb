@@ -390,7 +390,7 @@ module Auth::Concerns::UserConcern
 	## both email and unconfirmed email are nil AND additional_login_param has been confirmed already.
 	##currently used in this file in #authentication_keys_confirmed?
 	def email_confirmed_or_does_not_exist
-		(self.confirmed?) ||  (self.email.nil? && self.unconfirmed_email.nil?)
+		(self.confirmed? && !self.pending_reconfirmation?)  ||  (self.email.nil? && self.unconfirmed_email.nil?)
 	end
 
 	def additional_login_param_confirmed?
@@ -416,16 +416,16 @@ module Auth::Concerns::UserConcern
 		return email_confirmed_or_does_not_exist && additional_login_param_confirmed_or_does_not_exist
 	end
 
-	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
+	##if you change the additional login param while the email is not confirmed or doesnt exist, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
-		if additional_login_param_changed?  && (self.pending_reconfirmation?)
+		if additional_login_param_changed?  && (self.pending_reconfirmation? || (self.email.nil? && self.unconfirmed_email.nil?))
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]}")
 		end
 	end
 
 	##if you change the email while the additional login param not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
 	def email_changed_on_unconfirmed_additional_login_param
-		if email_changed? && (additional_login_param_status == 1) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
+		if email_changed? && (additional_login_param_status == 1 || additional_login_param.nil?) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
 			errors.add(:email, "Please add or verify your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} before changing your email id")
 		end
 	end

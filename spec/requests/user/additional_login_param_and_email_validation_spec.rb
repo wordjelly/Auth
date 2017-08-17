@@ -54,6 +54,64 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
     	
 
         context " -- flow test --- " do 
+            
+            context " --- create and confirm an account with a mobile number, then try to delete the mobile -- should give a validation error -- " do 
+
+                before(:all) do 
+                    $otp_session_id = nil
+                 end
+
+                 after(:all) do 
+                    $otp_session_id = nil
+                 end
+
+                    it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
+            
+                        post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                        @user_created = assigns(:user)
+                        @cl = assigns(:client)
+                        user_json_hash = JSON.parse(response.body)
+                        expect(user_json_hash.keys).to match_array(["nothing"])
+                    
+                    end
+
+                    it " -- accepts otp at the verify otp endpoint -- " do 
+
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                        
+                        get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                        
+                        expect(user_json_hash.keys).to match_array(["nothing"])
+                    end
+
+                    it " -- short polls for verification status, returns auth_token, es"  do    
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                        
+                       
+                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        user_json_hash = JSON.parse(response.body)
+                       
+                        expect(user_json_hash["verified"]).to eq(true)
+                    expect(user_json_hash["resource"]).not_to include("authentication_token","es")
+                    end
+
+                    it " -- has errors if we try to delete the mobile now -- " do 
+
+                        @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                       
+
+                        a = {:id => @last_user_created.id, :user => {:additional_login_param => "", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+
+                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+                        @user_updated = assigns(:user)
+                        expect(@user_updated.errors).not_to be_empty
+                        
+                    end
+
+            end
+
             context " --- create and confirm an account with a mobile number,add an unconfirmed email,try to change the mobile -> should fail ---", :problem => true do 
                 
                  before(:all) do 
@@ -104,9 +162,6 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                                
                         put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
                         @user_updated = assigns(:user)
-
-                        puts "THE RESPONSE BODY IN THE UPDATE RESPONSE WAS: #{response.body.to_s}"
-
                         expect(@user_updated.unconfirmed_email).to eq("rihanna@gmail.com")
                         expect(@user_updated.errors).to be_empty
                         expect(response.code).to eq("200")
