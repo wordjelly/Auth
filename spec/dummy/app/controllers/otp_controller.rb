@@ -12,6 +12,7 @@ class OtpController < Auth::ApplicationController
 	  	@resource_params = permitted_params.deep_symbolize_keys
 	  	puts "resource params are:"
 	  	puts @resource_params.to_s
+
 	  	##if the resource is defined, assign the class and the symbol for use further in the file
 	  	##eg: resource is provided in the route as : users, so 
 	  	##@resource_class => User
@@ -39,6 +40,7 @@ class OtpController < Auth::ApplicationController
 				  	
 				  	##the resource_id of the user, only used in the short_polling endpoint.
 				  	@resource_id = @resource_params[@resource_symbol][:_id]
+				  	
 	  			end
 
 	  		else
@@ -73,8 +75,8 @@ class OtpController < Auth::ApplicationController
 	  		resource = @resource_class.new
 	  		resource.errors.add(:additional_login_param,"Additional login param not provided")
 	  	elsif resource = @resource_class.where(conditions).first
-	  		resource.intent_token = Devise.friendly_token if !@intent.blank?
-	  		resource.save
+	  		#resource.intent_token = Devise.friendly_token if !@intent.blank?
+	  		#resource.save
 	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
@@ -143,20 +145,24 @@ class OtpController < Auth::ApplicationController
 	  			@status = 422
 		  		resource.errors.add(:additional_login_param,otp_error)
 	  		else
-
 	  			
-			  	if resource.additional_login_param_confirmed? && @intent && (resource.intent_token == @intent_token) && !@intent_token.blank?
+			  	if resource.additional_login_param_confirmed? 
 				  	if @intent == "reset_password"
+				  		puts "came to intent with reset password."
 				  		##protected method so had to do this.
 				  		if resource.confirmed? && !resource.	pending_reconfirmation?
 				  			resource.class.send_reset_password_instructions(resource.attributes)
+				  			puts "should have sent the email now."
 				  			##if successfull_sent ->
 				  			##else
 				  			## here error is added anyway to resource.
 				  			##end
 				  			##we want to send the reset password instructions, but using the email.
 				  		else
+				  			puts "should have encountered and error."
 				  			resource.errors.add(:additional_login_param,"you do not have a confirmed email account set for this account, you cannot recover the password.")
+				  			puts resource.errors.full_messages.to_s
+				  			@status = 400
 				  		end
 				  		#raw_token = resource.send(:set_reset_password_token)
 				  		#intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
@@ -170,8 +176,7 @@ class OtpController < Auth::ApplicationController
 	        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
 				  	end
 				  	##make the intent token nil, it can be used only thus once.
-				  	resource.intent_token = nil
-				  	resource.save
+				  	
 			  	end
 			end
 		else
@@ -186,8 +191,7 @@ class OtpController < Auth::ApplicationController
 		#puts "returning verified as: #{verified}"
 
 	  	respond_to do |format|
-	  	  format.json {render json: {:follow_url => intent_url, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
-	  	  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource}}
+	  	  format.json {render json: {:follow_url => intent_url, :errors => resource.errors.full_messages, :resource => resource, :verified => (resource.additional_login_param_confirmed? && resource.errors.empty?)}, status: @status}
 	  	end
 
 	  end

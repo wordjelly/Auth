@@ -59,10 +59,11 @@ module Auth
 							##and dont touch anything else.
 
 							self.otp = otp
-							
+
 							self.additional_login_param_status = 2
 							
 							self.save
+							
 							
 							
 							clear_redis_user_otp_hash
@@ -88,7 +89,7 @@ module Auth
 
 		def send_otp_response
 			if Auth.configuration.stub_otp_api_calls
-				puts "DOING DUMMY SEND CALL"
+				
 				OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => Faker::Name.name})})
 			else
 				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
@@ -101,11 +102,13 @@ module Auth
 				if Auth.configuration.simulate_invalid_otp
 					OpenStruct.new({code: 200, body: JSON.generate({:Status => "failed", :Details => "your otp is invalid"})})
 				else
-					puts "DOING DUMMY VERIFY CALL"
+
 					##check the otp, and derive the response based on that.
 					##this comparison of comparing the session id, with the opt is just for test purpose.
 					##in reality they have nothing to do with each other.
-					OpenStruct.new({code: 200, body: JSON.generate({:Status => ((otp_session_id == otp) ? "Success" : "failed"), :Details => "doesnt matter "})})	
+					puts "otp session id is:#{otp_session_id}"
+					puts "otp is: #{otp}"
+					OpenStruct.new({code: 200, body: JSON.generate({:Status => ((otp_session_id == otp) ? "Success" : "failed"), :Details => "location: two_factor_otp.rb#verify_otp_response, compares otp_session id to provided otp to decide failure or success"})})	
 				end
 			else
 				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{otp}")

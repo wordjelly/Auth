@@ -150,13 +150,13 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
 
         end
 
-        it " -- does not process short polling endpoint without api_key and current_app_id " do 
+        it " -- processes short polling endpoint without api_key and current_app_id " do 
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key}),nil,@headers
             
             
-            expect(response.body).to be_empty
+            expect(response.body).not_to be_empty
 
         end
 
@@ -206,20 +206,123 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
     
     end
 
+    context " -- forgot password flow with confirmed email --" do 
+        ##so basically we have to call send sms otp with an intent.
+        ##suppose we call it without an intent, then what happens?
+        ##when we call the subsequent call, then ?
+        before(:all) do 
+            $otp_session_id = nil
+           
+        end
+
+        after(:all) do 
+            $otp_session_id = nil
+           
+        end
+
+        it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
+            
+            post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            @user_created = assigns(:user)
+            @cl = assigns(:client)
+            user_json_hash = JSON.parse(response.body)
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        
+        end
+
+        it " -- accepts otp at the verify otp endpoint -- " do 
+
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+            $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+            
+            get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+            user_json_hash = JSON.parse(response.body)
+            
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end
+
+        it " -- short polls for verification status, returns verified true"  do    
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+            
+           
+            get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+            user_json_hash = JSON.parse(response.body)
+            
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
+        end
+
+        ##we then manually confirm the user.
+        it " -- updates the user with a new email address " do 
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                   
+            a = {:id => @last_user_created.id.to_s, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+                   
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+            @user_updated = assigns(:user)
+            ##manually confirm the email.
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+            @last_user_created.confirm!
+            @last_user_created.save            
+
+            expect(@last_user_created.email).to eq("rihanna@gmail.com")
+           # expect(@last_user_created.errors).to be_empty
+            expect(response.code).to eq("200")
+        end
+
+        it " -- resends sms otp this time with an intent of reset password, " do 
+
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+           
+            
+            get send_sms_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "reset_password"}),nil,@headers
+            
+            user_json_hash = JSON.parse(response.body)
+            
+        end
+
+        ##now it has to go to verify endpoint again.
+        it " -- REVERIFIES OTP at the  verify otp endpoint -- " do 
+
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+            $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+            
+            get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+            user_json_hash = JSON.parse(response.body)
+            
+            expect(user_json_hash.keys).to match_array(["nothing"])
+        end
+        
+        ##then to short poll with the intent token
+        it " -- short polls for verification status, this time with an intent and an intent token, and verified as true"  do    
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+           get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "reset_password"}),nil,@headers
+            user_json_hash = JSON.parse(response.body)
+            ##here check to see if a reset password email was sent.
+            message = ActionMailer::Base.deliveries[-1].to_s
+            rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
+            reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
+            expect(reset_password_token).not_to be(nil)
+            expect(user_json_hash["verified"]).to eq(true)
+           
+        end
+
+    end
+
     ##to do today
-    context " -- forgot password flow -- " do 
+    context " -- forgot password flow without confirmed email. -- " do 
 
         ##so basically we have to call send sms otp with an intent.
         ##suppose we call it without an intent, then what happens?
         ##when we call the subsequent call, then ?
         before(:all) do 
             $otp_session_id = nil
-            $intent_token = nil
+           
         end
 
         after(:all) do 
             $otp_session_id = nil
-            $intent_token = nil
+           
         end
 
         it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
@@ -255,7 +358,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         end
 
 
-        it " -- resends sms otp this time with an intent of reset password, and returns an intent token. " do 
+        it " -- resends sms otp this time with an intent of reset password, " do 
 
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
            
@@ -263,8 +366,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             get send_sms_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "reset_password"}),nil,@headers
             
             user_json_hash = JSON.parse(response.body)
-            $intent_token = user_json_hash["intent_token"]
-            expect(user_json_hash.keys).to include("intent_token")
+            
         end
 
         ##now it has to go to verify endpoint again.
@@ -276,21 +378,20 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash.keys).to match_array(["intent_token","nothing"])
+            expect(user_json_hash.keys).to match_array(["nothing"])
         end
         
         ##then to short poll with the intent token
         it " -- short polls for verification status, this time with an intent and an intent token, returns the reset password url, and verified as true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
-            
-           
-            get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent_token => $intent_token, :intent => "reset_password"}),nil,@headers
+           get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "reset_password"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
-            
-            expect(user_json_hash["follow_url"]).not_to be_empty
-            expect(user_json_hash["verified"]).to eq(true)
-            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
+            ##here check to see if a reset password email was sent.
+            expect(user_json_hash["verified"]).to eq(false)
+           
         end
+
+
 
     end
 
@@ -302,12 +403,12 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         ##when we call the subsequent call, then ?
         before(:all) do 
             $otp_session_id = nil
-            $intent_token = nil
+            
         end
 
         after(:all) do 
             $otp_session_id = nil
-            $intent_token = nil
+            
         end
 
         it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
@@ -343,7 +444,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         end
 
 
-        it " -- resends sms otp this time with an intent of reset password, and returns an intent token. " do 
+        it " -- resends sms otp this time with an intent of reset password,  " do 
 
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
            
@@ -351,8 +452,8 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             get send_sms_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "unlock_account"}),nil,@headers
             
             user_json_hash = JSON.parse(response.body)
-            $intent_token = user_json_hash["intent_token"]
-            expect(user_json_hash.keys).to include("intent_token")
+            
+            
         end
 
         ##now it has to go to verify endpoint again.
@@ -364,7 +465,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash.keys).to match_array(["intent_token","nothing"])
+            expect(user_json_hash.keys).to match_array(["nothing"])
         end
         
         ##then to short poll with the intent token
@@ -372,7 +473,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
-            get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent_token => $intent_token, :intent => "unlock_account"}),nil,@headers
+            get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "unlock_account"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
             expect(user_json_hash["follow_url"]).not_to be_empty

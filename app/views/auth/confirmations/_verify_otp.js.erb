@@ -12,7 +12,7 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
       		console.log("doing beforeSend with verified:" + verified);
       		
       	},
-      	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {_id : "<%= resource.id.to_s %>"}, intent: "<%= (defined?(intent) != nil) ? intent : "" %>"},
+      	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {_id : "<%= resource.id.to_s %>", otp: "<%= otp %>"}, intent: "<%= (defined?(intent) != nil) ? intent : "" %>"},
       	url: "<%= Auth.configuration.mount_path %>/<%= resource.class.name.downcase.pluralize.to_s %>/otp_verification_result",
       	error: function(){
       		//errors are not handled here, because spinner.js
@@ -22,12 +22,11 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
       		//the error lands up being shown inside show_error_modal, by means of json parsing the incoming string, and showing json[:errors] as the error message.
       	}, 
       	success: function(data){
-      		
 	        if(counter == null){
 	        	counter = 0;
 	        }
 	        counter++;
-	        	if(verified == "true"){
+	        	if(data["verified"] == true){
 	        		$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue.");
 	        			
 	        		/***
