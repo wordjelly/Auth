@@ -92,7 +92,8 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
-                        expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+                        expect(user_json_hash["verified"]).to eq(true)
+                    expect(user_json_hash["resource"]).not_to include("authentication_token","es")
                     end
 
 
@@ -240,7 +241,8 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
-                        expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+                       expect(user_json_hash["verified"]).to eq(true)
+                         expect(user_json_hash["resource"]).not_to include("authentication_token","es")
                     end
 
 

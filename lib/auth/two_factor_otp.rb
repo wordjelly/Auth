@@ -88,6 +88,7 @@ module Auth
 
 		def send_otp_response
 			if Auth.configuration.stub_otp_api_calls
+				puts "DOING DUMMY SEND CALL"
 				OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => Faker::Name.name})})
 			else
 				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
@@ -100,6 +101,7 @@ module Auth
 				if Auth.configuration.simulate_invalid_otp
 					OpenStruct.new({code: 200, body: JSON.generate({:Status => "failed", :Details => "your otp is invalid"})})
 				else
+					puts "DOING DUMMY VERIFY CALL"
 					##check the otp, and derive the response based on that.
 					##this comparison of comparing the session id, with the opt is just for test purpose.
 					##in reality they have nothing to do with each other.

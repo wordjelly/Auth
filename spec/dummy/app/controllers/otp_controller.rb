@@ -144,13 +144,22 @@ class OtpController < Auth::ApplicationController
 		  		resource.errors.add(:additional_login_param,otp_error)
 	  		else
 
-	  			res_verified = resource.additional_login_param_status == 2
 	  			
-			  	if res_verified && @intent && (resource.intent_token == @intent_token) && !@intent_token.blank?
+			  	if resource.additional_login_param_confirmed? && @intent && (resource.intent_token == @intent_token) && !@intent_token.blank?
 				  	if @intent == "reset_password"
 				  		##protected method so had to do this.
-				  		raw_token = resource.send(:set_reset_password_token)
-				  		intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
+				  		if resource.confirmed? && !resource.	pending_reconfirmation?
+				  			resource.class.send_reset_password_instructions(resource.attributes)
+				  			##if successfull_sent ->
+				  			##else
+				  			## here error is added anyway to resource.
+				  			##end
+				  			##we want to send the reset password instructions, but using the email.
+				  		else
+				  			resource.errors.add(:additional_login_param,"you do not have a confirmed email account set for this account, you cannot recover the password.")
+				  		end
+				  		#raw_token = resource.send(:set_reset_password_token)
+				  		#intent_url = send("edit_#{@resource_symbol.to_s}_password_path",{:reset_password_token => raw_token})
 				  	elsif @intent == "unlock_account"
 				  		##here normally would be resource.unlock.
 				  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
@@ -160,6 +169,9 @@ class OtpController < Auth::ApplicationController
 	        			resource.save(validate: false)
 	        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
 				  	end
+				  	##make the intent token nil, it can be used only thus once.
+				  	resource.intent_token = nil
+				  	resource.save
 			  	end
 			end
 		else
@@ -168,23 +180,14 @@ class OtpController < Auth::ApplicationController
 			resource.errors.add(:additional_login_param,"Not Found")
 		end
 
-
-		
-		
-
-		resource.set_client_authentication(session[:client]) if resource.set_client_authentication?(action_name,controller_name,session[:client])
-		
-
-
+		##we no longer return the auth_token and es from the short_poll_endpoint.
+		##the following code was disabled.
+		#resource.set_client_authentication(session[:client]) if resource.set_client_authentication?(action_name,controller_name,session[:client])
+		#puts "returning verified as: #{verified}"
 
 	  	respond_to do |format|
-	  	  format.json {render json: {:follow_url => intent_url, :verified => res_verified, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
-	  		##handle the redirect here.
-	  		##just set the redirect url as the intent url,
-	  		##and otherwise set the client_authentication, and then return the authentication token and es.
-	  		##abstract the devise_controller before request methods into a concern and use them in common.
-  		  #format.json {render json: resource.to_json, status: @status}
-
+	  	  format.json {render json: {:follow_url => intent_url, :errors => resource.errors.full_messages, :resource => resource}, status: @status}
+	  	  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource}}
 	  	end
 
 	  end

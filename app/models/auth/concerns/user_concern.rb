@@ -83,6 +83,7 @@ module Auth::Concerns::UserConcern
           		return additional_login_param.nil?
         	end 
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
+	      	
 
 
 	      	##IT ALLOWS A BLANK OR EMPTY ADDITIONAL LOGIN PARAM TO GO INTO THE DATABASE,BUT ONLY SENDS THE SMS_OTP IF THE PARAM IS NOT BLANK
@@ -392,9 +393,13 @@ module Auth::Concerns::UserConcern
 		(self.confirmed?) ||  (self.email.nil? && self.unconfirmed_email.nil?)
 	end
 
+	def additional_login_param_confirmed?
+		self.additional_login_param_status == 2 
+	end
+
 	## if the additional_login_param_status == 2
 	def additional_login_param_confirmed_or_does_not_exist
-		self.additional_login_param_status == 2 || self.additional_login_param_status == 0
+		additional_login_param_confirmed? || self.additional_login_param_status == 0
 	end
 	
 	## at least one authentication_key should be confirmed.

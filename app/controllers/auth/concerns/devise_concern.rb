@@ -96,16 +96,23 @@ module Auth::Concerns::DeviseConcern
     end
 
     def is_json_request?
-    
+
          return (request.format.symbol == :json) ? true : false
     end
 
 	def protect_json_request
-	   
-	    if is_json_request? && session[:client].nil?
-	      
-	      render :nothing => true , :status => :unauthorized
+	   	
 
+	    if is_json_request? 
+	    	if action_name == "otp_verification_result"
+	    		##we let this action pass because, we make json requests 
+	    		##from the web ui to this endpoint, and anyway it does
+	    		##not return anything sensitive.
+	    	else
+		    	if session[:client].nil?
+		      		render :nothing => true , :status => :unauthorized
+		      	end
+	      	end
 	    end
 	end
 

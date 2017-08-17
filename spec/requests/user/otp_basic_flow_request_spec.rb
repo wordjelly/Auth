@@ -73,14 +73,15 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns auth_token, es"  do    
+        it " -- short polls for verification status, returns verified true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
            
-            expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
     end
@@ -129,21 +130,23 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns auth_token, es"  do    
+        it " -- short polls for verification status, returns verified true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
-        it " -- does not return es or auth_token if there are errors from the short polling endpoint " do 
+        it " -- does not return verified true if there are errors from the short polling endpoint " do 
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             $redis.hset(@last_user_created.id.to_s + "_two_factor_sms_otp","error","some bloody error")
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             expect(user_json_hash["resource"].keys).not_to include("authentication_token","es") 
+            expect(user_json_hash["verified"]).to eq(false)
 
         end
 
@@ -191,12 +194,13 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns auth_token, es"  do    
+        it " -- short polls for verification status returns verified false"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
-            expect(user_json_hash["resource"].keys).not_to include("authentication_token","es") 
+            expect(user_json_hash["verified"]).to eq(false) 
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end        
 
     
@@ -239,14 +243,15 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns auth_token, es"  do    
+        it " -- short polls for verification status, returns verified true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
 
@@ -275,7 +280,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         end
         
         ##then to short poll with the intent token
-        it " -- short polls for verification status, this time with an intent and an intent token."  do    
+        it " -- short polls for verification status, this time with an intent and an intent token, returns the reset password url, and verified as true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
@@ -283,6 +288,8 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             user_json_hash = JSON.parse(response.body)
             
             expect(user_json_hash["follow_url"]).not_to be_empty
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
     end
@@ -324,14 +331,15 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns auth_token, es"  do    
+        it " -- short polls for verification status, returns verified true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash["resource"].keys).to match_array(["authentication_token","es"])
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
 
@@ -360,7 +368,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
         end
         
         ##then to short poll with the intent token
-        it " -- short polls for verification status, this time with an intent and an intent token."  do    
+        it " -- short polls for verification status, this time with an intent and an intent token, returns the unlock url , and verified as true"  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
@@ -368,6 +376,8 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             user_json_hash = JSON.parse(response.body)
             
             expect(user_json_hash["follow_url"]).not_to be_empty
+            expect(user_json_hash["verified"]).to eq(true)
+            expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
     end
 
