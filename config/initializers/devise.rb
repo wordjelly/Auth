@@ -454,7 +454,7 @@ module Devise
     end
 
     def authenticate_scope!
-      #puts "came to authenticate scope."
+      
 
       do_before_request  
 
@@ -483,7 +483,7 @@ module Devise
           end
         end
       else
-        #puts "wasnt a json request."
+       
         send("authenticate_#{resource_name}!", force: true)
         self.resource = send("current_#{resource_name}")
       end

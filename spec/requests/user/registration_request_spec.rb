@@ -75,7 +75,15 @@ RSpec.describe "Registration requests", :registration => true, :type => :request
         
         sign_in_as_a_valid_and_confirmed_user
 
-        put user_registration_path, :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"}
+        ##simulate like the user was authenticated using a client.
+        ##so that it will set a client authentication.
+        cli = Auth::Client.new
+        cli.current_app_id = "test_app_id"
+        @user.set_client_authentication(cli)
+
+        ##this client authentication will not change, provided that we use the same api key and same current app id.
+
+        put user_registration_path, :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"},:api_key => @ap_key, :current_app_id => cli.current_app_id
         
         @user_updated = assigns(:user)
 

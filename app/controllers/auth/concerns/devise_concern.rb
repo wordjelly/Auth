@@ -34,8 +34,6 @@ module Auth::Concerns::DeviseConcern
     ##so they can at the worst be redirected only to a url which was provided during client creation.
     ##so there is no need to delete the client from the session at every request, except if it is a json request.
 	def clear_client_and_redirect_url
-
-	   
 	    session.delete('omniauth.state')
 	    if is_json_request?
 	    	session.delete("client")

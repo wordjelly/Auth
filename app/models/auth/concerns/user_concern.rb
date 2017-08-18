@@ -175,6 +175,7 @@ module Auth::Concerns::UserConcern
 				login = login.downcase
 		  		where(conditions).where('$or' => [ {:additional_login_param => /^#{Regexp.escape(login)}$/i, :additional_login_param_status => 2}, {:email => /^#{Regexp.escape(login)}$/i} ]).first
 			else
+				
 		  		where(conditions).first
 			end
   		end
