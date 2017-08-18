@@ -407,7 +407,7 @@ module Auth::Concerns::UserConcern
 	## used in lib/devise to decide whether to return the auth token and es and redirect.
 	## used in self.as_json, to see whether to return the auth_token and es.
 	def at_least_one_authentication_key_confirmed?
-		self.confirmed? || self.additional_login_param_status == 2
+		(self.confirmed? && !self.pending_reconfirmation?) || self.additional_login_param_status == 2
 	end
 
 	## used in auth/registrations/update.js.erb
@@ -416,16 +416,16 @@ module Auth::Concerns::UserConcern
 		return email_confirmed_or_does_not_exist && additional_login_param_confirmed_or_does_not_exist
 	end
 
-	##if you change the additional login param while the email is not confirmed or doesnt exist, you will get a validation error on additional_login_param
+	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
-		if additional_login_param_changed?  && (self.pending_reconfirmation? || (self.email.nil? && self.unconfirmed_email.nil?))
+		if additional_login_param_changed?  && (self.pending_reconfirmation?)
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]}")
 		end
 	end
 
 	##if you change the email while the additional login param not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
 	def email_changed_on_unconfirmed_additional_login_param
-		if email_changed? && (additional_login_param_status == 1 || additional_login_param.nil?) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
+		if email_changed? && (additional_login_param_status == 1) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
 			errors.add(:email, "Please add or verify your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} before changing your email id")
 		end
 	end
@@ -462,18 +462,22 @@ module Auth::Concerns::UserConcern
 
 	##this def is used to determine if the auth_token and es should
 	##be sent back.
-	def reply_with_auth_token_es?(client)
+	def reply_with_auth_token_es?(client,curr_user)
 		 ##we have a client authentication for the client.
          ##we have an authentication token
          ##we are signed_in
          ##we have at least one authentication_key confirmed.
+        
          
-         client && client_authentication[client.current_app_id] && authentication_token && signed_in? && at_least_one_authentication_key_confirmed?
+         
+         
+         return false if !curr_user
+         client && client_authentication[client.current_app_id] && authentication_token && (id.to_s == curr_user.id.to_s) && at_least_one_authentication_key_confirmed?
 	end
 
 	##just a combination of having the redirect_url and the above method.
-	def reply_with_redirect_url_and_auth_token_and_es?(redirect_url,client)
-		redirect_url && reply_with_auth_token_es?(client)
+	def reply_with_redirect_url_and_auth_token_and_es?(redirect_url,client,curr_user)
+		redirect_url && reply_with_auth_token_es?(client,curr_user)
 	end
 
 	##

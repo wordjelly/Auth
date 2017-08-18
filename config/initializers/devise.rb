@@ -326,13 +326,14 @@ DeviseController.class_eval do
           ##we have an authentication token
           ##we are signed_in
           ##we have at least one authentication_key confirmed.
-          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client])
 
-            curr_app_es = resource.client_authentication[@client.current_app_id]
+          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client],current_user)
+
+            curr_app_es = resource.client_authentication[session[:client].current_app_id]
             session.delete(:client)
-            session.delete(:redirect_url)
+            
            
-            redirect_to @redirect_url + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
+            redirect_to session.delete(:redirect_url) + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es 
           else
             super
           end
@@ -349,13 +350,16 @@ DeviseController.class_eval do
         if (["passwords","confirmations","unlocks"].include? controller_name)
             super(*args)
         else
-            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client])
+         
+         
+
+            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client],current_user)
 
               curr_app_es = resource.client_authentication[session[:client].current_app_id]
               session.delete(:client)
-              session.delete(:redirect_url)
               
-              redirect_to (session[:redirect_url] + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
+              
+              redirect_to (session.delete(:redirect_url) + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
             else
              
               super(*args)
@@ -632,6 +636,7 @@ module Devise
 
   end
 
+  ##the additional_login_param is added as a authentication_key 
   class ParameterSanitizer
     DEFAULT_PERMITTED_ATTRIBUTES =
       {

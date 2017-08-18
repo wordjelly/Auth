@@ -35,8 +35,7 @@ module Auth::Concerns::DeviseConcern
     ##so there is no need to delete the client from the session at every request, except if it is a json request.
 	def clear_client_and_redirect_url
 
-	    @client = nil
-	    @redirect_url = nil
+	   
 	    session.delete('omniauth.state')
 	    if is_json_request?
 	    	session.delete("client")
@@ -122,11 +121,22 @@ module Auth::Concerns::DeviseConcern
         # puts "the session redirect url is: #{session[:redirect_url]}"
         redir_url = params[:redirect_url].nil? ? session[:redirect_url] : params[:redirect_url]
 
-	    if redir_url && session[:client] && client.contains_redirect_url?(redir_url) && !(is_json_request?)
-	        #puts "came to assign redir url:"
-	        #@redirect_url = redir_url
+        #puts "redir url was: #{redir_url}"
+
+        #puts "session[:client] is: #{session[:client]}"
+
+        #puts "session[:client].redirect urls"
+        #puts session[:client].redirect_urls
+        
+        #puts "does it contain the redirect url."
+        #puts session[:client].contains_redirect_url?(redir_url)
+
+
+
+	    if redir_url && session[:client] && session[:client].contains_redirect_url?(redir_url) && !(is_json_request?)
+	        
 	        session[:redirect_url] = redir_url
-	        #puts "#{@redirect_url}"
+	        
 	    end
   	end
 

@@ -15,6 +15,25 @@ end
 module ValidUserRequestHelper
   include Warden::Test::Helpers
 
+  def self.included(base)
+    base.before(:each) { Warden.test_mode! }
+    base.after(:each) { Warden.test_reset! }
+  end
+
+  def sign_in(resource)
+    login_as(resource, scope: warden_scope(resource))
+  end
+
+  def sign_out(resource)
+    logout(warden_scope(resource))
+  end
+
+  private
+
+  def warden_scope(resource)
+    resource.class.name.underscore.to_sym
+  end
+
   def sign_in_as_a_valid_admin
     @admin = FactoryGirl.create :admin
     cli = Auth::Client.new
@@ -26,7 +45,7 @@ module ValidUserRequestHelper
 
   def sign_in_as_a_valid_and_confirmed_admin
     @admin = FactoryGirl.create :admin_confirmed
-   cli = Auth::Client.new
+    cli = Auth::Client.new
     cli.current_app_id = "test_app_id"
     @admin.set_client_authentication(cli)
     @admin.save!
@@ -44,14 +63,12 @@ module ValidUserRequestHelper
   end
 
   def sign_in_as_a_valid_and_confirmed_user
-    @user = FactoryGirl.create :user_confirmed
-    ##should call set_client_authentication.
-    ##with the app id used throughout.
+    @user = User.new(attributes_for(:user_confirmed))
     cli = Auth::Client.new
     cli.current_app_id = "test_app_id"
     @user.set_client_authentication(cli)
-    @user.save!
-    post_via_redirect user_session_path, 'user[email]' => @user.email, 'user[password]' => @user.password
+    @user.save
+    sign_in(@user)
   end
 
 
