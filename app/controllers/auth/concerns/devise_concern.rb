@@ -98,8 +98,8 @@ module Auth::Concerns::DeviseConcern
     end
 
 	def protect_json_request
-	   	
-
+	   	##should block any put action on the user
+	   	##and should render an error saying please do this on the server.
 	    if is_json_request? 
 	    	if action_name == "otp_verification_result"
 	    		##we let this action pass because, we make json requests 

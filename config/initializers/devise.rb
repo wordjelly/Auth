@@ -471,14 +471,16 @@ module Devise
         else
           self.resource = resource_name.to_s.capitalize.constantize.where("authentication_token" => token, "client_authentication.#{app_id}" => es).first
 
-          if self.resource.nil?
-            #puts "didnt find any such resource."
+          self.resource = nil if self.resource.token_expired?
+          
+          if self.resource.nil? 
+            ##do this in case of the token_expired scenario, because there the resource will be present, just the token will have expired.
+            
             send("authenticate_#{resource_name}!",force: true)
           else
 
-            #puts "found sucha resource,"
-            #puts "auth token is: #{self.resource.authentication_token}"
-            #puts "client authentication is: #{self.resource.client_authentication}"
+            ##here also the same thing has to be done again.
+
             send(:sign_in,self.resource)
           end
         end

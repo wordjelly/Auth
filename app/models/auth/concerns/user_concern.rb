@@ -159,6 +159,8 @@ module Auth::Concerns::UserConcern
 	    	
 	    	acts_as_token_authenticatable
   			field :authentication_token, type: String
+  			##this we add to ensure that the token has an expiry.
+  			field :token_expires_at, type: Integer
 	    	field :client_authentication, type: Hash, default: {}
 	    	field :current_app_id, type: String
 	    	
@@ -482,6 +484,13 @@ module Auth::Concerns::UserConcern
 	end
 
 	##
+	def token_expired?
+		if token_expires_at < Time.now.to_i
+			regenerate_token
+			save
+			true
+		end
+	end
 
 	
 

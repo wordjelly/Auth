@@ -442,19 +442,30 @@ module SimpleTokenAuthentication
 		##this method is called whenever the email or the additional_login_param or the password is changed.
 		def regenerate_token
 			self.authentication_token = generate_authentication_token(token_generator)
+			self.token_expires_at = Time.now.to_i + Auth.configuration.token_regeneration_time
 		end	
 	end
 
 	module TokenAuthenticationHandler
-
+		##how the token authentication works:
+		##the function regenerate_token is called whenever a change is made to the email/password/additional_login_param
+		##this sets a new authentication_token and also makes the expires at now + 1.day(default)
+		##when you try to sign in with tokens, if the token has expired, then regenerate_token is called, and then the record is saved.
+		##as a result a new token is generated.
+		##this will only happen at the first token auth attempt with expired tokens, because on the subsequenty try, the record will not be found(since the auth token will have changed)
+		##thereafter signinng in to the accoutn with the username and password,(by json/or by web if using a redirect_url which is valid), will return the auth token and es.
+		##this can then be used to sign in.
+		##token_correct function was modified to check additional parameters that maybe used for token auth.
+		##for the moment these are X-App-Id, and X-Es, dont yet know how I defined these.
 		def authenticate_entity_from_token!(entity)
 		  ##here we should find the record by the authentication token.
 		  ##then we should find
-		  puts "the entity is: #{entity.to_s}"
+		  
 	      record = find_record_from_identifier(entity)
-	      puts "record is: #{record}"
+	      
 	      if token_correct?(record, entity, token_comparator)
-	        perform_sign_in!(record, sign_in_handler)
+	      		return false if record.token_expired?
+	        	perform_sign_in!(record, sign_in_handler)
 	      end
 	    end
 

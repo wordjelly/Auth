@@ -56,6 +56,7 @@ module Auth
     attr_accessor :otp_controller
     attr_accessor :cart_item_controller
     attr_accessor :cart_item_class
+    attr_accessor :token_regeneration_time
 
     def initialize
       @enable_token_auth = true
@@ -71,7 +72,7 @@ module Auth
       @cart_item_controller = nil
       @cart_item_class = "CartItem"
       @simulate_invalid_otp = false
-
+      @token_regeneration_time = 1.day
     end
   end
   

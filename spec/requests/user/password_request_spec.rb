@@ -177,7 +177,7 @@ RSpec.describe "password request spec", :type => :request, password: true do
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
 			      password_confirmation: "newpassword",
-			    }, redirect_url: "http://www.google.com", api_key: @ap_key}.to_json,@headers
+			    }, redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,@headers
 			    @u.reload
 			    expect(@u.encrypted_password).not_to  eq(old_password)
 			    expect(@u.errors.full_messages).to be_empty 
