@@ -51,7 +51,7 @@ RSpec.describe "token request spec", :type => :request,topic: true do
         end
 
 
-        context " -- it sets token_expires_at alongwith auth token-- " do 
+        context " -- it sets authentication_token_expires_at alongwith auth token-- " do 
 
                 before(:all) do 
                         $earlier_auth_token = nil
@@ -61,7 +61,7 @@ RSpec.describe "token request spec", :type => :request,topic: true do
                         get new_topic_path, nil, @headers
                         expect(assigns(:resource)).to be_truthy
                         resource = assigns(:resource)
-                        expect(resource.token_expires_at).not_to be_nil  
+                        expect(resource.authentication_token_expires_at).not_to be_nil  
                 end
 
                 it " - doesnt authenticate if token has expired -- " do 
@@ -89,7 +89,7 @@ RSpec.describe "token request spec", :type => :request,topic: true do
                         expect(user_returned.authentication_token).not_to eq($earlier_auth_token)
 
                         expect(user_returned.authentication_token).not_to be_nil
-                        expect(user_returned.token_expires_at > Time.now.to_i).to be_truthy
+                        expect(user_returned.authentication_token_expires_at > Time.now.to_i).to be_truthy
                 end
 
                 it  " -- subsequently it will sign in using the new authentication token and es -- " do 

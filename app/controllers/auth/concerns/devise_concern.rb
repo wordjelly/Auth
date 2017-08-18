@@ -44,16 +44,7 @@ module Auth::Concerns::DeviseConcern
     def set_client
 	    
 	    if session[:client]
-	      #puts "GOT SESSION CLIENT."
-	      #puts session[:client].to_s
-	      #if session[:client].is_a?Hash
-	      #   #puts "its a hash."
-	      #   @client = Auth::Client.new(session[:client])
 	      
-	      #elsif session[:client].is_a? Auth::Client
-	         #puts "its a client."
-	      #   @client = session[:client]
-	      #end 
 	      
 	      return true
 
@@ -77,15 +68,13 @@ module Auth::Concerns::DeviseConcern
 	      else
 	      end
 	      
-
-	      
-	      
 	      if api_key.nil? || current_app_id.nil?
 	        
 	      else
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
-	          request.env["omniauth.model"] = path
-	          return true
+	          	request.env["omniauth.model"] = path
+
+	          	return true
 	        end
 	      end
 	      return false
@@ -128,10 +117,10 @@ module Auth::Concerns::DeviseConcern
         
         #puts "does it contain the redirect url."
         #puts session[:client].contains_redirect_url?(redir_url)
+        cli = session[:client]
+        cli = Auth::Client.new(session[:client]) if session[:client].is_a? Hash
 
-
-
-	    if redir_url && session[:client] && session[:client].contains_redirect_url?(redir_url) && !(is_json_request?)
+	    if redir_url && session[:client] && cli.contains_redirect_url?(redir_url) && !(is_json_request?)
 	        
 	        session[:redirect_url] = redir_url
 	        
@@ -148,6 +137,10 @@ module Auth::Concerns::DeviseConcern
        set_redirect_url
 
        protect_json_request
+
+       puts "did before request and set client and redirect url as:"
+       puts session[:client]
+       puts session[:redirect_url]
     
     end
 

@@ -287,7 +287,10 @@ DeviseController.class_eval do
 
   def redirect_to(options = {}, response_status = {})
 
-      
+      cli = session[:client]
+       if (session[:client] && (session[:client].is_a? Hash))
+        cli = Auth::Client.new(session[:client])
+       end
       ##this handles the condition for example where the user comes to the sign in page with a valid redirect url and api key, then goes to the oauth page, then he clicks sign in by oauth, and comes back from oauth provider after a valid sign in, what happens as a result is that the request variable @redirect_url which was set when the user came to the sign_in_page(or any page controlled by the devise controller), is knocked off, because of the visit to the other domain. But the session variable is still intact, so we set the request variable again to the session variable and everything in front of that is just like what we normally do with render
       
       ##THIS SHOULD NO LONGER HAPPEN, I DONT WANT ANYONE TO BE AABLE TO VISIT THE WORDJELLY PAGE WITH A REDIRECT URL AND 
@@ -314,8 +317,8 @@ DeviseController.class_eval do
         super(options,response_status)
       else
         ##as long as its not destroy.
-        if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
-          resource.set_client_authentication(session[:client])
+        if resource && resource.set_client_authentication?(action_name,controller_name,cli)
+          resource.set_client_authentication(cli)
         end
         if (["passwords","confirmations","unlocks"].include? controller_name)
           super(options,response_status)
@@ -327,9 +330,9 @@ DeviseController.class_eval do
           ##we are signed_in
           ##we have at least one authentication_key confirmed.
 
-          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client],current_user)
+          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_user)
 
-            curr_app_es = resource.client_authentication[session[:client].current_app_id]
+            curr_app_es = resource.client_authentication[cli.current_app_id]
             session.delete(:client)
             
            
@@ -342,9 +345,14 @@ DeviseController.class_eval do
   end
  
   def render(*args)
-      
-       if resource && resource.set_client_authentication?(action_name,controller_name,session[:client])
-         resource.set_client_authentication(session[:client])
+       
+       cli = session[:client]
+       if (session[:client] && (session[:client].is_a? Hash))
+        cli = Auth::Client.new(session[:client])
+       end
+
+       if resource && resource.set_client_authentication?(action_name,controller_name,cli)
+         resource.set_client_authentication(cli)
        end
    
         if (["passwords","confirmations","unlocks"].include? controller_name)
@@ -353,9 +361,9 @@ DeviseController.class_eval do
          
          
 
-            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],session[:client],current_user)
+            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_user)
 
-              curr_app_es = resource.client_authentication[session[:client].current_app_id]
+              curr_app_es = resource.client_authentication[cli.current_app_id]
               session.delete(:client)
               
               

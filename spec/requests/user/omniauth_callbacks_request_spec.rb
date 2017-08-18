@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Omniauth requests", :type => :request, :omniauth_requests => true do
+RSpec.describe "Omniauth requests", :type => :request, :omniauth => true do
   
 
 

@@ -45,6 +45,11 @@ Capybara::Webkit.configure do |config|
   config.debug = false
   
   config.allow_url("www.google.com")
+  config.allow_url("www.google.co.in")
+  config.allow_url("clients1.google.co.in")
+  config.allow_url("ssl.gstatic.com")
+   
+  config.allow_url("fonts.googleapis.com")
   
 end
 

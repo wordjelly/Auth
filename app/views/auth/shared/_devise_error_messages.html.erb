@@ -5,5 +5,5 @@
 <!-- this data-resource is necessary for it to call the correct route while signing in -->
 <%= puts "resource is: #{resource.to_s}" %>
 <div data-resource="<%= Auth.configuration.mount_path[1..-1] + "/" + resource.class.name.downcase.pluralize %>">
-You need to <span class="sign_in">Sign in</span> to continue.
+You need to Sign in to continue.
 </div>

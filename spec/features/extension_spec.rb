@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.feature "", :type => :feature, :feature => true do
+RSpec.feature "", :type => :feature, :js => true  do
 
   before(:each) do 
  	    ActionController::Base.allow_forgery_protection = true
@@ -19,11 +19,12 @@ RSpec.feature "", :type => :feature, :feature => true do
     
   context " -- oauth tests -- " do 
 
-    context " -- google oauth test -- " do 
+    context " -- google oauth test -- ", google: true do 
 
         before(:all) do 
             @oauth_provider = :google_oauth2
         end
+
 
         scenario " -- it can sign in with oauth2 -- ", js: true do 
        
@@ -37,8 +38,13 @@ RSpec.feature "", :type => :feature, :feature => true do
             mock_auth_hash(@oauth_provider)
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
-    
+
+            l = find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']")
+            l.click
+            #find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+        
+
+
             expect(page).to have_content("Sign Out")
           
         end
@@ -56,7 +62,7 @@ RSpec.feature "", :type => :feature, :feature => true do
             mock_auth_hash(@oauth_provider)
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
     
 
             click_link "Sign Out"
@@ -76,7 +82,7 @@ RSpec.feature "", :type => :feature, :feature => true do
             mock_auth_hash(@oauth_provider,'new_token',50000)
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
     
             expect(page).to have_content("Sign Out")
 
@@ -92,13 +98,11 @@ RSpec.feature "", :type => :feature, :feature => true do
             ##visit the sign in page
             visit new_user_session_path({:redirect_url => "http://www.google.com", :api_key => @ap_key, :current_app_id => "test_app_id"})
 
-            puts "----------------FINISHED NEW USER SESSION PATH----------------"
+            
             ##visit the sign up page.
             click_link("Sign In")
+            
             wait_for_ajax
-            ##modal should open.
-            ##then 
-            ## SET RECAPTCHA TO FALSE SO THAT IT DOESNT INTERFERE WITH THE REQUEST RESPONSE.
             
             find("#show_sign_up").click
             #puts "----------------VISITED NEW USER REGISTRATION--------------"
@@ -137,6 +141,8 @@ RSpec.feature "", :type => :feature, :feature => true do
                         
         end
 
+
+        ##with this scenario will see error in console< that is expected>
         scenario "any error in omniauth -> goes to omniauth error page", js: true do 
 
             OmniAuth.config.test_mode = true
@@ -151,7 +157,7 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             expect(page).to have_content("error")
 
@@ -177,7 +183,7 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             click_link("Sign Out")
 
@@ -203,7 +209,7 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click                
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click                
 
            
             expect(page).to have_content("Failed to update the acceess token and token expires at")
@@ -234,7 +240,7 @@ RSpec.feature "", :type => :feature, :feature => true do
                 end
             end
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             expect(page).to have_content("Failed to create new identity")
 
@@ -266,7 +272,7 @@ RSpec.feature "", :type => :feature, :feature => true do
                 end
             end
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
             expect(page).to have_content("You have to confirm your email address before continuing.")
@@ -287,7 +293,7 @@ RSpec.feature "", :type => :feature, :feature => true do
             Rails.application.env_config["omniauth.model"] = nil
             mock_auth_hash(@oauth_provider)
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
             expect(page).to have_content("No resource was specified in the omniauth callback request.")
@@ -298,7 +304,7 @@ RSpec.feature "", :type => :feature, :feature => true do
     end
 
 
-    context " -- facebook oauth test -- " do 
+    context " -- facebook oauth test -- ", facebook: true do 
 
         before(:all) do 
             @oauth_provider = :facebook
@@ -456,7 +462,7 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             click_link("Sign Out")
 
@@ -482,7 +488,7 @@ RSpec.feature "", :type => :feature, :feature => true do
           
             Rails.application.env_config["omniauth.model"] = "omniauth/users/"
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click                
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click                
 
            
             expect(page).to have_content("Failed to update the acceess token and token expires at")
@@ -513,7 +519,7 @@ RSpec.feature "", :type => :feature, :feature => true do
                 end
             end
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             expect(page).to have_content("Failed to create new identity")
 
@@ -545,7 +551,7 @@ RSpec.feature "", :type => :feature, :feature => true do
                 end
             end
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
             expect(page).to have_content("You have to confirm your email address before continuing.")
@@ -566,7 +572,7 @@ RSpec.feature "", :type => :feature, :feature => true do
             Rails.application.env_config["omniauth.model"] = nil
             mock_auth_hash(@oauth_provider)
 
-            find(:xpath, "//a[@href='/authenticate/omniauth/users/#{@oauth_provider.to_s}']").click
+            find("a[href='/authenticate/omniauth/users/#{@oauth_provider}']").click
 
             ##THIS HAPPENS BECAUSE WE TRY TO SIGN IN AN UNCONFIRMED USER, AND SO IT WILL GIVE THAT AS THE ERROR, AND AT THE SAME TIME REDIRECT TO THE AFTER_SIGN_IN_PATH.
             expect(page).to have_content("No resource was specified in the omniauth callback request.")

@@ -147,7 +147,7 @@ RSpec.describe "otp request spec",:otp_request => true, :type => :request do
 
     context " -- on create user with email " do 
 
-      it " -- on updating with valid mobile number " do 
+      context " -- on updating with valid mobile number " do 
 
         it " -- sends sms otp " do 
 
