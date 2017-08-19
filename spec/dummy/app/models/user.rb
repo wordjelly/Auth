@@ -13,10 +13,14 @@ class User
   ##here we are processing it assuming it is a mobile number
   ##the regex is the same one used on the javascript side as well.
   def additional_login_param_format
-    #puts  "--------------- CAME TO VALIDATE ADDITIONAL LOGIN PARAM FORMAT----"
+   
   	if !additional_login_param.blank?
-  		if !additional_login_param =~/^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/
-  			errors.add(:additional_login_param,"please enter a valid mobile number")
+      
+  		if additional_login_param =~/^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/
+  			
+      else
+        
+        errors.add(:additional_login_param,"please enter a valid mobile number")
   		end
   	end
   end 

@@ -51,36 +51,64 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
     		expect(assigns(:user).errors).not_to be_empty
     	end
 
-    	
+        context " -- mobile validations -- ", :mobile_validations => true do 
 
-        context " -- flow test --- " do 
-            
-            context " --- create and confirm an account with a mobile number, then try to delete the mobile -- should give a validation error -- " do 
+        	context " -- additional login param validations " do 
 
                 before(:all) do 
-                    ActionController::Base.allow_forgery_protection = true
-                    User.delete_all
-                    Auth::Client.delete_all
-                    @u = User.new(attributes_for(:user_confirmed))
-                    @u.save
-                    @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
-                    @c.redirect_urls = ["http://www.google.com"]
-                    @c.versioned_create
-                    @u.client_authentication["test_app_id"] = "test_es_token"
-                    @u.save
-                    @ap_key = @c.api_key
-                    @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
-                    @otp = 1234
-                    Auth.configuration.stub_otp_api_calls = true
+                        ActionController::Base.allow_forgery_protection = true
+                        User.delete_all
+                        Auth::Client.delete_all
+                        @u = User.new(attributes_for(:user_confirmed))
+                        @u.save
+                        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+                        @c.redirect_urls = ["http://www.google.com"]
+                        @c.versioned_create
+                        @u.client_authentication["test_app_id"] = "test_es_token"
+                        @u.save
+                        @ap_key = @c.api_key
+                        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                        @otp = 1234
+                        Auth.configuration.stub_otp_api_calls = true
                 end
 
-                before(:all) do 
-                    $otp_session_id = nil
-                 end
+                it " --- gives a validation error if additional login param is not a valid mobile on CREATE -- " do 
+                    post user_registration_path, {user: attributes_for(:user_mobile_invalid),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    @user_created = assigns(:user)
+                    @cl = assigns(:client)
+                    user_json_hash = JSON.parse(response.body)
+                    expect(user_json_hash.keys).to match_array(["errors","nothing"])
+                end
 
-                 after(:all) do 
-                    $otp_session_id = nil
-                 end
+
+            end
+
+            context " --- validation flow first create a valid mobile, confirm it, then try to update with an invalid mobile -- should throw validation errors " do 
+
+                    before(:all) do 
+                        ActionController::Base.allow_forgery_protection = true
+                        User.delete_all
+                        Auth::Client.delete_all
+                        @u = User.new(attributes_for(:user_confirmed))
+                        @u.save
+                        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+                        @c.redirect_urls = ["http://www.google.com"]
+                        @c.versioned_create
+                        @u.client_authentication["test_app_id"] = "test_es_token"
+                        @u.save
+                        @ap_key = @c.api_key
+                        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                        @otp = 1234
+                        Auth.configuration.stub_otp_api_calls = true
+                    end
+
+                    before(:all) do 
+                        $otp_session_id = nil
+                    end
+
+                    after(:all) do 
+                        $otp_session_id = nil
+                    end
 
                     it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
             
@@ -88,8 +116,9 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         @user_created = assigns(:user)
                         @cl = assigns(:client)
                         user_json_hash = JSON.parse(response.body)
+                        
                         expect(user_json_hash.keys).to match_array(["nothing"])
-                    
+                        
                     end
 
                     it " -- accepts otp at the verify otp endpoint -- " do 
@@ -114,18 +143,152 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     expect(user_json_hash["resource"]).not_to include("authentication_token","es")
                     end
 
-                    it " -- has errors if we try to delete the mobile now -- " do 
+                    it " -- has errors if we try to update with an invalid mobile number now -- " do 
 
                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                        
 
-                        a = {:id => @last_user_created.id, :user => {:additional_login_param => "", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+                        a = {:id => @last_user_created.id, :user => {:additional_login_param => Faker::Name.name, :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
 
                         put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
                         @user_updated = assigns(:user)
                         expect(@user_updated.errors).not_to be_empty
-                        
+                        user_json_hash = JSON.parse(response.body)
+                        expect(user_json_hash.keys).to match_array(["nothing","errors"])
                     end
+
+
+            end
+            
+            ##with redirect the targets are as follows:
+            ## => should redirect with mobile flow
+            ## => should be able to switch off redirect functionality
+
+            context " -- validation flow - create account with confirmed email, then add invalid mobile - should throw error " do 
+
+                     before(:all) do 
+                        ActionController::Base.allow_forgery_protection = true
+                        User.delete_all
+                        Auth::Client.delete_all
+                        @u = User.new(attributes_for(:user_confirmed))
+                        @u.save
+                        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+                        @c.redirect_urls = ["http://www.google.com"]
+                        @c.versioned_create
+                        @u.client_authentication["test_app_id"] = "test_es_token"
+                        @u.save
+                        @ap_key = @c.api_key
+                        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                        @otp = 1234
+                        Auth.configuration.stub_otp_api_calls = true
+                    end
+
+
+                    it "-- creates confirmed email account " do 
+
+                        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                        @user_created = assigns(:user)
+                        @cl = assigns(:client)
+                        user_json_hash = JSON.parse(response.body)
+                        
+                       
+                        expect(user_json_hash.keys).to match_array(["authentication_token","es"])
+
+                    end
+
+                    it " -- fails to update with invalid mobile number -- " do 
+
+                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                       
+
+                        a = {:id => @last_user_created.id, :user => {:additional_login_param => Faker::Name.name, :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+
+                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+                        @user_updated = assigns(:user)
+                        expect(@user_updated.errors).not_to be_empty
+                        user_json_hash = JSON.parse(response.body)
+                        expect(user_json_hash.keys).to match_array(["nothing","errors"])
+
+                    end
+
+
+            end
+
+        end
+
+        context " -- flow test --- " do 
+            
+            context " --- create and confirm an account with a mobile number, then try to delete the mobile -- should give a validation error -- " do 
+
+                before(:all) do 
+                    ActionController::Base.allow_forgery_protection = true
+                    User.delete_all
+                    Auth::Client.delete_all
+                    @u = User.new(attributes_for(:user_confirmed))
+                    @u.save
+                    @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+                    @c.redirect_urls = ["http://www.google.com"]
+                    @c.versioned_create
+                    @u.client_authentication["test_app_id"] = "test_es_token"
+                    @u.save
+                    @ap_key = @c.api_key
+                    @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                    @otp = 1234
+                    Auth.configuration.stub_otp_api_calls = true
+                end
+
+                before(:all) do 
+                    $otp_session_id = nil
+                end
+
+                after(:all) do 
+                    $otp_session_id = nil
+                end
+
+                it " -- on creating unconfirmed user with a mobile number, it sends otp -- " do 
+        
+                    post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    @user_created = assigns(:user)
+                    @cl = assigns(:client)
+                    user_json_hash = JSON.parse(response.body)
+                    expect(user_json_hash.keys).to match_array(["nothing"])
+                    
+                end
+
+                it " -- accepts otp at the verify otp endpoint -- " do 
+
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                    $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                    
+                    get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                    user_json_hash = JSON.parse(response.body)
+                    
+                    expect(user_json_hash.keys).to match_array(["nothing"])
+                end
+
+                it " -- short polls for verification status, returns auth_token, es"  do    
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                    
+                   
+                    get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                    user_json_hash = JSON.parse(response.body)
+                   
+                    expect(user_json_hash["verified"]).to eq(true)
+                expect(user_json_hash["resource"]).not_to include("authentication_token","es")
+                end
+
+                it " -- has errors if we try to delete the mobile now -- " do 
+
+                    @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                   
+
+                    a = {:id => @last_user_created.id, :user => {:additional_login_param => "", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+
+                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+                    @user_updated = assigns(:user)
+                    expect(@user_updated.errors).not_to be_empty
+                    
+                end
 
             end
 
@@ -499,9 +662,6 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                 end
 
             end
-
-
-
 
         end
 

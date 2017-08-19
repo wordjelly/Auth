@@ -14,14 +14,19 @@ FactoryGirl.define do
   end
 
   factory :user_mobile, class: User do 
-    additional_login_param  {Faker::Number.number(10).to_s}
+    additional_login_param  {Faker::Number.between(9822028511, 9922028511).to_s}
     password  'password'
     password_confirmation  'password'
   end
 
+  factory :user_mobile_invalid, class: User do 
+    additional_login_param  {Faker::Name.name}
+    password  'password'
+    password_confirmation  'password'
+  end
 
   factory :user_mobile_confirmed, class: User do
-    additional_login_param  {Faker::Number.number(10).to_s}
+    additional_login_param  {Faker::Number.between(9822028511, 9922028511).to_s}
     password  'password'
     password_confirmation  'password'
     additional_login_param_status 2

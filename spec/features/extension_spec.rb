@@ -584,7 +584,6 @@ RSpec.feature "", :type => :feature, :js => true  do
 
   end
 
-
   context " -- topic web app request spec ", :topic_feature => true do 
 
     scenario "visit topic part after signing in, and everythign should work." , js: true do 
