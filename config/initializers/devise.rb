@@ -283,7 +283,7 @@ DeviseController.class_eval do
   ##add to devise concern.
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
- 
+
 
   def redirect_to(options = {}, response_status = {})
 
@@ -460,6 +460,8 @@ module Devise
         end
       end
     end
+
+    
 
     def authenticate_scope!
       

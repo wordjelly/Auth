@@ -71,10 +71,10 @@ CART ENDPOINTS:
 
 
 THINGS TO BE DONE:
-1. solve web ui side errors : 17 
-2. see how to add recaptch to api for registrations controller : 19 
-3. test password reset with otp, spec test and also ui test : 18
-4. fix all existing tests, and also test for otp validations : 20,21,22
+2. see how to add recaptch to api for registrations controller on the android side,enable the recaptcha on registration create and update : 19 
+3. forms should show additional login param names correctly.
+4. tests should pass with additional login param disabled.
+5. go over specs and write the api documentation.
 5. write cart specs and transaction specs: 23, 24
 6. build payments gateway(with refund, and cash on delivery options) : 24 - 28
 7. add notifications - 28 -> 31

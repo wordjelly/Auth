@@ -1,5 +1,6 @@
 mark_all_input_fields_valid();
-<% if (defined?(resource) != nil) && resource.errors.size > 0 %>
+<% if (defined?(resource) != nil) && !resource.nil? %>
+	<% if resource.errors.size > 0 %>
 	<% resource.errors.each do |attrib,message| %>
 		<% if attrib =~ /recaptcha/ %>
 			show_modal_error_message("<%= escape_javascript(message) %>");
@@ -12,6 +13,7 @@ mark_all_input_fields_valid();
 			//this currently happens when errors are returned on additional_login_param, which as a field never exists.
 			invalidate_input_field(field_id,"<%= message.html_safe %>");
 		<% end %>
+	<% end %>
 	<% end %>
 <% end %>
 //this conditions happens if an errors variable has been explicitly passed to this errors modal.

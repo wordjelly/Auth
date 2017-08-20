@@ -135,9 +135,7 @@ RSpec.feature "", :type => :feature, :js => true  do
             sleep(5)
             ##should redirect to the redirect url.
             expected_es = u.client_authentication["test_app_id"]
-            if current_url=~/google/
-                expect("one").to eql("one")
-            end
+            expect(current_url =~ /google/).to be_truthy
                         
         end
 

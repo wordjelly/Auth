@@ -57,6 +57,7 @@ module Auth
     attr_accessor :cart_item_controller
     attr_accessor :cart_item_class
     attr_accessor :token_regeneration_time
+    attr_accessor :do_redirect
 
     def initialize
       @enable_token_auth = true
@@ -72,7 +73,12 @@ module Auth
       @cart_item_controller = nil
       @cart_item_class = "CartItem"
       @simulate_invalid_otp = false
+      ##the regeneration time of the auth_token,
+      ##after the following mentioned time, the token is useless
       @token_regeneration_time = 1.day
+      ##whether to redirect to redirect urls if provided in the
+      ##request.
+      @do_redirect = true;
     end
   end
   

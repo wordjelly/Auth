@@ -478,9 +478,10 @@ module Auth::Concerns::UserConcern
          client && client_authentication[client.current_app_id] && authentication_token && (id.to_s == curr_user.id.to_s) && at_least_one_authentication_key_confirmed?
 	end
 
-	##just a combination of having the redirect_url and the above method.
+	##just a combination of having the redirect_url and the above method,
+	##and whether to redirect or not.
 	def reply_with_redirect_url_and_auth_token_and_es?(redirect_url,client,curr_user)
-		redirect_url && reply_with_auth_token_es?(client,curr_user)
+		Auth.configuration.do_redirect && redirect_url && reply_with_auth_token_es?(client,curr_user)
 	end
 
 	##
