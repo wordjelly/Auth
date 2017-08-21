@@ -71,16 +71,19 @@ CART ENDPOINTS:
 
 
 THINGS TO BE DONE:
-2. see how to add recaptch to api for registrations controller on the android side,enable the recaptcha on registration create and update : 19 
+1. recaptcha json request spec, add conditionals in the redirect parts of all the tests.
+2. add i18n translations for marathi, hindi.
 3. forms should show additional login param names correctly.
 4. tests should pass with additional login param disabled.
 5. go over specs and write the api documentation.
+6. oauth email should not be deletable**
 5. write cart specs and transaction specs: 23, 24
 6. build payments gateway(with refund, and cash on delivery options) : 24 - 28
 7. add notifications - 28 -> 31
 8. create admin ui fields for adding user
 9. cron api -> reminders for tests.
 10. picture + video upload.
+--- all the user sign up methodologies by admin, and also through doctor, and all that shit, as well as sending test reports to doctor.
 - by september end this much has to be done.
 
 9. geo location put and query  -> full functionality for nearest rider and where is rider

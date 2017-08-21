@@ -1,15 +1,23 @@
+<div class="col l8 m10 s10 offset-l2 offset-m1 offset-s1 center">
 Please enter your 10 digit mobile number.
 <% if !resource.nil? %>
-	<%= form_for(resource, as: resource.class.name.underscore, url: send_sms_otp_url(resource.class.name.underscore.downcase.pluralize,{:intent => intent}), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
-	<div class="input-field">
-	    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[additional_login_param]" id="<%= resource.class.name.downcase %>_additional_login_param">
-	    <label for="<%= resource.class.name.downcase %>_additional_login_param" class="">Mobile Number</label>
-	</div>
-	<%= f.submit "Log In",  id: "otp_form_submit", style: "display:none;" %>
-	<% end %>
-	<div class="col l6 m6 s6 p-0-left p-0-right" id="otp_submit">
-    
-      <i class="mdi-hardware-keyboard-tab grey-text right cursor-pointer" style="height:60px; width:60px; border:1px solid #9e9e9e; border-radius:5px; font-size:1.8em; padding-top:0.75rem; text-align:center;" id="submit_icon"></i>
-    
-    </div>
+	
+		<%= form_for(resource, as: resource.class.name.underscore, url: send_sms_otp_url(resource.class.name.underscore.downcase.pluralize,{:intent => intent}), remote: true, :authenticity_token => true, data: {type: "script"}, html: {id: "otp_form"}, method: "GET") do |f| %>
+			<div class="input-field" style="text-align: center">
+			    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[additional_login_param]" id="<%= resource.class.name.downcase %>_additional_login_param">
+			    <label for="<%= resource.class.name.downcase %>_additional_login_param" class="">Mobile Number</label>
+			</div>
+			<div style="text-align:center; padding-top: 1.5rem; padding-bottom: 1.5rem" id="recaptcha_tags">
+		    	<% if Auth.configuration.recaptcha %>
+					<%= recaptcha_tags %>
+				<% end %>
+		  	</div>
+	  	
+		<%= f.submit "Log In",  id: "otp_form_submit", style: "display:none;" %>
+		<% end %>
+		<div id="otp_submit" class="m-20-bottom">
+	      <i class="mdi-hardware-keyboard-tab grey-text center cursor-pointer" style="height:60px; width:60px; border:1px solid #9e9e9e; border-radius:5px; font-size:1.8em; padding-top:0.75rem; text-align:center;" id="submit_icon"></i>
+	    </div>
+ 
 <% end %>
+</div>

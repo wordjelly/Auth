@@ -9,18 +9,26 @@ module Auth::Concerns::DeviseConcern
 
     end
 
+    ##returns true if the recaptcha is not specified in the configuration
     ##returns true if the recaptcha is valid.
     ##expects the parameter 'g-recaptcha-response' in the params hash
     ##if the request is json, and has the header os-android, then it will use the android_recaptcha_api_key as the secret key, otherwise will use the default recaptch_secret key that should have been configured in the pre-initializer.
     ##it is currently being called in the registrations_controller on create and update, and in the otp action send_sms_otp,verify_sms_otp.
     ##so all these are protected by recaptcha, but not on iphone.
     def check_recaptcha
-        puts "checking recaptcha"
+    	
+    	return true unless Auth.configuration.recaptcha
+        
        	recaptcha_options = {}
-    	if is_json_request? && request.headers["OS-ANDROID"]
-    		return false unless Auth.configuration.third_party_api_keys[:android_recaptcha_api_key]
-    		recaptcha_options[:secret_key] = Auth.configuration.third_party_api_keys[:android_recaptcha_api_key]
+    	if is_json_request?
+    		#puts "is json request."
+    		return true unless request.headers["OS-ANDROID"]
+    		#puts "android is there in headers."
+    		not_found("recaptcha validation error") unless Auth.configuration.third_party_api_keys[:android_recaptcha_secret_key]
+    		#puts "android key is there in config."
+    		recaptcha_options[:secret_key] = Auth.configuration.third_party_api_keys[:android_recaptcha_secret_key]
     	end
+    	#puts "recaptcha_options are : #{recaptcha_options}"
     	not_found("recaptcha validation error") unless verify_recaptcha(recaptcha_options)
     end
 

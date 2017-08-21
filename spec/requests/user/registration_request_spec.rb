@@ -59,6 +59,29 @@ RSpec.describe "Registration requests", :registration => true, :type => :request
     end
 
 
+    context " -- recaptcha ", recaptcha: true do 
+      before(:example) do 
+        Recaptcha.configuration.skip_verify_env.delete("test")
+      end
+
+      after(:example) do 
+        Recaptcha.configuration.skip_verify_env << "test"
+      end
+      it " -- requires recaptcha on create " do 
+        ##we add that 
+        
+        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}
+        expect(response.body).to eq("recaptcha validation error")
+      end
+
+      it " -- requires recaptcha on update " do 
+        sign_in_as_a_valid_and_confirmed_user
+        put user_registration_path, :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"},:api_key => @ap_key, :current_app_id => "test_app_id"
+        expect(response.body).to eq("recaptcha validation error")
+      end
+
+    end
+
     context " -- auth token and client salt creation -- " do 
 
       it " -- creates client authentication and auth token on user create -- " do
@@ -388,6 +411,35 @@ RSpec.describe "Registration requests", :registration => true, :type => :request
         end        
 
         
+        context " -- recaptcha ", recaptcha_json: true do 
+          before(:example) do 
+            Recaptcha.configuration.skip_verify_env.delete("test")
+          end
+
+          after(:example) do 
+            Recaptcha.configuration.skip_verify_env << "test"
+          end
+
+          it " -- json request without android header passes, because it simply returns true from the check_recaptcha def -- " do 
+
+            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            resp = JSON.parse(response.body)
+            expect(resp.keys).to match_array(["authentication_token","es"])
+
+          end
+
+          ##basically here , it fails because since android os header is there, the verify recaptcha is still run.
+          ##it also uses the android_secret_key, but I couldnt figure out how to test for that, tried expect.to have_recevied, but the controller does not receive the verify_recaptcha method, guess not significantly well versed in rspec to know how to test for that.
+          it " -- json request with android header will fail, because verify recaptcha fails. "  do 
+            @headers["OS-ANDROID"] = true
+            
+            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            #puts response.body.to_s
+            resp = JSON.parse(response.body)
+            expect(resp["errors"]).to eq("recaptcha validation error")            
+          end
+
+        end
         
 
         context " --- UPDATE REQUEST --- " do 
