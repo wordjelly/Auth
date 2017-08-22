@@ -143,6 +143,14 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 			expect(created_cart_item_ids).to be_empty
 		end	
 
+		it "returns empty response if no cart items exist for this user" do 
+			Shopping::CartItem.delete_all
+			@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+			get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+			returned_objects = JSON.parse(response.body)
+			expect(returned_objects).to be_empty
+		end
+
 	end
 
 	context  " -- show " do 

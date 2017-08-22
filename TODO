@@ -71,7 +71,7 @@ CART ENDPOINTS:
 
 
 THINGS TO BE DONE:
-1. recaptcha json request spec, add conditionals in the redirect parts of all the tests.
+1. add recaptcha tests to otp controller, add conditionals in the redirect parts of all the tests.
 2. add i18n translations for marathi, hindi.
 3. forms should show additional login param names correctly.
 4. tests should pass with additional login param disabled.
