@@ -56,6 +56,8 @@ module Auth
     attr_accessor :otp_controller
     attr_accessor :cart_item_controller
     attr_accessor :cart_item_class
+    attr_accessor :transaction_controller
+    attr_accessor :transaction_class
     attr_accessor :token_regeneration_time
     attr_accessor :do_redirect
 
@@ -72,6 +74,8 @@ module Auth
       @otp_controller = nil
       @cart_item_controller = nil
       @cart_item_class = "CartItem"
+      @transaction_controller = nil
+      @transaction_class = "Transaction"
       @simulate_invalid_otp = false
       ##the regeneration time of the auth_token,
       ##after the following mentioned time, the token is useless

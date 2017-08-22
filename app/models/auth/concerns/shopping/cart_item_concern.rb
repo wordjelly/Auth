@@ -26,6 +26,12 @@ module Auth::Concerns::Shopping::CartItemConcern
 		##not permitted
 		field :parent_id, type: String
 
+		##name of transaction
+		field :parent_name, type: String
+
+		##notes on transaction
+		field :parent_notes, type: String
+
 		##is it being discounted, can be from 0 -> 100 percent discount
 		##not permitted
 		field :discount, type: Float

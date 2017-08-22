@@ -115,14 +115,20 @@ module Auth::Concerns::DeviseConcern
 	   	##should block any put action on the user
 	   	##and should render an error saying please do this on the server.
 	    if is_json_request? 
+            #puts "it is a json request."
 	    	if action_name == "otp_verification_result"
 	    		##we let this action pass because, we make json requests 
 	    		##from the web ui to this endpoint, and anyway it does
 	    		##not return anything sensitive.
+                #puts "action name is otp verification result."
 	    	else
+                #puts "action name is something else."
 		    	if session[:client].nil?
+                    puts "cient is nil so rendering nothing."
 		      		render :nothing => true , :status => :unauthorized
-		      	end
+		      	else
+                    #puts "client is not nil"
+                end
 	      	end
 	    end
 	end
@@ -163,10 +169,6 @@ module Auth::Concerns::DeviseConcern
 
        protect_json_request
 
-       puts "did before request and set client and redirect url as:"
-       puts session[:client]
-       puts session[:redirect_url]
-    
     end
 
 
