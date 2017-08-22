@@ -171,6 +171,11 @@ module Auth::Concerns::DeviseConcern
 
     end
 
+    ##used only in render, redirect in DeviseController.class_eval
+    def current_resource(resource)
+        send("current_#{resource.class.name.underscore.downcase}")
+    end
+
 
 
 end

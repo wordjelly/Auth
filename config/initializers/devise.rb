@@ -330,7 +330,7 @@ DeviseController.class_eval do
           ##we are signed_in
           ##we have at least one authentication_key confirmed.
 
-          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_user)
+          if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_resource(resource))
 
             curr_app_es = resource.client_authentication[cli.current_app_id]
             session.delete(:client)
@@ -351,6 +351,7 @@ DeviseController.class_eval do
         cli = Auth::Client.new(session[:client])
        end
 
+
        if resource && resource.set_client_authentication?(action_name,controller_name,cli)
          resource.set_client_authentication(cli)
        end
@@ -358,10 +359,8 @@ DeviseController.class_eval do
         if (["passwords","confirmations","unlocks"].include? controller_name)
             super(*args)
         else
-         
-         
-
-            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_user)
+           
+            if resource && resource.reply_with_redirect_url_and_auth_token_and_es?(session[:redirect_url],cli,current_resource(resource))
 
               curr_app_es = resource.client_authentication[cli.current_app_id]
               session.delete(:client)

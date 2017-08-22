@@ -7,6 +7,8 @@ module Auth::Concerns::UserConcern
 
 	included do 
 
+		include GlobalID::Identification
+
 		USER_INFO_FIELDS = ["name","image_url"]
 
 		include MongoidVersionedAtomic::VAtomic
@@ -271,6 +273,7 @@ module Auth::Concerns::UserConcern
 			self.save
 		end
 		self.current_app_id = app_id
+		
 	end
 
 
@@ -355,9 +358,6 @@ module Auth::Concerns::UserConcern
 	 	 if self.errors.full_messages.size > 0
 	 	 	json[:errors] = self.errors.full_messages
 	 	 end
-	 	 if self.intent_token
-	 	 	json[:intent_token] = self.intent_token
-	 	 end
 	 	 json
 	end
 
@@ -422,14 +422,14 @@ module Auth::Concerns::UserConcern
 	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
 		if additional_login_param_changed?  && (self.pending_reconfirmation?)
-			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]}")
+			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{additional_login_param_name}")
 		end
 	end
 
 	##if you change the email while the additional login param not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
 	def email_changed_on_unconfirmed_additional_login_param
-		if email_changed? && (additional_login_param_status == 1) && Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]
-			errors.add(:email, "Please add or verify your #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} before changing your email id")
+		if email_changed? && (additional_login_param_status == 1) && additional_login_param_name
+			errors.add(:email, "Please add or verify your #{additional_login_param_name} before changing your email id")
 		end
 	end
 
@@ -451,7 +451,7 @@ module Auth::Concerns::UserConcern
 		##additional login param can change as long as neither goes from nil to blank or blank to nil.
 
 		if email_changed? && !attr_blank_to_blank?("email") && additional_login_param_changed? && !attr_blank_to_blank?("additional_login_param")
-			errors.add(:email,"you cannot update your email and #{Auth.configuration.auth_resources[self.class.name.to_s.capitalize][:additional_login_param_name]} at the same time")
+			errors.add(:email,"you cannot update your email and #{additional_login_param_name} at the same time")
 		end
 	end
 
@@ -466,14 +466,11 @@ module Auth::Concerns::UserConcern
 	##this def is used to determine if the auth_token and es should
 	##be sent back.
 	def reply_with_auth_token_es?(client,curr_user)
+
 		 ##we have a client authentication for the client.
          ##we have an authentication token
          ##we are signed_in
          ##we have at least one authentication_key confirmed.
-        
-         
-         
-         
          return false if !curr_user
          client && client_authentication[client.current_app_id] && authentication_token && (id.to_s == curr_user.id.to_s) && at_least_one_authentication_key_confirmed?
 	end
@@ -493,6 +490,12 @@ module Auth::Concerns::UserConcern
 		end
 	end
 
+	
+
+	##returns the additional login param name.
+	def additional_login_param_name
+		Auth.configuration.auth_resources[self.class.name.to_s.underscore.capitalize][:additional_login_param_name]
+	end
 	
 
 end

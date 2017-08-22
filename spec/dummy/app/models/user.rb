@@ -3,10 +3,9 @@ class User
   include Auth::Concerns::UserConcern
   include Auth::Concerns::SmsOtpConcern
   include Auth::TwoFactorOtp
-  include GlobalID::Identification
 
   field :name, type: String
-  field :dog, type: String
+
 
   
   ##FUNCTION OVERRIDEN FROM THE USER CONCERN TO FORMAT AND PARSE THE ADDITIONAL_LOGIN_PARAM.

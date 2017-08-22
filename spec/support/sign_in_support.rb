@@ -44,19 +44,15 @@ module ValidUserRequestHelper
   end
 
   def sign_in_as_a_valid_and_confirmed_admin
-    @admin = FactoryGirl.create :admin_confirmed
-    cli = Auth::Client.new
-    cli.current_app_id = "test_app_id"
-    @admin.set_client_authentication(cli)
-    @admin.save!
-    post_via_redirect admin_session_path, 'admin[email]' => @admin.email, 'admin[password]' => @admin.password
+    @admin = Admin.new(attributes_for(:admin_confirmed))
+    @admin.save
+    sign_in(@admin)
   end
   
   
 
   def sign_in_as_a_valid_and_confirmed_user
     @user = User.new(attributes_for(:user_confirmed))
-    
     @user.save
     sign_in(@user)
   end
