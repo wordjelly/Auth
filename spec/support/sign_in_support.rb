@@ -57,10 +57,18 @@ module ValidUserRequestHelper
     sign_in(@user)
   end
 
+end
 
+module AdminRootPathSupport
+  ##this needs to be done ,because after_sign_in_path_for has been changed for admin in the application_controller, to topics/new.
+  def admin_after_sign_in_path
+    app.routes.url_helpers.new_topic_url(:only_path => true)
+  end
 end
 
 RSpec.configure do |config|
   config.include ValidUserHelper, :type => :controller
   config.include ValidUserRequestHelper, :type => :request
+  config.include AdminRootPathSupport, :type => :request
 end
+
