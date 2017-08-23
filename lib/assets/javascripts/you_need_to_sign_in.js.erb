@@ -223,41 +223,17 @@ var credential_exists = function(def,e,field_id){
 
 var toggle_sign_up_validation = function(login_text){
 	if(login_text == "Sign In"){
-	  validation_settings["login_form"]["user_password"]["validate_with"] = [
-      	{"required" : "true",
-      	 "failure_message": "this field is required"
-      	}
-      ];
-      //remove the remote from the user_email part.
-      
-      validation_settings["login_form"]["user_login"]["validate_with"] = _.filter(validation_settings["login_form"]["user_login"]["validate_with"],function(n){
-      	return !("remote" in n);
-      });
-      
-      
+	  //function should be defined in the daughter app
+	  //it is currently defined in dummy/app/assets/javascripts/application.js
+	  validator.args = validation_toggle_on_sign_in();
+	  validator.register_handlers();
 	}
 	else
 	{
-	  validation_settings["login_form"]["user_password"]["validate_with"] = [
-      	{"required" : "true",
-      	 "failure_message": "this field is required"
-      	},
-      	{
-      	 "should_be_equal":"true",
-      	 "failure_message":"fields do not match",
-      	 "field_array":["user_password_confirmation"]
-      	}
-      ];
-      
-      
-      validation_settings["login_form"]["user_login"]["validate_with"].push({
-      	"remote" : "true",
-      	"ajax_settings" : credential_exists
-      });
-      
-      
+	  validator.args = validation_toggle_on_sign_up();
+	  validator.register_handlers(); 
 	}
-	validator = new WJ_Validator(validation_settings,"materialize",true);
+	
 }
 
 /****

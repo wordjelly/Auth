@@ -86,35 +86,67 @@ var user_login_validation_function = function(def,e,field_id){
   return false;
 }
 
-//the user login validation function is included in you_need_to_sign_in.js
-var validation_settings = {
-  "login_form" : {
-    "user_login" : {
+var val_settings = function(){
+  var s = {};
+  s["login_form"] = {};
+  s["login_form"][resource_singular + "_login"] = {
       "validation_events":{
         "keyup" : true
       },
       "validate_with":[
         {"required" : "true",
          "failure_message": "this field is required"
-    	},
-    	{"format" : user_login_validation_function,
-    	 "failure_message": "Please enter a valid email or mobile number"
-    	}
+      },
+      {"format" : user_login_validation_function,
+       "failure_message": "Please enter a valid email or mobile number"
+      }
       ]
+    };
+  s["login_form"][resource_singular + "_password"] = {
+    "validation_events":{
+        "keyup":true
     },
-    "user_password":{
-    	"validation_events":{
-    	  "keyup":true
-    	},
-    	"validate_with":[
-      	{"required" : "true",
-      	 "failure_message": "this field is required"
-      	}
-      ]
-    }
-  }
+    "validate_with":[
+      {"required" : "true",
+       "failure_message": "this field is required"
+      }
+    ]
+  };
+  return s;
 }
 
+var validation_toggle_on_sign_in = function(){
+  validation_settings = val_settings();
+  validation_settings["login_form"][resource_singular + "_password"]["validate_with"] = [
+    {"required" : "true",
+     "failure_message": "this field is required"
+    }
+  ];
+  //remove the remote from the user_email part.
+  validation_settings["login_form"][resource_singular + "_login"]["validate_with"] = _.filter(validation_settings["login_form"][resource_singular + "_login"]["validate_with"],function(n){
+    return !("remote" in n);
+  });
+  return validation_settings;
+}
+
+var validation_toggle_on_sign_up = function(){
+  validation_settings = val_settings();
+  validation_settings["login_form"][resource_singular + "_password"]["validate_with"] = [
+        {"required" : "true",
+         "failure_message": "this field is required"
+        },
+        {
+         "should_be_equal":"true",
+         "failure_message":"fields do not match",
+         "field_array":[resource_singular + "_password_confirmation"]
+        }
+      ];
+  validation_settings["login_form"][resource_singular + "_login"]["validate_with"].push({
+    "remote" : "true",
+    "ajax_settings" : credential_exists
+  });
+  return validation_settings;
+}
 
 //behaviour of the login_form when submitting the additional_login_parameter
 //for verification.
