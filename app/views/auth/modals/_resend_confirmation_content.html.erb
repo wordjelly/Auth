@@ -4,8 +4,8 @@
 	  <div class="row m-50-bottom">
 	  	  <div class="col l6 m6 s12 offset-l3 offset-m3">
 			  <div class="input-field m-30-top" style="margin-bottom:-30px;">
-			    <input autofocus="autofocus" type="email" value="<%= (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>" name="user[email]" id="user_email">
-			    <label for="user_email" class="">Email</label>
+			    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.underscore %>[email]" id="<%= resource.class.name.underscore %>_email">
+			    <label for="<%= resource.class.name.underscore %>_email" class=""><%= login_label_text(resource) %></label>
 			  </div>
 			  <%= render 'auth/modals/oauth_and_submit.html.erb' %>
 			  <div class="actions">

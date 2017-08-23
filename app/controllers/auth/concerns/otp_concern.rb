@@ -11,11 +11,9 @@ module Auth::Concerns::OtpConcern
 
 	def initialize_vars
 	  	##deep symbolize the incoming params after passing through permitted params.
-	  	puts "action name is : #{action_name}"
+	  	
 	  	@resource_params = permitted_params.deep_symbolize_keys
-	  	puts "resource params are:"
-	  	puts @resource_params.to_s
-
+	  	
 	  	##if the resource is defined, assign the class and the symbol for use further in the file
 	  	##eg: resource is provided in the route as : users, so 
 	  	##@resource_class => User

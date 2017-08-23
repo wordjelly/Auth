@@ -7,9 +7,10 @@ $("#show_sign_up").show();
 $("#forgot_password").hide();
 $("#resend_confirmation_email").hide();
 //remove the remote from the user_email validation settings, if it is ther.
-validation_settings["login_form"]["user_email"]["validate_with"] = _.filter(validation_settings["login_form"]["user_email"]["validate_with"],function(n){
-	return !("remote" in n);
-});
-validator = new WJ_Validator(validation_settings,"materialize",true);
-
+try{
+	var validator = new WJ_Validator(val_settings("email"),"materialize",true);
+}
+catch(err){
+	console.log(err);
+}
 open_sign_in_modal_if_closed();

@@ -9,9 +9,7 @@ $("#resend_confirmation_email").hide();
 //remove the remote from the user_email validation settings, if it is ther.
 // Initialize the validator
 try{
-	console.log("validation settings are:");
-	console.log(val_settings());
-	var validator = new WJ_Validator(val_settings(),"materialize",true);
+	var validator = new WJ_Validator(val_settings("email"),"materialize",true);
 }
 catch(err){
 	console.log(err);

@@ -86,10 +86,25 @@ var user_login_validation_function = function(def,e,field_id){
   return false;
 }
 
-var val_settings = function(){
+/***
+for the passwords, unlocks and confirmations views, 
+email is sent in as resource_email,and not as resource_login,
+like in sign_in and sign_up forms.
+so a parameter is passed into this function called login_parameter
+it can be eiterh "email" or "login"
+***/
+var val_settings = function(login_parameter){
   var s = {};
+  var format_failure_message = null;
+  if(resource_singular == "user"){
+    format_failure_message = "Please enter a valid email or mobile number";
+  }
+  else{
+    format_failure_message = "Please enter a valid email";
+  }
+
   s["login_form"] = {};
-  s["login_form"][resource_singular + "_login"] = {
+  s["login_form"][resource_singular + "_" + login_parameter] = {
       "validation_events":{
         "keyup" : true
       },
@@ -98,7 +113,7 @@ var val_settings = function(){
          "failure_message": "this field is required"
       },
       {"format" : user_login_validation_function,
-       "failure_message": "Please enter a valid email or mobile number"
+       "failure_message": format_failure_message
       }
       ]
     };
@@ -116,7 +131,7 @@ var val_settings = function(){
 }
 
 var validation_toggle_on_sign_in = function(){
-  validation_settings = val_settings();
+  validation_settings = val_settings("login");
   validation_settings["login_form"][resource_singular + "_password"]["validate_with"] = [
     {"required" : "true",
      "failure_message": "this field is required"
@@ -130,7 +145,7 @@ var validation_toggle_on_sign_in = function(){
 }
 
 var validation_toggle_on_sign_up = function(){
-  validation_settings = val_settings();
+  validation_settings = val_settings("login");
   validation_settings["login_form"][resource_singular + "_password"]["validate_with"] = [
         {"required" : "true",
          "failure_message": "this field is required"
