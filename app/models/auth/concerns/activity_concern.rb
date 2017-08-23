@@ -1,11 +1,8 @@
 module Auth::Concerns::ActivityConcern
 
 	extend ActiveSupport::Concern
-
+	include Auth::Concerns::ChiefModelConcern
 	included do 
-
-		include Mongoid::Document
-		include Mongoid::Timestamps
 
 		field :user_id, 			type: BSON::ObjectId
 		field :image_url, 			type: String

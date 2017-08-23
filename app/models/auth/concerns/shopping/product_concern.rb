@@ -2,9 +2,7 @@
 module Auth::Concerns::Shopping::ProductConcern
 
 	extend ActiveSupport::Concern
-	
-	
-
+	include Auth::Concerns::ChiefModelConcern
 	included do 
 		
 		field :price, type: BigDecimal

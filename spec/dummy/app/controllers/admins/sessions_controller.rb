@@ -1,4 +1,4 @@
-class Admins::SessionsController < Devise::SessionsController
+class Admins::SessionsController < Auth::SessionsController
 
   
 

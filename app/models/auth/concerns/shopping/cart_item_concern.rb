@@ -1,8 +1,9 @@
 ##NEED A SEPERATE MODEL THAT IMPLEMENTS IT
 module Auth::Concerns::Shopping::CartItemConcern
 
+
+
 	extend ActiveSupport::Concern
-	
 	
 	include Auth::Concerns::Shopping::ProductConcern
 
@@ -39,7 +40,64 @@ module Auth::Concerns::Shopping::CartItemConcern
 		##discount code to offer discounts
 		##permitted
 		field :discount_code, type: String
+
+	################ PAYMENT RELATED FIELDS ################
+
+		##### =>  waiting_to_confirm
+		##### =>  confirmed
+		##### =>  pending_amount
+		##### =>  paid
+		##### =>  payment acknowledged
+		##### =>  refund_requested
+		##### =>  refund_request_accepted
+		##### =>  pending_refund
+		##### =>  refund_completed
+		##### =>  refund_acknowledged
+		##### => these states should be set in an after_create callback, it has to be decided if it can be confirmed or not.
+		##### => that callback is subclassed to the CartItemClass
+
+		before_save :set_payment_state
+
+		PAYMENT_STATES = {
+			:waiting_to_confirm => "waiting_to_confirm"
+		}
+
+		field :payment_state, type: String, default: PAYMENT_STATES[:waiting_to_confirm]
+
+		
+		#### => a mongoid::bson id, referring to the user id to whom the payment should be made.
+		#### => if the value is null, it automatically implies the admin/owner of the domain.
+		field :pay_to, type: String
+
+		#### => payment acknowledged by
+		#### => a mongoid::bson id, referring to the user who accepts the payment
+		#### => this can be [cashier -> in case of payments by users, staff -> in case of payments to staff, customers -> in case of refunds.]
+		field :payment_acked_by, type: String
+
+	################ END PAYMENT RELATED FIELDS ############
+
 	end
+
+
+	############### START PAYMENT RELATED METHODS ##############
+	
+	### =>  this method should be overridden in the implementing class to decide the payment state
+	### => it is called before_create and before_update
+	def set_payment_state
+
+	end
+
+
+	def before_pay
+
+	end
+
+
+	def after_pay
+
+	end
+
+	############### END PAYMENT RELATED METHODS ###############
 
 	private
 	def resource_id_not_changed

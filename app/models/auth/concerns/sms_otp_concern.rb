@@ -1,7 +1,7 @@
 module Auth::Concerns::SmsOtpConcern
 
 	extend ActiveSupport::Concern
-
+	include Auth::Concerns::ChiefModelConcern
 	included do 
 
 		field :otp, type: String

@@ -99,6 +99,16 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
     }
   end
 
+  def payment_success_callback
+
+  end
+
+  def payment_failure_callback
+
+  end
+
+  
+  
   def permitted_params
     ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
     ##so to update , we will have to permit the id, to be sent in.

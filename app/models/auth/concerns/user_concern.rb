@@ -4,7 +4,8 @@ require 'simple_token_authentication'
 module Auth::Concerns::UserConcern
 		
 	extend ActiveSupport::Concern
-
+	include Auth::Concerns::ChiefModelConcern
+	
 	included do 
 
 		include GlobalID::Identification
@@ -495,6 +496,12 @@ module Auth::Concerns::UserConcern
 	##returns the additional login param name.
 	def additional_login_param_name
 		Auth.configuration.auth_resources[self.class.name.to_s.underscore.capitalize][:additional_login_param_name]
+	end
+
+	## => resource name converted to string with a capital 
+	## => first letter. eg : "User" 
+	def resource_key_for_auth_configuration
+		self.class.name.to_s.underscore.capitalize
 	end
 	
 
