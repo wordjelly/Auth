@@ -65,15 +65,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :payment_state, type: String, default: PAYMENT_STATES[:waiting_to_confirm]
 
 		
-		#### => a mongoid::bson id, referring to the user id to whom the payment should be made.
-		#### => if the value is null, it automatically implies the admin/owner of the domain.
-		field :pay_to, type: String
+		field :payment_sent, type: Boolean
 
-		#### => payment acknowledged by
-		#### => a mongoid::bson id, referring to the user who accepts the payment
-		#### => this can be [cashier -> in case of payments by users, staff -> in case of payments to staff, customers -> in case of refunds.]
-		field :payment_acked_by, type: String
 
+		field :payment_received, type: Boolean
+
+
+		#### => payment transaction id, 
+		#### => a mongoid bson::object id.
+		#### => this is different from transaction id, it is a unique number regenerated each time an attempt is made to pay the transaction.
+		field :payment_transaction_id, type: String
 	################ END PAYMENT RELATED FIELDS ############
 
 	end
@@ -87,14 +88,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	end
 
-
-	def before_pay
-
+	def before_send_payment(ptid)
+		payment_transaction_id = ptid
+		payment_sent = nil
+		payment_received = nil
+		save
 	end
 
-
-	def after_pay
-
+	def after_payment_success
+		payment_sent = true
+		save
 	end
 
 	############### END PAYMENT RELATED METHODS ###############
@@ -126,6 +129,13 @@ module Auth::Concerns::Shopping::CartItemConcern
 				self.where(conditions)
 			end
 		end
+
+		##only called from the transaction_controller_concern#pay method, so cart_items is already assured to exist.
+		##returns the total of the prices of all the cart items
+		def total(cart_items)
+			cart_items.inject{|sum,n| sum + n.price}
+		end
+
 	end
 	
 end

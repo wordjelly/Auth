@@ -99,14 +99,44 @@ module Auth::Concerns::Shopping::TransactionControllerConcern
     }
   end
 
+  ##the transaction id must be available here.
+  ##as well as the payment transaction id.
   def payment_success_callback
+    not_found("we couldn't find that transaction") unless @cart_items
+    ##if this is false then we have to ask them to go and verify payment again.
+    @resp = @resource.after_payment_success(@cart_items)
+    if @resp == true
+        Notify.send_notification(@cart_items,@resource,@resp)
+    else
 
+    end
+    ##and now send a notification to the payment recipient.
   end
 
   def payment_failure_callback
 
   end
 
+  def send_payment
+    not_found("we couldn't find that transaction") unless @cart_items
+    not_found("you are not authorized to make this payment") unless @resource.can_pay(@cart_items)
+    not_found("something went wrong, please try again") unless @resource.send_payment(@cart_items)
+    ##now forward to whatever payment technique is being used.
+
+  end
+
+  
+
+  def pay
+    ################### BEFORE PAY ##################
+    not_found unless @cart_items
+    before_pay_responses = @cart_items.map{|c| c = c.before_send_payment(BSON::ObjectId.new)}.uniq
+    not_found("could not initialize process, please try again") if (before_pay_responses.size > 1 || before_pay_responses[0] == false)
+    ################## PAY ##########################
+    payment_type = params[:payment_type]
+    payment_purpose = params[:payment_purpose]
+    not_found("please enter a payment type") unless payment_type
+  end
   
   
   def permitted_params
