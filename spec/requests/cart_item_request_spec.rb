@@ -124,7 +124,7 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 
 		context " -- index " do 
 
-			it " -- returns the cart items belonging to this user " do 
+			it " -- returns the cart items belonging to this user ", :problem_now => true do 
 				created_cart_item_ids = []
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
@@ -135,6 +135,8 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
 				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
 				returned_objects = JSON.parse(response.body)
+				expect(returned_objects).not_to be_empty
+				expect(returned_objects.size).to eq(5)
 				returned_objects.each { |r|
 					citem = Shopping::CartItem.new(r)
 					if created_cart_item_ids.include? citem.id.to_s

@@ -24,6 +24,7 @@ PATH
       omniauth-google-oauth2 (= 0.4.1)
       omniauth-linkedin
       omniauth-twitter
+      payuindia
       rails (~> 4.2.6)
       recaptcha
       redis
@@ -217,6 +218,7 @@ GEM
       cocaine (~> 0.5.5)
       mime-types
       mimemagic (~> 0.3.0)
+    payuindia (0.1.1)
     public_suffix (2.0.5)
     rack (1.6.8)
     rack-test (0.6.3)
@@ -319,7 +321,7 @@ GEM
     turbolinks (5.0.1)
       turbolinks-source (~> 5)
     turbolinks-source (5.0.3)
-    typhoeus (1.1.2)
+    typhoeus (1.3.0)
       ethon (>= 0.9.0)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)

@@ -15,6 +15,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   #if no id is provided then creates a new cart_item from the permitted params, but excluding the id key.
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
+    @cart_class = Auth.configuration.cart_class.constantize
     if @cart_item_class = Auth.configuration.cart_item_class
       begin
         @cart_item_class = @cart_item_class.constantize
@@ -56,6 +57,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##so we just need a query to show all the cart items of this resource
   def index
     @cart_items = @cart_item_class.find_cart_items(@resource).page 1
+    respond_with @cart_items, template: 'auth/shopping/cart_items/index'
   end
 
 

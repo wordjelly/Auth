@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "transaction request spec",:transaction => true, :type => :request do 
+RSpec.describe "cart request spec",:transaction => true, :type => :request do 
 
 	before(:all) do 
         ActionController::Base.allow_forgery_protection = false
@@ -22,6 +22,7 @@ RSpec.describe "transaction request spec",:transaction => true, :type => :reques
     end
 
 	context " -- json requests  -- " do 
+
 
 		context " -- create -- " do 
 			before(:example) do 
@@ -107,7 +108,7 @@ RSpec.describe "transaction request spec",:transaction => true, :type => :reques
 				##notes to be added to all cart items.
 				@notes = "aies blood test when she was not well"
 
-				put shopping_transaction_path({:id => @t_id}), {transaction: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove], parent_notes: @notes},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				put shopping_transaction_path({:id => @t_id}), {transaction: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove], cart_items: {parent_notes: @notes}},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
 				
 				cart_items = Shopping::CartItem.where(:parent_id => @t_id)

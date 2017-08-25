@@ -40,20 +40,20 @@ module ActionDispatch::Routing
 			 end
 		 end
 
-		 if Auth.configuration.transaction_controller
+		 if Auth.configuration.cart_controller
 		 	scope_path = "/"
 		 	 as_prefix = nil
-		 	 transactions_collection = nil
-		 	 Auth.configuration.transaction_class.underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<transactions_collection>[A-Za-z_]+)$/) do |match|
+		 	 carts_collection = nil
+		 	 Auth.configuration.cart_class.underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<carts_collection>[A-Za-z_]+)$/) do |match|
 		 	 		if Regexp.last_match[:scope_path]
 		 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
 		 	 			as_prefix = Regexp.last_match[:scope_path]
 		 	 		end
-		 	 		transactions_collection = Regexp.last_match[:transactions_collection]
+		 	 		carts_collection = Regexp.last_match[:carts_collection]
 		 	 end
-		 	 if transactions_collection
+		 	 if carts_collection
 		 	 	scope :path => scope_path, :as => as_prefix do 
-			    	resources transactions_collection.to_sym, controller: "#{Auth.configuration.transaction_controller}"
+			    	resources carts_collection.to_sym, controller: "#{Auth.configuration.cart_controller}"
 			    end
 			 end
 		 end
