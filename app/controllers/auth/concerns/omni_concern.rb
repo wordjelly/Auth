@@ -69,15 +69,6 @@ module Auth::Concerns::OmniConcern
   end
 
 
-
-
-  def build_token(resource_klazz)
-    loop do
-        token = SimpleTokenAuthentication::TokenGenerator.instance.generate_token
-        break token if (resource_klazz.where(authentication_token: token).count == 0)
-    end
-  end
-
   def update_identity_information(identity_info,provider)
       @resource.identities.map{|i|
         if(i["provider"] && i["provider"] == provider)
@@ -169,7 +160,7 @@ module Auth::Concerns::OmniConcern
               @resource = resource_klazz.new
               @resource.email = identity.email
               @resource.password = Devise.friendly_token(20)
-              @resource.authentication_token = build_token(resource_klazz)
+              @resource.regenerate_token
               @resource.identities = [identity.attributes.except("_id")]
               if @resource.respond_to?(:confirmed_at)
                 @resource.confirmed_at = Time.now.utc  
@@ -211,8 +202,7 @@ module Auth::Concerns::OmniConcern
                 elsif @resource.upserted_id 
                   
                   sign_in @resource
-                  puts "came after sign in resource."
-                  puts @resource.errors.full_messages.to_s
+                 
                     respond_to do |format|
                       format.html { redirect_to after_sign_in_path_for(@resource) and return}
                       format.json  { render json: @resource, status: :updated and return}

@@ -63,6 +63,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 			self.where(:_id =>params_cart_item_id, :resource_id => resource.id.to_s).first
 		end
 
+		##used in cart_controller_concern#index
 		def find_cart_items(resource)
 			self.where(:resource_id => resource.id.to_s)
 		end

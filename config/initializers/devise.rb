@@ -527,6 +527,7 @@ module Devise
     prepend_before_action :ignore_json_request, only: [:new]
     prepend_before_action :do_before_request, only: [:show,:create]
 
+
   end
 
 
@@ -593,6 +594,22 @@ module Devise
 
   end
 
+
+  module Models
+
+    module Recoverable
+
+      ## change password instructions should not be sent if the user has oauth identities.
+      def send_reset_password_instructions
+        return if has_oauth_identity?
+        token = set_reset_password_token
+        send_reset_password_instructions_notification(token)
+        token
+      end
+
+    end
+
+  end
 
   
   module OmniAuth

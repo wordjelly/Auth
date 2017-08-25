@@ -503,7 +503,15 @@ module Auth::Concerns::UserConcern
 	def resource_key_for_auth_configuration
 		self.class.name.to_s.underscore.capitalize
 	end
-		
+	
+	#################### OAUTH EMAIL VALIDATION ################
+
+	##if a change in email is attempted with a preexisting oauth identity, the same is not permitted. 
+	def email_changed_with_existing_oauth
+		if email_changed? && !attr_blank_to_blank?("email") &&has_oauth_identity?
+			errors.add(:email,"you cannot change your email, since you have already authenticated with oauth")
+		end
+	end
 
 	#################### PAYMENT METHODS #######################
 	##override if you want to change this.
