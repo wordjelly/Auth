@@ -10,14 +10,10 @@ module Auth::Concerns::Shopping::CartConcern
 		field :notes, type: String
 	end
 
-
-	module ClassMethods
-		##used in transactions controller concern.
-		##and in cart item controller concern#index
-		def find_cart_items(resource)
-			conditions = {:resource_id => resource.id.to_s, :parent_id => self.id.to_s}
-			self.where(conditions)
-		end
+	def find_cart_items(resource)
+		conditions = {:resource_id => resource.id.to_s, :parent_id => self.id.to_s}
+		Auth.configuration.cart_item_class.constantize.where(conditions)
 	end
+
 
 end

@@ -16,37 +16,39 @@ module Auth::Concerns::Shopping::CartControllerConcern
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
     @cart_class = Auth.configuration.cart_class.constantize
-    @cart = permitted_params[:id] ? @cart_class.find(permitted_params[:id]) : @cart_class.new
+    begin
+      @cart = permitted_params[:id] ? @cart_class.find(permitted_params[:id]) : @cart_class.new
+    rescue => e
+      not_found(e.to_s)
+    end
     @add_cart_item_ids = permitted_params[:cart][:add_cart_item_ids]
     @remove_cart_item_ids = permitted_params[:cart][:remove_cart_item_ids]
-    @cart_item_class = Auth.configuration.cart_item_class
+    @cart_item_class = Auth.configuration.cart_item_class.constantize
   end
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart_items = @cart_class.find_cart_items(@resource) 
-    respond_with @cart_items
+    @cart_items = @cart_item_class.find_cart_items(@resource) 
+    respond_with @cart_items, template: "auth/shopping/cart_items/index"
   end
 
   ##responds with an array of the created cart items.
   def create
     not_found("this cart already exists") unless @cart.new_record?
-    @cart = @cart_class.new(permitted_params)
+    @cart = @cart_class.new(permitted_params[:cart].except(:add_cart_item_ids, :remove_cart_item_ids))
     add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
-    redirect_to @cart
+    respond_with @cart
   end
 
   def add_cart_items
     not_found("could not find that cart") if @cart.new_record?
     add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
-    redirect_to @cart
   end
 
   def remove_cart_items
     not_found("could not find that cart") if @cart.new_record?
     add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
-    redirect_to @cart
   end
 
   ## always returns an empty array.
@@ -54,8 +56,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
     not_found("please provide a cart id") if @cart.new_record?
     add_cart_items if @add_cart_item_ids
     remove_cart_items if @remove_cart_item_ids
-    @cart.update(permitted_params)
-    redirect_to @cart
+    @cart.update(permitted_params[:cart].except(:add_cart_item_ids, :remove_cart_item_ids))
+    respond_with @cart
   end
 
   ##will respond with nothing, or an array of cart_items that were removed, or whatever errors they have for not remvoing them.
@@ -73,6 +75,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
         cart_item.parent_id = (add_or_remove == 1) ? @cart.id : nil
         cart_item.resource_id = @resource.id.to_s
         cart_item if cart_item.save
+        cart_item
       else
         nil   
       end
