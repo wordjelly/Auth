@@ -58,6 +58,8 @@ module Auth
     attr_accessor :cart_item_class
     attr_accessor :cart_controller
     attr_accessor :cart_class
+    attr_accessor :payment_class
+    attr_accessor :payment_controller
     attr_accessor :token_regeneration_time
     attr_accessor :do_redirect
 
@@ -72,10 +74,15 @@ module Auth
       @third_party_api_keys = {}
       @stub_otp_api_calls = false
       @otp_controller = nil
+
       @cart_item_controller = nil
       @cart_item_class = "CartItem"
       @cart_controller = nil
       @cart_class = "Cart"
+      
+      @payment_controller = nil
+      @payment_class = "Payment"
+
       @simulate_invalid_otp = false
       ##the regeneration time of the auth_token,
       ##after the following mentioned time, the token is useless

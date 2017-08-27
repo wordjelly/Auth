@@ -21,42 +21,37 @@ module ActionDispatch::Routing
 			  get "#{Auth.configuration.mount_path}/:resource/resend_sms_otp", :action => "resend_sms_otp", :controller => "#{Auth.configuration.otp_controller}", :as => "resend_sms_otp"
 		  end
 
-		 ###CART ITEM ROUTES
-		 if Auth.configuration.cart_item_controller
-		 	 scope_path = "/"
-		 	 as_prefix = nil
-		 	 cart_items_collection = nil
-		 	 Auth.configuration.cart_item_class.underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<cart_items_collection>[A-Za-z_]+)$/) do |match|
-		 	 		if Regexp.last_match[:scope_path]
-		 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
-		 	 			as_prefix = Regexp.last_match[:scope_path]
-		 	 		end
-		 	 		cart_items_collection = Regexp.last_match[:cart_items_collection]
-		 	 end
-		 	 if cart_items_collection
-		 	 	scope :path => scope_path, :as => as_prefix do 
-			    	resources cart_items_collection.to_sym, controller: "#{Auth.configuration.cart_item_controller}"
-			    end
-			 end
-		 end
 
-		 if Auth.configuration.cart_controller
-		 	scope_path = "/"
-		 	 as_prefix = nil
-		 	 carts_collection = nil
-		 	 Auth.configuration.cart_class.underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<carts_collection>[A-Za-z_]+)$/) do |match|
-		 	 		if Regexp.last_match[:scope_path]
-		 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
-		 	 			as_prefix = Regexp.last_match[:scope_path]
-		 	 		end
-		 	 		carts_collection = Regexp.last_match[:carts_collection]
-		 	 end
-		 	 if carts_collection
-		 	 	scope :path => scope_path, :as => as_prefix do 
-			    	resources carts_collection.to_sym, controller: "#{Auth.configuration.cart_controller}"
-			    end
-			 end
-		 end
+			["cart_item","cart","payment"].each do |model|
+
+				if Auth.configuration.send("#{model}_controller")
+
+					scope_path = "/"
+			 	 	as_prefix = nil
+			 	 	collection = nil
+
+			 	 	Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
+
+			 	 		if Regexp.last_match[:scope_path]
+			 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
+			 	 			as_prefix = Regexp.last_match[:scope_path]
+			 	 		end
+			 	 		collection = Regexp.last_match[:collection]
+
+			 	 	end
+
+			 	 	if collection
+				 	 	scope :path => scope_path, :as => as_prefix do 
+				 	 		controller_name = Auth.configuration.send("#{model}_controller")
+					    	resources collection.to_sym, controller: controller_name
+					    end
+					end
+
+				end
+
+			end
+
+
 		  
 		  app_route_resources.each do |resource,opts| 
 

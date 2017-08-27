@@ -22,3 +22,53 @@
     
   end
 =end
+module Auth::Concerns::Shopping::PaymentControllerConcern
+
+  extend ActiveSupport::Concern
+
+  included do
+    ##this ensures api access to this controller.
+    include Auth::Concerns::DeviseConcern
+    include Auth::Concerns::TokenConcern
+    before_filter :do_before_request
+    before_filter :initialize_vars
+  end
+
+  def initialize_vars
+    @payment_class = Auth.configuration.payment_class.constantize
+  end
+
+  def show
+
+  end
+
+  def index
+
+  end
+
+  def new
+    @payment = @payment_class.new(permitted_params[:payment])
+    ##so from here basically the payment form will have to be rendered depending upon the payment type.
+    ##if it is cash/cheque, then a picture of the signature.
+    ##if it is cheque then the cheque number
+    ##if it is gateway then the email/phone/first-name/last-name
+    ##after this it should go to create, where it should get saved and then redirected from there to either the success url or to the gateway url.
+  end
+
+  def create
+
+  end
+
+  def update
+
+  end
+
+  def destroy
+
+  end
+
+  def permitted_params
+    params.permit({payment: [:transaction_id, :payment_type, :amount]},:id)
+  end
+
+end

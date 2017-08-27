@@ -5,69 +5,41 @@ module Auth::Concerns::Shopping::PaymentConcern
 	
 	included do 
 
-		##### =>  waiting_to_confirm
-		##### =>  confirmed
-		##### =>  pending_amount
-		##### =>  paid
-		##### =>  payment acknowledged
-		##### =>  refund_requested
-		##### =>  refund_request_accepted
-		##### =>  pending_refund
-		##### =>  refund_completed
-		##### =>  refund_acknowledged
-		##### => these states should be set in an after_create callback, it has to be decided if it can be confirmed or not.
-		##### => that callback is subclassed to the CartItemClass
+		##the unique transaction id associated with each payment
+		field :transaction_id, type: String, default: BSON::ObjectId.new.to_s
 
-		before_save :set_payment_state
+		## => gateway : 0
+		## => card : 1
+		## => cash : 2
+		## => cheque : 3
+		field :payment_type, type: Integer
 
-		PAYMENT_STATES = {
-			:waiting_to_confirm => "waiting_to_confirm"
-		}
+		##the id of the cart for which this payment was made
+		field :cart_id, type: String
 
-		##NOT PERMITTED , ONLY FOR INTERNAL ASSIGNMENT.
-		field :payment_state, type: String, default: PAYMENT_STATES[:waiting_to_confirm]
+		##the firstname of the payee
+		field :firstname, type:String
 
-			
-		##NOT PERMITTED, ONLY FOR INTERNAL ASSIGNMENT
-		field :payment_sent, type: Boolean
+		##the email of the payee
+		field :email, type: String
 
-		##NOT PERMITTED, ONLY FOR INTERNAL ASSIGNMENT
-		field :payment_received, type: Boolean
+		##the phone number of the payee
+		field :phone, type: String
 
-		##not permitted, only for internal assignment.
-		#### => payment transaction id, 
-		#### => a mongoid bson::object id.
-		#### => this is different from transaction id, it is a unique number regenerated each time an attempt is made to pay the transaction.
-		field :payment_transaction_id, type: String
+		##the url to redirect to on making a successfull payment
+		field :surl, type: String
 
-
-		##PERMITTED.
-		## => PAYMENT TYPE
-		## => string can be "cash,cheque,card"
-		field :payment_type, type: String
+		##the url to redirect to when the payment fails.
+		field :furl, type: String
 
 	end
 
-	############### START PAYMENT RELATED METHODS ##############
-	
-	### =>  this method should be overridden in the implementing class to decide the payment state
-	### => it is called before_create and before_update
-	def set_payment_state
-
+	def payment_type_is
+		return "gateway_payment" if payment_type == 0
+		return "card_payment" if payment_type == 1
+		return "cash_payment" if payment_type == 2
+		return "cheque_payment" if payment_type == 3
 	end
 
-	def before_send_payment(ptid)
-		payment_transaction_id = ptid
-		payment_sent = nil
-		payment_received = nil
-		save
-	end
-
-	def after_payment_success
-		payment_sent = true
-		save
-	end
-
-	############### END PAYMENT RELATED METHODS ###############
 
 end
