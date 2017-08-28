@@ -34,8 +34,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##the url to redirect to when the payment fails.
 		field :furl, type: String
 
+
+		##the id of the resource that is making the payment.
+
+
 	end
 
+	module ClassMethods
+		def find_payment(resource_id,cart)
+			self.where(:resource_id => resource.id.to_s, :cart_id => cart.id.to_s)
+		end		
+	end
 
 	def get_cart_name
 		Auth.configuration.cart_class.constantize.find(cart_id).name

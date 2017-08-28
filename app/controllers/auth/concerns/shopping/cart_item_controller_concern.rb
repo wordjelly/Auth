@@ -58,7 +58,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##all remaining cart items have already been assigned to carts
   def index
     @cart_items = @cart_item_class.find_cart_items(@resource).page 1
-    respond_with @cart_items, template: 'auth/shopping/cart_items/index'
+    respond_with @cart_items
   end
 
 

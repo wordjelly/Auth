@@ -63,9 +63,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 			self.where(:_id =>params_cart_item_id, :resource_id => resource.id.to_s).first
 		end
 
-		##used in cart_controller_concern#index
-		def find_cart_items(resource)
-			self.where(:resource_id => resource.id.to_s)
+		##used in cart_item_controller_concern#index
+		##used in cart_controller_concern#show
+		def find_cart_items(resource,cart=nil)
+			conditions = {:resource_id => resource.id.to_s, :parent_id => nil}
+			if cart
+				conditions[:parent_id] = cart.id.to_s 
+			end
+			self.where(conditions)
 		end
 
 	end

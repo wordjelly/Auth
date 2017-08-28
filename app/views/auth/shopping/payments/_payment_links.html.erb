@@ -1,0 +1,1 @@
+<%= link_to "Pay by PayuMoney", new_shopping_payment_path(Shopping::Payment.new(:amount => @cart.total, :payment_type => "gateway")) %>

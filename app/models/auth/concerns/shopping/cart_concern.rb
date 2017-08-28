@@ -8,6 +8,8 @@ module Auth::Concerns::Shopping::CartConcern
 	included do 
 		field :name, type: String
 		field :notes, type: String
+		field :pending, type: String
+		after_save :calculate_pending
 	end
 
 	def find_cart_items(resource)
@@ -15,5 +17,18 @@ module Auth::Concerns::Shopping::CartConcern
 		Auth.configuration.cart_item_class.constantize.where(conditions)
 	end
 
+	def total(resource)
+
+		total_value_of_all_items_in_cart = find_cart_items(resource).map{|c| c = c.price}.sum
+		
+		##find payments made to this cart
+		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(@resource,self)
+		total_payments = payments_made_to_this_cart.map{|c| c = c.amount}.sum
+
+		##what about refunds made to this cart.
+		##we will have to minus refunds as well.
+		return total_value_of_all_items_in_cart - total_payments
+
+	end
 
 end

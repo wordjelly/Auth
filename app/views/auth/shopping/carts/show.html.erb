@@ -1,0 +1,2 @@
+<%= render :partial => "auth/shopping/cart_items/cart_items.html.erb", locals: {cart_items: @cart_items, resource: @resource} %>
+<%= render :partial => "auth/shopping/payments/payment_links.html.erb", locals: {resource: @resource, cart_items: @cart_items} %>
