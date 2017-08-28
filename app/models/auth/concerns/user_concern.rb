@@ -503,6 +503,11 @@ module Auth::Concerns::UserConcern
 	def resource_key_for_auth_configuration
 		self.class.name.to_s.underscore.capitalize
 	end
+
+	##THIS DEF CAN BE OVERRIDDEN IN YOUR MODEL TO SUIT YOUR NEEDS.
+	def has_phone
+		Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] && Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] == "mobile"  
+	end
 	
 	#################### OAUTH EMAIL VALIDATION ################
 

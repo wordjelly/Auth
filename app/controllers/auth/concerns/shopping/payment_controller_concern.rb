@@ -48,11 +48,6 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def new
     @payment = @payment_class.new(permitted_params[:payment])
-    ##so from here basically the payment form will have to be rendered depending upon the payment type.
-    ##if it is cash/cheque, then a picture of the signature.
-    ##if it is cheque then the cheque number
-    ##if it is gateway then the email/phone/first-name/last-name
-    ##after this it should go to create, where it should get saved and then redirected from there to either the success url or to the gateway url.
   end
 
   def create
@@ -68,7 +63,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def permitted_params
-    params.permit({payment: [:transaction_id, :payment_type, :amount]},:id)
+    params.permit({payment: [:payment_type, :amount, :cart_id]},:id)
   end
 
 end

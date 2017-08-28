@@ -60,6 +60,7 @@ module Auth
     attr_accessor :cart_class
     attr_accessor :payment_class
     attr_accessor :payment_controller
+    attr_accessor :payment_gateway_info
     attr_accessor :token_regeneration_time
     attr_accessor :do_redirect
 
@@ -82,6 +83,7 @@ module Auth
       
       @payment_controller = nil
       @payment_class = "Payment"
+      @payment_gateway_info = {}
 
       @simulate_invalid_otp = false
       ##the regeneration time of the auth_token,

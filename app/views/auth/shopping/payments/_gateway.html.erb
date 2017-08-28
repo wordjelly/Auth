@@ -1,0 +1,21 @@
+<!-- so here render the gateway form, on click  -->
+Hello this is the payments gateway page.
+<% if payment_gateway = Auth.configuration[:payment_gateway] %>
+
+	<% payu_biz_form payment_gateway[:key], payment_gateway[:salt],
+		:txnid => @payment.id.to_s,
+		:amount => @payment.amount,
+		:productinfo => @payment.get_cart_name,
+		:firstname => nil,
+		:email => @resource.email,
+		:phone => @resource.has_phone ? @resource.additional_login_param : nil,
+		:surl => "update_payment_url",
+		:furl => "update_payment_url",
+		:html => {}
+	 %>
+
+<% else %>
+
+	You need to configure a payment gateway, Contact the site admin!
+
+<% end %>

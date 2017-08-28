@@ -5,14 +5,14 @@ module Auth::Concerns::Shopping::PaymentConcern
 	
 	included do 
 
-		##the unique transaction id associated with each payment
-		field :transaction_id, type: String, default: BSON::ObjectId.new.to_s
+		##the amount for this payment
+		field :amount, type: Float
 
-		## => gateway : 0
-		## => card : 1
-		## => cash : 2
-		## => cheque : 3
-		field :payment_type, type: Integer
+		##gateway
+		##card
+		##cash
+		##cheque
+		field :payment_type, type: String
 
 		##the id of the cart for which this payment was made
 		field :cart_id, type: String
@@ -34,12 +34,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	end
 
-	def payment_type_is
-		return "gateway_payment" if payment_type == 0
-		return "card_payment" if payment_type == 1
-		return "cash_payment" if payment_type == 2
-		return "cheque_payment" if payment_type == 3
-	end
 
+	def get_cart_name
+		Auth.configuration.cart_class.constantize.find(cart_id).name
+	end
+	
 
 end
