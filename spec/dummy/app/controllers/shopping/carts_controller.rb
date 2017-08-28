@@ -1,5 +1,4 @@
-class Shopping::CartsController < Auth::ApplicationController
-	include Auth::Concerns::Shopping::CartControllerConcern
+class Shopping::CartsController < Auth::Shopping::CartsController
 
 
 end

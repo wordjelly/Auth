@@ -1,3 +1,3 @@
-class Shopping::CartItemsController < Auth::ApplicationController
-	include Auth::Concerns::Shopping::CartItemControllerConcern
+class Shopping::CartItemsController < Auth::Shopping::CartItemsController
+	
 end

@@ -1,5 +1,3 @@
-class Shopping::PaymentsController < Auth::ApplicationController
-	include Auth::Concerns::Shopping::PaymentControllerConcern
-
-
+class Shopping::PaymentsController < Auth::Shopping::PaymentsController
+	
 end

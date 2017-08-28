@@ -2,7 +2,7 @@
 Hello this is the payments gateway page.
 <% if payment_gateway = Auth.configuration[:payment_gateway] %>
 
-	<% payu_biz_form payment_gateway[:key], payment_gateway[:salt],
+	<% payu_biz_form payment_gateway_info[:key], payment_gateway[:salt],
 		:txnid => @payment.id.to_s,
 		:amount => @payment.amount,
 		:productinfo => @payment.get_cart_name,

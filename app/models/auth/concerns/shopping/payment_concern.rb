@@ -2,7 +2,9 @@
 module Auth::Concerns::Shopping::PaymentConcern
 
 	extend ActiveSupport::Concern
-	
+		
+	include Auth::Concerns::ChiefModelConcern
+
 	included do 
 
 		##the amount for this payment

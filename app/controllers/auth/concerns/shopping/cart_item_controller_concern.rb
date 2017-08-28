@@ -50,11 +50,12 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   end
 
   def show
-    respond_with @cart_item || {}
+    respond_with @cart_item 
   end
 
-  ##we will have a cart item that is new and useless, and a resource.
-  ##so we just need a query to show all the cart items of this resource
+  ##should show those cart items which do not have a parent_id.
+  ##since these are the pending cart items.
+  ##all remaining cart items have already been assigned to carts
   def index
     @cart_items = @cart_item_class.find_cart_items(@resource).page 1
     respond_with @cart_items, template: 'auth/shopping/cart_items/index'
