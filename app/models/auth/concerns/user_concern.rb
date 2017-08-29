@@ -509,44 +509,7 @@ module Auth::Concerns::UserConcern
 		Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] && Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] == "mobile"  
 	end
 	
-	#################### OAUTH EMAIL VALIDATION ################
-
-	##if a change in email is attempted with a preexisting oauth identity, the same is not permitted. 
-	def email_changed_with_existing_oauth
-		if email_changed? && !attr_blank_to_blank?("email") &&has_oauth_identity?
-			errors.add(:email,"you cannot change your email, since you have already authenticated with oauth")
-		end
-	end
-
-	#################### PAYMENT METHODS #######################
-	##override if you want to change this.
-	def can_pay(cart_items)
-		true
-	end
-
-	def send_payment(cart_items)
-		payment_transaction_id = BSON::ObjectId.new
-		resp = cart_items.map{|c| c = c.before_send_payment(BSON::ObjectId.new)}.uniq
-		false  if (resp.size > 1 || resp[0] == false)
-		true
-	end
-
-	def after_payment_success(cart_items)
-		resp = cart_items.map{|c| c = c.after_payment_success}.uniq
-		false  if (resp.size > 1 || resp[0] == false)
-		true
-	end
-
-	##used by admin to receive payments from customers 
-	##paying physically
-	##in this case the customer will not have performed send payment so admin has to do the process himself.
-	def receive_payment
-
-	end
-
-	##here we first have to search for a transaction by the given ids, and then acknowledge it.
-	def acknowledge_payment
-
-	end
+	
+	
 
 end

@@ -29,14 +29,16 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart_items = @cart_item_class.find_cart_items(@resource,@cart) 
+    @cart_items = @cart_item_class.find_cart_items(lookup_resource,@cart) 
     respond_with @cart_items
   end
 
   ##responds with an array of the created cart items.
+  ##resource id is set only during create, never during update.
   def create
     not_found("this cart already exists") unless @cart.new_record?
     @cart = @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
+    @cart.resource_id = lookup_resource.id.to_s
     add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
     respond_with @cart
@@ -68,13 +70,18 @@ module Auth::Concerns::Shopping::CartControllerConcern
     respond_with @cart
   end
 
+  def index
+    @carts = @cart_class.where(:resource_id => lookup_resource.id.to_s)
+    respond_with @carts
+  end
+
   private
   ##returns array of cart items if successfully saved and updated, otherwise nil wherever the save was not successfull or the cart item was not found.
   def add_or_remove(item_ids,add_or_remove)
     item_ids.map {|id|
       if cart_item = @cart_item_class.find(id)
         cart_item.parent_id = (add_or_remove == 1) ? @cart.id : nil
-        cart_item.resource_id = @resource.id.to_s
+        cart_item.resource_id = lookup_resource.id.to_s
         cart_item if cart_item.save
         cart_item
       else

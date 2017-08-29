@@ -1,1 +1,3 @@
-<%= render :partial => 'auth/shopping/payments/_#{@payment.payment_type}.html.erb', locals: {payment: @payment, resource: @resource} %>
+<% partial_name = "auth/shopping/payments/#{@payment.payment_type}.html.erb" %>
+<% puts "partial name is: #{partial_name}" %>
+<%= render :partial => partial_name, locals: {payment: @payment, resource: lookup_resource} %>

@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/payu-india/payuindia.git
+  revision: 66d887615f893fa073ebc7cefa53adfd24e0f68d
+  specs:
+    payuindia (0.1.1)
+
+GIT
   remote: https://github.com/wordjelly/jquery-rails-4.2.2.git
   revision: 2fff659065002d3345fe67035b710491c34da569
   specs:
@@ -24,7 +30,6 @@ PATH
       omniauth-google-oauth2 (= 0.4.1)
       omniauth-linkedin
       omniauth-twitter
-      payuindia
       rails (~> 4.2.6)
       recaptcha
       redis
@@ -218,7 +223,6 @@ GEM
       cocaine (~> 0.5.5)
       mime-types
       mimemagic (~> 0.3.0)
-    payuindia (0.1.1)
     public_suffix (2.0.5)
     rack (1.6.8)
     rack-test (0.6.3)
@@ -346,6 +350,7 @@ DEPENDENCIES
   faker
   jquery-rails!
   mongoid_versioned_atomic!
+  payuindia!
   rspec-rails
   selenium-webdriver
 

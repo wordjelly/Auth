@@ -21,6 +21,8 @@ module Auth::Concerns::TokenConcern
 
     before_filter :authenticate_and_set_resource
 
+    helper_method :lookup_resource
+
   end
 
   ##iterates all the authentication resources in the config.
@@ -33,5 +35,15 @@ module Auth::Concerns::TokenConcern
     end
     self.send("authenticate_#{Auth.configuration.auth_resources.keys[0].downcase}!") if @resource.nil?
   end
+
+
+  ##this method is to be overridden in the daughter application to allow for a resource to be proxied, for eg, when an administrator wants to make changes on behalf of a resource 
+  ##this method simply returns the resource calculated in the #authenticate_and_set_resource method, for the moment.It should be overridden depending on app requirements.
+  def lookup_resource
+    @resource
+  end
+
+
+ 
 
 end

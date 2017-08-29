@@ -24,6 +24,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def new
     @payment = @payment_class.new(permitted_params[:payment])
+
   end
 
   def create

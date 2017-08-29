@@ -8,7 +8,6 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     include Auth::Concerns::TokenConcern
     before_filter :do_before_request 
     before_filter :initialize_vars
-    #before_filter :resource_owns_cart_item?, :except => [:create]
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -25,7 +24,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     else
       not_found("cart item class not specified in configuration")
     end
-    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item(permitted_params[:id],@resource) : @cart_item_class.new(permitted_params[:cart_item])
+    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item(permitted_params[:id],lookup_resource) : @cart_item_class.new(permitted_params[:cart_item])
   end
 
 
@@ -33,7 +32,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   def create
     ##ensure that the cart item is new
     @cart_item.new_record? or not_found("this is not a new record")
-    @cart_item.resource_id = @resource.id.to_s
+    @cart_item.resource_id = lookup_resource.id.to_s
     @cart_item.save
     respond_with @cart_item
   end
@@ -42,7 +41,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   def update
     not_found if @cart_item.nil?
     !@cart_item.new_record? or not_found("please provide a valid id for the update")
-    @cart_item.resource_id = @resource.id.to_s
+    @cart_item.resource_id = lookup_resource.id.to_s
     @cart_item.quantity = permitted_params[:cart_item][:quantity] || @cart_item.quantity 
     @cart_item.discount_code = permitted_params[:cart_item][:discount] || @cart_item.discount
     @cart_item.save
@@ -57,7 +56,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##since these are the pending cart items.
   ##all remaining cart items have already been assigned to carts
   def index
-    @cart_items = @cart_item_class.find_cart_items(@resource).page 1
+    @cart_items = @cart_item_class.find_cart_items(lookup_resource).page 1
     respond_with @cart_items
   end
 

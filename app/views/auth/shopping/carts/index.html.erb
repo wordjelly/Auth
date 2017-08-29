@@ -1,0 +1,3 @@
+<% @carts.each do |cart| %>
+	<%= link_to (cart.name || "cart"), shopping_cart_path(cart) %>
+<% end %>

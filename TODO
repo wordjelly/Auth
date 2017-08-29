@@ -71,13 +71,10 @@ CART ENDPOINTS:
 
 
 THINGS TO BE DONE:
-1. add recaptcha tests to otp controller, add conditionals in the redirect parts of all the tests.
-2. add i18n translations for marathi, hindi.
-3. forms should show additional login param names correctly.
-4. tests should pass with additional login param disabled.
-5. go over specs and write the api documentation.
-6. oauth email should not be deletable**
-5. write cart specs and transaction specs: 23, 24
+
+1. add i18n translations for marathi, hindi.
+2. validation for email, is returning cant be blank for additional login param in scenario of signing up for admins with a mobile number instead of an email.
+3. on signing up with a mobile, shows "your email is pending confirmation on the edit.html.erb page ->should not show this."
 6. build payments gateway(with refund, and cash on delivery options) : 24 - 28
 7. add notifications - 28 -> 31
 8. create admin ui fields for adding user
