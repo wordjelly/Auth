@@ -1,18 +1,18 @@
-<!-- so here render the gateway form, on click  -->
-Hello this is the payments gateway page.
 <% if payment_gateway = Auth.configuration.payment_gateway_info %>
 		
-	<% payment_options = {} %>
-	<% payment_options[:txnid] = payment.id.to_s %>
-	<% payment_options[:amount] = payment.amount %>
-	<% payment_options[:productinfo] = payment.get_cart_name %>
-	<% payment_options[:surl] = shopping_payment_path({:id => payment.id.to_s}) %>
-	<% payment_options[:furl] = shopping_payment_path({:id => payment.id.to_s}) %>
-	<% payment_options.merge(payment.user_info_for_payment_gateway(resource)) %>
-	<!--- the remaining options depend on the user -->
-	<!--- override user_concern def get_info in your own user class to do whatever it should -->
+	<% payment_options =  payment_options(payment,resource,shopping_payments_path,shopping_payments_path)%>
 
-	<!-- directly use form_for and use the methods from payumoney to directly make teh form -->
+	
+	<%= form_for(payment, as: :payment) do |f| %>
+		<% payment_options[:hidden].each do |k,v| %>
+			<%= f.hidden_field k, :value => v %>
+		<% end %>
+		<% payment_options[:visible].each do |k,v| %>
+			<%= f.label k %>
+			<%= f.text_field k, :value => v  %>
+		<% end %>
+		<%= f.submit 'Proceed' %>
+	<% end %>
 
 <% else %>
 

@@ -1,0 +1,6 @@
+<% @payment.attributes.each do |k,v| %>
+	<div>
+	<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
+	</div>
+<% end %>
+<%= payment_to_gateway_form(@payment) %>

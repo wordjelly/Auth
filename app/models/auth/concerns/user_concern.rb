@@ -508,8 +508,12 @@ module Auth::Concerns::UserConcern
 	def has_phone
 		Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] && Auth.configuration.auth_resources[resource_key_for_auth_configuration][:additional_login_param_name] == "mobile"  
 	end
-	
-	
+		
+	##override as needed.
+	##currently used in _gateway.html.erb
+	def resource_first_name
+		name
+	end
 	
 
 end

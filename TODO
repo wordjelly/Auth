@@ -75,6 +75,7 @@ THINGS TO BE DONE:
 1. add i18n translations for marathi, hindi.
 2. validation for email, is returning cant be blank for additional login param in scenario of signing up for admins with a mobile number instead of an email.
 3. on signing up with a mobile, shows "your email is pending confirmation on the edit.html.erb page ->should not show this."
+4. otp job, require path is hardcoded at top of file, and also in payment_controller_concern.
 6. build payments gateway(with refund, and cash on delivery options) : 24 - 28
 7. add notifications - 28 -> 31
 8. create admin ui fields for adding user
