@@ -27,14 +27,20 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
   ## In order to add them all under a :payment, the params are first duplicated,and then into the :payment key, all those keys are merged from the open hash that are present in the payumoney params defined above.
   ## Thereafter, permit is called on duplicated_params.
   def permitted_params
-  	
   	duplicated_params = params.dup
   	payment = duplicated_params["payment"] || {}
-  	k = duplicated_params.keep_if{|c| payumoney_params.include? c.to_s}
-  	k.merge(payment)
+  	k = duplicated_params.keep_if{|c| payumoney_params.include? c.to_sym}
+  	payment = k.merge(payment)
   	duplicated_params["payment"] = payment
   	duplicated_params.permit({payment: payumoney_params},:id)
-  	
+  end
+
+
+  ##this method is overriden here from the payment_concern.
+  def gateway_callback(pr)
+  	notification = PayuIndia::Notification.new(request.query_string, options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_infp[:salt], :params => pr[:payment]})
+  	status = 0
+  	status = 1 if(notification.acknowledge && notification.complete?)
   end
 
 end

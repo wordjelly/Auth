@@ -34,14 +34,24 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     respond_with @payment
   end
 
+  ##in the normal process of making a cash payment
+  ##we render a cash form, then we create a payment and then we should in the show screen,to confirm and commit the payment which finally brings it here.
+  ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
-    puts "the permitted params are:"
+    pr = permitted_params.deep_symbolize_keys 
+    @id = pr[:payment][:id] || pr[:payment][:txnid]
+    puts "the permitted params are:" 
     puts permitted_params.to_s
-    
+    @payment = @payment_class.find(@id)
+    @payment.gateway_callback(pr) if @payment.is_gateway?
+    #@payment.cash_callback(pr) if @payment.is_cash?
+    #@payment.cheque_callback(pr) if @payment.is_cheque?
+    #@payment.card_callback(pr) if @payment.is_card?
+    @payment.save
   end
 
   def destroy
-
+    
   end
 
   ##method should be overridden, to include whatever params the payment gateway needs.

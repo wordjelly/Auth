@@ -19,6 +19,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##the id of the cart for which this payment was made
 		field :cart_id, type: String
 
+		##can be "success"
+		##can be "failed"
+		##set in payment update.
+		field :status, type: Integer
+
 	end
 
 	module ClassMethods
@@ -36,6 +41,36 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	def is_gateway?
 		payment_type && payment_type == "gateway"
+	end
+
+	def is_cash?
+		payment_type && payment_type == "cash"
+	end
+
+	def is_card?
+		payment_type && payment_type == "card"
+	end
+
+	def is_cheque?
+		payment_type && payment_type == "cheque"
+	end
+
+	def cash_callback(params)
+		status = 1
+	end
+
+	def cheque_callback(params)
+		status = 1
+	end
+
+	def card_callback(params)
+		status = 1
+	end
+
+	##override this method depending upon the gateway that you use.
+	##
+	def gateway_callback(params)
+
 	end
 		
 end
