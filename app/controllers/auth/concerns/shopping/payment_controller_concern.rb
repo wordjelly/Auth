@@ -29,17 +29,15 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def create
-    puts "came to create with params:"
-    puts params.to_s
     @payment = @payment_class.new(permitted_params[:payment])
     @payment.save
-    puts "payment after save:"
-    puts @payment.attributes.to_s
     respond_with @payment
   end
 
   def update
-
+    puts "the permitted params are:"
+    puts permitted_params.to_s
+    
   end
 
   def destroy

@@ -44,6 +44,8 @@ module ActionDispatch::Routing
 				 	 	scope :path => scope_path, :as => as_prefix do 
 				 	 		controller_name = Auth.configuration.send("#{model}_controller")
 					    	resources collection.to_sym, controller: controller_name
+					    	##A ROUTE HAS BEEN ADDED IN THE DAUGHTER APP FOR THE POST -> TO THE PAYMENTS_UPDATE FOR PAYUMONEY.
+					    	##refer payumoney_controller_concern.rb
 					    end
 					end
 

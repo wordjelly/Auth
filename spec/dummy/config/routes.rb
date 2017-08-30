@@ -10,7 +10,12 @@ Rails.application.routes.draw do
   root "home#index"
   
   mount_routes Auth.configuration.auth_resources
-  
+    
+
+  ##PAYUMONEY CALLBACK ROUTE
+  post 'shopping/payments/:id', to: 'shopping/payments#update'  
+
+
   ##app-specific routes 
   namespace :api do 
 
