@@ -1,0 +1,10 @@
+<%= form_for(payment, as: :payment) do |f| %>
+		<%= f.hidden_field :payment_type, :value => payment.payment_type %>
+		<%= f.label :amount %>
+		<%= f.text_field :amount, :value => payment.amount  %>
+		<% if payment.needs_proof? %>
+			<%= f.label :payment_ack_proof %>
+			<%= f.text_field :payment_ack_proof %>
+		<% end %>
+		<%= f.submit 'Proceed' %>
+<% end %>

@@ -26,7 +26,8 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
         context " -- simulate callback -- " do 
             
             before(:example) do 
-
+                ## create a new payment
+                ## and  
             end
 
         end

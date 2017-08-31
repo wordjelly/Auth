@@ -21,9 +21,11 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 
 		##remember to set the default_url_options in the dummy app routes file.
 		before_create do |document|
-			document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
-			document.txnid = document.id.to_s
-			document.calculate_hash if document.is_gateway? 
+			if document.is_gateway? 
+				document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
+				document.txnid = document.id.to_s
+				document.calculate_hash 
+			end
 		end
 
 

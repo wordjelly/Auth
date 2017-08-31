@@ -19,11 +19,18 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##the id of the cart for which this payment was made
 		field :cart_id, type: String
 
-		##can be "success"
-		##can be "failed"
-		##set in payment update.
+		## can be "success"
+		## can be "faphysical_paymented"
+		## set in respective callback method of payment_type
 		field :payment_status, type: Integer
 
+		## payment ack proof.
+		field :payment_ack_proof, type: String
+
+		## validator is called on the payment_ack_proof, in this method.
+		## override as needed.
+		validate :payment_has_ack_proof
+	
 	end
 
 	module ClassMethods
@@ -56,15 +63,15 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def cash_callback(params)
-		payment_status = 1
+		self.payment_status = 1
 	end
 
 	def cheque_callback(params)
-		payment_status = 1
+		self.payment_status = 1
 	end
 
 	def card_callback(params)
-		payment_status = 1
+		self.payment_status = 1
 	end
 
 	def payment_failed
@@ -75,12 +82,34 @@ module Auth::Concerns::Shopping::PaymentConcern
 		payment_status && payment_status == 1
 	end
 
-	
+	def payment_pending
+		!payment_status
+	end
 
 	##override this method depending upon the gateway that you use.
 	##
 	def gateway_callback(params)
 
 	end
-		
+	
+	def physical_payment?
+		is_card? || is_cash? || is_cheque?
+	end
+
+	## returns true if this payment needs some kind of written proof / acknoledgement from the receiver of the payment. eg a signed receipt aknowledgin that the payment was received.
+	## override as needed.
+	def needs_proof?
+		##lets assume that we have a cart item, that is a salary.
+		##so the cart item should be able to dictate this aspect.
+		physical_payment?
+	end
+
+	## checked if the payment is acked
+	## just now just a dummy placeholder checks if the ack_proof length is > 5.
+	def payment_has_ack_proof
+		if needs_proof?
+			payment_ack_proof.length > 5
+		end
+	end
+
 end
