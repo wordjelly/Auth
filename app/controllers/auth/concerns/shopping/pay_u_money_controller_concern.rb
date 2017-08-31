@@ -15,7 +15,7 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
   ## PLUS the params that are native to the payment concern [:payment_type, :cart_id]
   ## Everywhere txnid, and :id is the same thing.
   def payumoney_params
-  	[:payment_type, :amount, :cart_id, :txnid, :surl, :furl, :productinfo, :firstname, :email, :phone,:mihpayid, :mode, :status, :unmappedstatus, :key, :cardCategory, :discount, :net_amount_debit, :addedon, :lastname, :address1, :address2, :city, :state, :country, :zipcode, :udf1, :udf2, :udf3, :udf4, :udf5, :udf6, :udf7, :udf8, :udf9, :udf10, :hash, :field1, :field2, :field3, :field4, :field5, :field6, :field7, :field8, :field9, :payment_source, :PG_TYPE, :bank_ref_num, :bankcode, :error, :error_Message, :name_on_card, :cardnum, :cardhash, :issuing_bank, :card_type ]
+  	[:payment_type, :amount, :cart_id, :txnid, :surl, :furl, :productinfo, :firstname, :email, :phone]
   end
 
   ##note that the payumoney callback makes a POST requet to whatever url you specifiy.
@@ -36,11 +36,6 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
   end
 
 
-  ##this method is overriden here from the payment_concern.
-  def gateway_callback(pr)
-  	notification = PayuIndia::Notification.new(request.query_string, options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_infp[:salt], :params => pr[:payment]})
-  	status = 0
-  	status = 1 if(notification.acknowledge && notification.complete?)
-  end
+ 
 
 end

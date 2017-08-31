@@ -1,6 +1,6 @@
 <% if payment_gateway = Auth.configuration.payment_gateway_info %>
 	
-	<% payment_options =  payment_options(payment,resource,shopping_payment_url({:id => payment.id.to_s}),shopping_payment_url({:id => payment.id.to_s}))%>
+	<% payment_options =  payment_options(payment,resource)%>
 
 	<%= form_for(payment, as: :payment) do |f| %>
 		<% payment_options[:hidden].each do |k,v| %>

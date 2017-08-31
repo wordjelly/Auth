@@ -18,9 +18,15 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		##the hash calculated by using the payumoney library.
 		field :hast, type: String
 
-		before_save do |document|
-			document.calculate_hash 
+
+		##remember to set the default_url_options in the dummy app routes file.
+		before_create do |document|
+			document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
+			document.txnid = document.id.to_s
+			document.calculate_hash if document.is_gateway? 
 		end
+
+
 
 		##add a validation, that checks that each of the 7 required fields are present, before create, only when the payment_type is gateway.
 		##the is_gateway? method is defined in payment_concern.
@@ -29,9 +35,6 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		validates_presence_of   :firstname, if: :is_gateway?
 		validates_presence_of   :email, if: :is_gateway?
 		validates_presence_of   :phone, if: :is_gateway?
-		validates_presence_of   :txnid, if: :is_gateway?
-		validates_presence_of   :surl, if: :is_gateway?
-		validates_presence_of   :furl, if: :is_gateway?
 		validates_presence_of 	:productinfo, if: :is_gateway?
 
 	end
@@ -51,6 +54,19 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	def payment_gateway_salt
 		Auth.configuration.payment_gateway_info[:salt]
 	end
+
+
+	 ##this method is overriden here from the payment_concern.
+	 def gateway_callback(pr)
+	 	puts "came to gateway callback with permitted params payment as"
+	 	puts JSON.pretty_generate(pr)
+	  	notification = PayuIndia::Notification.new("", options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_info[:salt], :params => pr})
+	  	self.payment_status = 0
+	  	self.payment_status = 1 if(notification.acknowledge && notification.complete?)
+	  	puts "notification acknowledge becomes: #{notification.acknowledge}"
+	  	puts "notification complete becomes: #{notification.complete?}"
+	  	puts "status becomes: #{payment_status}"
+	 end
 
 
 

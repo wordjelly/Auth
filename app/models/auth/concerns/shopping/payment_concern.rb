@@ -22,7 +22,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##can be "success"
 		##can be "failed"
 		##set in payment update.
-		field :status, type: Integer
+		field :payment_status, type: Integer
 
 	end
 
@@ -56,16 +56,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def cash_callback(params)
-		status = 1
+		payment_status = 1
 	end
 
 	def cheque_callback(params)
-		status = 1
+		payment_status = 1
 	end
 
 	def card_callback(params)
-		status = 1
+		payment_status = 1
 	end
+
+	def payment_failed
+		payment_status && payment_status == 0
+	end
+
+	def payment_success
+		payment_status && payment_status == 1
+	end
+
+	
 
 	##override this method depending upon the gateway that you use.
 	##

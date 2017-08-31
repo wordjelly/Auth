@@ -1,14 +1,16 @@
 module Auth::Shopping::Payments::PayUMoneyHelper
 	## used in the _gateway.html.erb, while generating the form to post to create payment.
-	def payment_options(payment,resource,success_url,failure_url)
+	def payment_options(payment,resource)
 		options = {}
 		options[:hidden] = {}
 		options[:visible] = {}
-		options[:hidden][:txnid] = payment.id.to_s
-		options[:hidden][:surl] = success_url
-		options[:hidden][:furl] = failure_url
+		#these three options are set in the before_save callback of the payumoney concern
+		#options[:hidden][:txnid] = payment.id.to_s
+		#options[:hidden][:surl] = success_url
+		#options[:hidden][:furl] = failure_url
 		options[:hidden][:payment_type] =  payment.payment_type
 		options[:hidden][:cart_id] = payment.cart_id.to_s
+		
 		options[:visible][:productinfo] = payment.get_cart_name
 		options[:visible][:firstname] =  resource.resource_first_name
 		options[:visible][:email] = resource.email
