@@ -1,10 +1,4 @@
 GIT
-  remote: git://github.com/payu-india/payuindia.git
-  revision: 66d887615f893fa073ebc7cefa53adfd24e0f68d
-  specs:
-    payuindia (0.1.1)
-
-GIT
   remote: https://github.com/wordjelly/jquery-rails-4.2.2.git
   revision: 2fff659065002d3345fe67035b710491c34da569
   specs:
@@ -53,6 +47,11 @@ PATH
       mongoid-paperclip
       rails (~> 4.2.4)
       rake (= 11.2.2)
+
+PATH
+  remote: /home/bhargav/Github/payuindia
+  specs:
+    payuindia (0.1.1)
 
 GEM
   remote: https://rubygems.org/

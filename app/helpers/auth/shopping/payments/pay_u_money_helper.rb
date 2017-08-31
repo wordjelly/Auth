@@ -37,4 +37,5 @@ module Auth::Shopping::Payments::PayUMoneyHelper
         concat(result.respond_to?(:html_safe) ? result.html_safe : result)
         nil
 	end
+
 end

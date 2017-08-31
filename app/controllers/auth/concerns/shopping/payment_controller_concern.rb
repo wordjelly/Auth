@@ -9,6 +9,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
     before_filter :do_before_request
     before_filter :initialize_vars
+    
   end
 
   def initialize_vars
@@ -55,8 +56,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     
   end
 
-  ##method should be overridden, to include whatever params the payment gateway needs.
-  ##this method has been overriden in the dummy app for the moment.
+
+
   def permitted_params
     params.permit({payment: [:payment_type, :amount, :cart_id,:payment_ack_proof]},:id)
   end

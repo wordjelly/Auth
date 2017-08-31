@@ -48,6 +48,18 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		self.hast = service.generate_checksum
 	end
 
+	## makes an api call to the payumoney server to verify the current payment.
+	def verify_payment
+		options = {:var1 => txnid, :command => 'verify_payment'}
+		webservice = PayuIndia::WebService.new(payment_gateway_key,payment_gateway_salt,options)
+		sha_hash = webservice.generate_checksum
+		resp = Typhoeus.post(PayuIndia.webservice_url, body: 
+			{ key: payment_gateway_key, command: 'verify_payment', hash: sha_hash})
+		puts "made request to verify payment."
+		puts resp.body.to_s
+	end
+
+
 	def payment_gateway_key
 		Auth.configuration.payment_gateway_info[:key]
 	end
