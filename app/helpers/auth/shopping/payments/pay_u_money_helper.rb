@@ -20,9 +20,9 @@ module Auth::Shopping::Payments::PayUMoneyHelper
 	end
 
 	##converts the payment object to a form that can be submitted to the gateway.
-	def payment_to_gateway_form(payment)
+	def payment_to_gateway_form(payment,html_options = {:id => "payumoney_form"})
 		result = []
-		result << form_tag(PayuIndia.service_url, :method => :post)
+		result << form_tag(PayuIndia.service_url,html_options.merge(:method => :post))
 
         result << hidden_field_tag('key', payment.payment_gateway_key)
 

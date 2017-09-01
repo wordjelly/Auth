@@ -24,6 +24,7 @@
 //= require data.js
 //= require jquery.calendario.js
 //= require moment
+//= require payumoney.js
 //= require_tree .
 $(document).ready(function(){
   var store = require("store");

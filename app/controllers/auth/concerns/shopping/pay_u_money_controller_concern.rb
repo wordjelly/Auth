@@ -16,7 +16,7 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
   ## PLUS the params that are native to the payment concern [:payment_type, :cart_id]
   ## Everywhere txnid, and :id is the same thing.
   def payumoney_params
-  	[:txnid, :surl, :furl, :productinfo, :firstname, :email, :phone]
+  	[:txnid, :surl, :furl, :productinfo, :firstname, :email, :phone, :gateway_payment_initiated]
   end
 
   ##note that the payumoney callback makes a POST requet to whatever url you specifiy.
@@ -25,9 +25,18 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
 
   ## permits the original parameters defined in the payment_controller_concern and the additional params that are defined here as "payumoney_params, alongwith id."
   def permitted_params
-    super.tap do |r|
-     r.permit({payment: payumoney_params + r["payment"].keys.map{|c| c = c.to_sym}},:id)
-    end
+    puts "came to payu permitted params."
+    
+    already_permitted = super
+    puts "already_permitted:"
+    puts already_permitted
+    pp = payumoney_params + already_permitted["payment"].keys.map{|c| c = c.to_sym}
+    puts "pp is:"
+    puts pp
+    k = params.permit({payment: pp},:id)
+    puts "result is:"
+    puts k.to_s
+    k
   end
 
  
