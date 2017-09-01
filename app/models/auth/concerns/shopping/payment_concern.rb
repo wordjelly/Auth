@@ -7,6 +7,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	included do 
 
+		FAILED = "Failed"
+		SUCCESS = "Success"
+		PENDING = "You need to complete this payment"
+
 		##the amount for this payment
 		field :amount, type: Float
 
@@ -113,9 +117,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	## currently does nothing
-	## overridden in thepayment gateway to verify payments that have not be either success or failure.
+	## overridden in the payment gateway to verify payments that have not be either success or failure.
 	def verify_payment
 
 	end
+
+
 
 end

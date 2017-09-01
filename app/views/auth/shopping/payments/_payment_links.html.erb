@@ -1,7 +1,7 @@
-<%= link_to "Pay by PayuMoney", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.total(lookup_resource), :payment_type => "gateway", :cart_id => @cart.id.to_s).attributes}) %>
+<%= link_to "Pay by PayuMoney", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_price, :payment_type => "gateway", :cart_id => @cart.id.to_s).attributes}) %>
 <br>
-<%= link_to "Pay by Cash", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.total(lookup_resource), :payment_type => "cash", :cart_id => @cart.id.to_s).attributes}) %>
+<%= link_to "Pay by Cash", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_price, :payment_type => "cash", :cart_id => @cart.id.to_s).attributes}) %>
 <br>
-<%= link_to "Pay by Cheque", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.total(lookup_resource), :payment_type => "cheque", :cart_id => @cart.id.to_s).attributes}) %>
+<%= link_to "Pay by Cheque", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_price, :payment_type => "cheque", :cart_id => @cart.id.to_s).attributes}) %>
 <br>
-<%= link_to "Pay by Card", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.total(lookup_resource), :payment_type => "card", :cart_id => @cart.id.to_s).attributes}) %>
+<%= link_to "Pay by Card", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_price, :payment_type => "card", :cart_id => @cart.id.to_s).attributes}) %>

@@ -29,8 +29,10 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart_items = @cart_item_class.find_cart_items(lookup_resource,@cart) 
-    respond_with @cart_items
+    @cart_item_class.find_cart_items(lookup_resource,@cart) 
+    @cart.set_cart_payments(lookup_resource)
+    @cart.set_cart_price(lookup_resource)
+    respond_with @cart
   end
 
   ##responds with an array of the created cart items.

@@ -18,6 +18,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def show
     @payment = @payment_class.find(params[:id])
+    @payment.verify_payment
     respond_with @payment
   end
 
@@ -30,7 +31,6 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def create
-    puts "Came to create."
     @payment = @payment_class.new(permitted_params[:payment])
     @payment.cash_callback(permitted_params[:payment]) if @payment.is_cash?
     @payment.cheque_callback(permitted_params[:payment]) if @payment.is_cheque?

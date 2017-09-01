@@ -132,9 +132,7 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	  	notification = PayuIndia::Notification.new("", options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_info[:salt], :params => pr})
 	  	self.payment_status = 0
 	  	self.payment_status = 1 if(notification.acknowledge && notification.complete?)
-	  	puts "notification acknowledge becomes: #{notification.acknowledge}"
-	  	puts "notification complete becomes: #{notification.complete?}"
-	  	puts "status becomes: #{payment_status}"
+	  	
 	 end
 
 end
