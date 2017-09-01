@@ -6,12 +6,12 @@ module Auth::Concerns::Shopping::CartItemConcern
 	extend ActiveSupport::Concern
 	
 	include Auth::Concerns::Shopping::ProductConcern
-
+	include Auth::Concerns::OwnerConcern
 
 
 	included do 
 
-		validate :resource_id_not_changed
+		
 
 		##PERMITTED
 		##the id of the product to which this cart item refers.
@@ -46,15 +46,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 
 	
-	private
-	def resource_id_not_changed
-	  ##this method will give you access to be able to reset the resource_id in case the admin is modifying the resource.
-	  ##need to check if that can be done?
-
-	  if resource_id_changed? && resource_id_was
-	      errors.add(:resource_id, "You cannot change or view this cart item")
-	  end
-	end
+	
 
 	module ClassMethods
 		##used in cart controller concern.

@@ -1,5 +1,6 @@
 <%= form_for(payment, as: :payment) do |f| %>
 		<%= f.hidden_field :payment_type, :value => payment.payment_type %>
+		<%= f.hidden_field :cart_id, :value => payment.cart_id %>
 		<%= f.label :amount %>
 		<%= f.text_field :amount, :value => payment.amount  %>
 		<% if payment.needs_proof? %>

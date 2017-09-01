@@ -32,6 +32,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def create
     @payment = @payment_class.new(permitted_params[:payment])
+    @payment.resource_id = lookup_resource.id.to_s
     @payment.cash_callback(permitted_params[:payment]) if @payment.is_cash?
     @payment.cheque_callback(permitted_params[:payment]) if @payment.is_cheque?
     @payment.card_callback(permitted_params[:payment]) if @payment.is_card?

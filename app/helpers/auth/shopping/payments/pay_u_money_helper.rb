@@ -41,15 +41,15 @@ module Auth::Shopping::Payments::PayUMoneyHelper
 	## returns the first error message from the validations.
 	## used in views.
 	def payment_error_message(payment)
-		if payment.success
-			payment.class.SUCCESS
-		elsif payment.failed
-			payment.class.FAILED
-		elsif payment.pending
+		if payment.payment_success
+			payment.class::SUCCESS
+		elsif payment.payment_failed
+			payment.class::FAILED
+		elsif payment.payment_pending
 			if !payment.errors.full_messages.empty?
 				payment.errors.full_messages[0]
 			else
-				payment.class.PENDING
+				payment.class::PENDING
 			end
 		end
 	end

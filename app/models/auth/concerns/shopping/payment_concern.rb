@@ -4,12 +4,15 @@ module Auth::Concerns::Shopping::PaymentConcern
 	extend ActiveSupport::Concern
 		
 	include Auth::Concerns::ChiefModelConcern
-
+	include Auth::Concerns::OwnerConcern
+	
 	included do 
 
 		FAILED = "Failed"
 		SUCCESS = "Success"
 		PENDING = "You need to complete this payment"
+
+
 
 		##the amount for this payment
 		field :amount, type: Float
@@ -34,15 +37,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## validator is called on the payment_ack_proof, in this method.
 		## override as needed.
 		validate :payment_has_ack_proof
-	
+		validates_presence_of :cart_id
+		validates_presence_of :resource_id
+		validates_presence_of :amount
+		validates_presence_of :payment_type
+
 	end
 
 	module ClassMethods
 		def find_payments(resource,cart)
-			self.where(:resource_id => resource.id.to_s, :cart_id => cart.id.to_s)
+			puts "came to find payments with resource; #{resource.id.to_s}"
+			puts "and cart: #{cart.id.to_s}"
+			res = Auth.configuration.payment_class.constantize.where(:resource_id => resource.id.to_s, :cart_id => cart.id.to_s)
+			res.each do |p|
+				puts "found payment: #{p.id.to_s}"
+			end
 		end		
 	end
 
+	##res : 59a5405c421aa90f732c9059
+	##cart : 59a54d7a421aa9173c834728
 	
 	##used in pay_u_money_helper.rb
 	def get_cart_name

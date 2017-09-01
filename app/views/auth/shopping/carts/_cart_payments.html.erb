@@ -15,9 +15,9 @@
     		<th><%= payment.payment_type %></th>
     		<th>
     			<%= payment_error_message(payment) %>
-    			<% total_paid+= payment.amount if payment.success %>
+    			<% total_paid+= payment.amount if payment.payment_success %>
     		</th>
-    		<th>payment.amount</th>
+    		<th><%= payment.amount %></th>
     		</tr>
     	<% end %>
     	<tr class="blue lighten-2">
