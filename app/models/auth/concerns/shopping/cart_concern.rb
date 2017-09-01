@@ -16,20 +16,18 @@ module Auth::Concerns::Shopping::CartConcern
 		Auth.configuration.cart_item_class.constantize.where(conditions)
 	end
 
-	def total(resource)
+	## => 
+	def total_cart_value(resource)
 
 		total_value_of_all_items_in_cart = find_cart_items(resource).map{|c| c = c.price}.sum
-		
-		## find payments made to this cart
-		#payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(resource,self)
-
-		## call the total method on each payment.
-		#payments_made_to_this_cart.map{|c| c = c.total}
-
-		##what about refunds made to this cart.
-		##we will have to minus refunds as well.
-		return total_value_of_all_items_in_cart 
-
+	
+	## => returns an array of payments made to the cart , alongwith verification errors if any.
+	def all_payments(resource)
+		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(resource,self)
+		payments_made_to_this_cart.each do |payment|
+			payment.verify_payment if payment.payment_pending
+		end
+		payments_made_to_this_cart		 
 	end
 
 

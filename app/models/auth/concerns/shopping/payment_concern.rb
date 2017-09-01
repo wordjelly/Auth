@@ -112,11 +112,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 		end
 	end
 
-	## returns the total amount of the payment[if the payment was successfull] or 0.0 in case this payment failed.
-	## override as necessary.
-	def add_to_total_paid
-		self.amount if payment_success
-		0.0 if (payment_failed || payment_pending)
+	## currently does nothing
+	## overridden in thepayment gateway to verify payments that have not be either success or failure.
+	def verify_payment
+
 	end
 
 end
