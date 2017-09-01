@@ -1,4 +1,3 @@
-<% total_paid = 0 %>
 <table>
     <thead>
      	<tr>
@@ -9,13 +8,12 @@
       	</tr>
     </thead>
     <tbody>
-    	<% payments.each do |payment| %>
+    	<% @cart.cart_payments.each do |payment| %>
     		<tr>
     		<th><%= link_to payment.updated_at.to_s, shopping_payment_path(payment.id.to_s) %></th>
     		<th><%= payment.payment_type %></th>
     		<th>
     			<%= payment_error_message(payment) %>
-    			<% total_paid+= payment.amount if payment.payment_success %>
     		</th>
     		<th><%= payment.amount %></th>
     		</tr>
@@ -24,19 +22,19 @@
 	    	<th>Paid</th>
 	        <th></th>
 	        <th></th>
-	        <th><%= total_paid %></th>
+	        <th><%= @cart.cart_paid_amount %></th>
     	</tr>
     	<tr class="yellow lighten-2">
 	    	<th>Pending Balance</th>
 	        <th></th>
 	        <th></th>
-	        <th><%= price - total_paid %></th>
+	        <th><%= @cart.cart_balance %></th>
     	</tr>
     	<tr class="yellow">
 	    	<th>Total Amount</th>
 	        <th></th>
 	        <th></th>
-	        <th><%= price %></th>
+	        <th><%= @cart.cart_price %></th>
     	</tr>
     </tbody>
 </table>

@@ -1,3 +1,3 @@
 <%= render :partial => "auth/shopping/cart_items/cart_items.html.erb", locals: {cart_items: @cart.cart_items, resource: lookup_resource} %>
-<%= render :partial => "auth/shopping/carts/cart_payments.html.erb", locals: {payments: @cart.cart_payments, resource: lookup_resource, price: @cart.cart_price} %>
+<%= render :partial => "auth/shopping/carts/cart_payments.html.erb", locals: {resource: lookup_resource} %>
 <%= render :partial => "auth/shopping/payments/payment_links.html.erb", locals: {resource: lookup_resource, cart_items: @cart_items} %>

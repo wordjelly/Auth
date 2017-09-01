@@ -32,6 +32,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
     @cart_item_class.find_cart_items(lookup_resource,@cart) 
     @cart.set_cart_payments(lookup_resource)
     @cart.set_cart_price(lookup_resource)
+    @cart.set_cart_paid_amount(lookup_resource)
+    @cart.set_cart_balance(lookup_resource)
     respond_with @cart
   end
 
