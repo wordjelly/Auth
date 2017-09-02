@@ -10,6 +10,8 @@ module Auth::Concerns::Shopping::CartConcern
 		field :notes, type: String
 		field :resource_id, type: String
 		
+		## debit is calculated live, by first getting all the items already dispatched and their value, and then getting the total payments made and their value, so it infact becomes something at the validation level of the cart item.
+
 		## the total price of all the items in the cart
 		attr_accessor :cart_price
 
@@ -24,6 +26,17 @@ module Auth::Concerns::Shopping::CartConcern
 
 		## the cumulative amount paid into this cart(sum of all successfull payments.)
 		attr_accessor :cart_paid_amount
+
+	end
+
+	## gathers all the information about the cart
+	## 
+	def prepare_cart(resource)
+		find_cart_items(resource)
+		set_cart_price(resource)
+		set_cart_payments(resource)
+		set_cart_paid_amount(resource)
+		set_cart_balance(resource)
 
 	end
 
@@ -64,5 +77,35 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_balance = self.cart_price - self.cart_paid_amount
 		self.cart_balance
 	end
+
+	def has_balance
+		self.cart_balance > 0
+	end
+
+	def fully_paid
+		self.cart_balance = 0
+	end
+
+	def not_paid_at_all
+		self.cart_balance == self.cart_price
+	end
+
+
+	## so imagine a situation
+	## the item stage should be set for all items.
+	def set_cart_item_stages
+		if fully_paid
+			## shift the stage of all cart_items to awaiting_confirmation
+			## provided the stage is not already crossed that.
+		elsif has_balance
+			## shift the stage of all items which have an awaiting payment to awaiting confirmation.
+			## the problem will be that we will again have to check before dispatch results, that there is 
+			## some guy comes and says let the earlier tests be , i want these tests done first.
+			## before setting stage to dispatch, it has to go on minusing that amount from the total paid , this is only necessary because we allow half payments.
+		elsif not_paid_at_all
+			## shift the stage of those cart items which have a payable at after the awaiting payment.
+		else
+		end
+	end	
 
 end

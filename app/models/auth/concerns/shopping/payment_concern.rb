@@ -42,6 +42,16 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :amount
 		validates_presence_of :payment_type
 
+		##after the cart receives a payment
+		##it has to be determined now if the order can go through or not.
+		##this whole thing has to happen on the cart object
+		##and also is a feature of the products that make up the cart.
+		##so the cart has to have some kind of order status.
+		##and that will have to be reflected onto the cart_items
+		##however even after cart is created , for eg he may choose to pay after order is delivered, cheque, or card.
+		##in that case all this should happen on cart_show.
+		##so after payment is created, give a link to go and see the cart.
+		
 	end
 
 	module ClassMethods

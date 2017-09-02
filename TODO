@@ -76,8 +76,16 @@ THINGS TO BE DONE:
 2. validation for email, is returning cant be blank for additional login param in scenario of signing up for admins with a mobile number instead of an email.
 3. on signing up with a mobile, shows "your email is pending confirmation on the edit.html.erb page ->should not show this."
 4. otp job, require path is hardcoded at top of file, and also in payment_controller_concern.
-6. build payments gateway(with refund, and cash on delivery options) : 24 - 28
-7. add notifications - 28 -> 31
+
+5. receipt
+6. payment receipient resolver in case of salaries -> hooked into notifications
+7. refund 
+8. cash on delivery
+9. order acceptance post payment resolver - order status, eta
+10. payment acknowledgement in case of any payment 
+11. on removing a test from the cart, refund should get triggered, only if it is past the cancellation point.
+12. specs
+
 8. create admin ui fields for adding user
 9. cron api -> reminders for tests.
 10. picture + video upload.

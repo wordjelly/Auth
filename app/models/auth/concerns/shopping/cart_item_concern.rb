@@ -42,13 +42,17 @@ module Auth::Concerns::Shopping::CartItemConcern
 		##permitted
 		field :discount_code, type: String
 
+
+
+
 	end
 
 
-	
+		
 	
 
 	module ClassMethods
+
 		##used in cart controller concern.
 		##you can modify this to allow admin to also view/update/etc the cart items.
 		def find_cart_item(params_cart_item_id,resource)
