@@ -15,17 +15,21 @@ module Auth::Concerns::Shopping::CartConcern
 		## the total price of all the items in the cart
 		attr_accessor :cart_price
 
-		## the array of payments made upto now to this cart
+		## the array of payment objects made upto now to this cart
 		attr_accessor :cart_payments
 
 		## the array of cart items in this cart.
 		attr_accessor :cart_items
 
-		## the balance payment to be made to this cart.
-		attr_accessor :cart_balance
+		## the amount the customer owes to us.
+		attr_accessor :cart_pending_balance
 
 		## the cumulative amount paid into this cart(sum of all successfull payments.)
 		attr_accessor :cart_paid_amount
+
+		## the credit the customer has pending in the cart.
+		## this is used for sequentially debiting money from the cart_paid amount.
+		attr_accessor :cart_credit
 
 	end
 
@@ -36,9 +40,12 @@ module Auth::Concerns::Shopping::CartConcern
 		set_cart_price(resource)
 		set_cart_payments(resource)
 		set_cart_paid_amount(resource)
-		set_cart_balance(resource)
+		set_cart_pending_balance(resource)
 
 	end
+
+	################ ATTR ACCESSOR SETTERS & GETTERS ##############
+
 
 	def find_cart_items(resource)
 		conditions = {:resource_id => resource.id.to_s, :parent_id => self.id.to_s}
@@ -46,12 +53,21 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_items
 	end
 
+	def get_cart_items(resource)
+		self.cart_items || find_cart_items(resource)
+	end
+
 	## => 
 	def set_cart_price(resource)
 		self.cart_price = total_value_of_all_items_in_cart = find_cart_items(resource).map{|c| c = c.price}.sum
 		self.cart_price
 	end
-	## => returns an array of payments made to the cart , alongwith verification errors if any.
+
+	def get_cart_price(resource)
+		self.cart_price || set_cart_price(resource)
+	end
+
+	
 	def set_cart_payments(resource)
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(resource,self)
 		payments_made_to_this_cart.each do |payment|
@@ -61,10 +77,14 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_payments	 
 	end
 
+	def get_cart_payments(resource)
+		self.cart_payments || set_cart_payments(resource)
+	end
+
 	def set_cart_paid_amount(resource)
 		total_paid = 0
-		payments = self.cart_payments || set_cart_payments(resource)
-		price = self.cart_price || set_cart_price(resource)
+		payments = get_cart_payments(resource)
+		price = get_cart_price(resource)
 		payments.each do |payment|
 			total_paid += payment.amount if (payment.payment_success)
 		end
@@ -72,40 +92,59 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_paid_amount
 	end
 
-	
-	def set_cart_balance(resource)
-		self.cart_balance = self.cart_price - self.cart_paid_amount
-		self.cart_balance
+	def get_cart_paid_amount(resource)
+		self.cart_paid_amount || set_cart_paid_amount(balance)
 	end
 
-	def has_balance
-		self.cart_balance > 0
+	## how much money the customer still owes us.
+	def set_cart_pending_balance(resource)
+		self.cart_pending_balance = get_cart_price(resource) - get_cart_paid_amount(resource)
+		self.cart_pending_balance
 	end
 
-	def fully_paid
-		self.cart_balance = 0
-	end
-
-	def not_paid_at_all
-		self.cart_balance == self.cart_price
+	def get_cart_pending_balance(resource)
+		self.cart_pending_balance || set_cart_pending_balance(resource)
 	end
 
 
-	## so imagine a situation
-	## the item stage should be set for all items.
-	def set_cart_item_stages
-		if fully_paid
-			## shift the stage of all cart_items to awaiting_confirmation
-			## provided the stage is not already crossed that.
-		elsif has_balance
-			## shift the stage of all items which have an awaiting payment to awaiting confirmation.
-			## the problem will be that we will again have to check before dispatch results, that there is 
-			## some guy comes and says let the earlier tests be , i want these tests done first.
-			## before setting stage to dispatch, it has to go on minusing that amount from the total paid , this is only necessary because we allow half payments.
-		elsif not_paid_at_all
-			## shift the stage of those cart items which have a payable at after the awaiting payment.
-		else
-		end
+	## this defaults to the total paid amount by the customer, and can then be changed depending upon need.
+	def set_cart_credit(resource,credit)
+		credit || get_cart_paid_amount(resource)
+	end
+
+
+	def get_cart_credit(resource)
+		self.credit || set_cart_credit(resource)
+	end
+
+	############# PAYMENT BALANCE CONVENIENCE METHODS #############
+
+	## not fully paid, there is some amount to be taken from the customer yet.
+	def has_pending(resource)
+		get_cart_pending_balance(resource) > 0
+	end
+
+
+	## fully paid.
+	def fully_paid(resource)
+		get_cart_pending_balance(resource) = 0
+	end
+
+
+	## not paid a penny.
+	def not_paid_at_all(resource)
+		get_cart_pending_balance(resource) == get_cart_price(resource)
+	end
+
+
+	################# CART ITEM STAGES METHODS #################
+
+	## should be called on cart#show,#create,#update
+	## should be called on payment#success
+	## sets the stage of each cart item.
+	## return[Array] : cart_item instances, after setting stage.
+	def set_cart_item_stages(resource)
+		get_cart_items(resource).map{|cart_item| c.set_stage(nil,self,resource)}
 	end	
 
 end

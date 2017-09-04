@@ -43,7 +43,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :discount_code, type: String
 
 
+		###################### product status fields ##################
+		## one of the stages mentioned below.
+		field :accepted, type: Boolean
 
+
+		### a percentage of the total price , at which to accept the order.
+		## order accepted only if credit exceeds this number
+		field :accept_order_at_credit, type: Float
 
 	end
 
@@ -70,5 +77,23 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 
 	end
+
+
+
+	## this method should be overridden in models implementing , so that you can have finegrained control over stages of the product. 
+	## pass in the stage as nil, in case you want to determine it by the inherent logic presented hereunder.
+	## the order is accepted if there is sufficient credit to accept it.
+	## or if the credit acceptence level is acceptable.
+	def set_stage(accepted,cart,resource)
+		## first check the payable at.
+		## then check the credit.
+		## then return.
+		## this again depends upon what stage you want to set.
+		## if it has no stage, then the initial logic is used, otherwise then assign stage directly.
+		self.accepted = accepted if accepted
+
+	end
 	
+	
+
 end
