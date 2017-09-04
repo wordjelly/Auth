@@ -49,25 +49,20 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 
 		### a percentage of the total price , at which to accept the order.
-		## order accepted only if credit exceeds this number
-		field :accept_order_at_credit, type: Float
+		## the current item is accepted only if (price*accept_order_at_percentage_of_price) <= available credit
+		field :accept_order_at_percentage_of_price, type: Float
 
 	end
 
 
-		
-	
-
 	module ClassMethods
 
-		##used in cart controller concern.
-		##you can modify this to allow admin to also view/update/etc the cart items.
+		##used in cart_item_controller_concern#show
 		def find_cart_item(params_cart_item_id,resource)
 			self.where(:_id =>params_cart_item_id, :resource_id => resource.id.to_s).first
 		end
 
 		##used in cart_item_controller_concern#index
-		##used in cart_controller_concern#show
 		def find_cart_items(resource,cart=nil)
 			conditions = {:resource_id => resource.id.to_s, :parent_id => nil}
 			if cart
@@ -78,22 +73,22 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	end
 
-
-
-	## this method should be overridden in models implementing , so that you can have finegrained control over stages of the product. 
-	## pass in the stage as nil, in case you want to determine it by the inherent logic presented hereunder.
-	## the order is accepted if there is sufficient credit to accept it.
-	## or if the credit acceptence level is acceptable.
-	def set_stage(accepted,cart,resource)
-		## first check the payable at.
-		## then check the credit.
-		## then return.
-		## this again depends upon what stage you want to set.
-		## if it has no stage, then the initial logic is used, otherwise then assign stage directly.
-		self.accepted = accepted if accepted
-
+	## decides whether or not the current item can be accepted , given whatever money has been paid by the resource.
+	## will first set the order as accepted, provided that the cart has enough credit. While checking for the credit, will debit the minimum amount necessary to accept this cart item, from the cart credit.
+	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
+	## returns the result of calling #save on the cart_item.
+	def set_accepted(cart,resource,override)
+		self.accepted = cart_has_sufficient_credit_for_item?(cart) 
+		self.accepted = override if override
+		self.save
+		self
 	end
 	
-	
+	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
+	## the #debit function returns the current cart credit.
+	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
+	def cart_has_sufficient_credit_for_item?(cart)
+		cart.debit(self.accept_order_at_percentage_of_price*self.price) >= 0
+	end
 
 end

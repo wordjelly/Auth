@@ -8,9 +8,6 @@ module Auth::Concerns::Shopping::ProductConcern
 		field :price, type: BigDecimal
 		field :name, type: String
 
-		validates_presence_of :payable_at
-		validates_presence_of :cancellable_at
-
 	end
 
 

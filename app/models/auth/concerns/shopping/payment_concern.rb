@@ -12,8 +12,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 		SUCCESS = "Success"
 		PENDING = "You need to complete this payment"
 
-
-
 		##the amount for this payment
 		field :amount, type: Float
 

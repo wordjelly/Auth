@@ -33,20 +33,19 @@ module Auth::Concerns::Shopping::CartConcern
 
 	end
 
-	## gathers all the information about the cart
-	## 
+	## sets all the attribute accessors of the cart.
 	def prepare_cart(resource)
 		find_cart_items(resource)
 		set_cart_price(resource)
 		set_cart_payments(resource)
 		set_cart_paid_amount(resource)
 		set_cart_pending_balance(resource)
-
+		set_cart_credit(resource)
 	end
 
 	################ ATTR ACCESSOR SETTERS & GETTERS ##############
 
-
+	## set the cart items, [Array] of cart items.
 	def find_cart_items(resource)
 		conditions = {:resource_id => resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions)
@@ -107,14 +106,20 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 
-	## this defaults to the total paid amount by the customer, and can then be changed depending upon need.
+	## returns the credit set, or the the total amount paid by the customer.
 	def set_cart_credit(resource,credit)
 		credit || get_cart_paid_amount(resource)
 	end
 
-
+	## returns the credit if it exists, or the total amount paid by the customer, by calling set_cart_credit(resource)
 	def get_cart_credit(resource)
 		self.credit || set_cart_credit(resource)
+	end
+
+	## debits the cart_item price from the cart credit.
+	## returns the current credit.
+	def debit(amount,resource)
+		set_cart_credit(resource,get_cart_credit(resource) - amount)
 	end
 
 	############# PAYMENT BALANCE CONVENIENCE METHODS #############
@@ -124,12 +129,10 @@ module Auth::Concerns::Shopping::CartConcern
 		get_cart_pending_balance(resource) > 0
 	end
 
-
 	## fully paid.
 	def fully_paid(resource)
-		get_cart_pending_balance(resource) = 0
+		get_cart_pending_balance(resource) == 0
 	end
-
 
 	## not paid a penny.
 	def not_paid_at_all(resource)
@@ -143,8 +146,8 @@ module Auth::Concerns::Shopping::CartConcern
 	## should be called on payment#success
 	## sets the stage of each cart item.
 	## return[Array] : cart_item instances, after setting stage.
-	def set_cart_item_stages(resource)
-		get_cart_items(resource).map{|cart_item| c.set_stage(nil,self,resource)}
+	def set_cart_items_accepted(resource)
+		get_cart_items(resource).map{|cart_item| c.set_accepted(nil,self,resource)}
 	end	
 
 end

@@ -6,8 +6,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
     ##this ensures api access to this controller.
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
-    before_filter :do_before_request
-    before_filter :initialize_vars
+    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index]
+    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index]
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -29,7 +29,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart_item_class.find_cart_items(lookup_resource,@cart) 
+    @cart.find_cart_items(lookup_resource) 
     @cart.set_cart_payments(lookup_resource)
     @cart.set_cart_price(lookup_resource)
     @cart.set_cart_paid_amount(lookup_resource)

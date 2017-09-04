@@ -461,12 +461,15 @@ module Devise
     end
 
     
-
+    ## only required in case of registrations controller, for the update action, and destroy actions, wherein we need to make sure that the resource is authenticated before doing anything.
+    ## have overridden the devise method here.
+    ## it has nothing to do with the simple_token_authentication being done in other controllers. 
+    ## this was just done here because we cannot add simple_token_authentication to a devise controller.
     def authenticate_scope!
       
 
       do_before_request  
-
+=begin
       if is_json_request?
         #puts "is a json request"
         token = request.headers["X-#{resource_name.to_s.capitalize}-Token"]
@@ -498,7 +501,7 @@ module Devise
         send("authenticate_#{resource_name}!", force: true)
         self.resource = send("current_#{resource_name}")
       end
-
+=end
     end
 
   end

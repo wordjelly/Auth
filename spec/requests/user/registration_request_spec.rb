@@ -67,9 +67,7 @@ RSpec.describe "Registration requests", :registration => true, :type => :request
       after(:example) do 
         Recaptcha.configuration.skip_verify_env << "test"
       end
-      it " -- requires recaptcha on create " do 
-        ##we add that 
-        
+      it " -- requires recaptcha on create " do         
         post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}
         expect(response.body).to eq("recaptcha validation error")
       end

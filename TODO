@@ -76,7 +76,7 @@ THINGS TO BE DONE:
 2. validation for email, is returning cant be blank for additional login param in scenario of signing up for admins with a mobile number instead of an email.
 3. on signing up with a mobile, shows "your email is pending confirmation on the edit.html.erb page ->should not show this."
 4. otp job, require path is hardcoded at top of file, and also in payment_controller_concern.
-
+4b. add secure compare of the auth token in the authenticate_scope method overriden in devise in registrations controller.
 5. receipt
 6. payment receipient resolver in case of salaries -> hooked into notifications
 7. refund 

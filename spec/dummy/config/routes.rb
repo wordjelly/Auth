@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   post 'shopping/payments/:id', to: 'shopping/payments#update'  
 
 
+
   ##app-specific routes 
   namespace :api do 
 

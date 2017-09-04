@@ -6,9 +6,17 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ##this ensures api access to this controller.
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
-    before_filter :do_before_request 
-    before_filter :initialize_vars
+    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index]
+    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index]
+    
   end
+
+  module ClassMethods
+    def token_authentication_conditions
+      {:only => [:create,:update,:destroy]}
+    end
+  end
+  
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
   #if no id is provided then creates a new cart_item from the permitted params, but excluding the id key.
