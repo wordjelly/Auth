@@ -4,25 +4,17 @@ class Shopping::CartItem < Auth::Shopping::CartItem
     field :public, type: Boolean
 
     ##used in cart_item_controller_concern#show
-	def self.find_cart_item(params_cart_item_id,resource)
-		conditions = {:_id => params_cart_item_id}
-		if resource.nil?
-			conditions[:public] = true
-		else
-			conditions[:resource_id] = resource.id.to_s
-		end
-		self.where(conditions).first
+	def self.find_cart_item(params_cart_item_id,resource,pub=nil)
+		return super(params_cart_item_id,resource) if pub.nil?
+		all = self.where(:_id => params_cart_item_id, :public => pub)
+		return all.first if all.size > 0
+		return all
 	end
 
 	##used in cart_item_controller_concern#index
-	def self.find_cart_items(resource)
-		conditions = {}
-		if resource.nil?
-			conditions[:public] = true
-		else
-			conditions[:resource] = resource.id.to_s
-		end
-		self.where(conditions)
+	def self.find_cart_items(resource,pub=nil)
+		return super(resource) if pub.nil?
+		self.where(:public => pub)
 	end
 
 

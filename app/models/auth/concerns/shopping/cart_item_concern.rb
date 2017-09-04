@@ -58,16 +58,21 @@ module Auth::Concerns::Shopping::CartItemConcern
 	module ClassMethods
 
 		##used in cart_item_controller_concern#show
+		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
 		def find_cart_item(params_cart_item_id,resource)
-			self.where(:_id =>params_cart_item_id, :resource_id => resource.id.to_s).first
+			conditions = {:_id => params_cart_item_id}
+			conditions[:resource_id] = resource.id.to_s if resource
+			all = self.where(conditions)
+			return all.first if all.size > 0
+			return all 
 		end
 
 		##used in cart_item_controller_concern#index
-		def find_cart_items(resource,cart=nil)
-			conditions = {:resource_id => resource.id.to_s, :parent_id => nil}
-			if cart
-				conditions[:parent_id] = cart.id.to_s 
-			end
+		## if there is a resource, will return all cart items with that resource id.
+		## if there is no resource, will return all cart items with a nil rsource.
+		def find_cart_items(resource)
+			conditions = {:resource_id => nil}
+			conditions[:resource_id] = resource.id.to_s if resource
 			self.where(conditions)
 		end
 
