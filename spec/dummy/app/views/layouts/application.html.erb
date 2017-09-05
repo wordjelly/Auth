@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dummy</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <title><%= Auth.configuration.brand_name %></title>
+  <!-- this uses the stylesheet and javascript files of the engine, as they are prefixed with auth, this automatically also includes the application.js and application.scss files of the current app. -->
+  <%= stylesheet_link_tag    "auth/application", media: "all" %>
+  <%= stylesheet_link_tag    "https://fonts.googleapis.com/icon?family=Material+Icons", media: "all" %>
+  <%= javascript_include_tag "auth/application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
-
-<% res = get_signed_in_scope %>
-<% puts "resource is : #{res}" %>
-<% if user_signed_in? %>
-  Logged in as <strong><%= current_user.email %></strong>.
-  <%= link_to 'Edit profile', edit_user_registration_path %> |
-  <%= link_to "Logout", destroy_user_session_path, method: :delete %>
-<% else %>
-  <%= link_to "Sign up", new_user_registration_path, :class => 'navbar-link'  %> |
-  <%= link_to "Login", new_user_session_path, :class => 'navbar-link'  %>
-<% end %>
-<%= yield %>
-
+  <%= content_for(:personalization_nav_links) do %>
+    <%= render :partial => 'shopping/navigation_options.html.erb' %>
+  <% end %>
+  <!-- now here calling content for will change the things that need to be changed -->
+  <%= render :partial => "layouts/auth/navbar/navbar.html.erb" %>
+  
+  <div class="container">
+    <%= yield %>
+  </div>
+  
+  <%= render :partial => "layouts/auth/modals.html.erb" %>
 </body>
 </html>
