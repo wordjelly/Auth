@@ -2,7 +2,6 @@ class Shopping::CartItemsController < Auth::Shopping::CartItemsController
 	
 	def index
 		cart_item_params = permitted_params.fetch(:cart_item,{})
-		
 		if pub = cart_item_params[:public]
 			@cart_items = @cart_item_class.find_cart_items({:resource => lookup_resource,:pub => pub}).page 1
 		else

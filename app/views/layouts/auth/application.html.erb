@@ -8,41 +8,11 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-<div class="row">
-    <div class="navbar-fixed">
-      <nav class="teal">
-        <div class="nav-wrapper">
-          <a href="/" class="brand-logo">WordJelly
-          
-            <div class="preloader-wrapper small active m-5-left" style="vertical-align:middle; height:18px; width:18px; display:none;" id="progress_circle">
-              <div class="spinner-layer spinner-white-only">
-                <div class="circle-clipper left">
-                  <div class="circle"></div>
-                </div><div class="gap-patch">
-                  <div class="circle"></div>
-                </div><div class="circle-clipper right">
-                  <div class="circle"></div>
-                </div>
-              </div>
-            </div>
-          
 
-          </a>
-
-          <ul class="right hide-on-med-and-down">
-            <span id="personalization">
-             <%= render 'layouts/auth/personalization.html.erb' %>
-            </span>
-          </ul>
-        </div>
-    </nav>
-  </div>
-</div>
+<%= render :partial => "layouts/auth/navbar/navbar.html.erb" %>
 <div class="container">
 <%= yield %>
 </div>
-<%= render :partial => "auth/modals/ajax_error_modal.html.erb" %>
-<%= render 'auth/modals/sign_in_needed_modal.html.erb' %>
-
+<%= render :partial => "layouts/auth/modals.html.erb" %>
 </body>
 </html>

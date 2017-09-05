@@ -63,6 +63,7 @@ module Auth
     attr_accessor :payment_gateway_info
     attr_accessor :token_regeneration_time
     attr_accessor :do_redirect
+    attr_accessor :brand_name
 
     def initialize
       @enable_token_auth = true
@@ -77,12 +78,12 @@ module Auth
       @otp_controller = nil
 
       @cart_item_controller = nil
-      @cart_item_class = "CartItem"
+      @cart_item_class = nil
       @cart_controller = nil
-      @cart_class = "Cart"
+      @cart_class = nil
       
       @payment_controller = nil
-      @payment_class = "Payment"
+      @payment_class = nil
       @payment_gateway_info = {}
 
       @simulate_invalid_otp = false
@@ -92,6 +93,7 @@ module Auth
       ##whether to redirect to redirect urls if provided in the
       ##request.
       @do_redirect = true;
+      @brand_name = "Wordjelly"
     end
   end
   
