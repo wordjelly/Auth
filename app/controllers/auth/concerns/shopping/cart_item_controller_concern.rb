@@ -32,7 +32,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     else
       not_found("cart item class not specified in configuration")
     end
-    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item(permitted_params[:id],lookup_resource) : @cart_item_class.new(permitted_params[:cart_item])
+    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item({:cart_item_id => permitted_params[:id], :resource => lookup_resource}) : @cart_item_class.new(permitted_params[:cart_item])
   end
 
 
@@ -64,7 +64,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##since these are the pending cart items.
   ##all remaining cart items have already been assigned to carts
   def index
-    @cart_items = @cart_item_class.find_cart_items(lookup_resource).page 1
+    @cart_items = @cart_item_class.find_cart_items({:resource => lookup_resource}).page 1
     respond_with @cart_items
   end
 
@@ -77,9 +77,8 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     respond_with @cart_item
   end
 
+  ## this permitted params is overridden in the dummy app, and as a result throws unpermitted parameters for the daughter app parameters, even though they are subsequently permitted, since super is called first.
   def permitted_params
-    ##can there be more than one cart_item for the same product_id and resource_id, answer is yes, he can reorder the same product.
-    ##so to update , we will have to permit the id, to be sent in.
     params.permit({cart_item: [:product_id,:discount_code,:quantity,:price,:name]},:id)
   end
 

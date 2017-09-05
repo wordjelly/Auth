@@ -17,7 +17,7 @@
         <td><%= test.name %></td>
         <td><%= test.description %></td>
         <td><%= link_to 'Show', shopping_cart_item_path({:id => test.id, :cart_item => {:public => true}}) %></td>
-        <td><%= link_to 'Add to Cart',shopping_cart_items_path({:cart_item => test.attributes}), method: :post %></td>
+        <td><%= render :partial => "new.html.erb", locals: {cart_item: Auth.configuration.cart_item_class.constantize.new(test.attributes.except("_id")) } %></td>
         <td></td>
         <% if lookup_resource %>
         <td><%= link_to 'Destroy', test, method: :delete, data: { confirm: 'Are you sure?' } %></td>

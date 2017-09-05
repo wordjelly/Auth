@@ -1,0 +1,6 @@
+<%= form_for(cart_item,as: :cart_item) do |f| %>
+	<% cart_item.attributes.each do |k,v| %>
+		<%= f.hidden_field k, :value => v %>
+	<% end %>
+	<%= f.submit "Add Cart Item"%>
+<% end %>
