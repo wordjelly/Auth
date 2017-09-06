@@ -48,6 +48,8 @@ class User
       check_errors
   end
 
+  ## only will work as long as you specify a default queue adapter at the application level, otherwise defaults to inline which basically means that it will block till email is sent.
+  ## refer: https://github.com/mperham/sidekiq/wiki/Active-Job#active-job-setup
   def send_devise_notification(notification, *args)
     devise_mailer.send(notification, self, *args).deliver_later
   end

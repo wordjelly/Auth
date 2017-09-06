@@ -22,6 +22,7 @@ require "redis"
 require "active_job"
 require "kaminari/mongoid"
 require "kaminari/actionview"
+require "mailgun-ruby"
 
 module Auth
 end
