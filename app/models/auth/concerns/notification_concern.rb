@@ -7,6 +7,7 @@ module Auth::Concerns::NotificationConcern
 
 		include GlobalID::Identification
 
+
 		## email subject.
 		## the subject for email notifications.
 		field :email_subject, type: String, default: "Notification from #{Auth.configuration.brand_name}"
@@ -63,35 +64,67 @@ module Auth::Concerns::NotificationConcern
 
 	######################### FORMAT METHODS ####################
 
-	def format_for_email(args)
+	## returns the name of a partial to be rendered.
+	def email_partial
+		"auth/notifier/email.html.erb"
+	end
+
+	def format_for_sms(resource)
 
 	end
 
-	def format_for_sms(args)
+	def format_for_android(resource)
 
 	end
 
-	def format_for_android(args)
+	def format_for_ios(resource)
 
 	end
 
-	def format_for_ios(args)
-
-	end
-
-	def format_for_web(args)
+	def format_for_web(resource)
 
 	end
 
 	######################### SEND METHODS ####################
 
+
+	## if the notification should be sent by email or not.
+	## override in the implementing model.
+	## default is true
+	def send_by_email?
+		true
+	end
+
+
+	## if the notification should be sent by sms or not.
+	## override in the implementing model.
+	## default is true
+	def send_by_sms?
+		true
+	end
+
+	## if the notification should be sent by mobile or not.
+	## override in the implementing model.
+	## default is true
+	def send_by_mobile?
+		true
+	end
+
+
+	## if the notification should be sent by desktop or not.
+	## override in the implementing model.
+	## default is true
+	def send_by_desktop?
+		true
+	end
+
 	def send
 		recipients = send_to
 		recipients[:resources].map{|r|
-			r.send_email
-			r.send_sms
-			r.send_mobile_notification
-			r.send_desktop_notification	
+			r.send_email(self) if send_by_email?
+			r.send_sms(self) if send_by_sms?
+			r.send_mobile_notification(self) if send_by_mobile?
+			r.send_desktop_notification(self) if send_by_desktop?	
 		}
 	end
 
@@ -102,7 +135,7 @@ module Auth::Concerns::NotificationConcern
 		resources = []
 		resources << resource_ids.map{|c| resource_class_constantized.find(c)} if resource_ids
 		resources << resource_class_constantized.where(resources_by_query) if resources_by_query
-		resources
+		resources.flatten
 	end
 
 	def get_topics

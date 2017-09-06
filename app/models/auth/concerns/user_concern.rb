@@ -525,11 +525,11 @@ module Auth::Concerns::UserConcern
 
 	def send_email(notification)
 		## notifier is an email notifier.
-		Auth::Notifier.send_notification(self,notification).deliver_now if self.email
+		Auth.configuration.mailer_class.constantize.notification(self,notification).deliver_now if self.email
 	end
 
 	def send_sms(notification)
-
+		
 	end
 
 	def send_mobile_notification(notification)

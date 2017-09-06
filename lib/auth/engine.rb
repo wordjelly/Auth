@@ -64,6 +64,9 @@ module Auth
     attr_accessor :token_regeneration_time
     attr_accessor :do_redirect
     attr_accessor :brand_name
+    ## the class used in the user_concern, to send the user notifications by email.
+    ## should inherit from Auth::Notifier.
+    attr_accessor :mailer_class
 
     def initialize
       @enable_token_auth = true
@@ -84,6 +87,7 @@ module Auth
       
       @payment_controller = nil
       @payment_class = nil
+      @mailer_class = nil
       @payment_gateway_info = {}
 
       @simulate_invalid_otp = false
