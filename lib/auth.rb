@@ -24,5 +24,6 @@ require "kaminari/mongoid"
 require "kaminari/actionview"
 require "mailgun-ruby"
 
+
 module Auth
 end

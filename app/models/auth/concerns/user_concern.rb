@@ -516,4 +516,28 @@ module Auth::Concerns::UserConcern
 	end
 	
 
+	def has_gcm_token
+		false
+	end
+
+	#################### NOTIFICATION METHODS #############
+
+
+	def send_email(notification)
+		## notifier is an email notifier.
+		Auth::Notifier.send_notification(self,notification).deliver_now if self.email
+	end
+
+	def send_sms(notification)
+
+	end
+
+	def send_mobile_notification(notification)
+
+	end
+
+	def send_desktop_notification(notification)
+
+	end
+
 end
