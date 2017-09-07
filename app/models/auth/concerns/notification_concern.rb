@@ -49,10 +49,18 @@ module Auth::Concerns::NotificationConcern
 		field :reply_to_email, type: String
 
 
-
 		## reply_to_number
 		## a mobile phone number to which the user can reply in case of any issues.		
 		field :reply_to_number, type: String
+
+		## objects related to this notification.
+		## a hash of object ids, that refer to any objects that this notification deals with.
+		## key -> string[preferably the class name, but can be anything if more than two objects of the same class are used.]
+		## value -> bson::objectid of the instance of that class
+		## these can be used to refer to , or pull up objects , pertaining to this notification.
+		## eg, suppose you are sending a notification regarding an order object, then this would be a good place to store a key->value like: object_id: object.id.to_s
+		## this can later be used when sending the notification, in the email/sms etc.
+		field :objects, type: Hash, default: {}
 
 	end
 
@@ -85,7 +93,7 @@ module Auth::Concerns::NotificationConcern
 	## if the notification should be sent by email or not.
 	## override in the implementing model.
 	## default is true
-	def send_by_email?
+	def send_by_email?(resource)
 		true
 	end
 
@@ -93,14 +101,14 @@ module Auth::Concerns::NotificationConcern
 	## if the notification should be sent by sms or not.
 	## override in the implementing model.
 	## default is true
-	def send_by_sms?
-		true
+	def send_by_sms?(resource)
+		resource.has_phone && resource.additional_login_param_confirmed?
 	end
 
 	## if the notification should be sent by mobile or not.
 	## override in the implementing model.
 	## default is true
-	def send_by_mobile?
+	def send_by_mobile?(resource)
 		true
 	end
 
@@ -108,7 +116,7 @@ module Auth::Concerns::NotificationConcern
 	## if the notification should be sent by desktop or not.
 	## override in the implementing model.
 	## default is true
-	def send_by_desktop?
+	def send_by_desktop?(resource)
 		true
 	end
 
@@ -118,11 +126,17 @@ module Auth::Concerns::NotificationConcern
 	def send
 		recipients = send_to
 		recipients[:resources].map{|r|
-			r.send_email(self) if send_by_email?
-			r.send_notification_sms(self) if send_by_sms?
-			r.send_mobile_notification(self) if send_by_mobile?
-			r.send_desktop_notification(self) if send_by_desktop?
+			r.send_email(self) if send_by_email?(resource)
+			r.send_notification_sms(self) if send_by_sms?(resource)
+			r.send_mobile_notification(self) if send_by_mobile?(resource)
+			r.send_desktop_notification(self) if send_by_desktop?(resource)
 		}
+		##notification should be added to a redis list where a daemon will check it for receipt acks.
+		##if notification send_by_desktop for eg is true, then it will be checked for a receipt for the same.
+		##if the receipt is not found, then it will be ignored, and readded to the end of the list, but there will be a max tries.
+		##if the receipt is found and it is valid and it is so for all the notification types, then the item is popped.
+		##if the maxtries are exceeded, then an error is logged.
+		##this is the sample behaviour.
 	end
 
 	######################## UTILITY METHODS ##################
@@ -144,7 +158,7 @@ module Auth::Concerns::NotificationConcern
 	end
 
 	def resource_class_constantized
-		resource_class.capitalize.constantize
+		self.class.name.capitalize.constantize
 	end
 
 end

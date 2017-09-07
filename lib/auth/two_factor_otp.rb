@@ -10,25 +10,30 @@ module Auth
 
 		## to_number : string, indian telephone number, without the preceeding 91
 		## template : the two_factor_otp template 
-		def send_transactional_sms(to_number,template_name,var_hash,template_sender_id)
+		## example request should look like this
+		## "https://2factor.in/API/R1/?module=TRANS_SMS&apikey=#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}&to=#{to_number}&from=#{template_sender_id}&templatename=TemplateName&var1=VAR1_VALUE&var2=VAR2_VALUE"
+		## @return[String] session_id
+		def send_transactional_sms(args)
+			to_number = args[:to_number],
+			template_name = args[:template_name]
+			var_hash = args[:var_hash]
+			template_sender_id = args[:template_sender_id]
 			
-			url = TWO_FACTOR_BASE_URL + Auth.configuration.third_party_api_keys[:two_factor_sms_api_key] + TWO_FACTOR_TRANSACTIONAL_SMS_URL
-
-			form_object = {
-				From: template_sender_id,
-			    To: to_number,
-			    TemplateName: template_name
+			url = "https://2factor.in/API/R1/?module=TRANS_SMS"
+			
+			params = {
+				api_key: Auth.configuration.third_party_api_keys[:two_factor_sms_api_key],
+				to: to_number,
+				from: template_sender_id,
+				templatename: template_name,
 			}.merge(var_hash)
 
-			request = Typhoeus::Request.new(
-			        url,
-			        method: :post,
-			        headers: {
-			              ContentType: 'multipart/form-data'   
-			        },
-			        body: form_object
-			)
+			response = Typhoeus::Request.new(
+			  url,
+			  params: params
+			).run
 			
+			JSON.parse(response)["session-id"]
 		end
 
 		def auth_gen

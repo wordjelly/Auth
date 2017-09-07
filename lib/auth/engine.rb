@@ -5,6 +5,7 @@ require "auth/rails/routes"
 require "auth/two_factor_otp"
 require "auth/job_exception_handler"
 require "auth/url_shortener"
+require "auth/notify"
 
 module Auth
   class Engine < ::Rails::Engine

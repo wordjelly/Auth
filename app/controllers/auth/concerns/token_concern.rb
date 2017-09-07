@@ -55,6 +55,9 @@ module Auth::Concerns::TokenConcern
 
   ##this method is to be overridden in the daughter application to allow for a resource to be proxied, for eg, when an administrator wants to make changes on behalf of a resource 
   ##this method simply returns the resource calculated in the #authenticate_and_set_resource method, for the moment.It should be overridden depending on app requirements.
+  ##for example one strategy would be to store the resource to be proxied into the session, and reference that here, if the logged in resource is an admin.
+  ##best strategy would be to pick up a :resource_id from the params, and use that everywhere.
+  ##provided that the signed in resource is an admin.
   def lookup_resource
     @resource
   end

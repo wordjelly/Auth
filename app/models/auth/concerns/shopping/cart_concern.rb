@@ -4,6 +4,7 @@ module Auth::Concerns::Shopping::CartConcern
 	extend ActiveSupport::Concern
 	
 	include Auth::Concerns::ChiefModelConcern	
+	include Auth::Concerns::OwnerConcern
 
 	included do 
 		field :name, type: String

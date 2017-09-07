@@ -44,7 +44,9 @@ class OtpJob < ActiveJob::Base
 			resource.verify(params[:otp])
     elsif job_type == "send_transactional_sms"
       notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
-      resource.send_transactional_sms(notification.format_for_sms(resource))
+      session_id = resource.send_transactional_sms(notification.format_for_sms(resource))
+      puts "the session id : #{session_id}"
+      ## need to figure out some way to poll for these 
 		end
 	end
 

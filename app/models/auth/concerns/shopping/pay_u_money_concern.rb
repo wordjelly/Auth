@@ -37,7 +37,6 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		end
 
 
-
 		##add a validation, that checks that each of the 7 required fields are present, before create, only when the payment_type is gateway.
 		##the is_gateway? method is defined in payment_concern.
 		##these validations are run before the before_save is called.

@@ -20,7 +20,6 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   def show
     @payment = @payment_class.find(params[:id])
     @payment.verify_payment 
-    respond_with @payment
   end
 
   def index
