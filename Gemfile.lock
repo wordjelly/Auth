@@ -12,6 +12,7 @@ PATH
   specs:
     auth (0.0.1)
       devise (= 4.1.1)
+      googl
       hashie (= 3.5.1)
       i18n (= 0.8.1)
       kaminari-actionview
@@ -149,6 +150,9 @@ GEM
     ffi (1.9.18)
     globalid (0.4.0)
       activesupport (>= 4.2.0)
+    googl (0.7.1)
+      httparty (~> 0.10)
+      json (>= 1.4.6)
     hashie (3.5.1)
     htmlentities (4.3.4)
     http-cookie (1.0.3)

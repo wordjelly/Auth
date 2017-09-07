@@ -17,12 +17,6 @@ module Auth::Concerns::NotificationConcern
 		field :callout_message, type: String
 
 
-
-		## a url that the user can visit to get more information about the notification.
-		field :more_information_url, type: String
-
-
-
 		## a collapse id, for gcm messages.
 		field :collapse_id, type: String
 
@@ -118,13 +112,16 @@ module Auth::Concerns::NotificationConcern
 		true
 	end
 
+	## the user must implement a method called send_transactional_sms
+	## this is defined in the sms_otp_concern.
+	## remember to include this concern in the user, if using mobile numbers, and notification concern.
 	def send
 		recipients = send_to
 		recipients[:resources].map{|r|
 			r.send_email(self) if send_by_email?
-			r.send_sms(self) if send_by_sms?
+			r.send_notification_sms(self) if send_by_sms?
 			r.send_mobile_notification(self) if send_by_mobile?
-			r.send_desktop_notification(self) if send_by_desktop?	
+			r.send_desktop_notification(self) if send_by_desktop?
 		}
 	end
 

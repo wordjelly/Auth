@@ -1,9 +1,34 @@
 module Auth
 	module TwoFactorOtp
 
+		TWO_FACTOR_BASE_URL = "http://2factor.in/API/V1/"
+		TWO_FACTOR_TRANSACTIONAL_SMS_URL = "/ADDON_SERVICES/SEND/TSMS"
 		##returns the string value at the errors keys in the redis hash 
 		def check_errors
 			$redis.hget(self.id.to_s + "_two_factor_sms_otp","error")
+		end
+
+		## to_number : string, indian telephone number, without the preceeding 91
+		## template : the two_factor_otp template 
+		def send_transactional_sms(to_number,template_name,var_hash,template_sender_id)
+			
+			url = TWO_FACTOR_BASE_URL + Auth.configuration.third_party_api_keys[:two_factor_sms_api_key] + TWO_FACTOR_TRANSACTIONAL_SMS_URL
+
+			form_object = {
+				From: template_sender_id,
+			    To: to_number,
+			    TemplateName: template_name
+			}.merge(var_hash)
+
+			request = Typhoeus::Request.new(
+			        url,
+			        method: :post,
+			        headers: {
+			              ContentType: 'multipart/form-data'   
+			        },
+			        body: form_object
+			)
+			
 		end
 
 		def auth_gen

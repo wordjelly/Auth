@@ -30,7 +30,8 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 			if document.is_gateway?
 				document.gateway_payment_initiated = true 
 				document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
-				document.txnid = document.id.to_s
+				#document.txnid = document.id.to_s
+				document.txnid = "a#{Random.new.rand(1..50)}"
 				document.calculate_hash 
 			end
 		end

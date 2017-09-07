@@ -23,7 +23,7 @@ require "active_job"
 require "kaminari/mongoid"
 require "kaminari/actionview"
 require "mailgun-ruby"
-
+require "googl"
 
 module Auth
 end

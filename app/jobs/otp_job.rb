@@ -1,6 +1,6 @@
-require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
+#require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
 class OtpJob < ActiveJob::Base
-  include Auth::TwoFactorOtp
+  #include Auth::TwoFactorOtp
   include Auth::JobExceptionHandler
 
   queue_as :default
@@ -36,10 +36,15 @@ class OtpJob < ActiveJob::Base
 		resource_class = resource_class.constantize
 		resource = resource_class.find(resource_id)
 		
+    ## the resource methods mentioned here are added throgh the TwoFactorOtp module.
+
 		if job_type == "send_sms_otp"
 			resource.auth_gen
 		elsif job_type == "verify_sms_otp"
 			resource.verify(params[:otp])
+    elsif job_type == "send_transactional_sms"
+      notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
+      resource.send_transactional_sms(notification.format_for_sms(resource))
 		end
 	end
 

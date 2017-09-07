@@ -4,6 +4,7 @@ require "auth/omniauth/path"
 require "auth/rails/routes"
 require "auth/two_factor_otp"
 require "auth/job_exception_handler"
+require "auth/url_shortener"
 
 module Auth
   class Engine < ::Rails::Engine

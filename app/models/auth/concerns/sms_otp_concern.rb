@@ -31,6 +31,7 @@ module Auth::Concerns::SmsOtpConcern
 
 
 	
+	
 	def send_sms_otp
 		##the user model will call the initial step of actually sending the sms otp.
 		
@@ -45,18 +46,7 @@ module Auth::Concerns::SmsOtpConcern
 	    
 	end
 	
-=begin
-	def deconfirm_additional_param
-		##this is assumed as pending because we dont know exactly when the remote job will send the sms
-		##so we set this as pending.
-		##a more fine granularity can be got by first making it unconfirmed and later sending a push notification that it is now pending.
-		##as follows
-		##self.additional_login_param_status = "unconfirmed"
-		##so now it is directly pending.
-		puts "deconfirming"
-		self.additional_login_param_status = 1
-	end
-=end		
+		
 	##overridden in the model that implements this concern,
 	##whoever calls this method , must set the self.additional_login_param_pre_request_status to 2, at the end of successfull verification,since this is needed for password recovery, unlocks mechanisms.
 	def verify_sms_otp(otp)
