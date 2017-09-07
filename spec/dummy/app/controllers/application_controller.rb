@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
 
   #use this line to directly include the layout from the engine.
   #layout 'auth/application'  
- 
+  layout 'application'
   respond_to :html,:js,:json
   
 

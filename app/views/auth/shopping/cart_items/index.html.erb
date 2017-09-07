@@ -4,8 +4,7 @@
 
 <br>
 
-<%= if lookup_resource %>
+
 	<%= link_to 'Add Another Test', tests_path %>
 	<br>
 	<%= link_to 'Checkout',shopping_carts_path({cart: {add_cart_item_ids: @cart_items.map{|c| c = c.id.to_s}}}), :method=> :post %>
-<% end %>

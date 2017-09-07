@@ -11,6 +11,10 @@
 <body>
   
   <!-- now here calling content for will change the things that need to be changed -->
+  <%= content_for(:personalization_nav_links) do %>
+    <%= render :partial => "shopping/navigation_options.html.erb" %>
+  <% end %>
+   
   <%= render :partial => "layouts/auth/navbar/navbar.html.erb" %>
   
   <div class="container">

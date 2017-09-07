@@ -3,7 +3,7 @@
 	<div>
 	<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
 	</div>
-<% end %>
+	<% end %>
 	<div>Payment success</div>
 	
 <% elsif @payment.payment_failed %>
@@ -11,8 +11,9 @@
 	<div>
 	<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
 	</div>
-<% end %>
+	<% end %>
 	<div>Payment failed</div>
+	<%= render :partial => "show_gateway.html.erb", locals: {payment: @payment} %>
 <% else %>
 	<%= render :partial => "show_gateway.html.erb", locals: {payment: @payment} %>
 <% end %>

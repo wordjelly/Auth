@@ -1,9 +1,9 @@
-<% if @cart.cart_balance > 0 %>
-	<%= link_to "Pay by PayuMoney", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_balance, :payment_type => "gateway", :cart_id => @cart.id.to_s).attributes}) %>
+<% if @cart.cart_pending_balance > 0 %>
+	<%= link_to "Pay by PayuMoney", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_pending_balance, :payment_type => "gateway", :cart_id => @cart.id.to_s).attributes}) %>
 	<br>
-	<%= link_to "Pay by Cash", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_balance, :payment_type => "cash", :cart_id => @cart.id.to_s).attributes}) %>
+	<%= link_to "Pay by Cash", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_pending_balance, :payment_type => "cash", :cart_id => @cart.id.to_s).attributes}) %>
 	<br>
-	<%= link_to "Pay by Cheque", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_balance, :payment_type => "cheque", :cart_id => @cart.id.to_s).attributes}) %>
+	<%= link_to "Pay by Cheque", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_pending_balance, :payment_type => "cheque", :cart_id => @cart.id.to_s).attributes}) %>
 	<br>
-	<%= link_to "Pay by Card", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_balance, :payment_type => "card", :cart_id => @cart.id.to_s).attributes}) %>
+	<%= link_to "Pay by Card", new_shopping_payment_path({payment: Shopping::Payment.new(:amount => @cart.cart_pending_balance, :payment_type => "card", :cart_id => @cart.id.to_s).attributes}) %>
 <% end %>
