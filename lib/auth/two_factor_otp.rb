@@ -13,9 +13,7 @@ module Auth
 		## example request should look like this
 		## "https://2factor.in/API/R1/?module=TRANS_SMS&apikey=#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}&to=#{to_number}&from=#{template_sender_id}&templatename=TemplateName&var1=VAR1_VALUE&var2=VAR2_VALUE"
 		## @return[String] session_id
-		def send_transactional_sms(args)
-			puts "arguments entering send transactional sms are:"
-			puts args.to_s
+		def self.send_transactional_sms(args)
 			to_number = args[:to_number]
 			template_name = args[:template_name]
 			var_hash = args[:var_hash]
@@ -30,28 +28,14 @@ module Auth
 				templatename: template_name,
 			}.merge(var_hash)
 			
-
-
-			puts "params are:"
-			puts params.to_s
-
 			request = Typhoeus::Request.new(
 			  url,
 			  params: params
 			)
 
-			puts "request url is:"
-			puts request.url
-
 			response = request.run
 
-			puts "response body is:"
-			puts response.body.to_s
-
-			puts "response code is:"
-			puts response.code.to_s			
-			
-			JSON.parse(response.body)["session-id"]
+			response.body
 		end
 
 		def auth_gen

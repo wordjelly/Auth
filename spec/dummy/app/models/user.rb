@@ -49,11 +49,6 @@ class User
   end
 
 
-  def send_notification_sms(notification) 
-    super(notification)
-    OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => notification.id.to_s, :notification_class => notification.class.name.to_s})])
-  end
-
   ## only will work as long as you specify a default queue adapter at the application level, otherwise defaults to inline which basically means that it will block till email is sent.
   ## refer: https://github.com/mperham/sidekiq/wiki/Active-Job#active-job-setup
   def send_devise_notification(notification, *args)

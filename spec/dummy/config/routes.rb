@@ -16,7 +16,7 @@ Rails.application.routes.draw do
   ##PAYUMONEY CALLBACK ROUTE
   post 'shopping/payments/:id', to: 'shopping/payments#update'  
 
-
+  post 'transactional_sms_webhook_endpoint', to: 'auth/two_factor#transactional_sms_webhook_endpoint'
 
   ##app-specific routes 
   namespace :api do 

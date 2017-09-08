@@ -41,6 +41,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ##ensure that the cart item is new
     @cart_item.new_record? or not_found("this is not a new record")
     @cart_item.resource_id = lookup_resource.id.to_s
+    @cart_item.resource_class = lookup_resource.class.name
     @cart_item.save
     respond_with @cart_item
   end

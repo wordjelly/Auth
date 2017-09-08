@@ -1,6 +1,6 @@
-#require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
+require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
 class OtpJob < ActiveJob::Base
-  #include Auth::TwoFactorOtp
+  include Auth::TwoFactorOtp
   include Auth::JobExceptionHandler
 
   queue_as :default
@@ -44,9 +44,10 @@ class OtpJob < ActiveJob::Base
 			resource.verify(params[:otp])
     elsif job_type == "send_transactional_sms"
       notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
-      session_id = resource.send_transactional_sms(notification.format_for_sms(resource))
-      puts "the session id : #{session_id}"
-      ## need to figure out some way to poll for these 
+      ## calling the block 
+      notification.send_sms(resource) do 
+        Auth::TwoFactorOtp.send_transactional_sms(notification.format_for_sms(resource))
+      end
 		end
 	end
 

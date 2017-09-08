@@ -68,14 +68,11 @@ module Auth::Concerns::NotificationConcern
 		## this can later be used when sending the notification, in the email/sms etc.
 		field :objects, type: Hash, default: {}
 
+		
+		##################### RETRY COUNTS ######################
 
-		################# WEBHOOK RECEIPT FIELDS ###############
-
-		## JSON encoded webhook email response.
-		field :email_webhook_response, type: String
-
-		## JSON encoded webhook sms response.
-		field :sms_webhook_response, type: String
+		field :sms_send_count, type: Integer, default: 0
+		field :email_send_count, type: Integer, default: 0
 
 	end
 
@@ -104,6 +101,12 @@ module Auth::Concerns::NotificationConcern
 
 	def format_for_web(resource)
 
+	end
+
+	################ default max retry count ################### 
+
+	def max_retry_count
+		2
 	end
 
 	######################### SEND METHODS ####################
@@ -146,16 +149,34 @@ module Auth::Concerns::NotificationConcern
 		recipients = send_to
 		recipients[:resources].map{|r|
 			r.send_email(self) if send_by_email?(r)
-			r.send_notification_sms(self) if send_by_sms?(r)
+			send_sms_background(r) if send_by_sms?(r)
 			r.send_mobile_notification(self) if send_by_mobile?(r)
 			r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
-		##notification should be added to a redis list where a daemon will check it for receipt acks.
-		##if notification send_by_desktop for eg is true, then it will be checked for a receipt for the same.
-		##if the receipt is not found, then it will be ignored, and readded to the end of the list, but there will be a max tries.
-		##if the receipt is found and it is valid and it is so for all the notification types, then the item is popped.
-		##if the maxtries are exceeded, then an error is logged.
-		##this is the sample behaviour.
+	end
+
+	## defaults to just sending the sms direclty.
+	## override using a background job to actually call the send_sms method.
+	def send_sms_background(resource)
+		send_sms(resource)
+	end
+
+	## creates a notification response object using the 
+	def send_sms(resource)
+		if self.sms_send_count < max_retry_count
+			self.sms_send_count+=1
+			create_notification_response(yield,"sms")
+			self.save
+		end
+	end
+
+	## @response[String] : a response received after sending a notification.
+	## webhook identifier is called before_create by a callback. 
+	def create_notification_response(response,type)
+		notification_response = Auth.configuration.notification_response_class.constantize.new(notification_type: type, parent_notification_id: self.id.to_s)
+		notification_response.add_response(response)
+		notification_response.set_webhook_identifier
+		notification_response.save
 	end
 
 	######################## UTILITY METHODS ##################

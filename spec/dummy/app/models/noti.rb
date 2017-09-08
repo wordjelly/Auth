@@ -17,4 +17,10 @@ class Noti
 		response
 	end
 
+	def send_sms_background(resource)
+		OtpJob.perform_later([resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})])
+	end
+
+	
+
 end

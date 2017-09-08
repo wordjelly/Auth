@@ -5,8 +5,19 @@ module Auth::Concerns::OwnerConcern
 	included do 
 
 		field :resource_id, type: String
+		field :resource_class, type: String
+		
+		validates_presence_of :resource_class, if: Proc.new{|c| !c.resource_id.nil?}
+
 		validate :resource_id_not_changed
 
+
+
+	end
+
+
+	def get_resource
+		self.resource_class.capitalize.constantize.find(self.resource_id)
 	end
 
 	private

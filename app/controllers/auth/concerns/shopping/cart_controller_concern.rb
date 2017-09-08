@@ -44,6 +44,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
     not_found("this cart already exists") unless @cart.new_record?
     @cart = @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
     @cart.resource_id = lookup_resource.id.to_s
+    @cart.resource_class = lookup_resource.class.name
     add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
     respond_with @cart

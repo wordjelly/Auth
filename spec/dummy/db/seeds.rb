@@ -11,6 +11,7 @@ json_tests["data"].each do |test_as_array|
         t.price = Faker::Commerce.price
         t.accept_order_at_percentage_of_price = (r.rand(0..100)/100).to_f
         t.public = true
+        ## using this to skip it having to save a cart item without the resource_class added.
         t.save
         puts "saved cart item: #{counter}"
         counter+=1

@@ -85,15 +85,17 @@ THINGS TO BE DONE:
 10. payment acknowledgement in case of any payment 
 11. on removing a test from the cart, refund should get triggered, only if it is past the cancellation point.
 12. specs
-
-8. create admin ui fields for adding user
-9. cron api -> reminders for tests.
-10. picture + video upload.
---- all the user sign up methodologies by admin, and also through doctor, and all that shit, as well as sending test reports to doctor.
-- by september end this much has to be done.
-
-9. geo location put and query  -> full functionality for nearest rider and where is rider
-10. send test reports to doctor, 
+13. what happens to cart items after they are added to a cart? should they still be seen , no, -> that query has to be modified.
+14. deep linking + test android
+15. email and mobile webhooks and notification retry
+16. verify payment test.
+17. endpoint to return custom jwt token for firebase sign in
+18. image/video upload using firebase cloud storage.
+19. create a pathofast app implementing the auth engine
+20. geo location api
+21. custom user and test creation -> admin ui, and shopping cart for admin
+22. write test suite for shopping module
+23. after this there will all the stuff to create -> user , collection agent interaction, test updates.
 
 
 -->
