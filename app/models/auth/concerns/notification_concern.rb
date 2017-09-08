@@ -36,12 +36,18 @@ module Auth::Concerns::NotificationConcern
 
 
 		## to resource_ids
-		## array of resource_ids to which this notification is being sent.
-		field :resource_ids, type: Array
+		## hash of resource_ids to which this notification is being sent.
+		## key -> class_name 
+		## value -> array of resource ids.
+		## JSON encoded string.
+		field :resource_ids, type: String, default: JSON.generate({})
 
 
 		## a hash with query conditions determining to which resources this notification should be sent.
-		field :resources_by_query, type: Hash
+		## key -> class name
+		## value -> query hash
+		## JSON encoded string.
+		field :resources_by_query, type: String, default: JSON.generate({})
 
 
 		## reply_to_email
@@ -62,7 +68,19 @@ module Auth::Concerns::NotificationConcern
 		## this can later be used when sending the notification, in the email/sms etc.
 		field :objects, type: Hash, default: {}
 
+
+		################# WEBHOOK RECEIPT FIELDS ###############
+
+		## JSON encoded webhook email response.
+		field :email_webhook_response, type: String
+
+		## JSON encoded webhook sms response.
+		field :sms_webhook_response, type: String
+
 	end
+
+
+	
 
 	######################### FORMAT METHODS ####################
 
@@ -70,6 +88,7 @@ module Auth::Concerns::NotificationConcern
 	def email_partial
 		"auth/notifier/email.html.erb"
 	end
+
 
 	def format_for_sms(resource)
 
@@ -123,13 +142,13 @@ module Auth::Concerns::NotificationConcern
 	## the user must implement a method called send_transactional_sms
 	## this is defined in the sms_otp_concern.
 	## remember to include this concern in the user, if using mobile numbers, and notification concern.
-	def send
+	def send_notification
 		recipients = send_to
 		recipients[:resources].map{|r|
-			r.send_email(self) if send_by_email?(resource)
-			r.send_notification_sms(self) if send_by_sms?(resource)
-			r.send_mobile_notification(self) if send_by_mobile?(resource)
-			r.send_desktop_notification(self) if send_by_desktop?(resource)
+			r.send_email(self) if send_by_email?(r)
+			r.send_notification_sms(self) if send_by_sms?(r)
+			r.send_mobile_notification(self) if send_by_mobile?(r)
+			r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
 		##notification should be added to a redis list where a daemon will check it for receipt acks.
 		##if notification send_by_desktop for eg is true, then it will be checked for a receipt for the same.
@@ -144,8 +163,15 @@ module Auth::Concerns::NotificationConcern
 	## @return [Array] of resource objects.
 	def get_resources
 		resources = []
-		resources << resource_ids.map{|c| resource_class_constantized.find(c)} if resource_ids
-		resources << resource_class_constantized.where(resources_by_query) if resources_by_query
+
+		JSON.parse(resource_ids).each do |class_name,ids|
+			resources << ids.map{|c|
+				class_name.capitalize.constantize.find(c)
+			}
+		end
+		JSON.parse(resources_by_query).each do |class_name,query|
+			resources << class_name.capitalize.constantize.where(query)
+		end
 		resources.flatten
 	end
 
