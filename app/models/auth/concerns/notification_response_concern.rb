@@ -24,8 +24,6 @@ module Auth::Concerns::NotificationResponseConcern
 
 	## the idea here is the process the response by means of a block.
 	def add_response(json_response)
-		puts "came to add response:"
-		puts json_response
 		self.responses << json_response
 		yield if block_given?
 	end
