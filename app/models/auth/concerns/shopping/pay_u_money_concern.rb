@@ -30,8 +30,8 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 			if document.is_gateway?
 				document.gateway_payment_initiated = true 
 				document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
-				#document.txnid = document.id.to_s
-				document.txnid = "a#{Random.new.rand(1..50)}"
+				document.txnid = document.id.to_s
+				#document.txnid = "a#{Random.new.rand(1..50)}"
 				document.calculate_hash 
 			end
 		end
@@ -55,14 +55,7 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		self.hast = service.generate_checksum
 	end
 
-	def test_verify(txnid)
-		options = {:var1 => txnid, :command => 'verify_payment'}
-		webservice = PayuIndia::WebService.new(payment_gateway_key,payment_gateway_salt,options)
-			sha_hash = webservice.generate_checksum
-		resp = Typhoeus.post(PayuIndia.webservice_url, body: 
-				{ key: payment_gateway_key, command: '	verify_payment', hash: sha_hash})
-		puts resp.body.to_s
-	end
+	
 
 	## Interpretation: 
 	## check validation errors, if none, then there should be a payment status.
