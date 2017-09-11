@@ -3,5 +3,4 @@ module Auth::Notify
 		notification.send_notification
 	end
 
-	
 end

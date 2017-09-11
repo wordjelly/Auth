@@ -72,7 +72,7 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 			webservice = PayuIndia::WebService.new(payment_gateway_key,payment_gateway_salt,options)
 			sha_hash = webservice.generate_checksum
 			if resp = Typhoeus.post(PayuIndia.webservice_url, body: 
-				{ key: payment_gateway_key, command: '	verify_payment', hash: sha_hash})
+				{ key: payment_gateway_key, command: 'verify_payment', hash: sha_hash, var1: self.txnid}, headers: {'Content-Type' => 'application/x-www-form-urlencoded'})
 				Rails.logger.info(resp.body + ":transaction_id:" + self.id.to_s)
 				begin
 					details = JSON.parse(resp.body)
