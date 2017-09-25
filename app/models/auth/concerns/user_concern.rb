@@ -520,25 +520,5 @@ module Auth::Concerns::UserConcern
 		false
 	end
 
-	#################### NOTIFICATION METHODS #############
-
-	## all the notification delivery mechanisms, occur as background jobs.
-	def send_email(notification)
-		## notifier is an email notifier.
-		Auth.configuration.mailer_class.constantize.notification(self,notification).deliver_later if self.email
-	end
-
-	## send sms is moved to the sms_otp_concern.
-	def send_notification_sms(notification)
-		
-	end
-
-	def send_mobile_notification(notification)
-
-	end
-
-	def send_desktop_notification(notification)
-
-	end
-
+	
 end

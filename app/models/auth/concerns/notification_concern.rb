@@ -142,18 +142,19 @@ module Auth::Concerns::NotificationConcern
 		true
 	end
 
-	## the user must implement a method called send_transactional_sms
-	## this is defined in the sms_otp_concern.
-	## remember to include this concern in the user, if using mobile numbers, and notification concern.
+	
 	def send_notification
 		recipients = send_to
 		recipients[:resources].map{|r|
-			r.send_email(self) if send_by_email?(r)
+			send_email_background(r) if send_by_email?(r)
 			send_sms_background(r) if send_by_sms?(r)
 			r.send_mobile_notification(self) if send_by_mobile?(r)
 			r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
 	end
+
+	################### SEND SMS NOTIFICATION ####################
+
 
 	## defaults to just sending the sms direclty.
 	## override using a background job to actually call the send_sms method.
@@ -161,7 +162,7 @@ module Auth::Concerns::NotificationConcern
 		send_sms(resource)
 	end
 
-	## creates a notification response object using the 
+	## creates a notification response object using the yield block from calling this method.
 	def send_sms(resource)
 		if self.sms_send_count < max_retry_count
 			self.sms_send_count+=1
@@ -169,6 +170,25 @@ module Auth::Concerns::NotificationConcern
 			self.save
 		end
 	end
+
+	################## SEND EMAIL NOTIFICATION  ##################
+
+	## defaults to sending the email directly.
+	## override to send email in a background job.
+	def send_email_background(resource)
+		send_email(resource)
+	end
+
+	# Auth.configuration.mailer_class.constantize.notification(resource,notification).deliver_later if resource.email
+	
+	def send_email(resource)
+		if self.email_send_count < max_retry_count
+			self.email_send_count+=1
+			create_notification_response(yield,"email")
+			self.save
+		end
+	end
+	################## NOTIFICATION RESPONSE CREATE ##############
 
 	## @response[String] : a response received after sending a notification.
 	## webhook identifier is called before_create by a callback. 

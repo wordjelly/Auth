@@ -23,6 +23,7 @@ module Auth::Concerns::NotificationResponseConcern
 	end
 
 	## the idea here is the process the response by means of a block.
+	## json response should be a string representation of a valid json object.
 	def add_response(json_response)
 		self.responses << json_response
 		yield if block_given?
@@ -37,7 +38,7 @@ module Auth::Concerns::NotificationResponseConcern
 	
 	## fixes the identifier by which this response can be identified during webhook calls.
 	def set_webhook_identifier
-		puts "calling concern method."
+		
 	end
 
 
