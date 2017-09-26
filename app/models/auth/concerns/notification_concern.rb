@@ -124,7 +124,7 @@ module Auth::Concerns::NotificationConcern
 	## override in the implementing model.
 	## default is true
 	def send_by_sms?(resource)
-		resource.has_phone && resource.additional_login_param_confirmed?
+		true
 	end
 
 	## if the notification should be sent by mobile or not.
@@ -147,9 +147,9 @@ module Auth::Concerns::NotificationConcern
 		recipients = send_to
 		recipients[:resources].map{|r|
 			send_email_background(r) if send_by_email?(r)
-			send_sms_background(r) if send_by_sms?(r)
-			r.send_mobile_notification(self) if send_by_mobile?(r)
-			r.send_desktop_notification(self) if send_by_desktop?(r)
+			#send_sms_background(r) if send_by_sms?(r)
+			#r.send_mobile_notification(self) if send_by_mobile?(r)
+			#r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
 	end
 

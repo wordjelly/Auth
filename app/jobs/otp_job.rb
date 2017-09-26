@@ -10,14 +10,6 @@ class OtpJob < ActiveJob::Base
   rescue_from(StandardError) do |exception|
   	puts exception.message
    	puts exception.backtrace.join("\n")
-   	##if a resource id is defined in the arguments, then we log the error to that resources otp errors hash.
-	#if arguments[1].nil? || arguments[1]["_id"].nil? || arguments[1]["_id"]["$oid"].nil?
-	#	Auth::TwoFactorOtp.log_error_to_redis(arguments[1]["_id"]["$oid"],exception.to_s)
-	##otherwise we log the error using the job_exception_handler.
-	#else
-	#	Auth::JobExceptionHandler.log_exception(exception)
-	#end
-  	
   end
  
   ## expected array of arguments is: 
@@ -26,7 +18,7 @@ class OtpJob < ActiveJob::Base
   ## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
   ## 3 => hash of additional arguments if any
   def perform(args)
-  	
+  	puts "came to perform in sidekiq job."
   	resource_class = args[0]
   	resource_id = args[1]
   	job_type = args[2]
@@ -48,6 +40,15 @@ class OtpJob < ActiveJob::Base
       notification.send_sms(resource) do 
         Auth::TwoFactorOtp.send_transactional_sms(notification.format_for_sms(resource))
       end
+    elsif job_type == "send_email"
+      notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
+      email = Auth.configuration.mailer_class.constantize.notification(resource,self)
+      email.message.mailgun_variables = {}
+      email.message.mailgun_variables["webhook_identifier"] = BSON::ObjectId.new.to_s
+      notification.send_email(resource) do 
+        JSON.generate(email.message.mailgun_variables)      
+      end
+      email.deliver_now
 		end
 	end
 

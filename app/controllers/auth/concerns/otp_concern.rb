@@ -140,19 +140,19 @@ module Auth::Concerns::OtpConcern
 	  	res_verified = false
 	  	##first check the errors
 	  	
-	  	if @resource_id && resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
+	  	if @resource_id && @resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
 	  		
-	  		if otp_error = resource.check_otp_errors
+	  		if otp_error = @resource.check_otp_errors
 	  			@status = 422
-		  		resource.errors.add(:additional_login_param,otp_error)
+		  		@resource.errors.add(:additional_login_param,otp_error)
 	  		else
 	  			
-			  	if resource.additional_login_param_confirmed? 
+			  	if @resource.additional_login_param_confirmed? 
 				  	if @intent == "reset_password"
 				  		puts "came to intent with reset password."
 				  		##protected method so had to do this.
-				  		if resource.confirmed? && !resource.	pending_reconfirmation?
-				  			resource.class.send_reset_password_instructions(resource.attributes)
+				  		if @resource.confirmed? && !@resource.	pending_reconfirmation?
+				  			@resource.class.send_reset_password_instructions(@resource.attributes)
 				  			puts "should have sent the email now."
 				  			##if successfull_sent ->
 				  			##else
@@ -161,8 +161,8 @@ module Auth::Concerns::OtpConcern
 				  			##we want to send the reset password instructions, but using the email.
 				  		else
 				  			puts "should have encountered and error."
-				  			resource.errors.add(:additional_login_param,"you do not have a confirmed email account set for this account, you cannot recover the password.")
-				  			puts resource.errors.full_messages.to_s
+				  			@resource.errors.add(:additional_login_param,"you do not have a confirmed email account set for this account, you cannot recover the password.")
+				  			puts @resource.errors.full_messages.to_s
 				  			@status = 400
 				  		end
 				  		#raw_token = resource.send(:set_reset_password_token)
@@ -171,9 +171,9 @@ module Auth::Concerns::OtpConcern
 				  		##here normally would be resource.unlock.
 				  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
 				  		#puts "came to unlocks."
-				  		raw, enc = Devise.token_generator.generate(resource.class, :unlock_token)
-	        			resource.unlock_token = enc
-	        			resource.save(validate: false)
+				  		raw, enc = Devise.token_generator.generate(@resource.class, :unlock_token)
+	        			@resource.unlock_token = enc
+	        			@resource.save(validate: false)
 	        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
 				  	end
 				  	##make the intent token nil, it can be used only thus once.
@@ -181,20 +181,17 @@ module Auth::Concerns::OtpConcern
 			  	end
 			end
 		else
-			resource = @resource_class.new
+			@resource = @resource_class.new
 			@status = 422
-			resource.errors.add(:additional_login_param,"Not Found")
+			@resource.errors.add(:additional_login_param,"Not Found")
 		end
 
-		##we no longer return the auth_token and es from the short_poll_endpoint.
-		##the following code was disabled.
-		#resource.set_client_authentication(session[:client]) if resource.set_client_authentication?(action_name,controller_name,session[:client])
-		#puts "returning verified as: #{verified}"
-
 	  	respond_to do |format|
-	  	  format.json {render json: {:follow_url => intent_url, :errors => resource.errors.full_messages, :resource => resource, :verified => (resource.additional_login_param_confirmed? && resource.errors.empty?)}, status: @status}
+	  	  format.json {render json: {:follow_url => intent_url, :errors => @resource.errors.full_messages, :resource => @resource, :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
 	  	end
  	end
+
+
 
 	def permitted_params
 	  	if action_name == "resend_sms_otp"

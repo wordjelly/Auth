@@ -24,6 +24,8 @@ require "kaminari/mongoid"
 require "kaminari/actionview"
 require "mailgun-ruby"
 require "googl"
+require "sidekiq"
+require "sidekiq/api"
 
 module Auth
 end

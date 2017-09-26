@@ -1,8 +1,8 @@
 class Auth::TwoFactorController <  ApplicationController
  	skip_before_filter :verify_authenticity_token
- 	def transactional_sms_webhook_endpoint
+ 	def sms_webhook
  		if notification_response = Auth.configuration.notification_response_class.constantize.where(:webhook_identifier => permitted_params[:SessionId])
- 			
+			
  			notification_response = notification_response.first
 
  			notification_response.add_response(permitted_params)

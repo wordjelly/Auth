@@ -18,24 +18,30 @@ class Noti
 	end
 
 	def send_sms_background(resource)
-		OtpJob.perform_later([resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})])
+		puts "came to send sms background."
+		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
+		Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+			OtpJob.perform_later(job_arguments)
+		end
 	end
 
 
 	def send_email_background(resource)
-		## returns the mailgun variables hash as the notification response, and then sends the message.
-		## there is no way to know if the deliver_later method fails, for example if the sidekiq is down or something like that.
-		## we can only wait for the webhook to trigger.
-		email = Auth.configuration.mailer_class.constantize.notification(resource,self)
-		send_email(resource) do 
-			email_message = email.message
-			email_message.mailgun_variables = {}
-			email_message.mailgun_variables["webhook_identifier"] = BSON::ObjectId.new.to_s
-			## returns the mailgun variables hash as a json string to be added into the notification response. 
-			JSON.generate(email_message.mailgun_variables)
+		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_email",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
+		Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+			OtpJob.perform_later(job_arguments)
 		end
-		email.deliver_later
 	end
 	
+
+	########################### TEST METHODS ####################
+	def self.dummy
+		n = Noti.new
+		resource_ids = {}
+		resource_ids[User.name] = ["59a5405c421aa90f732c9059"]
+		n.resource_ids = JSON.generate(resource_ids)
+		n.save
+		n
+	end
 
 end

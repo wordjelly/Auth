@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   
   get 'get_activities' , :action => "get_activities", :controller => "activity"
 
+  get 'send_notification', :action => "send_notification", :controller => "home", :as => "send_notification"
+
+
 
   root "home#index"
   
@@ -16,7 +19,9 @@ Rails.application.routes.draw do
   ##PAYUMONEY CALLBACK ROUTE
   post 'shopping/payments/:id', to: 'shopping/payments#update'  
 
-  post 'transactional_sms_webhook_endpoint', to: 'auth/two_factor#transactional_sms_webhook_endpoint'
+  post 'sms_webhook', to: 'auth/two_factor#sms_webhook'
+
+  post 'email_webhook', to: 'auth/mailgun#email_webhook'
 
   ##app-specific routes 
   namespace :api do 
