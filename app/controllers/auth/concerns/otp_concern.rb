@@ -91,8 +91,6 @@ module Auth::Concerns::OtpConcern
 
 
   	##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
-  	##so what happens after resend?
-  	##this is similar to calling new on the resource.
   	def resend_sms_otp
   		resource = @resource_class.new
   		respond_to do |format|

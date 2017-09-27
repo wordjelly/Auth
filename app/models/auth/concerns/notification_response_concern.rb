@@ -37,9 +37,35 @@ module Auth::Concerns::NotificationResponseConcern
 
 	
 	## fixes the identifier by which this response can be identified during webhook calls.
-	def set_webhook_identifier
+	## @param response[String] : the json string that contains the response that was obtained by sending the notification.
+	def set_webhook_identifier(response)
 		
 	end
 
 
+	module ClassMethods
+
+		## @param webhook_identifier[String] : an identifier by which to search for a notification response object
+		## @param params[String] : a JSON string of whatever was received from the webhook request.
+		## &block, optional block.
+		## return the notification_response object, after adding the response to it and saving it, if it was found
+		## yields the provided block after calling save.
+		## check the notification_response to see if it was successfully saved.
+		## return nil otherwise, and logs a rails error.
+		def find_and_update_notification_response(webhook_identifier,params,&block)
+			puts "webhook identifier is: #{webhook_identifier}"
+			if notification_response = Auth.configuration.notification_response_class.constantize.where(:webhook_identifier => webhook_identifier)
+		 		notification_response = notification_response.first
+		 		notification_response.add_response(params)
+		 		notification_response.save
+		 		yield(notification_response) if block_given?
+		 		notification_response
+		 	else
+		 		Rails.logger.error("webhook identifier not found: #{webhook_identifier}")
+		 	end
+		end
+
+	end
+
 end
+

@@ -2,7 +2,7 @@ class User
   include Mongoid::Document
   include Auth::Concerns::UserConcern
   include Auth::Concerns::SmsOtpConcern
-  include Auth::TwoFactorOtp
+  
 
   field :name, type: String
 
@@ -44,8 +44,9 @@ class User
   end
 
   def check_otp_errors
-      ##so suppose it returns errors then what?
-      check_errors
+      ## should make a call to the two factor otp check_errors class method, passing in self.
+      Auth::TwoFactorOtp.resource = self
+      Auth::TwoFactorOtp.check_errors
   end
 
 

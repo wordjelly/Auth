@@ -1,6 +1,7 @@
 require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
 class OtpJob < ActiveJob::Base
   include Auth::TwoFactorOtp
+  include Auth::Mailgun
   include Auth::JobExceptionHandler
 
   queue_as :default
@@ -24,33 +25,68 @@ class OtpJob < ActiveJob::Base
   	job_type = args[2]
     params = (args.size == 4) ? JSON.parse(args[3]).deep_symbolize_keys : nil 
     
-	if resource_class && Auth.configuration.auth_resources[resource_class]
-		resource_class = resource_class.constantize
-		resource = resource_class.find(resource_id)
-		
-    ## the resource methods mentioned here are added throgh the TwoFactorOtp module.
 
-		if job_type == "send_sms_otp"
-			resource.auth_gen
-		elsif job_type == "verify_sms_otp"
-			resource.verify(params[:otp])
-    elsif job_type == "send_transactional_sms"
-      notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
-      ## calling the block 
-      notification.send_sms(resource) do 
-        Auth::TwoFactorOtp.send_transactional_sms(notification.format_for_sms(resource))
+    ############### WEBHOOK JOBS ##########################
+
+    if job_type == "sms_webhook"
+
+      sms_webhook(params)
+
+    elsif job_type == "email_webhook"
+
+      email_webhook(params)
+
+    end
+
+    ############### JOBS THAT NEED A RESOURCE #############
+
+	  if resource_class && Auth.configuration.auth_resources[resource_class]
+		
+      resource_class = resource_class.constantize
+		  
+
+      resource = resource_class.find(resource_id)
+		
+      
+      Auth::TwoFactorOtp.resource = resource
+  		
+
+      if job_type == "send_sms_otp"
+  			
+
+        auth_gen
+  		
+
+      elsif job_type == "verify_sms_otp"
+  		
+
+      	verify(params[:otp])
+      
+
+      elsif job_type == "send_transactional_sms"
+        
+
+        notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
+        notification.send_sms(resource) do 
+          send_transactional_sms(notification.format_for_sms(resource))
+        end
+
+
+      elsif job_type == "send_email"
+      
+        notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
+        email = Auth.configuration.mailer_class.constantize.notification(resource,self)
+        email = add_webhook_identifier_to_email(email)
+      
+        notification.send_email(resource) do 
+          JSON.generate(email.message.mailgun_variables)      
+        end
+      
+        email.deliver_now
+  	
       end
-    elsif job_type == "send_email"
-      notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
-      email = Auth.configuration.mailer_class.constantize.notification(resource,self)
-      email.message.mailgun_variables = {}
-      email.message.mailgun_variables["webhook_identifier"] = BSON::ObjectId.new.to_s
-      notification.send_email(resource) do 
-        JSON.generate(email.message.mailgun_variables)      
-      end
-      email.deliver_now
-		end
-	end
+      
+	  end
 
   end
 end

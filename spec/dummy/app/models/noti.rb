@@ -12,13 +12,12 @@ class Noti
 		response[:template_name] = "test2"
 		response[:var_hash] = {var1: resource.id.to_s, var2: objects[:payment_id]}
 		response[:template_sender_id] = "PATHOF"
-		puts "format for sms is:"
-		puts response.to_s
+		
 		response
 	end
 
 	def send_sms_background(resource)
-		puts "came to send sms background."
+		
 		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
 		Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
 			OtpJob.perform_later(job_arguments)

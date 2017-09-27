@@ -43,7 +43,7 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
     end
 
 
-    context " -- basic otp flow --" do
+    context " -- basic otp flow --", :basic_otp_flow => true do
         before(:all) do 
             $otp_session_id = nil
         end
@@ -73,13 +73,13 @@ RSpec.describe "OTP flow requests", :otp => true, :type => :request do
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns verified true"  do    
+        it " -- short polls for verification status, returns verified true", :fail => true  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            
             get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
-           
+            puts user_json_hash.to_s
             expect(user_json_hash["verified"]).to eq(true)
             expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end

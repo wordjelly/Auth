@@ -147,7 +147,7 @@ module Auth::Concerns::NotificationConcern
 		recipients = send_to
 		recipients[:resources].map{|r|
 			send_email_background(r) if send_by_email?(r)
-			#send_sms_background(r) if send_by_sms?(r)
+			send_sms_background(r) if send_by_sms?(r)
 			#r.send_mobile_notification(self) if send_by_mobile?(r)
 			#r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
@@ -163,6 +163,7 @@ module Auth::Concerns::NotificationConcern
 	end
 
 	## creates a notification response object using the yield block from calling this method.
+	## block passed if any must return a string as the yield.
 	def send_sms(resource)
 		if self.sms_send_count < max_retry_count
 			self.sms_send_count+=1
@@ -195,7 +196,7 @@ module Auth::Concerns::NotificationConcern
 	def create_notification_response(response,type)
 		notification_response = Auth.configuration.notification_response_class.constantize.new(notification_type: type, parent_notification_id: self.id.to_s)
 		notification_response.add_response(response)
-		notification_response.set_webhook_identifier
+		notification_response.set_webhook_identifier(response)
 		notification_response.save
 	end
 

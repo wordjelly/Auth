@@ -1,11 +1,26 @@
 module Auth
 	module TwoFactorOtp
 
+		## the currently being used resource. 
+		mattr_accessor :resource
+
 		TWO_FACTOR_BASE_URL = "http://2factor.in/API/V1/"
 		TWO_FACTOR_TRANSACTIONAL_SMS_URL = "/ADDON_SERVICES/SEND/TSMS"
 		##returns the string value at the errors keys in the redis hash 
-		def check_errors
-			$redis.hget(self.id.to_s + "_two_factor_sms_otp","error")
+		def self.check_errors
+			$redis.hget(resource.id.to_s + "_two_factor_sms_otp","error")
+		end
+
+		def self.set_webhook_identifier(notification_response,last_response)
+
+			
+			last_response = JSON.parse(last_response)
+			
+			if last_response["Status"] && last_response["Status"] == "Success"
+
+				notification_response.webhook_identifier = last_response["Details"]
+			end
+			
 		end
 
 		## to_number : string, indian telephone number, without the preceeding 91
@@ -13,7 +28,7 @@ module Auth
 		## example request should look like this
 		## "https://2factor.in/API/R1/?module=TRANS_SMS&apikey=#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}&to=#{to_number}&from=#{template_sender_id}&templatename=TemplateName&var1=VAR1_VALUE&var2=VAR2_VALUE"
 		## @return[String] session_id
-		def self.send_transactional_sms(args)
+		def send_transactional_sms(args)
 			to_number = args[:to_number]
 			template_name = args[:template_name]
 			var_hash = args[:var_hash]
@@ -59,7 +74,7 @@ module Auth
 					if response_body[:Status] == "Success"
 						puts "--send response status is success"
 						puts "set the redis value to : #{response_body[:Details]}"
-						$redis.hset(self.id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
+						$redis.hset(resource.id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
 					else
 						#puts "--response status is failure"
 						log_error_to_redis(response_body[:Details])
@@ -77,7 +92,7 @@ module Auth
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
 				log_error_to_redis("no api key found for two_factor_sms_otp")
 			else
-				otp_session_id = $redis.hget(self.id.to_s + "_two_factor_sms_otp","otp_session_id")
+				otp_session_id = $redis.hget(resource.id.to_s + "_two_factor_sms_otp","otp_session_id")
 				if otp_session_id.nil?
 					log_error_to_redis("No otp session id found, please click \"resend otp message\" and try again")
 				else
@@ -90,11 +105,11 @@ module Auth
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
 
-							self.otp = otp
+							resource.otp = otp
 
-							self.additional_login_param_status = 2
+							resource.additional_login_param_status = 2
 							
-							self.save
+							resource.save
 							
 							
 							
@@ -111,12 +126,12 @@ module Auth
 
 		def log_error_to_redis(error)
 			#puts "redis error is:#{error}"
-			$redis.hset(self.id.to_s + "_two_factor_sms_otp","error",error)
+			$redis.hset(resource.id.to_s + "_two_factor_sms_otp","error",error)
 		end
 
 		def clear_redis_user_otp_hash
 			#puts "--came to clear redis otp hash."
-			$redis.del(self.id.to_s + "_two_factor_sms_otp")
+			$redis.del(resource.id.to_s + "_two_factor_sms_otp")
 		end
 
 		def send_otp_response
@@ -146,5 +161,36 @@ module Auth
 				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{otp}")
 			end
 		end
+
+		############################ WEBHOOK #####################
+
+		def sms_webhook(params)
+
+			Auth.configuration.notification_response_class.constantize.find_and_update_notification_response(params[:SessionId],JSON.generate(params)) do |notification_response|
+				puts "found the sms notification response and triggered it."
+				if transactional_sms_failed?(params)
+	 				notification = notification_response.get_parent_notification
+	 				resource = notification_response.get_resource
+	 				notification.send_sms_background(resource)
+	 			end
+
+			end
+
+	 	end
+
+
+	 	def transactional_sms_delivered?(params)
+	 		params[:StatusGroupId] && params[:StatusGroupId].to_s == "3"
+	 	end
+
+	 	def transactional_sms_pending?(params)
+	 		params[:StatusGroupId] && params[:StatusGroupId].to_s =~ /0|1/
+	 	end
+
+	 	def transactional_sms_failed?(params)
+	 		!params[:StatusGroupId] || (params[:StatusGroupId] && params[:StatusGroupId].to_s =~ /2|4|5/)
+	 	end
+
+
 	end
 end
