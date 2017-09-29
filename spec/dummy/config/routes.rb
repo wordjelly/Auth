@@ -9,7 +9,8 @@ Rails.application.routes.draw do
 
   get 'send_notification', :action => "send_notification", :controller => "home", :as => "send_notification"
 
-
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
 
   root "home#index"
   

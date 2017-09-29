@@ -26,6 +26,7 @@ require "mailgun-ruby"
 require "googl"
 require "sidekiq"
 require "sidekiq/api"
+require "aws-sdk"
 
 module Auth
 end

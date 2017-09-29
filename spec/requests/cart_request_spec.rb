@@ -26,8 +26,6 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
     	before(:example) do 
 			@created_cart_item_ids = []
-			##create a transaction on each of them.
-			
 			@cart = Shopping::Cart.new
 			@cart.save
 
@@ -154,9 +152,6 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 				##notes to be added to all cart items.
 				@notes = "aies blood test when she was not well"
 
-
-
-
 				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove],parent_notes: @notes},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
 				
@@ -236,7 +231,7 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 				Shopping::CartItem.delete_all
 			end
 
-			it " -- shows the array fo cart items in the transaction " do 
+			it " -- shows the array fo cart items in the cart " do 
 
 				get shopping_cart_path(@cart),{:api_key => @ap_key, :current_app_id => "test_app_id"},@headers
 				jresp = JSON.parse(response.body)

@@ -5,6 +5,10 @@ source 'https://rubygems.org'
  gem 'payuindia', :path => '/home/bhargav/Github/payuindia'
  gem 'mailgun-ruby', :git => 'https://github.com/wordjelly/mailgun-ruby'
  gem 'premailer-rails'
+ gem 'sinatra'
+ gem 'aws-sdk', '~> 2'
+ gem 'shoryuken'
+ gem 'dotenv-rails', :groups => [:development, :test]
 # Declare your gem's dependencies in auth.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.

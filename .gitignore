@@ -8,3 +8,5 @@ spec/dummy/tmp/
 spec/dummy/.sass-cache
 spec/dummy/config/initializers/preinitializer.rb
 spec/dummy/config/environments/*
+spec/dummy/shoryuken.yml
+spec/dummy/.env

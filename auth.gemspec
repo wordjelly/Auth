@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari-mongoid'
   s.add_dependency 'kaminari-actionview'
   s.add_dependency 'googl'
+  s.add_dependency 'shoryuken'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'
