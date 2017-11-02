@@ -32,9 +32,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## payment ack proof.
 		field :payment_ack_proof, type: String
 
-		## validator is called on the payment_ack_proof, in this method.
-		## override as needed.
-		validate :payment_has_ack_proof
+		
 		validates_presence_of :cart_id
 		validates_presence_of :resource_id
 		validates_presence_of :amount
@@ -49,6 +47,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##however even after cart is created , for eg he may choose to pay after order is delivered, cheque, or card.
 		##in that case all this should happen on cart_show.
 		##so after payment is created, give a link to go and see the cart.
+
+		before_save do |document|
+			## if payment_status changed
+			## set cart items accepted.
+		end
 		
 	end
 
@@ -122,22 +125,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 		is_card? || is_cash? || is_cheque?
 	end
 
-	## returns true if this payment needs some kind of written proof / acknoledgement from the receiver of the payment. eg a signed receipt aknowledgin that the payment was received.
-	## override as needed.
-	def needs_proof?
-		##lets assume that we have a cart item, that is a salary.
-		##so the cart item should be able to dictate this aspect.
-		physical_payment?
-	end
-
-	## checked if the payment is acked
-	## just now just a dummy placeholder checks if the ack_proof length is > 5.
-	def payment_has_ack_proof
-		if needs_proof?
-			payment_ack_proof.length > 5
-		end
-	end
-
 	## currently does nothing
 	## overridden in the payment gateway to verify payments that have not be either success or failure.
 	def verify_payment
@@ -145,7 +132,15 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	
+	################# CART ITEM STAGES METHODS #################
 
+	## is called on payment_status_changed
+	## return[Array] : cart_item instances, after setting stage.
+	def set_cart_items_accepted(resource)
+		## first get the cart 
+		## then get its 
+		get_cart_items(resource).map{|cart_item| c.set_accepted(self,resource,false)}
+	end	
 
 
 end

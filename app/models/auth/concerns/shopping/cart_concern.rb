@@ -139,16 +139,4 @@ module Auth::Concerns::Shopping::CartConcern
 	def not_paid_at_all(resource)
 		get_cart_pending_balance(resource) == get_cart_price(resource)
 	end
-
-
-	################# CART ITEM STAGES METHODS #################
-
-	## should be called on cart#show,#create,#update
-	## should be called on payment#success
-	## sets the stage of each cart item.
-	## return[Array] : cart_item instances, after setting stage.
-	def set_cart_items_accepted(resource)
-		get_cart_items(resource).map{|cart_item| c.set_accepted(nil,self,resource)}
-	end	
-
 end
