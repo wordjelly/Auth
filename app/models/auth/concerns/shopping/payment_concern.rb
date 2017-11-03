@@ -12,6 +12,16 @@ module Auth::Concerns::Shopping::PaymentConcern
 		SUCCESS = "Success"
 		PENDING = "You need to complete this payment"
 
+
+		## the params that are passed into the payment controller at create or update.
+		## used in the before_update callback
+		## for the gateway_callback
+		## in that callback we need access
+		## to the full params hash.
+		## so this accessor is set in the controller #update
+		## and #create methods.
+		attr_accessor :payment_params
+
 		##the amount for this payment
 		field :amount, type: Float
 
@@ -38,19 +48,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :amount
 		validates_presence_of :payment_type
 
-		##after the cart receives a payment
-		##it has to be determined now if the order can go through or not.
-		##this whole thing has to happen on the cart object
-		##and also is a feature of the products that make up the cart.
-		##so the cart has to have some kind of order status.
-		##and that will have to be reflected onto the cart_items
-		##however even after cart is created , for eg he may choose to pay after order is delivered, cheque, or card.
-		##in that case all this should happen on cart_show.
-		##so after payment is created, give a link to go and see the cart.
 
+		## set_cart_items accepted callback
 		before_save do |document|
-			## if payment_status changed
-			## set cart items accepted.
+			if document.payment_status_changed?
+				document.update_cart_items_accepted
+			end
+		end
+
+		## payment type callbacks.
+		## only for cash, card and cheque
+		before_create do |document|
+			document.cash_callback(document.payment_params) if document.is_cash?
+    		document.cheque_callback(document.payment_params) if document.is_cheque?
+    		document.card_callback(document.payment_params) if document.is_card?
+		end
+
+		## payment type callback
+		## for gateway done on payment update.
+		before_update do |document|
+			document.gateway_callback(document.payment_params) if document.is_gateway?
 		end
 		
 	end
@@ -133,13 +150,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	
 	################# CART ITEM STAGES METHODS #################
+	def get_cart
+		Auth.configuration.cart_class.constantize.where(:cart_id => cart.id.to_s).first
+	end
+
+
 
 	## is called on payment_status_changed
 	## return[Array] : cart_item instances, after setting stage.
-	def set_cart_items_accepted(resource)
-		## first get the cart 
-		## then get its 
-		get_cart_items(resource).map{|cart_item| c.set_accepted(self,resource,false)}
+	def update_cart_items_accepted
+		resource = get_resource
+		get_cart.get_cart_items(get_resource).map{|cart_item| c.set_accepted(self,get_resource,false)}
 	end	
 
 

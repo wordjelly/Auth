@@ -21,17 +21,44 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
         
     end
 
-    context " -- gateway payment -- " do 
 
-        context " -- simulate callback -- " do 
-            
-            before(:example) do 
-                ## create a new payment
-                ## and  
+    context " -- cash, card, cheque payment -- " do 
+
+        before(:example) do 
+            @created_cart_item_ids = []
+            @cart = Shopping::Cart.new
+            @cart.save
+
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.parent_id = @cart.id
+                
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
             end
 
         end
 
+        after(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+        end
+
+        it " -- creates a payment -- " do 
+
+        end
+
+
     end
+
+
+    context " -- gateway payment -- " do 
+
+    end
+
+
+   
+
 
 end

@@ -32,14 +32,10 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def create
     @payment = @payment_class.new(permitted_params[:payment])
+    @payment.payment_params = params
     @payment.resource_id = lookup_resource.id.to_s
     @payment.resource_class = lookup_resource.class.name
-    @payment.cash_callback(permitted_params[:payment]) if @payment.is_cash?
-    @payment.cheque_callback(permitted_params[:payment]) if @payment.is_cheque?
-    @payment.card_callback(permitted_params[:payment]) if @payment.is_card?
-    a = @payment.save
-    puts "save errors:"
-    puts @payment.errors.full_messages.to_s
+    @payment.save
     respond_with @payment
   end
 
@@ -49,7 +45,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   def update
     @payment = @payment_class.find(params[:id])
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
-    @payment.gateway_callback(params) if @payment.is_gateway?
+    @payment.payment_params = params
     @payment.save
     respond_with @payment
   end
