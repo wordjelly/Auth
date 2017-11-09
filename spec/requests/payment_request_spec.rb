@@ -6,7 +6,6 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
         ActionController::Base.allow_forgery_protection = false
         User.delete_all
         Auth::Client.delete_all
-        Shopping::CartItem.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
@@ -32,23 +31,42 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
             5.times do 
                 cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
                 cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = "User"
                 cart_item.parent_id = @cart.id
-                
+                cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
-
+           
         end
 
         after(:example) do 
             Shopping::CartItem.delete_all
             Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
         end
 
-        it " -- creates a payment -- " do 
 
+        it " -- creates a payment to the cart-- " do 
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    
+            expect(Shopping::Payment.count).to eq(1)
         end
 
+        it " -- sets all cart items as accepted " do 
+            
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    
+            expect(Shopping::Payment.count).to eq(1)
+            
+            @created_cart_item_ids.each do |id|
+                cart_item = Shopping::CartItem.find(id)
+                expect(cart_item.accepted).to be_truthy
+            end
+
+
+        end
 
     end
 

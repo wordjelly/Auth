@@ -42,6 +42,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## payment ack proof.
 		field :payment_ack_proof, type: String
 
+
+		attr_accessor :cart
 		
 		validates_presence_of :cart_id
 		validates_presence_of :resource_id
@@ -49,25 +51,25 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :payment_type
 
 
-		## set_cart_items accepted callback
-		before_save do |document|
-			if document.payment_status_changed?
-				document.update_cart_items_accepted
-			end
-		end
-
 		## payment type callbacks.
 		## only for cash, card and cheque
 		before_create do |document|
 			document.cash_callback(document.payment_params) if document.is_cash?
     		document.cheque_callback(document.payment_params) if document.is_cheque?
     		document.card_callback(document.payment_params) if document.is_card?
+			document.update_cart_items_accepted if document.payment_status_changed?
 		end
 
 		## payment type callback
 		## for gateway done on payment update.
 		before_update do |document|
 			document.gateway_callback(document.payment_params) if document.is_gateway?
+			document.update_cart_items_accepted if document.payment_status_changed?
+		end
+
+		before_save do |document|
+			document.set_cart(document.cart_id) if document.cart_id && document.resource_id && document.resource_class
+			
 		end
 		
 	end
@@ -83,13 +85,14 @@ module Auth::Concerns::Shopping::PaymentConcern
 		end		
 	end
 
+	
+
 	##res : 59a5405c421aa90f732c9059
 	##cart : 59a54d7a421aa9173c834728
 	
 	##used in pay_u_money_helper.rb
 	def get_cart_name
-		cart = Auth.configuration.cart_class.constantize.find(cart_id)
-		cart.name || "shopping cart"
+		self.cart.nil? ? "shopping_cart" : (self.cart.name.nil? ? "shopping_cart" : self.cart.name)
 	end
 
 	def is_gateway?
@@ -97,6 +100,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def is_cash?
+		puts "document is cash #{payment_type && payment_type == "cash"}"
 		payment_type && payment_type == "cash"
 	end
 
@@ -109,7 +113,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def cash_callback(params)
+		puts "triggered cash callback "
 		self.payment_status = 1
+		puts "payment status set as: #{self.payment_status}"
 	end
 
 	def cheque_callback(params)
@@ -148,19 +154,36 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	end
 
-	
-	################# CART ITEM STAGES METHODS #################
-	def get_cart
-		Auth.configuration.cart_class.constantize.where(:cart_id => cart.id.to_s).first
+	## finds the cart that this payment refers to
+	## sets it to an attr_accessor called cart
+	## prepares the cart(refer to cart concern for a description of this method)
+	def set_cart(cart_id)	
+		
+		self.cart = Auth.configuration.cart_class.constantize.find(cart_id)
+		
+		self.cart.prepare_cart(get_resource)
+
 	end
 
-
-
 	## is called on payment_status_changed
+	## check whether this payment was already registered on the cart as success or failed.
+	## and then debit/credit.
 	## return[Array] : cart_item instances, after setting stage.
 	def update_cart_items_accepted
-		resource = get_resource
-		get_cart.get_cart_items(get_resource).map{|cart_item| c.set_accepted(self,get_resource,false)}
+
+		if payment_status == 1
+			self.cart.cart_credit+= self.amount
+		elsif payment_status == 0 && payment_status_was == 1
+			self.cart.cart_credit-= self.amount
+		else
+
+		end
+
+		self.cart.get_cart_items(get_resource).map{|cart_item| 
+
+			cart_item.set_accepted(self.cart,get_resource,false)
+
+		}
 	end	
 
 

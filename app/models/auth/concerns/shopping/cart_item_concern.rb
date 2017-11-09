@@ -50,7 +50,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 		### a percentage of the total price , at which to accept the order.
 		## the current item is accepted only if (price*accept_order_at_percentage_of_price) <= available credit
-		field :accept_order_at_percentage_of_price, type: Float
+		field :accept_order_at_percentage_of_price, type: Float, default: 1.00
 
 	end
 
@@ -84,7 +84,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
 	## returns the result of calling #save on the cart_item.
 	def set_accepted(cart,resource,override)
-		self.accepted = cart_has_sufficient_credit_for_item?(cart) 
+		self.accepted = cart_has_sufficient_credit_for_item?(cart,resource) 
 		self.accepted = override if override
 		self.save
 		self
@@ -93,8 +93,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
 	## the #debit function returns the current cart credit.
 	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
-	def cart_has_sufficient_credit_for_item?(cart)
-		cart.debit(self.accept_order_at_percentage_of_price*self.price) >= 0
+	def cart_has_sufficient_credit_for_item?(cart,resource)
+		
+		cart.debit((self.accept_order_at_percentage_of_price*self.price), resource) >= 0
 	end
 
 end

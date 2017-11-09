@@ -41,7 +41,6 @@ module Auth::Concerns::Shopping::CartConcern
 		set_cart_payments(resource)
 		set_cart_paid_amount(resource)
 		set_cart_pending_balance(resource)
-		set_cart_credit(resource)
 	end
 
 	################ ATTR ACCESSOR SETTERS & GETTERS ##############
@@ -81,6 +80,9 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_payments || set_cart_payments(resource)
 	end
 
+
+	
+
 	def set_cart_paid_amount(resource)
 		total_paid = 0
 		payments = get_cart_payments(resource)
@@ -89,6 +91,7 @@ module Auth::Concerns::Shopping::CartConcern
 			total_paid += payment.amount if (payment.payment_success)
 		end
 		self.cart_paid_amount = total_paid
+		self.cart_credit = self.cart_paid_amount
 		self.cart_paid_amount
 	end
 
@@ -107,20 +110,16 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 
-	## returns the credit set, or the the total amount paid by the customer.
-	def set_cart_credit(resource,credit)
-		credit || get_cart_paid_amount(resource)
-	end
-
 	## returns the credit if it exists, or the total amount paid by the customer, by calling set_cart_credit(resource)
 	def get_cart_credit(resource)
-		self.credit || set_cart_credit(resource)
+		self.cart_credit 
 	end
 
 	## debits the cart_item price from the cart credit.
 	## returns the current credit.
 	def debit(amount,resource)
-		set_cart_credit(resource,get_cart_credit(resource) - amount)
+		self.cart_credit-=amount
+		self.cart_credit
 	end
 
 	############# PAYMENT BALANCE CONVENIENCE METHODS #############
