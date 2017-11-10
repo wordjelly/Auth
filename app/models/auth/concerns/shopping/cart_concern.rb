@@ -48,12 +48,12 @@ module Auth::Concerns::Shopping::CartConcern
 	## set the cart items, [Array] of cart items.
 	def find_cart_items(resource)
 		conditions = {:resource_id => resource.id.to_s, :parent_id => self.id.to_s}
-		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions)
+		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'desc')
 		self.cart_items
 	end
 
 	def get_cart_items(resource)
-		self.cart_items || find_cart_items(resource)
+		self.cart_items 
 	end
 
 	## => 
@@ -63,7 +63,7 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	def get_cart_price(resource)
-		self.cart_price || set_cart_price(resource)
+		self.cart_price 
 	end
 
 	
@@ -77,7 +77,7 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	def get_cart_payments(resource)
-		self.cart_payments || set_cart_payments(resource)
+		self.cart_payments 
 	end
 
 
@@ -96,17 +96,16 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	def get_cart_paid_amount(resource)
-		self.cart_paid_amount || set_cart_paid_amount(balance)
+		self.cart_paid_amount 
 	end
 
 	## how much money the customer still owes us.
 	def set_cart_pending_balance(resource)
 		self.cart_pending_balance = get_cart_price(resource) - get_cart_paid_amount(resource)
-		self.cart_pending_balance
 	end
 
 	def get_cart_pending_balance(resource)
-		self.cart_pending_balance || set_cart_pending_balance(resource)
+		self.cart_pending_balance 
 	end
 
 

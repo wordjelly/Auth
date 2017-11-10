@@ -49,28 +49,16 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :resource_id
 		validates_presence_of :amount
 		validates_presence_of :payment_type
+		validates_presence_of :resource_class
 
-
-		## payment type callbacks.
-		## only for cash, card and cheque
-		before_create do |document|
-			document.cash_callback(document.payment_params) if document.is_cash?
-    		document.cheque_callback(document.payment_params) if document.is_cheque?
-    		document.card_callback(document.payment_params) if document.is_card?
-			document.update_cart_items_accepted if document.payment_status_changed?
-		end
-
-		## payment type callback
-		## for gateway done on payment update.
-		before_update do |document|
-			document.gateway_callback(document.payment_params) if document.is_gateway?
-			document.update_cart_items_accepted if document.payment_status_changed?
-		end
 
 		before_save do |document|
-			document.set_cart(document.cart_id) if document.cart_id && document.resource_id && document.resource_class
-			
+			document.set_cart(document.cart_id) 
+			document.payment_callback(document.payment_type,document.payment_params) do 
+					document.update_cart_items_accepted if document.payment_status_changed?
+			end
 		end
+
 		
 	end
 
@@ -100,7 +88,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def is_cash?
-		puts "document is cash #{payment_type && payment_type == "cash"}"
 		payment_type && payment_type == "cash"
 	end
 
@@ -112,18 +99,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 		payment_type && payment_type == "cheque"
 	end
 
-	def cash_callback(params)
-		puts "triggered cash callback "
-		self.payment_status = 1
-		puts "payment status set as: #{self.payment_status}"
+	def payment_callback(type,params,&block)
+		self.send("#{type}_callback",params,&block) if self.respond_to? "#{type}_callback"
 	end
 
-	def cheque_callback(params)
+	def cash_callback(params,&block)
+		return unless self.new_record?
 		self.payment_status = 1
+		yield if block_given?
 	end
 
-	def card_callback(params)
+	def cheque_callback(params,&block)
+		return unless self.new_record?
 		self.payment_status = 1
+		yield if block_given?
+	end
+
+	def card_callback(params,&block)
+		return unless self.new_record?
+		self.payment_status = 1
+		yield if block_given?
 	end
 
 	def payment_failed
@@ -140,8 +135,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	##override this method depending upon the gateway that you use.
 	##
-	def gateway_callback(params)
-
+	def gateway_callback(params,&block)
+		return if self.new_record?
+		yield if block_given?
 	end
 	
 	def physical_payment?
@@ -188,3 +184,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 
 end
+
+## payment created -> success -> update as success.
+## payment updated -> success -> do so.

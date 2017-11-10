@@ -127,14 +127,12 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 
 
 	 ##this method is overriden here from the payment_concern.
-	 def gateway_callback(pr)
-	 	puts "came to gateway callback with permitted params payment as"
-	 	puts JSON.pretty_generate(pr)
-	 	
+	 def gateway_callback(pr,&block)
+	 	return if self.new_record?
 	  	notification = PayuIndia::Notification.new("", options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_info[:salt], :params => pr})
 	  	self.payment_status = 0
 	  	self.payment_status = 1 if(notification.acknowledge && notification.complete?)
-	  	
+	  	yield if block_given?
 	 end
 
 end
