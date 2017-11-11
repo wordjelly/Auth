@@ -31,7 +31,7 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
             5.times do 
                 cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
                 cart_item.resource_id = @u.id.to_s
-                cart_item.resource_class = "User"
+                cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
                 cart_item.save

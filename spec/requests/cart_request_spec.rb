@@ -31,10 +31,12 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
 			5.times do 
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-				cart_item.resource_id = @u.id.to_s
-				cart_item.parent_id = @cart.id
-				cart_item.save
-				@created_cart_item_ids << cart_item.id.to_s
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
 			end
 
 		end
@@ -62,11 +64,13 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 		context " -- create -- " do 
 			before(:example) do 
 				@created_cart_item_ids = []
+				@cart = Shopping::Cart.new
+				@cart.save
+
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-					cart_item.resource_id = @u.id.to_s
-					cart_item.save
-					@created_cart_item_ids << cart_item.id.to_s
+	                cart_item.save
+	                @created_cart_item_ids << cart_item.id.to_s
 				end
 			end
 
@@ -111,20 +115,23 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
 		end
 
+
 		context " -- update -- " do 
 			before(:example) do 
 				@created_cart_item_ids = []
-				##create a transaction on each of them.
 				
+				## create a cart with some cart items.
 				@cart = Shopping::Cart.new
 				@cart.save
 
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-					cart_item.resource_id = @u.id.to_s
-					cart_item.parent_id = @cart.id
-					cart_item.save
-					@created_cart_item_ids << cart_item.id.to_s
+	                cart_item.resource_id = @u.id.to_s
+	                cart_item.resource_class = @u.class.name
+	                cart_item.parent_id = @cart.id
+	                cart_item.price = 10.00
+	                cart_item.save
+	                @created_cart_item_ids << cart_item.id.to_s
 				end
 
 			end
@@ -143,7 +150,7 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
 				##this is the new cart item to be added
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-				cart_item.resource_id = @u.id.to_s
+				
 				cart_item.save
 
 				##the cart item to be removed
@@ -183,10 +190,12 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-					cart_item.resource_id = @u.id.to_s
-					cart_item.parent_id = @cart.id
-					cart_item.save
-					@created_cart_item_ids << cart_item.id.to_s
+	                cart_item.resource_id = @u.id.to_s
+	                cart_item.resource_class = @u.class.name
+	                cart_item.parent_id = @cart.id
+	                cart_item.price = 10.00
+	                cart_item.save
+	                @created_cart_item_ids << cart_item.id.to_s
 				end
 
 			end
@@ -208,42 +217,7 @@ RSpec.describe "cart request spec",:cart => true, :type => :request do
 
 		end
 
-		context " -- show", should_fail: true  do 
-
-			before(:example) do 
-				@created_cart_item_ids = []
-				##create a transaction on each of them.
-				
-				@cart = Shopping::Cart.new
-				@cart.save
-
-				5.times do 
-					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-					cart_item.resource_id = @u.id.to_s
-					cart_item.parent_id = @cart.id
-					cart_item.save
-					@created_cart_item_ids << cart_item.id.to_s
-				end
-
-			end
-
-			after(:example) do 
-				Shopping::CartItem.delete_all
-			end
-
-			it " -- shows the array fo cart items in the cart " do 
-
-				get shopping_cart_path(@cart),{:api_key => @ap_key, :current_app_id => "test_app_id"},@headers
-				jresp = JSON.parse(response.body)
-				puts jresp.to_s
-				jresp_cart_items = jresp.map{|c| c = Shopping::CartItem.new(c)}
-				jresp_hash = Hash[jresp_cart_items.map{|c| c = c.id.to_s}.zip(jresp_cart_items)]
-				@created_cart_item_ids.each do |c|
-					expect(jresp_hash[c]).not_to be_nil
-				end
-			end
-
-		end
+		
 
 	end		
 

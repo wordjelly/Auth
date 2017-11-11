@@ -88,6 +88,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
       if cart_item = @cart_item_class.find(id)
         cart_item.parent_id = (add_or_remove == 1) ? @cart.id : nil
         cart_item.resource_id = lookup_resource.id.to_s
+        cart_item.resource_class = lookup_resource.class.name
         cart_item if cart_item.save
         cart_item
       else
