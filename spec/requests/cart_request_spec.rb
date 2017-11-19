@@ -78,7 +78,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-			it " -- creates a new cart -- ", issue: true do 
+			it " -- creates a new cart -- ", :cd => true do 
 				
 
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -88,6 +88,13 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				expect(ct.errors).to be_empty
 				cart_items = ct.find_cart_items(@u)
 				expect(cart_items.size).to eq(@created_cart_item_ids.size)
+
+				## now we need to find cart items which would be returned in the index action of the cart_item_controller.
+				@cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
+				puts "cart items size found is:"
+				puts @cart_items.size.to_s
+				expect(@cart_items).to be_empty
+
 			end
 
 			it " -- id is provided, without add_cart_items paramenter, it returns an error. -- ", issue: true do 
@@ -143,7 +150,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			##scenario -> add a few new cart items, but also add name on transaction, and remove some of the older cart items
 
-			it " -- adds name and notes to cart, and adds the new cart items, and removes the required cart items.",issue: true do 
+			it " -- adds name and notes to cart, and adds the new cart items, and removes the required cart items." do 
 
 				##
 
@@ -175,15 +182,47 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				expect(cart_items_map.size).to eq(5)
 			end
 
-
+			
 		end
 
 
-		context " -- destroy -- ", transaction_destroy: true do 
+		context " -- adding and removing cart items from the cart -- " do 
+
+			before(:example) do 
+			
+				Shopping::CartItem.delete_all
+				@created_cart_item_ids = []
+				5.times do 
+					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+		            cart_item.resource_id = @u.id.to_s
+		            cart_item.resource_class = @u.class.name
+		            cart_item.save
+	            	@created_cart_item_ids << cart_item.id.to_s
+	            end			
+
+			end
+
+
+			it " -- on adding items to the cart, they are no longer visible in cart_item#index action -- " do 
+
+
+
+
+			end
+
+			it " -- on removing items from the cart, they are once again visible in cart_item#index action -- " do 
+
+
+			end
+
+
+		end
+
+		context " -- destroy -- " do 
 
 			before(:example) do 
 				@created_cart_item_ids = []
-				##create a transaction on each of them.
+				
 				
 				@cart = Shopping::Cart.new
 				@cart.save
@@ -205,11 +244,11 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			end
 
 
-			it " -- destroys the transaction " do 
+			it " -- destroys the cart, and removes the parent id from all cart items before doing so. " do 
 
 				delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
-				cart_items = Shopping::CartItem.where(:parent_id => @t_id)
+				cart_items = Shopping::CartItem.where(:parent_id => @cart.id.to_s)
 
 				expect(cart_items.size).to eq(0)
 

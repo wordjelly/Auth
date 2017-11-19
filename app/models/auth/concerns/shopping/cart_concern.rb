@@ -32,6 +32,11 @@ module Auth::Concerns::Shopping::CartConcern
 		## this is used for sequentially debiting money from the cart_paid amount.
 		attr_accessor :cart_credit
 
+		## should de link the 
+		before_destroy do |document|
+			## update all the cart items.
+		end
+
 	end
 
 	## sets all the attribute accessors of the cart.
