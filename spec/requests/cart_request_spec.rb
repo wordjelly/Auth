@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "cart request spec",:cart => true, :type => :request do 
+RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :request do 
 
 	before(:all) do 
         ActionController::Base.allow_forgery_protection = false

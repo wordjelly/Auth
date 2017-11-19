@@ -63,17 +63,22 @@ module Auth::Concerns::Shopping::CartItemConcern
 		def find_cart_item(options)
 			conditions = {:_id => options[:cart_item_id]}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
+			puts "conditions become:"
+			puts conditions.to_s
 			all = self.where(conditions)
-			return all.first if all.size > 0
-			return all 
+			return all.first if all.size > 0 
+			return nil
 		end
 
 		##used in cart_item_controller_concern#index
 		## if there is a resource, will return all cart items with that resource id.
 		## if there is no resource, will return all cart items with a nil rsource.
 		def find_cart_items(options)
+			puts "options are: #{options.to_s}"
 			conditions = {:resource_id => nil}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
+			puts "conditions are:"
+			puts conditions.to_s
 			self.where(conditions)
 		end
 

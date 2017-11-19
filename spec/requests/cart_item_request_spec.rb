@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "cart item request spec",:cart_item => true, :type => :request do 
+RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :type => :request do 
 
 	before(:all) do 
         ActionController::Base.allow_forgery_protection = false
@@ -21,38 +21,17 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
         
     end
 
+
+
     context " -- json requests -- " do 
-    ##HERE WE ASSUME THAT THE ABOVE USER IS ONLY INTERACTING WITH THE CART_ITEM_CONTROLLER.
 
-		context " -- security " do 
-
-			context " -- needs api key and app_id " do 
-
-				it " -- fails on create without " do 
-					cart_item = attributes_for(:cart_item)
-					post shopping_cart_items_path,{cart_item: cart_item}.to_json, @headers
-	            	@cart_item_created = assigns(:cart_item)
-	            	expect(response.body).to be_empty
-	            	expect(response.code).to eq("401")
-				end
-
-			end
-
-			context " -- needs auth token and es " do 
-
-				it " -- fails to create " do 
-
-					cart_item = attributes_for(:cart_item)
-					@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
-					post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
-	            	expect(response.code).to eq("401")
-				end
-
-			end
-
-		end
-
+    	before(:each) do 
+    		Shopping::CartItem.delete_all
+    	end	
+	
 		context " -- create " do 
+
+
 
 			it " -- creates cart item with all permitted params,and assigns user id. " do 
 				cart_item = attributes_for(:cart_item)
@@ -71,14 +50,17 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 
 			it " -- only updates discount and quantity " do 
 				
+				
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name.to_s
 				cart_item.save
 				
 	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
 	            
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
+	           
 				updated_cart_item = assigns(:cart_item)
 				expect(response.code).to eq("204")
 				##get the updated 
@@ -109,11 +91,13 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 
 		end
 
+
 		context " -- destroy -- " do 
 
 			it  " -- returns 204 " do 
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name.to_s
 				cart_item.save
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
 				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
@@ -129,6 +113,7 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 					cart_item.resource_id = @u.id.to_s
+					cart_item.resource_class = @u.class.name
 					cart_item.save
 					created_cart_item_ids << cart_item.id.to_s
 				end
@@ -146,6 +131,7 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 				expect(created_cart_item_ids).to be_empty
 			end	
 
+
 			it "returns empty response if no cart items exist for this user" do 
 				Shopping::CartItem.delete_all
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
@@ -154,7 +140,19 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 				expect(returned_objects).to be_empty
 			end
 
+
+			it " -- return unauthorized trying to access index action without a valid user -- " do 
+
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+
+				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+
+				expect(response.code).to eq("401")
+
+			end
+
 		end
+
 
 		context  " -- show ", :test_now => true do 
 
@@ -164,15 +162,21 @@ RSpec.describe "cart item request spec",:cart_item => true, :type => :request do
 	       	 	@u2.save
 	       	 	@u2.client_authentication["test_app_id"] = "test_es_token"
 	        	@u2.save
+
 	        	##so basically we are going to use the client from @u only here as well.
 	        	cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name
 				cart_item.save
 				
 	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
 	            get shopping_cart_item_path({:id => cart_item.id.to_s,api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
 
-	            expect(response.body).to eq("{}")
+	            response_hash = JSON.parse(response.body)
+
+	            
+
+	            expect(response_hash["errors"]).to eq("Not Found")
 
 			end
 

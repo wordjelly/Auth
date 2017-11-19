@@ -11,11 +11,6 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     
   end
 
-  module ClassMethods
-    def token_authentication_conditions
-      {:only => [:create,:update,:destroy]}
-    end
-  end
   
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -58,6 +53,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   end
 
   def show
+    not_found if @cart_item.nil?
     respond_with @cart_item 
   end
 

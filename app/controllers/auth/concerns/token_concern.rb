@@ -10,6 +10,22 @@ module Auth::Concerns::TokenConcern
     ## merges in the entire hash for the current resource_type, from the configuration preinitializer file.
     ## it then merges in any controller level configuration options
     ## for this purpose, the controller should add a class method called 'token_authentication_conditions', which should return a hash of options. Refer to models/auth/shopping/cart_concern.rb and model/auth/shopping/cart_item_concern.rb to see how this has been implemented. Only options supported by simple_token_authentication can be set in the hash. 
+
+    ### Example how to add it in the controller
+
+=begin
+    ### in this case, the token authentication will be done on all actions defined below.
+    ### so it won't be done on "show"
+    module ClassMethods
+      def token_authentication_conditions
+        {:only => [:create,:update,:destroy,:index]}
+      end
+    end
+=end
+
+    ### Example ends
+
+
     if Auth.configuration.enable_token_auth
       
       token_auth_controller_conditions = self.respond_to?(:token_authentication_conditions) ? self.token_authentication_conditions : {}

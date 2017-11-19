@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "payment request spec",:payment => true, :type => :request do 
+RSpec.describe "payment request spec",:payment => true, :shopping => true, :type => :request do 
 
 	before(:all) do 
         ActionController::Base.allow_forgery_protection = false
@@ -48,12 +48,14 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
 
 
         it " -- creates a payment to the cart-- " do 
+            
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
                     
             expect(Shopping::Payment.count).to eq(1)
+        
         end
 
-        it " -- sets all cart items as accepted " do 
+        it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. " do 
             
 
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -65,6 +67,18 @@ RSpec.describe "payment request spec",:payment => true, :type => :request do
                 expect(cart_item.accepted).to be_truthy
             end
 
+
+        end
+
+        it " -- can update the payment status -- " do 
+
+            k = Shopping::Payment.new
+            k.cart_id = @cart.id.to_s
+            k.payment_type = "cash"
+            k.amount = 50.00
+            k.save
+
+            ## should be able to update this payment as 
 
         end
 
