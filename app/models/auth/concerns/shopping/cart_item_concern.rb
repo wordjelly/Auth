@@ -63,8 +63,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		def find_cart_item(options)
 			conditions = {:_id => options[:cart_item_id]}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
-			puts "conditions become:"
-			puts conditions.to_s
 			all = self.where(conditions)
 			return all.first if all.size > 0 
 			return nil
@@ -98,6 +96,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def cart_has_sufficient_credit_for_item?(cart,resource)
 		
 		cart.debit((self.accept_order_at_percentage_of_price*self.price), resource) >= 0
+	end
+
+	## unsets the parent id from this cart item.
+	## @used_in : CartConcern#before_destroy
+	## @return[Boolean] : result of saving the cart item.
+	def unset_cart
+		self.parent_id = nil
+		self.save
 	end
 
 end

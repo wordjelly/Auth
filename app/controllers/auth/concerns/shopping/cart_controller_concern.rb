@@ -72,6 +72,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   ##will respond with nothing, or an array of cart_items that were removed, or whatever errors they have for not remvoing them.
   def destroy    
     not_found("please provide a cart id") if @cart.new_record?
+    @cart.prepare_cart(lookup_resource)
     @cart.destroy
     respond_with @cart
   end

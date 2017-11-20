@@ -78,7 +78,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-			it " -- creates a new cart -- ", :cd => true do 
+			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- ", :cd => true do 
 				
 
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -90,9 +90,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				expect(cart_items.size).to eq(@created_cart_item_ids.size)
 
 				## now we need to find cart items which would be returned in the index action of the cart_item_controller.
+				## these should not be seen.
 				@cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
-				puts "cart items size found is:"
-				puts @cart_items.size.to_s
+				
 				expect(@cart_items).to be_empty
 
 			end

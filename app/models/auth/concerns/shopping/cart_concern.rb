@@ -34,7 +34,12 @@ module Auth::Concerns::Shopping::CartConcern
 
 		## should de link the 
 		before_destroy do |document|
-			## update all the cart items.
+			## update all the cart items, to no longer
+			## have a parent id.
+			save_results = document.cart_items.map{|c_item| c_item = c_item.unset_cart}.compact.uniq
+			false if save_results.size > 1
+			false if save_results[0] == false
+			true
 		end
 
 	end
