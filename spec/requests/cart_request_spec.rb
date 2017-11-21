@@ -186,31 +186,64 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 		end
 
 
-		context " -- adding and removing cart items from the cart -- " do 
+		context " -- adding and removing cart items from the cart -- ", :add_remove => true do 
 
 			before(:example) do 
 			
 				Shopping::CartItem.delete_all
+				Shopping::Cart.delete_all
+
+				## create a cart.
+				@cart = Shopping::Cart.new
+				@cart.resource_id = @u.id.to_s
+				@cart.resource_class = @u.class.name.to_s
+				@cart.save
+
 				@created_cart_item_ids = []
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 		            cart_item.resource_id = @u.id.to_s
 		            cart_item.resource_class = @u.class.name
+		            cart_item.parent_id = @cart.id.to_s
 		            cart_item.save
 	            	@created_cart_item_ids << cart_item.id.to_s
-	            end			
+	            end	
+
+	            ## make a few additional cart items , so that these should be visible initially in the cart_item#index call.
+
+	            @additional_cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+	            @additional_cart_item.resource_id = @u.id.to_s
+	            @additional_cart_item.resource_class = @u.class.name.to_s
+	            @additional_cart_item.save
 
 			end
 
 
-			it " -- on adding items to the cart, they are no longer visible in cart_item#index action -- " do 
+			it " -- additional cart item is visible before adding to cart -- " do 
 
-
-
+				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
+				
+				expect(cart_items.size).to eq(1)
 
 			end
 
-			it " -- on removing items from the cart, they are once again visible in cart_item#index action -- " do 
+			it " -- additional cart item is not visible after adding to cart -- " do 
+
+				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
+				
+				expect(cart_items).to be_empty
+
+			end
+
+			it " -- on removing from cart , it is once again visible -- " do 
+
+				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
+				
+				expect(cart_items.size).to eq(1)
 
 
 			end

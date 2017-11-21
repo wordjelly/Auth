@@ -4,11 +4,16 @@ module Auth::Concerns::OwnerConcern
 	include Auth::Concerns::ChiefModelConcern
 	included do 
 
+		## resource id is not essential for the creation of a cart.
+
+		## but if a resource id is present, then a resource class must be provided.
+
 		field :resource_id, type: String
 		field :resource_class, type: String
 		
 		validates_presence_of :resource_class, if: Proc.new{|c| !c.resource_id.nil?}
 
+		## you cannot change the resource_id or owner of the object once it is set.
 		validate :resource_id_not_changed
 
 
