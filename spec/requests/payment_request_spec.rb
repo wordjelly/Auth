@@ -78,7 +78,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             k.amount = 50.00
             k.save
 
-            ## should be able to update this payment as 
+            
 
         end
 
@@ -94,3 +94,49 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
 end
+
+
+=begin
+
+-so basically it buys down to this->
+
+-1. before_remove - check if status is accepted, if yes, then 
+it cannot be removed, provide a hook to override this method as per the needs.
+
+- here only there is fork - that if removal fails, then provide:
+on_cannot_remove_item_hook
+
+-2. after_remove - create a payment refund to the customer for the amount equalling the removed amount.
+
+-3. provide a method to cancel all the tests in the cart, this is done by calling destroy cart - if call destroy cart, then where will we show the refund?
+- refund should also be shown in the cart.
+
+so you cannot destroy the cart if payments have already been made to it.
+you can only remove items from the cart, i.e all the items.
+and there you can show the refunds.
+
+so before destroy cart - check if payments have been made, and if yes, then don't destroy the cart.
+
+
+-4. basically we have to make a payment to the user.
+    thats the essence.
+    so the payment should have a pay_to
+    it will also have a type, this will be the same as the last payment made by the user.
+    it will have to be done by the business seperately.
+    notification behaviour has to be defined, for eg: 
+    
+    refund can be by cheque only at this stage. 
+    the refund is successfull if the cheque is ready.
+
+    After refund success, a callback has to notify the payee, that his cheque can be picked up,
+
+    at this stage the acknowledgement proof can be picked up, saying that his payment was successfully received.
+    
+
+
+=end
+
+
+
+
+
