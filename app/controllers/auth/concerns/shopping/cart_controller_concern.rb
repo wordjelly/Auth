@@ -29,12 +29,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart_items = @cart.find_cart_items(lookup_resource) 
-    @cart.set_cart_payments(lookup_resource)
-    @cart.set_cart_price(lookup_resource)
-    @cart.set_cart_paid_amount(lookup_resource)
-    @cart.set_cart_pending_balance(lookup_resource)
-
+    @cart.prepare_cart(lookup_resource)
+    @cart_items = @cart.cart_items
     respond_with @cart
   end
 
@@ -83,17 +79,15 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   private
+
   ##returns array of cart items if successfully saved and updated, otherwise nil wherever the save was not successfull or the cart item was not found.
   def add_or_remove(item_ids,add_or_remove)
     item_ids.map {|id|
       if cart_item = @cart_item_class.find(id)
-        cart_item.parent_id = (add_or_remove == 1) ? @cart.id : nil
-        cart_item.resource_id = lookup_resource.id.to_s
-        cart_item.resource_class = lookup_resource.class.name
-        cart_item if cart_item.save
-        cart_item
+        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart,lookup_resource) : cart_item.unset_cart 
+        resp == true ? cart_item : nil
       else
-        nil   
+        nil
       end
     }
   end

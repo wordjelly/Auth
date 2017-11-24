@@ -52,6 +52,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		## the current item is accepted only if (price*accept_order_at_percentage_of_price) <= available credit
 		field :accept_order_at_percentage_of_price, type: Float, default: 1.00
 
+
 	end
 
 
@@ -98,11 +99,46 @@ module Auth::Concerns::Shopping::CartItemConcern
 		cart.debit((self.accept_order_at_percentage_of_price*self.price), resource) >= 0
 	end
 
-	## unsets the parent id from this cart item.
-	## @used_in : CartConcern#before_destroy
+	## called in block form inside unset_cart.
+	## expected to define conditions that will call yield or not.
+	## for eg if this method doesn't call yield , then unset will never be called  
+	## currently skips the yield if the item has already been accepted.
+	def before_unset_cart
+		return true
+	end
+
+	## called if self.parent_id remains nil, after calling unset_cart
+	## called in unset_cart
+	def on_unset_failed
+
+	end
+
+
+
+	def on_unset_success
+
+	end
+
+	## unsets the parent id from this cart item. i.e removes the cart item from the cart.
+	## calls the before_unset as a block => that's where you have to add your code to decide whether to allow the parent_id to be set as nil or not.
+	## @used_in : cart_controller_concern # add_or_remove
 	## @return[Boolean] : result of saving the cart item.
 	def unset_cart
-		self.parent_id = nil
+		if before_unset_cart == true
+			self.parent_id = nil
+			self.save
+		end
+		self.parent_id.nil? ? on_unset_success : on_unset_failed
+	end
+
+
+	## assigns a cart and resource, resource_id to the cart_item.
+	## @returns : true or false depending on whether the cart item was successfully saved or not.
+	## @used_in : cart_controller_concern # add_or_remove
+	def set_cart_and_resource(cart,resource)
+		self.parent_id = cart.id.to_s
+		self.resource_class = resource.class.name
+		self.resource_id = resource.id.to_s
 		self.save
 	end
 

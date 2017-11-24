@@ -33,6 +33,7 @@ module Auth::Concerns::Shopping::CartConcern
 		attr_accessor :cart_credit
 
 		## should de link the 
+=begin
 		before_destroy do |document|
 			## update all the cart items, to no longer
 			## have a parent id.
@@ -41,7 +42,7 @@ module Auth::Concerns::Shopping::CartConcern
 			false if save_results[0] == false
 			true
 		end
-
+=end
 	end
 
 	## sets all the attribute accessors of the cart.
@@ -112,11 +113,13 @@ module Auth::Concerns::Shopping::CartConcern
 	## how much money the customer still owes us.
 	def set_cart_pending_balance(resource)
 		self.cart_pending_balance = get_cart_price(resource) - get_cart_paid_amount(resource)
+
 	end
 
 	def get_cart_pending_balance(resource)
 		self.cart_pending_balance 
 	end
+
 
 
 	## returns the credit if it exists, or the total amount paid by the customer, by calling set_cart_credit(resource)

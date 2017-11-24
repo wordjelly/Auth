@@ -42,6 +42,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## payment ack proof.
 		field :payment_ack_proof, type: String
 
+		
 
 		attr_accessor :cart
 		
@@ -185,5 +186,5 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 end
 
-## payment created -> success -> update as success.
-## payment updated -> success -> do so.
+
+

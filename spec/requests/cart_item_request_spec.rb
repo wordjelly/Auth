@@ -104,6 +104,12 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				expect(response.code).to eq("204")
 				expect(response.body).to be_empty
 			end
+
+
+			it " -- doesn't allow destroy if status is accepted -- " do 
+
+			end
+			
 		end
 
 		context " -- index " do 

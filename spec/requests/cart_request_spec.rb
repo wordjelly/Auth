@@ -239,7 +239,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			it " -- on removing from cart , it is once again visible -- " do 
 
+
 				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
 
 				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
 				
@@ -249,7 +251,44 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			end
 
 
+			it " -- doesn't remove item if before_unset_cart returns false -- " do 
+
+				## first add the item into the cart, after setting accepted to true.
+				@additional_cart_item.parent_id = @cart.id.to_s
+				@additional_cart_item.save
+
+				Shopping::CartItem.class_eval do 
+
+					def before_unset_cart
+						false
+					end
+
+				end
+
+				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers				
+
+				Shopping::CartItem.class_eval do 
+
+					def before_unset_cart
+						true
+					end
+
+				end
+
+				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
+				
+				expect(cart_items.size).to eq(0)
+
+			end
+
+
 		end
+
+
+
+
+
+
 
 		context " -- destroy -- " do 
 
@@ -276,7 +315,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-
+=begin
 			it " -- destroys the cart, and removes the parent id from all cart items before doing so. " do 
 
 				delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -286,6 +325,14 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				expect(cart_items.size).to eq(0)
 
 			end
+=end
+
+			it " -- doesnt allow the cart to be destroyed if cart items have already been accepted -- " do 
+
+
+			end
+
+
 
 		end
 

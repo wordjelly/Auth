@@ -24,6 +24,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     context " -- cash, card, cheque payment -- " do 
 
         before(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
             @created_cart_item_ids = []
             @cart = Shopping::Cart.new
             @cart.save
@@ -82,6 +85,11 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
+        it " -- if payment status is set as false, cart item statuses are also updated -- " do 
+            
+
+        end
+
     end
 
 
@@ -89,7 +97,10 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     end
 
+    context " -- payment cannot be destroyed -- " do 
 
+
+    end
    
 
 
