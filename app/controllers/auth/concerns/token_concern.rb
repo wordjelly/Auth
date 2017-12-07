@@ -74,11 +74,14 @@ module Auth::Concerns::TokenConcern
   ##for example one strategy would be to store the resource to be proxied into the session, and reference that here, if the logged in resource is an admin.
   ##best strategy would be to pick up a :resource_id from the params, and use that everywhere.
   ##provided that the signed in resource is an admin.
+  ## override as needed.
   def lookup_resource
+    current_signed_in_resource
+  end  
+
+
+  def current_signed_in_resource
     @resource
   end
-
-  
- 
 
 end

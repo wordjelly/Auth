@@ -5,8 +5,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   included do
     
 
-    include Auth::Concerns::DeviseConcern
-    include Auth::Concerns::TokenConcern
+   include Auth::Concerns::DeviseConcern
+   include Auth::Concerns::TokenConcern
 
    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index, :new]
    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index, :new]
@@ -57,7 +57,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
 
   def permitted_params
-    params.permit({payment: [:payment_type, :amount, :cart_id,:payment_ack_proof]},:id)
+    params.permit({payment: [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund]},:id)
   end
 
 end

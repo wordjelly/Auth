@@ -84,8 +84,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## will first set the order as accepted, provided that the cart has enough credit. While checking for the credit, will debit the minimum amount necessary to accept this cart item, from the cart credit.
 	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
 	## returns the result of calling #save on the cart_item.
-	def set_accepted(cart,resource,override)
-		self.accepted = cart_has_sufficient_credit_for_item?(cart,resource) 
+	def set_accepted(cart,override)
+		self.accepted = cart_has_sufficient_credit_for_item?(cart) 
 		self.accepted = override if override
 		self.save
 		self
@@ -94,17 +94,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
 	## the #debit function returns the current cart credit.
 	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
-	def cart_has_sufficient_credit_for_item?(cart,resource)
+	def cart_has_sufficient_credit_for_item?(cart)
 		
-		cart.debit((self.accept_order_at_percentage_of_price*self.price), resource) >= 0
+		cart.debit((self.accept_order_at_percentage_of_price*self.price)) >= 0
 	end
 
-	## called in block form inside unset_cart.
-	## expected to define conditions that will call yield or not.
-	## for eg if this method doesn't call yield , then unset will never be called  
-	## currently skips the yield if the item has already been accepted.
+	## will unset the cart if this method returns true.
+	## otherwise will not unset the cart.
+	## override to change the behaviour.
 	def before_unset_cart
-		return true
+		true
 	end
 
 	## called if self.parent_id remains nil, after calling unset_cart
@@ -135,10 +134,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## assigns a cart and resource, resource_id to the cart_item.
 	## @returns : true or false depending on whether the cart item was successfully saved or not.
 	## @used_in : cart_controller_concern # add_or_remove
-	def set_cart_and_resource(cart,resource)
+	def set_cart_and_resource(cart)
 		self.parent_id = cart.id.to_s
-		self.resource_class = resource.class.name
-		self.resource_id = resource.id.to_s
+		self.resource_class = cart.get_resource.class.name
+		self.resource_id = cart.get_resource.id.to_s
 		self.save
 	end
 

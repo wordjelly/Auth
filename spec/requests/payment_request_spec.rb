@@ -101,7 +101,61 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
     end
-   
+    
+
+    context " -- refund -- ", :refund => true do 
+
+        it " -- checks that the cart pending balance is negative, before creating a refund -- " do 
+
+            ## create a cart
+            @cart = Shopping::Cart.new
+            @cart.save
+
+
+            ## create five cart items and add them to the cart.
+            @created_cart_item_ids = []
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+
+            ## create a payment to the cart
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            ps = payment.save
+            @cart.prepare_cart(@u)
+            expect(@cart.cart_pending_balance).to eq(0.00)
+
+
+            ## now basically remove a cart item from the cart.
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+            ## now the pending balance should be -ve
+            @cart.prepare_cart(@u)
+            expect(@cart.cart_pending_balance).to eq(-10.00)
+
+
+            ## so basically here we are just creating a refund request.
+            ## basically here it doesn't matter what payment type and amount is used.
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
+            
+            expect(response.code).to eq("201")
+            
+            ## now basically the idea is that when the refund is set as approved, it has to check 
+
+        end
+
+    end
 
 
 end
@@ -109,24 +163,26 @@ end
 
 =begin
 
--so basically it buys down to this->
+-so basically it boils down to this->
 
--1. before_remove - check if status is accepted, if yes, then 
-it cannot be removed, provide a hook to override this method as per the needs.
+-1. 
+    before_remove - check if status is accepted, if yes, then 
+    it cannot be removed, provide a hook to override this method as per the needs.
 
-- here only there is fork - that if removal fails, then provide:
-on_cannot_remove_item_hook
+    - here only there is fork - that if removal fails, then provide:
+    on_cannot_remove_item_hook
 
--2. after_remove - create a payment refund to the customer for the amount equalling the removed amount.
+-2. 
+    after_remove - this is not done automatically. He has to request a refund, by creating a refund request.
 
 -3. provide a method to cancel all the tests in the cart, this is done by calling destroy cart - if call destroy cart, then where will we show the refund?
-- refund should also be shown in the cart.
+    - refund should also be shown in the cart.
 
-so you cannot destroy the cart if payments have already been made to it.
-you can only remove items from the cart, i.e all the items.
-and there you can show the refunds.
+    so you cannot destroy the cart if payments have already been made to it.
+    you can only remove items from the cart, i.e all the items.
+    and there you can show the refunds.
 
-so before destroy cart - check if payments have been made, and if yes, then don't destroy the cart.
+    so before destroy cart - check if payments have been made, and if yes, then don't destroy the cart.
 
 
 -4. basically we have to make a payment to the user.
@@ -143,7 +199,13 @@ so before destroy cart - check if payments have been made, and if yes, then don'
 
     at this stage the acknowledgement proof can be picked up, saying that his payment was successfully received.
     
+- 5. refund lifecycle.
 
+    a. first the refund is created, by the user.
+    b. before_creating the refund, check if the pending_balance is -ve, only then create the refund, otherwise not.
+    c. refund now has a status of 0, i.e pending.
+    d. before_updating refund, if the refund is being set as accepted, then it has to check if there is any negative balance and only then update it.
+       while changing such a status, it has to set the amount of the refund, and also delete any other refund requests, created before now.
 
 =end
 

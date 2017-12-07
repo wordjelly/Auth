@@ -29,7 +29,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    @cart.prepare_cart(lookup_resource)
+    @cart.prepare_cart
     @cart_items = @cart.cart_items
     respond_with @cart
   end
@@ -68,7 +68,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   ##will respond with nothing, or an array of cart_items that were removed, or whatever errors they have for not remvoing them.
   def destroy    
     not_found("please provide a cart id") if @cart.new_record?
-    @cart.prepare_cart(lookup_resource)
+    @cart.prepare_cart
     @cart.destroy
     respond_with @cart
   end
@@ -84,7 +84,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def add_or_remove(item_ids,add_or_remove)
     item_ids.map {|id|
       if cart_item = @cart_item_class.find(id)
-        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart,lookup_resource) : cart_item.unset_cart 
+        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart) : cart_item.unset_cart 
         resp == true ? cart_item : nil
       else
         nil

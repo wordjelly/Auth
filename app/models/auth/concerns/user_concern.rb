@@ -520,5 +520,11 @@ module Auth::Concerns::UserConcern
 		false
 	end
 
+	## this method is to be overridden, it returns false by default.
+	## it can be used to decide if the user is an admin.
+	## @used_in : payment_concern in the refund_callback 
+	def is_admin?
+		false
+	end
 	
 end

@@ -34,15 +34,18 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##the id of the cart for which this payment was made
 		field :cart_id, type: String
 
-		## can be "success"
-		## can be "faphysical_paymented"
-		## set in respective callback method of payment_type
+		## success : 1
+		## fail : 0
+		## pending : null.
 		field :payment_status, type: Integer
 
 		## payment ack proof.
 		field :payment_ack_proof, type: String
 
 		
+		## is it a refund?
+		## true if it is a refund, false otherwise.
+		field :refund, type: Boolean
 
 		attr_accessor :cart
 		
@@ -101,25 +104,35 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def payment_callback(type,params,&block)
-		self.send("#{type}_callback",params,&block) if self.respond_to? "#{type}_callback"
+		return unless self.new_record?
+		
+		if self.refund
+			self.send("refund_callback",params,&block) 
+		else
+			self.send("#{type}_callback",params,&block) if self.respond_to? "#{type}_callback"
+		end
+
+		yield if block_given?
 	end
 
 	def cash_callback(params,&block)
-		return unless self.new_record?
 		self.payment_status = 1
-		yield if block_given?
 	end
 
 	def cheque_callback(params,&block)
-		return unless self.new_record?
 		self.payment_status = 1
-		yield if block_given?
+	end
+
+	def refund_callback(params,&block)
+		if refund_approved?
+		elsif refund_disapproved?
+		elsif refund_failed?
+		else
+		end
 	end
 
 	def card_callback(params,&block)
-		return unless self.new_record?
 		self.payment_status = 1
-		yield if block_given?
 	end
 
 	def payment_failed
@@ -158,7 +171,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		
 		self.cart = Auth.configuration.cart_class.constantize.find(cart_id)
 		
-		self.cart.prepare_cart(get_resource)
+		self.cart.prepare_cart
 
 	end
 
@@ -176,15 +189,43 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		end
 
-		self.cart.get_cart_items(get_resource).map{|cart_item| 
+		self.cart.get_cart_items.map{|cart_item| 
 
-			cart_item.set_accepted(self.cart,get_resource,false)
+			cart_item.set_accepted(self.cart,false)
 
 		}
 	end	
 
+	## when the payment is a refund, and its status goes from null -> 1, by an admin user.
+	## this change in status means the refund has gone from pending directly to approved.
+	## @used_in : refund_callback
+	def refund_approved?
+		return signed_in_resource.is_admin? && payment_status_was.nil? && payment_status == 1
+	end
+
+	## when the payment is a refund , and its status goes from nil -> 0
+	## this change in status menas the refund has gone from pending to failed.
+	## @used_in : refund_callback
+	def refund_disapproved?
+		return signed_in_resource.is_admin? && payment_status_was.nil? && payment_status == 0
+	end
+
+
+	## when the payment is a refund, and its status goes from initially being 1, to now being 0.
+	## @used_in : refund_callback.
+	def refund_failed?
+		return signed_in_resource.is_admin? && payment_status_was == 1 && payment_status == 0
+	end
 
 end
 
 
 
+=begin
+a refund request is made.
+if made by a user it is set as pending.
+if made by a staff authorized member it is set as one, 
+by calculating effective refund amount, payable at that time.
+
+
+=end
