@@ -27,6 +27,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
     	before(:example) do 
 			@created_cart_item_ids = []
 			@cart = Shopping::Cart.new
+			@cart.resource_class = @u.class.name
+			@cart.resource_id = @u.id.to_s
 			@cart.save
 
 			5.times do 
@@ -78,7 +80,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- ", :cd => true do 
+			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- " do 
 				
 
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -86,7 +88,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				jresp = JSON.parse(response.body)
 				ct = Shopping::Cart.new(jresp)
 				expect(ct.errors).to be_empty
-				cart_items = ct.find_cart_items(@u)
+				cart_items = ct.find_cart_items
 				expect(cart_items.size).to eq(@created_cart_item_ids.size)
 
 				## now we need to find cart items which would be returned in the index action of the cart_item_controller.
@@ -107,7 +109,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			end
 
 
-			it " -- some of the cart items ids provided don't exist, only updates the existing cart items with this cart's id. -- ", issue: true do 
+			it " -- some of the cart items ids provided don't exist, only updates the existing cart items with this cart's id. -- " do 
 
 				@created_cart_item_ids.pop
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -115,7 +117,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				jresp = JSON.parse(response.body)
 				ct = Shopping::Cart.new(jresp)
 				expect(ct.errors).to be_empty
-				cart_items = ct.find_cart_items(@u)
+				cart_items = ct.find_cart_items
 				expect(cart_items.size).to eq(4)
 
 			end
@@ -129,6 +131,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				
 				## create a cart with some cart items.
 				@cart = Shopping::Cart.new
+				@cart.resource_class = @u.class.name
+				@cart.resource_id = @u.id.to_s
 				@cart.save
 
 				5.times do 

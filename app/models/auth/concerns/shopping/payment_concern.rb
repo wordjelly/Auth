@@ -124,11 +124,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def refund_callback(params,&block)
-		if refund_approved?
-		elsif refund_disapproved?
-		elsif refund_failed?
-		else
-		end
+		#if refund_approved?
+		#elsif refund_disapproved?
+		#elsif refund_failed?
+		#else
+		#end
+		
 	end
 
 	def card_callback(params,&block)
@@ -196,6 +197,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		}
 	end	
 
+=begin
 	## when the payment is a refund, and its status goes from null -> 1, by an admin user.
 	## this change in status means the refund has gone from pending directly to approved.
 	## @used_in : refund_callback
@@ -216,7 +218,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	def refund_failed?
 		return signed_in_resource.is_admin? && payment_status_was == 1 && payment_status == 0
 	end
-
+=end
 end
 
 

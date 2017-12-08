@@ -29,6 +29,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             Shopping::Payment.delete_all
             @created_cart_item_ids = []
             @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
             @cart.save
 
             5.times do 
@@ -109,6 +111,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## create a cart
             @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
             @cart.save
 
 
@@ -132,7 +136,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
             ps = payment.save
-            @cart.prepare_cart(@u)
+            @cart.prepare_cart
             expect(@cart.cart_pending_balance).to eq(0.00)
 
 
@@ -141,7 +145,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             last_cart_item.unset_cart
 
             ## now the pending balance should be -ve
-            @cart.prepare_cart(@u)
+            @cart.prepare_cart
             expect(@cart.cart_pending_balance).to eq(-10.00)
 
 

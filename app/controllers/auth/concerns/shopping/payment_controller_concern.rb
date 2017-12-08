@@ -55,9 +55,9 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
 
-
   def permitted_params
     params.permit({payment: [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund]},:id)
+    
   end
 
 end

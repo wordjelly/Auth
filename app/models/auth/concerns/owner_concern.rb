@@ -34,6 +34,11 @@ module Auth::Concerns::OwnerConcern
 	## it basically uses the resource_id and resource_class that were saved, when creating the resource.
 	## since resources can be created without the resource_class and resource_id being provided, it may return nil if these two are not present.
 	def get_resource
+		puts "is the resource class nil?"
+		puts self.resource_class.nil?
+
+		puts "is the resource id nil?"
+		puts self.resource_id.nil?
 		return unless (self.resource_class && self.resource_id) 
 		unless owner_resource
 			owner_resource = self.resource_class.capitalize.constantize.find(self.resource_id)
