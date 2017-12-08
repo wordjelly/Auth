@@ -79,9 +79,18 @@ module Auth::Concerns::TokenConcern
     current_signed_in_resource
   end  
 
-
+  ## the current signed in resource.
   def current_signed_in_resource
     @resource
+  end
+
+  ## convenience method to add the current signed in resource to the model instance.
+  ## the object instance passed in MUST implement the owner concern
+  ## @param[Object] : instance of any object that implements the OwnerConcern.
+  ## @return : the object passed in.
+  def add_signed_in_resource(obj)
+    obj.signed_in_resource = current_signed_in_resource
+    obj
   end
 
 end

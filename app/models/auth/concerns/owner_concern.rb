@@ -17,10 +17,9 @@ module Auth::Concerns::OwnerConcern
 
 		attr_accessor :owner_resource
 
-		## SIGNED_IN_RESOURCE : the resource that is currently signed in, and should be assigned to this model instance, in the controller. This is can be got by calling the method currently_signed_in_resource on the token_controller_concern.
+		## SIGNED_IN_RESOURCE : the resource that is currently signed in, and should be assigned to this model instance, in the controller. In the controller this can be got by calling the method currently_signed_in_resource, provided that the controller implements the token_concern.
 
 		attr_accessor :signed_in_resource
-
 
 
 		validates_presence_of :resource_class, if: Proc.new{|c| !c.resource_id.nil?}
@@ -34,11 +33,6 @@ module Auth::Concerns::OwnerConcern
 	## it basically uses the resource_id and resource_class that were saved, when creating the resource.
 	## since resources can be created without the resource_class and resource_id being provided, it may return nil if these two are not present.
 	def get_resource
-		puts "is the resource class nil?"
-		puts self.resource_class.nil?
-
-		puts "is the resource id nil?"
-		puts self.resource_id.nil?
 		return unless (self.resource_class && self.resource_id) 
 		unless owner_resource
 			owner_resource = self.resource_class.capitalize.constantize.find(self.resource_id)

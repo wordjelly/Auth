@@ -135,9 +135,13 @@ module Auth::Concerns::Shopping::CartConcern
 		get_cart_pending_balance == get_cart_price
 	end
 
+
+
 	## returns the amount that needs to be refunded to the customer from this cart.
+	## @return : 0 if the pending_balance is greater than 0,otherwise returns the pending balance.
 	def refund_amount
-		
+		return 0 unless get_cart_pending_balance < 0
+		return get_cart_pending_balance
 	end
 
 end

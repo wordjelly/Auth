@@ -19,6 +19,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def show
     @payment = @payment_class.find(params[:id])
+    @payment = add_signed_in_resource(@payment)
     @payment.verify_payment 
   end
 
@@ -28,6 +29,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def new
     @payment = @payment_class.new(permitted_params[:payment])
+    @payment = add_signed_in_resource(@payment)
   end
 
   def create
@@ -35,6 +37,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @payment.payment_params = params
     @payment.resource_id = lookup_resource.id.to_s
     @payment.resource_class = lookup_resource.class.name
+    @payment = add_signed_in_resource(@payment)
     @payment.save
     respond_with @payment
   end
@@ -44,6 +47,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
     @payment = @payment_class.find(params[:id])
+    @payment = add_signed_in_resource(@payment)
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     @payment.payment_params = params
     @payment.save

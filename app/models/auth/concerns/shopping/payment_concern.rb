@@ -68,8 +68,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	module ClassMethods
 		def find_payments(resource,cart)
-			puts "came to find payments with resource; #{resource.id.to_s}"
-			puts "and cart: #{cart.id.to_s}"
 			res = Auth.configuration.payment_class.constantize.where(:resource_id => resource.id.to_s, :cart_id => cart.id.to_s)
 			res.each do |p|
 				puts "found payment: #{p.id.to_s}"
@@ -124,12 +122,18 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def refund_callback(params,&block)
-		#if refund_approved?
-		#elsif refund_disapproved?
-		#elsif refund_failed?
-		#else
-		#end
-		
+		if signed_in_resource.is_admin?
+			## if there is something to refund, make that the amount for this payment.
+			if self.cart.refund_amount > 0
+				self.amount = self.cart.refund_amount
+				self.payment_status = 1
+				
+			## if there is nothing to refund, make the amount of the payment zero, and set the payment status to failed.
+			else
+				self.amount = 0
+				self.payment_status = 0
+			end
+		end
 	end
 
 	def card_callback(params,&block)
@@ -197,37 +201,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		}
 	end	
 
-=begin
-	## when the payment is a refund, and its status goes from null -> 1, by an admin user.
-	## this change in status means the refund has gone from pending directly to approved.
-	## @used_in : refund_callback
-	def refund_approved?
-		return signed_in_resource.is_admin? && payment_status_was.nil? && payment_status == 1
-	end
-
-	## when the payment is a refund , and its status goes from nil -> 0
-	## this change in status menas the refund has gone from pending to failed.
-	## @used_in : refund_callback
-	def refund_disapproved?
-		return signed_in_resource.is_admin? && payment_status_was.nil? && payment_status == 0
-	end
 
 
-	## when the payment is a refund, and its status goes from initially being 1, to now being 0.
-	## @used_in : refund_callback.
-	def refund_failed?
-		return signed_in_resource.is_admin? && payment_status_was == 1 && payment_status == 0
-	end
-=end
 end
 
 
-
-=begin
-a refund request is made.
-if made by a user it is set as pending.
-if made by a staff authorized member it is set as one, 
-by calculating effective refund amount, payable at that time.
-
-
-=end
