@@ -72,8 +72,17 @@ module Auth
     attr_accessor :notification_response_class
     ## the class used in the user_concern, to send emails.
     ## should inherit from Auth::Notifier.
+    ## the class used to send the notification
     attr_accessor :mailer_class
-    ## the class used to send the notification 
+     
+    ## the queue adapter for the delayed jobs
+    ## @used in OtpJob
+    attr_accessor :queue_adapter
+
+    ## whether to stub out the notifications, useful in tests.
+    ## true if the notifications are to be sent, false otherwise.
+    ## @used_in : Auth::Notify.
+    attr_accessor :notify
 
     def initialize
       @enable_token_auth = true
@@ -108,6 +117,10 @@ module Auth
       ##request.
       @do_redirect = true;
       @brand_name = "Wordjelly"
+      @queue_adapter = "shoryuken"
+
+      @notify = false
+
     end
   end
   

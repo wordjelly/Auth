@@ -122,18 +122,25 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def refund_callback(params,&block)
-		if signed_in_resource.is_admin?
+		
 			## if there is something to refund, make that the amount for this payment.
-			if self.cart.refund_amount > 0
-				self.amount = self.cart.refund_amount
-				self.payment_status = 1
-				
+			puts "refund amount is : #{self.cart.refund_amount}"
+			if self.cart.refund_amount < 0
+				if signed_in_resource.is_admin?
+					self.amount = self.cart.refund_amount
+					self.payment_status = 1
+				end
 			## if there is nothing to refund, make the amount of the payment zero, and set the payment status to failed.
 			else
-				self.amount = 0
-				self.payment_status = 0
+				if signed_in_resource.is_admin?
+					self.amount = 0
+					self.payment_status = 0
+				end
+				if self.new_record?
+					self.errors.add(:refund,"Nothing to refund")
+				end
 			end
-		end
+		
 	end
 
 	def card_callback(params,&block)

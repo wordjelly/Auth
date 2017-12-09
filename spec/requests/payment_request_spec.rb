@@ -61,8 +61,6 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
         it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. " do 
-            
-
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
                     
             expect(Shopping::Payment.count).to eq(1)
@@ -106,8 +104,12 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     
 
     context " -- refund -- ", :refund => true do 
+        
+        before(:example) do 
 
-        it " -- checks that the cart pending balance is negative, before creating a refund -- " do 
+        	Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
 
             ## create a cart
             @cart = Shopping::Cart.new
@@ -137,6 +139,19 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.cart_id = @cart.id.to_s
             ps = payment.save
             @cart.prepare_cart
+
+        end
+
+        after(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+        end
+
+
+        it " -- creates a refund request if the cart pending balance is negative. -- " do 
+
+            
             expect(@cart.cart_pending_balance).to eq(0.00)
 
 
@@ -152,10 +167,33 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## so basically here we are just creating a refund request.
             ## basically here it doesn't matter what payment type and amount is used.
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
-            
+            puts response.body.to_s
             expect(response.code).to eq("201")
             
             ## now basically the idea is that when the refund is set as approved, it has to check 
+
+        end
+
+        it " -- does not create a refund request if the cart pending balance is positive or zero -- " do 
+
+            ## add an item to the cart.
+            cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+            cart_item.resource_id = @u.id.to_s
+            cart_item.resource_class = @u.class.name
+            cart_item.parent_id = @cart.id
+            cart_item.price = 10.00
+            cart_item.save            
+
+            ## prepare the cart again.
+            @cart.prepare_cart
+            expect(@cart.cart_pending_balance).to eq(10.00)
+
+            ## now try to create a refund request, and it should fail
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
+            
+            expect(response.code).to eq("422")
+
 
         end
 

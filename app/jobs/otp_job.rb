@@ -5,7 +5,7 @@ class OtpJob < ActiveJob::Base
   include Auth::JobExceptionHandler
 
   queue_as :shoryuken
-  self.queue_adapter = :shoryuken
+  self.queue_adapter = Auth.configuration.queue_adapter.to_sym
 
   ##we currently log all exceptions to redis.
   rescue_from(StandardError) do |exception|
@@ -19,7 +19,7 @@ class OtpJob < ActiveJob::Base
   ## 2 => job_type : either "send_sms_otp" or "verify_sms_otp"
   ## 3 => hash of additional arguments if any
   def perform(args)
-  	puts "came to perform in sidekiq job."
+  	
   	resource_class = args[0]
   	resource_id = args[1]
   	job_type = args[2]
