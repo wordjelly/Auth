@@ -60,7 +60,12 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
 
   def permitted_params
-    params.permit({payment: [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund]},:id)
+    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund]
+
+    ## payment status is allowed only if the user is an admin user.
+    payment_params << :payment_status if (current_signed_in_resource && current_signed_in_resource.is_admin?)
+
+    params.permit({payment: payment_params},:id)
     
   end
 

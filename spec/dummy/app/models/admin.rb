@@ -13,4 +13,8 @@ class Admin
   ##
   ###############
 
+  def is_admin?
+    true
+  end
+
 end

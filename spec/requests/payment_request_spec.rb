@@ -18,6 +18,14 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
         
         
+        ### CREATE ONE ADMIN USER
+
+        ### It will use the same client as the user.
+        @admin = Admin.new(attributes_for(:admin_confirmed))
+        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin.save
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+
     end
 
 
@@ -196,6 +204,59 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
         end
+
+
+        it " -- accepts a valid refund if the user is an administrator -- ", :problematic => true do 
+
+        	last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+            ## create a new refund request and set it as pending.
+            payment = Shopping::Payment.new
+            
+            ## this doesn't matter while creating refunds.
+            payment.payment_type = "cheque"
+            
+            ## this also doesnt matter while creating refunds.
+            payment.amount = 50.00
+            payment.refund = true
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            
+            ## need to assign this because we are bypassing the controller.
+            payment.signed_in_resource = @u
+            ps = payment.save
+            
+            ##now first assert that a refund exists whose refund status is null.
+            payment = Shopping::Payment.find(payment.id.to_s)
+            expect(payment.payment_status).to eq(nil)
+
+            ## now use the admin user to create a put request to the above payment.
+
+            ## it should set the status of the payment as accepted.
+
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+          
+
+            refund = Shopping::Payment.find(payment.id)
+
+            expect(payment.payment_status).to eq(1)
+
+        end
+	
+
+        it " -- before accepting a refund as an administrator it checks that there is negative pending balance -- " do 
+
+
+        end
+
+
+        it " -- after accepting a refund as an administrator, will delete all previous pending refunds." do 
+
+
+        end
+
 
     end
 
