@@ -447,6 +447,18 @@ module SimpleTokenAuthentication
 	end
 
 	module TokenAuthenticationHandler
+
+		## here added the first line, so that it doesnt do any fallback in case we are already signed in.
+		## this needed to be done, in case for example:
+		## there are two models for which authentication is being done.
+		## first one authenticates,
+		## but then the gem attempts authentication of the second model also, and failing that, triggers the not authenticated fallback.
+		## to prevent that from happening, we ignore the fallback if we are already signed in.
+		def fallback!(entity, fallback_handler)
+      	  return if self.signed_in?
+	      fallback_handler.fallback!(self, entity)
+	    end
+
 		##how the token authentication works:
 		##the function regenerate_token is called whenever a change is made to the email/password/additional_login_param
 		##this sets a new authentication_token and also makes the expires at now + 1.day(default)
@@ -463,7 +475,7 @@ module SimpleTokenAuthentication
 		  
 	      record = find_record_from_identifier(entity)
 	      
-	      if token_correct?(record, entity, token_comparator)
+	      if token_correct?(record, entity, token_comparator) 
 	      		return false if record.token_expired?
 	        	perform_sign_in!(record, sign_in_handler)
 	      end
@@ -471,6 +483,7 @@ module SimpleTokenAuthentication
 
 	    def find_record_from_identifier(entity)
 	    	token = entity.get_token_from_params_or_headers(self)
+	    	
 		    token && entity.model.find_for_authentication("authentication_token" => token)
 	    end
 

@@ -238,6 +238,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
           
+            puts response.body.to_s
 
             refund = Shopping::Payment.find(payment.id)
 

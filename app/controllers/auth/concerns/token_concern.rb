@@ -4,6 +4,8 @@ module Auth::Concerns::TokenConcern
   
   included do 
   	
+    attr_accessor :authentication_done
+
   	## adds simple_token_authentication to whichever controller implements this concern.
     ## the models have alredy been made token_authenticatable in the lib/auth/omniauth.rb file
     ## logic implemented here is that it iterates the auth_resources one at a time, and as long as the previous one is not already signed in , will add the 'acts_as_token_authentication_handler_for' the current resource_type.
@@ -25,21 +27,48 @@ module Auth::Concerns::TokenConcern
 
     ### Example ends
 
+    ## POINT B:
+    ## so as per documentation of simple-token-authentication, if multiple models are to be handled for token auth then all but the last must have a fallback of :none in case of authentication failure.
+    ## this is so that it doesnt fail on the first model.
+    ## and at least tries all the remaining models.
+    ## So if there is only one model : then its fallback is default.
+    ## if there is more than one model : all but the last will have a fallback of :none.
+    ## 
 
     if Auth.configuration.enable_token_auth
-      
+        
+      ## conditions can be defined at the controller level .
       token_auth_controller_conditions = self.respond_to?(:token_authentication_conditions) ? self.token_authentication_conditions : {}
 
-  		Auth.configuration.auth_resources.keys.each_with_index {|res,i|
-        if i > 0
-  			 prev_resource = Auth.configuration.auth_resources.keys[i - 1]
-         acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(:unless => lambda { |controller| send("#{prev_resource.downcase}_signed_in?") }).merge(token_auth_controller_conditions)) 
-        else
-          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(token_auth_controller_conditions))
-        end
+      ## how many models are defined in the preinitializer
+      auth_resources_count = Auth.configuration.auth_resources.size
 
-  		}
       
+
+      ## if we have more than one auth resource model.
+      if auth_resources_count > 1
+          ## take all of them except the last, and add the fallback as none to them.
+          ## also merge the controller level conditions defined above.
+         
+          Auth.configuration.auth_resources.keys.slice(0,auth_resources_count - 1).each do |res|
+
+            acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => :none}).merge(token_auth_controller_conditions))
+
+            
+           
+          end
+          ## for the last one, just dont add the fallback as none, other conditions are the same.
+          res = Auth.configuration.auth_resources.keys[-1]
+          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(token_auth_controller_conditions))
+          
+
+      else
+        ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
+        res = Auth.configuration.auth_resources.keys[0]
+        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(token_auth_controller_conditions))
+
+      end
+    
     end
 
     before_filter :set_resource
@@ -92,5 +121,8 @@ module Auth::Concerns::TokenConcern
     obj.signed_in_resource = current_signed_in_resource
     obj
   end
+
+  
+
 
 end

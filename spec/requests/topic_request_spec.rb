@@ -20,7 +20,15 @@ RSpec.describe "token request spec", :type => :request,topic: true do
                 @ap_key = @c.api_key
                 @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => @c.app_ids[0]}
 
-	end
+                @admin = Admin.new(attributes_for(:admin_confirmed))
+                
+                @admin.client_authentication["test_app_id"] = "test_es_token"
+                
+                @admin.save
+                
+                @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+             	
+    end
 
      
 
@@ -47,6 +55,28 @@ RSpec.describe "token request spec", :type => :request,topic: true do
                         get new_topic_path, nil, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"]}
                         expect(response.code).to eq("401")     
                 end
+
+        end
+
+        context " -- authenticates admin as well as user models -- ", :token_tests => true do 
+
+            it " -- authenticates an admin user using a token -- " do
+
+                 get new_topic_path, nil, @admin_headers
+                 
+                 expect(response.code).to eq("200")
+
+            end
+
+
+            it " -- doesnt attempt authentication of admin user if the normal user gets authenticated -- " do 
+
+                 get new_topic_path, nil, @headers
+                
+                 expect(response.code).to eq("200")
+
+            end
+
 
         end
 
