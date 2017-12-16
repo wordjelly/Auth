@@ -52,9 +52,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @payment.assign_attributes(permitted_params[:payment])
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     @payment.payment_params = params
-   
+    @payment.refresh_refund
     @payment.save
-   
     respond_with @payment
   end
 

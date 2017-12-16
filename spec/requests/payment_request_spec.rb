@@ -347,11 +347,63 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
+            
+        it " -- attempting to 'show' a refund, if a subsequent refund was accepted, then will redirect to update this refund as failed -- " do 
+
+             ## remove an item from the cart.
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+
+            ## now we create three refunds
+            refunds_expected_to_have_failed = []
+            3.times do 
+                payment = Shopping::Payment.new
+                payment.payment_type = "cheque"
+                payment.amount = 50.00
+                payment.refund = true
+                payment.resource_id = @u.id.to_s
+                payment.resource_class = @u.class.name.to_s
+                payment.cart_id = @cart.id.to_s
+                payment.signed_in_resource = @u
+                ps = payment.save
+                refunds_expected_to_have_failed << payment
+            end
+
+
+            ## then we accept the last one, by sending in a put request as the admin.
+            #put shopping_payment_path({:id => refunds_expected_to_have_failed.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+
+
+            refunds_expected_to_have_failed.last.refund_success
+            refunds_expected_to_have_failed.last.save
+
+            ##the first two because the last one will not be deleted, we are going to be accepting the last one. 
+            refunds_expected_to_have_failed.map!{|c| c = c.id.to_s}
+            refunds_expected_to_have_failed.pop
+            
+
+            ## okay now simulate that the last refund, actually wasnt able to be updated as failed.
+
+            ## so change its payment status back to nil.
+            last_refund = Shopping::Payment.find(refunds_expected_to_have_failed.last)
+
+            last_refund.payment_status = nil
+            last_refund.skip_callbacks = {:before_save => true, after_save => true}
+            last_refund.save
+
+            ## now do a refresh request.
+            ## this basically an update request, that will check if any refund has been accepted since this refund was created and update this to failed if yes.
+            put shopping_payment_path({:id => last_refund.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            last_refund = Shopping::Payment.find(last_refund.id.to_s)
+
+            expect(last_refund.payment_status).to eq(0)
+
+        end
         
-        ## imagine the situation where
 
-
-        it " -- how does refund affect cart, item accepted, " do 
+        it " -- how does refund affect cart_item_accepted -- " do 
 
 
         end

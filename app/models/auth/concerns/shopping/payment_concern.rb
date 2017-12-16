@@ -22,11 +22,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## and #create methods.
 		attr_accessor :payment_params
 
-
-		## an attr accessor that can be used to switch after_save_callbacks on or off.
-		## used to prevent the cascading of the after_save callback, where it would otherwise cause each refund to search for other pending refunds, and set their payment status as failed.
-		## setting this value to anything will cause the callbacks to be skipped.
-		## it just allows the callbacks to happen if the value is nil.
+		## expected to be a hash with names of callbacks and boolean values.
+		## eg: {:before_save => true, :after_save => false..}
+		## used in conjunction with the provided skip_callback?(callback_name) method to determine whether to execute the callbacks or not.
+		## so basically before saving the document, set this attr_accessor on it, and it will allow you to control if callbacks are executed or not.
+		## currently used in the after_save callback where we dont want the refund being set to accepted, and thereafter to update all other refunds as failed to cascade.
 		attr_accessor :skip_callbacks
 
 		##the amount for this payment
@@ -105,9 +105,27 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
 	## return[Boolean] : true or false.
+	## checks whether the attr_accessor skip_callbacks is set, and if yes, then whether the name of this callback exists in it.
+	## if both above are no, then returns false
+	## if the name exists, then return whatever is stored for the name i.e true or false.
+	## @used_in the after_save and before_save callback blocks, as the first line, basically only executes the block if this method returns false.
 	def skip_callback?(callback_name)
 		return false if (self.skip_callbacks.blank? || self.skip_callbacks[callback_name.to_sym].nil?)
 		return self.skip_callbacks[callback_name.to_sym] == true
+	end
+
+	## called in the payment_controller_concern update action
+	## basically checks if there is any refund that was accepted after this refund_request was created. then in that case sets this refund as failed.
+	## this is basically done because while normally, whenever a refund is accepted, all other pending refunds are updated as failed, but suppose that that operation does not complete and some refunds are left still pending.
+	## then in the controller update action, this method is called on the payment.
+	def refresh_refund
+		if self.refund && self.payment_status.nil?
+			already_accepted_refunds = self.class.where("refund" => true, "payment_status" => 1, "modified_at.gt" => self.created_at)
+				#self.refund_failed
+			if already_accepted_refunds.size > 0
+				self.refund_failed
+			end
+		end
 	end
 	
 
