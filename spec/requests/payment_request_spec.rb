@@ -316,7 +316,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
             ## now we create three refunds
-            refunds_expected_to_be_deleted = []
+            refunds_expected_to_have_failed = []
             3.times do 
                 payment = Shopping::Payment.new
                 payment.payment_type = "cheque"
@@ -327,31 +327,29 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 payment.cart_id = @cart.id.to_s
                 payment.signed_in_resource = @u
                 ps = payment.save
-                refunds_expected_to_be_deleted << payment
+                refunds_expected_to_have_failed << payment
             end
 
 
             ## then we accept the last one, by sending in a put request as the admin.
-            put shopping_payment_path({:id => refunds_expected_to_be_deleted.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => refunds_expected_to_have_failed.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
 
 
             ## we only keep the first two because the last one will not be deleted, we are going to be accepting the last one. 
-            refunds_expected_to_be_deleted.map!{|c| c = c.id.to_s}
-            refunds_expected_to_be_deleted.pop
+            refunds_expected_to_have_failed.map!{|c| c = c.id.to_s}
+            refunds_expected_to_have_failed.pop
             ## all previous payments should be marked as successfull.
             ## for this an after update callback can be added?
             ## but then that will be 
-            Shopping::Payment.each do |p|
-                expect(refunds_expected_to_be_deleted.include? p.id.to_s).not_to be_truthy
+            refunds_expected_to_have_failed.each do |ref_id|
+                expect(Shopping::Payment.find(ref_id).payment_status).to eq(0)
             end
 
         end
 
-        it " -- on clicking 'show' refund, it will show nothing, if a later refund which is accepted exists, and then it should delete the current refund -- " do 
+        
+        ## imagine the situation where
 
-            ## if a future refund is found to be accepted, then this refund is updated as being failed.
-
-        end
 
         it " -- how does refund affect cart, item accepted, " do 
 

@@ -22,6 +22,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## and #create methods.
 		attr_accessor :payment_params
 
+
+		## an attr accessor that can be used to switch after_save_callbacks on or off.
+		## used to prevent the cascading of the after_save callback, where it would otherwise cause each refund to search for other pending refunds, and set their payment status as failed.
+		## setting this value to anything will cause the callbacks to be skipped.
+		## it just allows the callbacks to happen if the value is nil.
+		attr_accessor :skip_callbacks
+
 		##the amount for this payment
 		field :amount, type: Float
 
@@ -57,24 +64,30 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 
 		before_save do |document|
-			document.set_cart(document.cart_id) 
-			document.payment_callback(document.payment_type,document.payment_params) do 
-					document.update_cart_items_accepted if document.payment_status_changed?
+			if !document.skip_callback?("before_save")
+				document.set_cart(document.cart_id) 
+				document.payment_callback(document.payment_type,document.payment_params) do 
+						document.update_cart_items_accepted if document.payment_status_changed?
+				end
 			end
 		end
 
-		## when a refund is accepted, all previous pending refunds have to be deleted.
+		## when a refund is accepted, any pening refund requests are considered to have failed, since this one has succeeded.
 		after_save do |document|
-			## find all previous pending refunds and delete them.
-			if document.payment_status_changed? && document.payment_status == 1 && document.refund
+			if !document.skip_callback?("after_save")
+				## find all previous pending refunds and delete them.
+				if document.payment_status_changed? && document.payment_status == 1 && document.refund 
 
-				## find previous refunds.
-				older_pending_refunds = self.class.where(:refund => true, :payment_status => nil, :created_at.lt => Time.now)
+					## find previous refunds.
+					any_pending_refunds = self.class.where(:refund => true, :payment_status => nil)
 
-				older_pending_refunds.each do |pen_ref|
-					pen_ref.delete
+					any_pending_refunds.each do |pen_ref|
+						pen_ref.refund_failed
+						pen_ref.skip_callbacks = {:before_save => true, :after_save => true}
+						pen_ref.save
+					end
+
 				end
-
 			end
 		end
 
@@ -90,6 +103,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 		end		
 	end
 
+	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
+	## return[Boolean] : true or false.
+	def skip_callback?(callback_name)
+		return false if (self.skip_callbacks.blank? || self.skip_callbacks[callback_name.to_sym].nil?)
+		return self.skip_callbacks[callback_name.to_sym] == true
+	end
 	
 
 	##res : 59a5405c421aa90f732c9059
@@ -143,14 +162,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 			if self.cart.refund_amount < 0
 				
 				if signed_in_resource.is_admin?
-					self.amount = self.cart.refund_amount
-					self.payment_status = 1
+					refund_success
 				end
 			## if there is nothing to refund, make the amount of the payment zero, and set the payment status to failed.
 			else
 				if signed_in_resource.is_admin?
-					self.amount = 0
-					self.payment_status = 0
+					refund_failed
 				end
 				if self.new_record?
 					self.errors.add(:refund,"Nothing to refund")
@@ -159,6 +176,18 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 
 		
+	end
+
+	## used in refund_callback
+	def refund_success
+		self.amount = self.cart.refund_amount
+		self.payment_status = 1
+	end
+
+	## used in refund callback.
+	def refund_failed
+		self.amount = 0
+		self.payment_status = 0
 	end
 
 	def card_callback(params,&block)
