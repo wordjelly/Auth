@@ -63,6 +63,21 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 		end
 
+		## when a refund is accepted, all previous pending refunds have to be deleted.
+		after_save do |document|
+			## find all previous pending refunds and delete them.
+			if document.payment_status_changed? && document.payment_status == 1 && document.refund
+
+				## find previous refunds.
+				older_pending_refunds = self.class.where(:refund => true, :payment_status => nil, :created_at.lt => Time.now)
+
+				older_pending_refunds.each do |pen_ref|
+					pen_ref.delete
+				end
+
+			end
+		end
+
 		
 	end
 
@@ -102,7 +117,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def payment_callback(type,params,&block)
-		return unless self.new_record?
+		
 		
 		if self.refund
 			self.send("refund_callback",params,&block) 
@@ -124,8 +139,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 	def refund_callback(params,&block)
 		
 			## if there is something to refund, make that the amount for this payment.
-			puts "refund amount is : #{self.cart.refund_amount}"
+			
 			if self.cart.refund_amount < 0
+				
 				if signed_in_resource.is_admin?
 					self.amount = self.cart.refund_amount
 					self.payment_status = 1
@@ -140,6 +156,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 					self.errors.add(:refund,"Nothing to refund")
 				end
 			end
+
+
 		
 	end
 

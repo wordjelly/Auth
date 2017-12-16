@@ -109,7 +109,11 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
     end
-    
+        
+    context " -- payment receipt -- " do 
+
+
+    end
 
     context " -- refund -- ", :refund => true do 
         
@@ -206,7 +210,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        it " -- accepts a valid refund if the user is an administrator -- ", :problematic => true do 
+        it " -- accepts a valid refund if the user is an administrator -- " do 
 
         	last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
             last_cart_item.unset_cart
@@ -238,26 +242,121 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
           
-            puts response.body.to_s
-
-            refund = Shopping::Payment.find(payment.id)
+            
+            payment = Shopping::Payment.find(payment.id)
 
             expect(payment.payment_status).to eq(1)
 
         end
 	
 
-        it " -- before accepting a refund as an administrator it checks that there is negative pending balance -- " do 
+        it " -- before accepting a refund as an administrator it checks that there is negative pending balance -- ", :problematic => true do 
+
+            ## remove an item from the cart.
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+            ## create a new refund request and set it as pending.
+            payment = Shopping::Payment.new
+            
+            ## this doesn't matter while creating refunds.
+            payment.payment_type = "cheque"
+            
+            ## this also doesnt matter while creating refunds.
+            payment.amount = 50.00
+            payment.refund = true
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            
+            ## need to assign this because we are bypassing the controller.
+            payment.signed_in_resource = @u
+            ps = payment.save
+            
+            ##now first assert that a refund exists whose refund status is null.
+            payment = Shopping::Payment.find(payment.id.to_s)
+            expect(payment.payment_status).to eq(nil)
+
+            ## at this stage, check the cart and expect it to have a negative balance : i.e the user deserves a refund.
+            @cart = Shopping::Cart.find(@cart.id)
+            @cart.prepare_cart
+            expect(@cart.cart_pending_balance < 0).to be(true)
+
+
+            ## now again add another item to the cart so that the balance is no longer negative.
+            cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+            cart_item.resource_id = @u.id.to_s
+            cart_item.resource_class = @u.class.name
+            cart_item.parent_id = @cart.id
+            cart_item.price = 10.00
+            cart_item.save            
+
+
+            ## now use the admin user to create a put request to the above payment.
+
+            ## it should set the payment status as 0 or failed, because balance is now negative.
+
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+          
+            
+            payment = Shopping::Payment.find(payment.id)
+
+            expect(payment.payment_status).to eq(0)
 
 
         end
 
 
-        it " -- after accepting a refund as an administrator, will delete all previous pending refunds." do 
+        it " -- after accepting a refund as an administrator, will delete all previous pending refunds.", :problematic => true do 
 
+
+            ## remove an item from the cart.
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+
+            ## now we create three refunds
+            refunds_expected_to_be_deleted = []
+            3.times do 
+                payment = Shopping::Payment.new
+                payment.payment_type = "cheque"
+                payment.amount = 50.00
+                payment.refund = true
+                payment.resource_id = @u.id.to_s
+                payment.resource_class = @u.class.name.to_s
+                payment.cart_id = @cart.id.to_s
+                payment.signed_in_resource = @u
+                ps = payment.save
+                refunds_expected_to_be_deleted << payment
+            end
+
+
+            ## then we accept the last one, by sending in a put request as the admin.
+            put shopping_payment_path({:id => refunds_expected_to_be_deleted.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+
+
+            ## we only keep the first two because the last one will not be deleted, we are going to be accepting the last one. 
+            refunds_expected_to_be_deleted.map!{|c| c = c.id.to_s}
+            refunds_expected_to_be_deleted.pop
+            ## all previous payments should be marked as successfull.
+            ## for this an after update callback can be added?
+            ## but then that will be 
+            Shopping::Payment.each do |p|
+                expect(refunds_expected_to_be_deleted.include? p.id.to_s).not_to be_truthy
+            end
 
         end
 
+        it " -- on clicking 'show' refund, it will show nothing, if a later refund which is accepted exists, and then it should delete the current refund -- " do 
+
+            ## if a future refund is found to be accepted, then this refund is updated as being failed.
+
+        end
+
+        it " -- how does refund affect cart, item accepted, " do 
+
+
+        end
 
     end
 
