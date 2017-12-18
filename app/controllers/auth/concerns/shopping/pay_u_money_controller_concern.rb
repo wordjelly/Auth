@@ -25,7 +25,13 @@ module Auth::Concerns::Shopping::PayUMoneyControllerConcern
 
   ## permits the original parameters defined in the payment_controller_concern and the additional params that are defined here as "payumoney_params, alongwith id."
   def permitted_params
-    pp = payumoney_params + super["payment"].keys.map{|c| c = c.to_sym}
+    
+    payment_controller_params = []
+
+    if super["payment"]
+      payment_controller_params = super["payment"].keys.map{|c| c = c.to_sym}
+    end
+    pp = payumoney_params + payment_controller_params
     params.permit({payment: pp},:id)
   end
 

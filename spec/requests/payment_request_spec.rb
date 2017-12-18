@@ -100,6 +100,10 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
+        it " -- mix and play : payments made, then cart item removed, then refund request made, then earlier payment fails, now what happens to the other cart items -- " do 
+
+        end
+
     end
 
 
@@ -107,14 +111,23 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     end
 
-    context " -- payment cannot be destroyed -- " do 
+    ## note also need to check this in case of cart controller, when we add or remove cart items.
+    context " -- transactional issues in multiple cart items being marked as accepted -- " do 
 
 
     end
-        
+ 
     context " -- payment receipt -- " do 
+        it " -- generates receipt after payment is saved -- " do 
 
+            ## proposed plan for successfull payment.
+            ## cart should prepare cart
+            ## it should also show the receipt of the latest payment.
+            ## so basically a hash with two keys should be generated
+            ## cart => {with all its attributes}
+            ## curr_payment => {with cart item ids, that it has paid for.}
 
+        end
     end
 
     context " -- refund -- ", :refund => true do 
@@ -352,7 +365,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             
         it " -- attempting to 'show' a refund, if a subsequent refund was accepted, then will redirect to update this refund as failed -- ", :only_failure => true do 
 
-             ## remove an item from the cart.
+            ## remove an item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
             last_cart_item.unset_cart
 
@@ -372,41 +385,30 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 refunds_expected_to_have_failed << payment
             end
 
-
+            ## sleep so that there is some time lag between creating the refunds and updating the last one as a success.
             sleep(2)
-            successfull_refund = refunds_expected_to_have_failed.pop 
-            successfull_refund.refund_success
-            puts "result of saying the last refund was successfull is:"
-            res1 = successfull_refund.save
-            puts res1.to_s
+            
 
-            ##only keep the first two because the last one will not be deleted, we are going to be accepting the last one.
+            ## update the last refund as successfull. 
+            successfull_refund = refunds_expected_to_have_failed.pop 
+            
+            successfull_refund.refund_success
+          
+            res1 = successfull_refund.save
+          
            
+
+            ## convert the remaining two refunds into their ids.
             refunds_expected_to_have_failed.map!{|c| c = c.id.to_s}
             
-            ## at this stage we are suspecting that a particular refund could not be updated as a failure.
-
-            ## so of those two refunds that are still there, make the later one a nil payment status.
-
-            ## so change its payment status back to nil.
+            ## now update the last one as nil, i.e we simulate that somehow it didnt get converted to a failure payment status when the successfull refund was accepted.
             last_refund = Shopping::Payment.find(refunds_expected_to_have_failed.last)
-
             last_refund.payment_status = nil
             last_refund.skip_callbacks = {:before_save => true, :after_save => true}
             res = last_refund.save
-            puts res.to_s
-            puts "results of redoing the last refund "
-            puts last_refund.errors.full_messages.to_s
-
-            ## now we should simply try to update it
-            ## and find that there are some records that were accepted, after it was created.
-
-            ## now do a refresh request.
-            ## this basically an update request, that will check if any refund has been accepted since this refund was created and update this to failed if yes.
+          
+            ## now do update on this last refund, so that it will call refund_refresh, and we now expect it to have a 0 payment status.
             put shopping_payment_path({:id => last_refund.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-
-            puts "the response of making the update request."
-            puts response.body.to_s
 
             last_refund = Shopping::Payment.find(last_refund.id.to_s)
 
@@ -420,17 +422,119 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         ## since at that stage
         it " -- how does refund affect cart_item_accepted -- " do 
 
-            
+        end
+
+
+    end
+
+    context " --- update, delete, payment and refund by user -- " do 
+
+        before(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+
+            ## create a cart
+            @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
+            @cart.save
+
+
+            ## create five cart items and add them to the cart.
+            @created_cart_item_ids = []
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+        end
+
+
+
+        it " -- user cannot update a payment once made -- ", :update_payment => true do 
+
+            ## create a payment.
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            ps = payment.save
+
+
+            ## now try to update it.
+            put shopping_payment_path({:id => payment.id}), {payment: {amount: 10.00},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            payment = Shopping::Payment.find(payment.id.to_s)
+            expect(payment.amount).to eq(50.00)
+
+
+
+        end 
+
+        it " -- user cannot update a refund once created -- ", :update_refund => true do 
+
+            ## create a payment.
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            ps = payment.save
+            expect(ps).to be_truthy
+
+            ## remove an item from the cart
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+
+            ## create a refund
+            ref = Shopping::Payment.new
+            ref.payment_type = "cash"
+            ref.amount = 50.00
+            ref.refund = true
+            ref.resource_id = @u.id.to_s
+            ref.resource_class = @u.class.name.to_s
+            ref.signed_in_resource = @u
+            ref.cart_id = @cart.id.to_s
+            rs = ref.save
+            expect(rs).to be_truthy
+
+            ## now try to update it.
+            put shopping_payment_path({:id => ref.id}), {payment: {refund: false},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            ref = Shopping::Payment.find(ref.id.to_s)
+            expect(ref.refund).to be_truthy
 
         end
 
-        it " -- once the user initiates a payment or refund request, he cannot change its type -- " do 
+        it " -- user cannot delete a payment once made -- ", :delete_payment do 
 
+            ## create a payment.
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            ps = payment.save
+            expect(ps).to be_truthy
+
+            ## now try to update it.
+            delete shopping_payment_path({:id => payment.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            expect(Shopping::Payment.count).to eq(1)
 
         end
 
     end
-
 
 end
 

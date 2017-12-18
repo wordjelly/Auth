@@ -32,7 +32,14 @@ module Auth::Concerns::Shopping::CartConcern
 		## this is used for sequentially debiting money from the cart_paid amount.
 		attr_accessor :cart_credit
 
-
+		before_destroy do |document|
+			document.prepare_cart
+			if document.cart_items.keep_if{|c| c.accepted == true}.size > 0
+				false
+			elsif document.get_cart_payments.size > 0 
+				false
+			end
+		end
 		
 	end
 

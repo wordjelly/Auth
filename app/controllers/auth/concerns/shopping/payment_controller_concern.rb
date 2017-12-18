@@ -58,7 +58,12 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def destroy
-    
+     @payment = @payment_class.find(params[:id])
+     @payment = add_signed_in_resource(@payment)
+     if @payment.signed_in_resource.is_admin?
+        @payment.delete
+     end
+     respond_with @payment
   end
 
 
@@ -68,7 +73,22 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     ## payment status is allowed only if the user is an admin user.
     payment_params << :payment_status if (current_signed_in_resource && current_signed_in_resource.is_admin?)
 
-   # puts "payment params becomes: #{payment_params.to_s}"
+    
+    ## if the user is not admin, and the action is update, none of the parameters are allowed.
+  
+    if action_name.to_s == "update"
+     
+
+      if !current_signed_in_resource.is_admin?
+       
+        payment_params = []
+
+      else
+
+      end
+
+    end
+
 
     params.permit({payment: payment_params},:id)
     

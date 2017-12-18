@@ -55,6 +55,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		field :refund, type: Boolean
 
 		attr_accessor :cart
+
+		attr_accessor :payment_receipt
 		
 		validates_presence_of :cart_id
 		validates_presence_of :resource_id
@@ -75,7 +77,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## when a refund is accepted, any pening refund requests are considered to have failed, since this one has succeeded.
 		after_save do |document|
 			if !document.skip_callback?("after_save")
-				## find all previous pending refunds and delete them.
+
+				## set the payment receipt
+				document.set_payment_receipt
+
+
+				## find all  pending refunds and set them as failed.
 				if document.payment_status_changed? && document.payment_status == 1 && document.refund 
 
 					## find previous refunds.
@@ -125,12 +132,22 @@ module Auth::Concerns::Shopping::PaymentConcern
 			already_accepted_refunds = self.class.where(:refund => true, :payment_status => 1, :updated_at => { :$gte => self.created_at})
 			
 			if already_accepted_refunds.size > 0
-				puts "doing self.refund_failed"
+				p
 				self.refund_failed
 			end
 		end
 	end
-	
+		
+	## returns the cart_item ids which were accepted due to this payment.
+	## called after_save callback.
+	## called in show action of controller.
+	## return[Array]
+	def set_payment_receipt
+		self.payment_receipt = []
+		Auth.configuration.cart_item_class.constantize.where(:accepted_by_payment_id => self.id.to_s).each do |c_item|
+			self.payment_receipt <<  c_item.id.to_s
+		end
+	end
 
 	##res : 59a5405c421aa90f732c9059
 	##cart : 59a54d7a421aa9173c834728
@@ -271,7 +288,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		self.cart.get_cart_items.map{|cart_item| 
 
-			cart_item.set_accepted(self.cart,false)
+			cart_item.set_accepted(self,false)
 
 		}
 	end	

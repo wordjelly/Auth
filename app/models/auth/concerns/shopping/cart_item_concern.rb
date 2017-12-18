@@ -48,6 +48,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :accepted, type: Boolean
 
 
+		################### which payment led to this cart item being accepted
+
+		field :accepted_by_payment_id, type: String
+
 		### a percentage of the total price , at which to accept the order.
 		## the current item is accepted only if (price*accept_order_at_percentage_of_price) <= available credit
 		field :accept_order_at_percentage_of_price, type: Float, default: 1.00
@@ -83,10 +87,13 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## decides whether or not the current item can be accepted , given whatever money has been paid by the resource.
 	## will first set the order as accepted, provided that the cart has enough credit. While checking for the credit, will debit the minimum amount necessary to accept this cart item, from the cart credit.
 	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
+	## finally if the cart item is accepted, then it also stores the id of the payment which led to its being accepted.
+	## this is used to generate the receipt, and keep track of which payments led to which cart items being accepted.
 	## returns the result of calling #save on the cart_item.
-	def set_accepted(cart,override)
-		self.accepted = cart_has_sufficient_credit_for_item?(cart) 
+	def set_accepted(payment,override)
+		self.accepted = cart_has_sufficient_credit_for_item?(payment.cart) 
 		self.accepted = override if override
+		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.save
 		self
 	end

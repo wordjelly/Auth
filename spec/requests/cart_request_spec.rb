@@ -301,6 +301,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				
 				
 				@cart = Shopping::Cart.new
+				@cart.resource_id = @u.id.to_s
+				@cart.resource_class = @u.class.name.to_s
 				@cart.save
 
 				5.times do 
@@ -319,23 +321,46 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-=begin
-			it " -- destroys the cart, and removes the parent id from all cart items before doing so. " do 
+
+
+			it " -- doesnt allow the cart to be destroyed if cart items have already been accepted -- ", :delete_cart do 
+
+				## if the cart has items that were accepted, then it cannot be destroyed.
+				Shopping::CartItem.each_with_index {|c_item,key|
+					if key % 2 == 0
+						c_item.accepted = true
+						c_item.save
+					end
+				}
 
 				delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
-				cart_items = Shopping::CartItem.where(:parent_id => @cart.id.to_s)
+				shopping_cart_ids = Shopping::Cart.all.map{|c| c = c.id.to_s}
 
-				expect(cart_items.size).to eq(0)
-
-			end
-=end
-
-			it " -- doesnt allow the cart to be destroyed if cart items have already been accepted -- " do 
-
+				expect(shopping_cart_ids.include? @cart.id.to_s).to be_truthy
 
 			end
 
+			it " -- doesnt allow the cart to be destroyed if any payments are even pending, successfull or failed on the cart -- ", :delete_cart => true do 
+
+				## create and save a payment to the cart.
+				payment = Shopping::Payment.new
+	            payment.payment_type = "cash"
+	            payment.amount = 50.00
+	            payment.resource_id = @u.id.to_s
+	            payment.resource_class = @u.class.name.to_s
+	            payment.cart_id = @cart.id.to_s
+	            ps = payment.save
+	            expect(ps).to be_truthy
+
+	            delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+				shopping_cart_ids = Shopping::Cart.all.map{|c| c = c.id.to_s}
+
+				expect(shopping_cart_ids.include? @cart.id.to_s).to be_truthy
+
+
+			end
 
 
 		end
