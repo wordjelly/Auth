@@ -20,7 +20,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   def show
     @payment = @payment_class.find(params[:id])
     @payment = add_signed_in_resource(@payment)
-    @payment.verify_payment 
+    @payment.set_payment_receipt
+    
   end
 
   def index
@@ -46,12 +47,16 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   ##we render a cash form, then we create a payment and then we should in the show screen,to confirm and commit the payment which finally brings it here.
   ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
-   
     @payment = @payment_class.find(params[:id])
     @payment = add_signed_in_resource(@payment)
     @payment.assign_attributes(permitted_params[:payment])
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     @payment.payment_params = params
+    
+    ## for gateway payments this is how we refresh.
+    @payment.verify_payment
+
+    ## for refunds this is how we refresh it.
     @payment.refresh_refund
     @payment.save
     respond_with @payment
