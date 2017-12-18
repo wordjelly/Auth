@@ -119,10 +119,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## this is basically done because while normally, whenever a refund is accepted, all other pending refunds are updated as failed, but suppose that that operation does not complete and some refunds are left still pending.
 	## then in the controller update action, this method is called on the payment.
 	def refresh_refund
+		
 		if self.refund && self.payment_status.nil?
-			already_accepted_refunds = self.class.where("refund" => true, "payment_status" => 1, "modified_at.gt" => self.created_at)
-				#self.refund_failed
+			
+			already_accepted_refunds = self.class.where(:refund => true, :payment_status => 1, :updated_at => { :$gte => self.created_at})
+			
 			if already_accepted_refunds.size > 0
+				puts "doing self.refund_failed"
 				self.refund_failed
 			end
 		end

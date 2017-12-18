@@ -81,7 +81,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
-        it " -- can update the payment status -- " do 
+        it " -- can update the payment status, only as an admin directly. -- " do 
 
             k = Shopping::Payment.new
             k.cart_id = @cart.id.to_s
@@ -93,6 +93,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
+        ## payment goes from success to failure.
+        ## in that case cart items should become unpaid.
         it " -- if payment status is set as false, cart item statuses are also updated -- " do 
             
 
@@ -307,7 +309,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        it " -- after accepting a refund as an administrator, will delete all previous pending refunds.", :problematic => true do 
+        it " -- after accepting a refund as an administrator, will update all pending refunds as failed" do 
 
 
             ## remove an item from the cart.
@@ -348,7 +350,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
             
-        it " -- attempting to 'show' a refund, if a subsequent refund was accepted, then will redirect to update this refund as failed -- " do 
+        it " -- attempting to 'show' a refund, if a subsequent refund was accepted, then will redirect to update this refund as failed -- ", :only_failure => true do 
 
              ## remove an item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
@@ -371,30 +373,40 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             end
 
 
-            ## then we accept the last one, by sending in a put request as the admin.
-            #put shopping_payment_path({:id => refunds_expected_to_have_failed.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            sleep(2)
+            successfull_refund = refunds_expected_to_have_failed.pop 
+            successfull_refund.refund_success
+            puts "result of saying the last refund was successfull is:"
+            res1 = successfull_refund.save
+            puts res1.to_s
 
-
-            refunds_expected_to_have_failed.last.refund_success
-            refunds_expected_to_have_failed.last.save
-
-            ##the first two because the last one will not be deleted, we are going to be accepting the last one. 
+            ##only keep the first two because the last one will not be deleted, we are going to be accepting the last one.
+           
             refunds_expected_to_have_failed.map!{|c| c = c.id.to_s}
-            refunds_expected_to_have_failed.pop
             
+            ## at this stage we are suspecting that a particular refund could not be updated as a failure.
 
-            ## okay now simulate that the last refund, actually wasnt able to be updated as failed.
+            ## so of those two refunds that are still there, make the later one a nil payment status.
 
             ## so change its payment status back to nil.
             last_refund = Shopping::Payment.find(refunds_expected_to_have_failed.last)
 
             last_refund.payment_status = nil
-            last_refund.skip_callbacks = {:before_save => true, after_save => true}
-            last_refund.save
+            last_refund.skip_callbacks = {:before_save => true, :after_save => true}
+            res = last_refund.save
+            puts res.to_s
+            puts "results of redoing the last refund "
+            puts last_refund.errors.full_messages.to_s
+
+            ## now we should simply try to update it
+            ## and find that there are some records that were accepted, after it was created.
 
             ## now do a refresh request.
             ## this basically an update request, that will check if any refund has been accepted since this refund was created and update this to failed if yes.
             put shopping_payment_path({:id => last_refund.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            puts "the response of making the update request."
+            puts response.body.to_s
 
             last_refund = Shopping::Payment.find(last_refund.id.to_s)
 
@@ -402,8 +414,17 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
         
-
+        ## expected behavior should play out as follows:
+        ## so on removing a cart item, will the cart item states for the rest of the stuff be affected?
+        ## no -> because that is affected only if the payment status of a payment changes.
+        ## since at that stage
         it " -- how does refund affect cart_item_accepted -- " do 
+
+            
+
+        end
+
+        it " -- once the user initiates a payment or refund request, he cannot change its type -- " do 
 
 
         end
