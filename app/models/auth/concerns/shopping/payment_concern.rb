@@ -68,9 +68,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 		before_save do |document|
 			if !document.skip_callback?("before_save")
 				document.set_cart(document.cart_id) 
+				## this callback will return true if all the cart items could be successfully updated.
+				## and in that case everything will be fine.
+				## if it returns false, then set_accepted will automatically add a validation error.
 				document.payment_callback(document.payment_type,document.payment_params) do 
 						document.update_cart_items_accepted if document.payment_status_changed?
 				end
+
 			end
 		end
 
@@ -275,7 +279,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## is called on payment_status_changed
 	## check whether this payment was already registered on the cart as success or failed.
 	## and then debit/credit.
-	## return[Array] : cart_item instances, after setting stage.
+	## return[Boolean] : true/false depending on whether all the cart items could be successfully updated or not. 
 	def update_cart_items_accepted
 
 		if payment_status == 1
@@ -286,11 +290,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		end
 
-		self.cart.get_cart_items.map{|cart_item| 
-
+		## okay so what if this doesn't go through as expected.
+		## here is where all the transactional issues come up
+		## the right thing here is to check if 
+		## ideally it would make most sense to store on the payment itself the list of newly accepted cart items.
+		## that way there is no need for multiple updates.
+		cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
 			cart_item.set_accepted(self,false)
+		}.compact.uniq
+		self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
+		return cart_item_update_results[0] == true
 
-		}
 	end	
 
 

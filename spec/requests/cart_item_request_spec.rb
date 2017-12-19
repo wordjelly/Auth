@@ -106,7 +106,19 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 			end
 
 
-			it " -- doesn't allow destroy if status is accepted -- " do 
+			it " -- doesn't allow destroy if status is accepted -- ", :delete_accepted_cart_item do 
+
+				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name.to_s
+				cart_item.accepted = true
+				cart_item.save
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+
+				shopping_cart_item_ids = Shopping::CartItem.all.map{|c| c = c.id.to_s}
+
+				expect(shopping_cart_item_ids.include? cart_item.id.to_s).to be_truthy
 
 			end
 			

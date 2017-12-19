@@ -81,17 +81,6 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
-        it " -- can update the payment status, only as an admin directly. -- " do 
-
-            k = Shopping::Payment.new
-            k.cart_id = @cart.id.to_s
-            k.payment_type = "cash"
-            k.amount = 50.00
-            k.save
-
-            
-
-        end
 
         ## payment goes from success to failure.
         ## in that case cart items should become unpaid.
@@ -111,9 +100,62 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     end
 
+
+    context " -- payment made to empty cart -- " do 
+
+    end
+
     ## note also need to check this in case of cart controller, when we add or remove cart items.
+    ## set cart item accepted specs.
     context " -- transactional issues in multiple cart items being marked as accepted -- " do 
 
+        before(:example) do 
+
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+            @created_cart_item_ids = []
+            @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
+            @cart.save
+
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+
+           
+            allow_any_instance_of(Shopping::CartItem).to receive(:set_accepted).and_return(false)
+  
+
+        end
+
+        after(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+
+            
+                        
+        end
+
+        it " -- shows a validation error if, all cart items cannot be successfully updated ", :cart_item_update_payment_failure do 
+
+            ## so how to simulate this?
+            ## override set_accepted method in payment_concern to return false.
+            
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            payment = assigns(:payment)
+            expect(payment.errors.full_messages).not_to be_empty
+        end
 
     end
  

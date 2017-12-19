@@ -57,6 +57,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :accept_order_at_percentage_of_price, type: Float, default: 1.00
 
 
+		before_destroy do |document|
+			false if document.accepted == true
+		end
+
 	end
 
 
@@ -95,7 +99,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.accepted = override if override
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.save
-		self
 	end
 	
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
