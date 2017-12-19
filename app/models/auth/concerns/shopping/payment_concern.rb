@@ -56,6 +56,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		attr_accessor :cart
 
+		## Hash with two keys:
+		## cart => with all its attributes
+		## payment => with an array of cart_item objects accepted due to it.
 		attr_accessor :payment_receipt
 		
 		validates_presence_of :cart_id
@@ -82,21 +85,25 @@ module Auth::Concerns::Shopping::PaymentConcern
 		after_save do |document|
 			if !document.skip_callback?("after_save")
 
-				## set the payment receipt
-				document.set_payment_receipt
-
 
 				## find all  pending refunds and set them as failed.
-				if document.payment_status_changed? && document.payment_status == 1 && document.refund 
+				if document.payment_status_changed? && document.payment_status == 1 
 
-					## find previous refunds.
-					any_pending_refunds = self.class.where(:refund => true, :payment_status => nil)
+					if document.refund
+						## find previous refunds.
+						any_pending_refunds = self.class.where(:refund => true, :payment_status => nil)
 
-					any_pending_refunds.each do |pen_ref|
-						pen_ref.refund_failed
-						pen_ref.skip_callbacks = {:before_save => true, :after_save => true}
-						pen_ref.save
+						any_pending_refunds.each do |pen_ref|
+							pen_ref.refund_failed
+							pen_ref.skip_callbacks = {:before_save => true, :after_save => true}
+							pen_ref.save
+						end
+
+					
 					end
+
+					## set the payment receipt
+					document.set_payment_receipt
 
 				end
 			end
@@ -147,10 +154,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## called in show action of controller.
 	## return[Array]
 	def set_payment_receipt
-		self.payment_receipt = []
+		self.payment_receipt = {:current_payment => [], :cart => {}}
 		Auth.configuration.cart_item_class.constantize.where(:accepted_by_payment_id => self.id.to_s).each do |c_item|
-			self.payment_receipt <<  c_item.id.to_s
+			self.payment_receipt[:current_payment] <<  c_item
 		end
+		set_cart if self.cart.nil?
+		self.payment_receipt[:cart] = self.cart.prepare_receipt
 	end
 
 	##res : 59a5405c421aa90f732c9059
@@ -179,7 +188,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	def payment_callback(type,params,&block)
 		
-		
 		if self.refund
 			self.send("refund_callback",params,&block) 
 		else
@@ -189,14 +197,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 		yield if block_given?
 	end
 
+	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def cash_callback(params,&block)
-		self.payment_status = 1
+		self.payment_status = 1 if self.new_record?
 	end
 
+	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def cheque_callback(params,&block)
-		self.payment_status = 1
+		self.payment_status = 1 if self.new_record?
 	end
 
+	## called everytime the payment is saved, created or updated.
 	def refund_callback(params,&block)
 		
 			## if there is something to refund, make that the amount for this payment.
@@ -232,8 +243,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 		self.payment_status = 0
 	end
 
+	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def card_callback(params,&block)
-		self.payment_status = 1
+		self.payment_status = 1 if self.new_record?
 	end
 
 	def payment_failed
@@ -281,10 +293,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## and then debit/credit.
 	## return[Boolean] : true/false depending on whether all the cart items could be successfully updated or not. 
 	def update_cart_items_accepted
-
+		puts "came to update cart items accepted"
+		puts "payment status is: #{payment_status}"
+		puts "payment status was: #{payment_status_was}"
 		if payment_status == 1
 			self.cart.cart_credit+= self.amount
 		elsif payment_status == 0 && payment_status_was == 1
+			puts "correctly deducted cart credit."
 			self.cart.cart_credit-= self.amount
 		else
 

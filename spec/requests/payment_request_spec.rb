@@ -82,12 +82,52 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        ## payment goes from success to failure.
-        ## in that case cart items should become unpaid.
-        it " -- if payment status is set as false, cart item statuses are also updated -- " do 
+        
+        it " -- if payment status is set as failed, cart item statuses are also updated -- ", :payment_cart_item_reversal do 
+    
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            payment.signed_in_resource = @u
+            ## this is setting the payment as successfully.
+            payment.payment_status = 1
+            ps = payment.save
+
+
+            ## now all the cart items should be accepted
+            @created_cart_item_ids.each do |id|
+                cart_item = Shopping::CartItem.find(id)
+                expect(cart_item.accepted).to be_truthy
+            end
+
+            ## now update payment as failed
+
+            payment = Shopping::Payment.find(payment.id)
+            payment.signed_in_resource = @admin
+            payment.payment_status = 0
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
             
 
+             @created_cart_item_ids.each do |id|
+                cart_item = Shopping::CartItem.find(id)
+                expect(cart_item.accepted).not_to be_truthy
+            end
+
         end
+
+        it " -- helps the cashier to calculate change -- " do 
+
+            ## proposed plan is in the cash callback, check if the amount is less than cart pending balance.
+            ## if yes, then let it be.
+            ## if more, then , make amount to cart pending balance, and set change to the difference.
+
+        end
+
 
         it " -- mix and play : payments made, then cart item removed, then refund request made, then earlier payment fails, now what happens to the other cart items -- " do 
 
@@ -103,7 +143,13 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     context " -- payment made to empty cart -- " do 
 
+        it " -- doesnt allow payment to be created if cart is empty -- " do 
+
+        end
+
     end
+
+
 
     ## note also need to check this in case of cart controller, when we add or remove cart items.
     ## set cart item accepted specs.
@@ -160,7 +206,45 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     end
  
     context " -- payment receipt -- " do 
-        it " -- generates receipt after payment is saved -- " do 
+
+        before(:example) do 
+
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+            @created_cart_item_ids = []
+            @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
+            @cart.save
+
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+
+           
+           
+  
+
+        end
+
+        after(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+
+            
+                  
+        end
+
+
+        it " -- generates receipt after payment is saved -- ", :failure => true do 
 
             ## proposed plan for successfull payment.
             ## cart should prepare cart
@@ -168,6 +252,20 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## so basically a hash with two keys should be generated
             ## cart => {with all its attributes}
             ## curr_payment => {with cart item ids, that it has paid for.}
+
+            ## expect the payment_receipt hash to be present.
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            
+            assigned_p = assigns(:payment)
+
+            expect(Shopping::Payment.count).to eq(1)
+            
+            @created_cart_item_ids.each do |id|
+                cart_item = Shopping::CartItem.find(id)
+                expect(cart_item.accepted).to be_truthy
+            end
+
+            puts JSON.pretty_generate(assigned_p.payment_receipt)
 
         end
     end
@@ -218,7 +316,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        it " -- creates a refund request if the cart pending balance is negative. -- " do 
+
+
+        it " -- creates a refund request if the cart pending balance is negative -- " do 
 
             
             expect(@cart.cart_pending_balance).to eq(0.00)
@@ -236,7 +336,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## so basically here we are just creating a refund request.
             ## basically here it doesn't matter what payment type and amount is used.
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
-            puts response.body.to_s
+            
             expect(response.code).to eq("201")
             
             ## now basically the idea is that when the refund is set as approved, it has to check 

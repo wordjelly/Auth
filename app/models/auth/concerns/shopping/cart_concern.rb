@@ -151,4 +151,15 @@ module Auth::Concerns::Shopping::CartConcern
 		return get_cart_pending_balance
 	end
 
+	## just replaces the cart_items with an array of cart_item_ids
+	## replaces the cart_payments with an array of cart_payment_ids
+	## then returns a hash with these two instead of the original values.
+	## @used_in : Shopping::PaymentConcern.set_receipt.
+	def prepare_receipt
+		cart_item_ids = cart_items.map{|c| c = c.id.to_s}
+		cart_payment_ids = cart_payments.map{|c| c = c.id.to_s}
+		receipt = self.attributes.merge({:cart_items => cart_item_ids, :cart_payments => cart_payment_ids})
+		receipt
+	end
+
 end

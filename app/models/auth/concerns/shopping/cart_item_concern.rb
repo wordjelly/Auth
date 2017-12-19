@@ -88,6 +88,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	end
 
+	## if the item is already accepted, then just returns true.
 	## decides whether or not the current item can be accepted , given whatever money has been paid by the resource.
 	## will first set the order as accepted, provided that the cart has enough credit. While checking for the credit, will debit the minimum amount necessary to accept this cart item, from the cart credit.
 	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
@@ -95,7 +96,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## this is used to generate the receipt, and keep track of which payments led to which cart items being accepted.
 	## returns the result of calling #save on the cart_item.
 	def set_accepted(payment,override)
-		self.accepted = cart_has_sufficient_credit_for_item?(payment.cart) 
+		if cart_has_sufficient_credit_for_item?(payment.cart) 
+			## is it already accepted?
+			if self.accepted
+				return true
+			else
+				self.accepted = true
+			end
+		else
+			self.accepted = false
+		end
 		self.accepted = override if override
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.save
