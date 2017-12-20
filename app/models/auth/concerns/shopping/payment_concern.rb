@@ -60,17 +60,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## cart => with all its attributes
 		## payment => with an array of cart_item objects accepted due to it.
 		attr_accessor :payment_receipt
-		
+			
+		##
+		## how much change should be given to the customer.
+		##
+		attr_accessor :cash_change
+
 		validates_presence_of :cart_id
 		validates_presence_of :resource_id
 		validates_presence_of :amount
 		validates_presence_of :payment_type
 		validates_presence_of :resource_class
+		validate :cheque_or_card_payment_not_excessive
 
+		before_validation do |document|
+			document.set_cart(document.cart_id)
+		end
 
 		before_save do |document|
 			if !document.skip_callback?("before_save")
-				document.set_cart(document.cart_id) 
+				
 				## this callback will return true if all the cart items could be successfully updated.
 				## and in that case everything will be fine.
 				## if it returns false, then set_accepted will automatically add a validation error.
@@ -197,14 +206,39 @@ module Auth::Concerns::Shopping::PaymentConcern
 		yield if block_given?
 	end
 
+	def payment_excessive?
+		self.amount > self.cart.cart_pending_balance && self.amount > 0
+	end
+
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
+	## calculate the change
+	## make the amount equal to the pending balance if it is excesive.
 	def cash_callback(params,&block)
-		self.payment_status = 1 if self.new_record?
+		if self.new_record?
+			calculate_change
+			self.amount = self.cart.cart_pending_balance if payment_excessive?
+			self.payment_status = 1 
+		end
+	end
+
+
+	## sets the change to be given to the customer
+	## @used_in : cash_callback
+	## @return[nil] : returns nothing, just sets the cash_change attribute.
+	def calculate_change
+		## by this point in time the cart has already been set, and prepared, so we know the total pending amount. 
+		if self.amount > self.cart.cart_pending_balance
+			self.cash_change = self.amount - self.cart.cart_pending_balance
+		else
+			self.cash_change = 0
+		end
 	end
 
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def cheque_callback(params,&block)
-		self.payment_status = 1 if self.new_record?
+		if self.new_record?
+			self.payment_status = 1 
+		end
 	end
 
 	## called everytime the payment is saved, created or updated.
@@ -245,7 +279,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def card_callback(params,&block)
-		self.payment_status = 1 if self.new_record?
+		if self.new_record?
+			self.errors.add(:amount,"The amount you entered is greater than the due amount") if payment_excessive?
+			self.payment_status = 1
+		end 
 	end
 
 	def payment_failed
@@ -293,13 +330,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## and then debit/credit.
 	## return[Boolean] : true/false depending on whether all the cart items could be successfully updated or not. 
 	def update_cart_items_accepted
-		puts "came to update cart items accepted"
-		puts "payment status is: #{payment_status}"
-		puts "payment status was: #{payment_status_was}"
+		
 		if payment_status == 1
 			self.cart.cart_credit+= self.amount
 		elsif payment_status == 0 && payment_status_was == 1
-			puts "correctly deducted cart credit."
+			
 			self.cart.cart_credit-= self.amount
 		else
 
@@ -319,6 +354,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end	
 
 
+	def cheque_or_card_payment_not_excessive
+		self.errors.add(:amount,"payment is excessive") if payment_excessive? && (is_cheque? || is_card?) && !refund
+	end
+
+	
 
 end
 

@@ -111,30 +111,83 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
-            
+            payment.save
 
-             @created_cart_item_ids.each do |id|
+            @created_cart_item_ids.each do |id|
                 cart_item = Shopping::CartItem.find(id)
                 expect(cart_item.accepted).not_to be_truthy
             end
 
         end
 
-        it " -- helps the cashier to calculate change -- " do 
-
-            ## proposed plan is in the cash callback, check if the amount is less than cart pending balance.
-            ## if yes, then let it be.
-            ## if more, then , make amount to cart pending balance, and set change to the difference.
-
-        end
+        
 
 
         it " -- mix and play : payments made, then cart item removed, then refund request made, then earlier payment fails, now what happens to the other cart items -- " do 
 
         end
 
+
+
     end
 
+
+    context " -- excess payment -- " do 
+        before(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+            @created_cart_item_ids = []
+            @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
+            @cart.save
+
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+        end
+
+        after(:example) do 
+             Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+        end
+
+        it " -- cash payment should set amount to pending balance, and pass, with change being calculated -- ", :cash_payment_excess => true do 
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    
+            expect(Shopping::Payment.count).to eq(1)
+
+            payment = assigns(:payment)
+            expect(payment.cash_change).to eq(5.00)
+
+        end
+
+        it " -- cheque payment should fail, saying amount is excessive -- ", :cheque_payment_excess => true do 
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cheque", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            
+            puts response.body.to_s
+            expect(Shopping::Payment.count).to eq(0)
+
+            payment = assigns(:payment)
+            expect(payment.errors.full_messages).not_to be_empty
+
+        end
+
+        it " -- card payment should fail, saying amount is excessive -- " do 
+
+        end
+
+    end
 
     context " -- gateway payment -- " do 
 
@@ -144,6 +197,10 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     context " -- payment made to empty cart -- " do 
 
         it " -- doesnt allow payment to be created if cart is empty -- " do 
+
+        end
+
+        it " -- doesnt allow payment amount to be negative -- " do 
 
         end
 
@@ -266,6 +323,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             end
 
             puts JSON.pretty_generate(assigned_p.payment_receipt)
+
+
 
         end
     end

@@ -40,6 +40,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @payment.resource_class = lookup_resource.class.name
     @payment = add_signed_in_resource(@payment)
     @payment.save
+
     respond_with @payment
   end
 
