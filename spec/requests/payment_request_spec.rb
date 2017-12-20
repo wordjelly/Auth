@@ -558,11 +558,43 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
         
-        ## expected behavior should play out as follows:
-        ## so on removing a cart item, will the cart item states for the rest of the stuff be affected?
-        ## no -> because that is affected only if the payment status of a payment changes.
-        ## since at that stage
-        it " -- how does refund affect cart_item_accepted -- " do 
+        
+        it " -- remaining cart items are not affected after refund is approved. -- ", :refund_cart_item_status do 
+            
+
+            last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.unset_cart
+
+            ## create a new refund request and set it as pending.
+            payment = Shopping::Payment.new
+            
+            ## this doesn't matter while creating refunds.
+            payment.payment_type = "cheque"
+            
+            ## this also doesnt matter while creating refunds.
+            payment.amount = 50.00
+            payment.refund = true
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            
+            ## need to assign this because we are bypassing the controller.
+            payment.signed_in_resource = @u
+            ps = payment.save
+            
+            ##now first assert that a refund exists whose refund status is null.
+            payment = Shopping::Payment.find(payment.id.to_s)
+            expect(payment.payment_status).to eq(nil)
+
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+
+            ## take all the cart items.
+            payment = Shopping::Payment.find(payment.id.to_s)
+            expect(payment.payment_status).to eq(1) 
+            
+            Shopping::CartItem.all.each do |c_item|
+                expect(c_item.accepted).to be_truthy
+            end           
 
         end
 
