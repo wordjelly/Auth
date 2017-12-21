@@ -162,4 +162,12 @@ module Auth::Concerns::Shopping::CartConcern
 		receipt
 	end
 
+	## checks if there are any items in the cart.
+	## expected that prepare_cart has been called in advance.
+	## return[Boolean] true if there is one or more items in the cart
+	## @used_in: payment_concern validation cart_not_empty
+	def has_items?
+		get_cart_items.size > 0
+	end
+
 end

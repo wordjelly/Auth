@@ -185,6 +185,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- card payment should fail, saying amount is excessive -- " do 
 
+            ## this is same as for cheque, just change the payment type.
+
         end
 
     end
@@ -194,13 +196,64 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     end
 
 
-    context " -- payment made to empty cart -- " do 
+    context " -- payment validations. -- " do 
 
-        it " -- doesnt allow payment to be created if cart is empty -- " do 
+        before(:example) do 
+            Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+            @created_cart_item_ids = []
+            @cart = Shopping::Cart.new
+            @cart.resource_id = @u.id.to_s
+            @cart.resource_class = @u.class.name
+            @cart.save
+
+
+            5.times do 
+                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                cart_item.resource_id = @u.id.to_s
+                cart_item.resource_class = @u.class.name
+                cart_item.parent_id = @cart.id
+                cart_item.price = 10.00
+                cart_item.save
+                @created_cart_item_ids << cart_item.id.to_s
+            end
+
 
         end
 
-        it " -- doesnt allow payment amount to be negative -- " do 
+        after(:example) do 
+             Shopping::CartItem.delete_all
+            Shopping::Cart.delete_all
+            Shopping::Payment.delete_all
+        end
+
+        it " -- doesnt allow payment to be created if cart is empty -- ", :payment_into_empty_cart do 
+
+            Shopping::CartItem.all.each do |citem|
+                citem.unset_cart
+            end
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: -10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    
+            expect(Shopping::Payment.count).to eq(0)
+
+            payment = assigns(:payment)
+
+            expect(payment.errors.full_messages).not_to be_empty
+
+
+        end
+
+        it " -- payment or refund amount must be greater than zero. -- ", :payment_greater_than => true do
+
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: -10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+                    
+            expect(Shopping::Payment.count).to eq(0)
+
+            payment = assigns(:payment)
+
+            expect(payment.errors.full_messages).not_to be_empty
 
         end
 

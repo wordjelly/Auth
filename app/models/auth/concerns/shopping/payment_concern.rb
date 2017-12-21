@@ -72,6 +72,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :payment_type
 		validates_presence_of :resource_class
 		validate :cheque_or_card_payment_not_excessive
+		validates :amount, numericality: { :greater_than => 0.00 }
+		validate :cart_not_empty
 
 		before_validation do |document|
 			document.set_cart(document.cart_id)
@@ -356,6 +358,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	def cheque_or_card_payment_not_excessive
 		self.errors.add(:amount,"payment is excessive") if payment_excessive? && (is_cheque? || is_card?) && !refund
+	end
+
+	def cart_not_empty
+		self.errors.add(:cart,"cart has to have some items in order to make a payment") if !self.cart.has_items?
 	end
 
 	
