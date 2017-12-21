@@ -72,7 +72,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :payment_type
 		validates_presence_of :resource_class
 		validate :cheque_or_card_payment_not_excessive
-		validates :amount, numericality: { :greater_than => 0.00 }
+		validates :amount, numericality: { :greater_than => 0.00 }, unless: Proc.new { |document| document.refund  }
 		validate :cart_not_empty
 
 		before_validation do |document|
@@ -100,14 +100,19 @@ module Auth::Concerns::Shopping::PaymentConcern
 				## find all  pending refunds and set them as failed.
 				if document.payment_status_changed? && document.payment_status == 1 
 
+
+					
 					if document.refund
+						
 						## find previous refunds.
 						any_pending_refunds = self.class.where(:refund => true, :payment_status => nil)
 
+						
 						any_pending_refunds.each do |pen_ref|
 							pen_ref.refund_failed
 							pen_ref.skip_callbacks = {:before_save => true, :after_save => true}
-							pen_ref.save
+							res = pen_ref.save
+
 						end
 
 					
@@ -127,7 +132,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		def find_payments(resource,cart)
 			res = Auth.configuration.payment_class.constantize.where(:resource_id => resource.id.to_s, :cart_id => cart.id.to_s)
 			res.each do |p|
-				puts "found payment: #{p.id.to_s}"
+				#puts "found payment: #{p.id.to_s}"
 			end
 		end		
 	end
