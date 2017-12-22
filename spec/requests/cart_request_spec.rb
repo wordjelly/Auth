@@ -19,6 +19,14 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
         
         
+        ### CREATE ONE ADMIN USER
+
+        ### It will use the same client as the user.
+        @admin = Admin.new(attributes_for(:admin_confirmed))
+        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin.save
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+        
     end
 
 
@@ -350,6 +358,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	            payment.resource_id = @u.id.to_s
 	            payment.resource_class = @u.class.name.to_s
 	            payment.cart_id = @cart.id.to_s
+	            payment.signed_in_resource = @admin
 	            ps = payment.save
 	            expect(ps).to be_truthy
 

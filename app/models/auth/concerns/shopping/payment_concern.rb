@@ -74,20 +74,28 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validate :cheque_or_card_payment_not_excessive
 		validates :amount, numericality: { :greater_than => 0.00 }, unless: Proc.new { |document| document.refund  }
 		validate :cart_not_empty
+		validate :document_updated_only_by_admin
+		validate :document_status_set_only_by_admin
+		validate :refund_created_or_approved_only_if_balance_is_negative
+		validate :refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
 
 		before_validation do |document|
 			document.set_cart(document.cart_id)
+			x = document.payment_callback(document.payment_type,document.payment_params) do 
+						document.update_cart_items_accepted if document.payment_status_changed?
+			end
+		end
+
+		## because the validation will not allow the payment status to be changed in case this is not an admin user, and we need to allow the user to refresh the payment state, in case of refunds which need to set as failed because some later refund was accepted but in that callback the nil refund was for some reason not set as failed.
+		## also in case of gateway payments, we need to allow to see if it can be verified.
+		## both these methods change the state of the payment suo moto. it is not necessary that the user should be an admin.
+		after_validation do |document|
+			document.refresh_refund
+			## what about verify payment.
 		end
 
 		before_save do |document|
 			if !document.skip_callback?("before_save")
-				
-				## this callback will return true if all the cart items could be successfully updated.
-				## and in that case everything will be fine.
-				## if it returns false, then set_accepted will automatically add a validation error.
-				document.payment_callback(document.payment_type,document.payment_params) do 
-						document.update_cart_items_accepted if document.payment_status_changed?
-				end
 
 			end
 		end
@@ -109,8 +117,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 						
 						any_pending_refunds.each do |pen_ref|
+							pen_ref.signed_in_resource = document.signed_in_resource
 							pen_ref.refund_failed
-							pen_ref.skip_callbacks = {:before_save => true, :after_save => true}
+							## so that it doesnt do this recursively for every refund.
+							pen_ref.skip_callbacks = {:after_save => true}
 							res = pen_ref.save
 
 						end
@@ -226,6 +236,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			self.amount = self.cart.cart_pending_balance if payment_excessive?
 			self.payment_status = 1 
 		end
+		puts "at end of cash callback the payment status is: #{self.payment_status}"
 	end
 
 
@@ -250,35 +261,16 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## called everytime the payment is saved, created or updated.
 	def refund_callback(params,&block)
-		
-			## if there is something to refund, make that the amount for this payment.
+
 			
-			if self.cart.refund_amount < 0
-				
-				if signed_in_resource.is_admin?
-					refund_success
-				end
-			## if there is nothing to refund, make the amount of the payment zero, and set the payment status to failed.
-			else
-				if signed_in_resource.is_admin?
-					refund_failed
-				end
-				if self.new_record?
-					self.errors.add(:refund,"Nothing to refund")
-				end
-			end
-
-
-		
 	end
 
-	## used in refund_callback
 	def refund_success
 		self.amount = self.cart.refund_amount
 		self.payment_status = 1
 	end
 
-	## used in refund callback.
+	
 	def refund_failed
 		self.amount = 0
 		self.payment_status = 0
@@ -287,7 +279,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def card_callback(params,&block)
 		if self.new_record?
-			self.errors.add(:amount,"The amount you entered is greater than the due amount") if payment_excessive?
 			self.payment_status = 1
 		end 
 	end
@@ -356,20 +347,67 @@ module Auth::Concerns::Shopping::PaymentConcern
 			cart_item.set_accepted(self,false)
 		}.compact.uniq
 		self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
-		return cart_item_update_results[0] == true
-
+		
 	end	
 
+	#######################################################
+	##
+	## CUSTOM VALIDATION DEFS
+	##
+	#######################################################
 
+	## validation
 	def cheque_or_card_payment_not_excessive
+		
 		self.errors.add(:amount,"payment is excessive") if payment_excessive? && (is_cheque? || is_card?) && !refund
 	end
 
+	## validation
 	def cart_not_empty
+		
 		self.errors.add(:cart,"cart has to have some items in order to make a payment") if !self.cart.has_items?
+
 	end
 
-	
+	## not really a validation, basically doesnt allow any user provided attributes to be set if the user is not an admin and trying to update the document.
+	def document_updated_only_by_admin
+		if !new_record?
+			if !signed_in_resource.is_admin? 
+				self.attributes.clear
+			end
+		end
+
+	end
+
+	## validation
+	def document_status_set_only_by_admin
+		if payment_status_changed?
+			if !signed_in_resource.is_admin?
+				## delete the payment_status if resource is not an admin, whether he is saving or updating the document.
+				self.attributes.delete("payment_status")
+				self.errors.add(:payment_status,"only admin can set or change the payment status")
+			end
+		end
+	end
+
+	## validation
+	def refund_created_or_approved_only_if_balance_is_negative
+		if refund
+			## in case the admin wants to mark a refund as failed.
+			if payment_status == 0 && payment_status_changed?
+			
+			else
+				self.errors.add("payment_status","you cannot authorize a refund since the pending balance is positive.") if self.cart.cart_pending_balance >= 0
+			end
+		end
+	end
+
+	## validation 
+	def refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
+		if payment_status_changed? && payment_status == 1 && refund
+			self.errors.add("payment_status","you cannot authorize a refund since the amount you entered is wrong") if self.cart.cart_pending_balance != self.amount
+		end
+	end
 
 end
 

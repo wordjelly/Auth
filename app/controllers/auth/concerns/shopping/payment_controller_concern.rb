@@ -53,12 +53,6 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @payment.assign_attributes(permitted_params[:payment])
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     @payment.payment_params = params
-    
-    ## for gateway payments this is how we refresh.
-    @payment.verify_payment
-
-    ## for refunds this is how we refresh it.
-    @payment.refresh_refund
     @payment.save
     respond_with @payment
   end
@@ -74,27 +68,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
 
   def permitted_params
-    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund]
-
-    ## payment status is allowed only if the user is an admin user.
-    payment_params << :payment_status if (current_signed_in_resource && current_signed_in_resource.is_admin?)
-
-    
-    ## if the user is not admin, and the action is update, none of the parameters are allowed.
-  
-    if action_name.to_s == "update"
-     
-
-      if !current_signed_in_resource.is_admin?
-       
-        payment_params = []
-
-      else
-
-      end
-
-    end
-
+    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status]
 
     params.permit({payment: payment_params},:id)
     

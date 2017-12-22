@@ -47,9 +47,13 @@ module Auth::Concerns::Shopping::CartConcern
 	def prepare_cart
 		find_cart_items
 		set_cart_price
+		
 		set_cart_payments
+		
 		set_cart_paid_amount
+		
 		set_cart_pending_balance
+
 	end
 
 	################ ATTR ACCESSOR SETTERS & GETTERS ##############
@@ -94,9 +98,11 @@ module Auth::Concerns::Shopping::CartConcern
 		payments = get_cart_payments
 		price = get_cart_price
 		payments.each do |payment|
+
 			total_paid += payment.amount if (payment.payment_success)
 		end
 		self.cart_paid_amount = total_paid
+		
 		self.cart_credit = self.cart_paid_amount
 		self.cart_paid_amount
 	end
