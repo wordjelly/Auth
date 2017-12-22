@@ -81,7 +81,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		before_validation do |document|
 			document.set_cart(document.cart_id)
-			x = document.payment_callback(document.payment_type,document.payment_params) do 
+			document.payment_callback(document.payment_type,document.payment_params) do 
 						document.update_cart_items_accepted if document.payment_status_changed?
 			end
 		end
@@ -91,6 +91,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## both these methods change the state of the payment suo moto. it is not necessary that the user should be an admin.
 		after_validation do |document|
 			document.refresh_refund
+			document.verify_payment
 			## what about verify payment.
 		end
 
@@ -234,9 +235,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		if self.new_record?
 			calculate_change
 			self.amount = self.cart.cart_pending_balance if payment_excessive?
-			self.payment_status = 1 
+			#self.payment_status = 1 
 		end
-		puts "at end of cash callback the payment status is: #{self.payment_status}"
 	end
 
 
@@ -254,15 +254,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def cheque_callback(params,&block)
-		if self.new_record?
-			self.payment_status = 1 
-		end
+		
 	end
 
-	## called everytime the payment is saved, created or updated.
+	
 	def refund_callback(params,&block)
-
-			
+		## onus is on the user to provide the payment status.
+		## some checks and balances can be done for verification purposes.
 	end
 
 	def refund_success
@@ -278,9 +276,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## the if new_record? is added so that the callback is done only when the payment is first made and not every time the payment is updated
 	def card_callback(params,&block)
-		if self.new_record?
-			self.payment_status = 1
-		end 
+		
 	end
 
 	def payment_failed
@@ -309,7 +305,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## currently does nothing
 	## overridden in the payment gateway to verify payments that have not be either success or failure.
 	def verify_payment
-
+		true
 	end
 
 	## finds the cart that this payment refers to

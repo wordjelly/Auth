@@ -69,7 +69,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
         it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. " do 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(1)
             
@@ -221,7 +221,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- cash payment should set amount to pending balance, and pass, with change being calculated -- ", :cash_payment_excess => true do 
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(1)
 
@@ -373,7 +373,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## override set_accepted method in payment_concern to return false.
             
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
 
             payment = assigns(:payment)
             expect(payment.errors.full_messages).not_to be_empty
@@ -430,7 +430,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## curr_payment => {with cart item ids, that it has paid for.}
 
             ## expect the payment_receipt hash to be present.
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
             
             assigned_p = assigns(:payment)
 
@@ -483,6 +483,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
             payment.signed_in_resource = @admin
+            payment.payment_status = 1
             ps = payment.save
            
 
@@ -515,13 +516,13 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## so basically here we are just creating a refund request.
             ## basically here it doesn't matter what payment type and amount is used.
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers        
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
             
             puts response.body.to_s
 
             expect(response.code).to eq("201")
             
-            ## now basically the idea is that when the refund is set as approved, it has to check 
+           
 
         end
 
@@ -563,8 +564,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## this doesn't matter while creating refunds.
             payment.payment_type = "cheque"
             
-            ## this also doesnt matter while creating refunds.
-            payment.amount = -10
+            
+            payment.amount = 5000
             payment.refund = true
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
@@ -582,7 +583,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## it should set the status of the payment as accepted.
 
-            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1, amount: -10},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
           
             
             payment = Shopping::Payment.find(payment.id)
@@ -856,13 +857,19 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
             payment.signed_in_resource = @admin
+            payment.payment_status = 1
             ps = payment.save
             expect(ps).to be_truthy
+            puts payment.attributes.to_s
 
             ## remove an item from the cart
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
             last_cart_item.unset_cart
 
+            cart = Shopping::Cart.find(payment.cart_id)
+            cart.prepare_cart
+            puts "teh cart pending balance. is."
+            puts cart.cart_pending_balance.to_s
 
             ## create a refund
             ref = Shopping::Payment.new
@@ -874,6 +881,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ref.signed_in_resource = @u
             ref.cart_id = @cart.id.to_s
             rs = ref.save
+            puts ref.errors.full_messages.to_s
             expect(rs).to be_truthy
 
             ## now try to update it.

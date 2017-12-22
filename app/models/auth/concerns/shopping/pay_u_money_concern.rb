@@ -36,7 +36,7 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 			end
 		end
 
-
+		
 		##add a validation, that checks that each of the 7 required fields are present, before create, only when the payment_type is gateway.
 		##the is_gateway? method is defined in payment_concern.
 		##these validations are run before the before_save is called.
@@ -60,58 +60,60 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	## Interpretation: 
 	## check validation errors, if none, then there should be a payment status.
 	def verify_payment
-		if self.gateway_payment_initiated
-			options = {:var1 => self.txnid, :command => 'verify_payment'}
-			webservice = PayuIndia::WebService.new(payment_gateway_key,payment_gateway_salt,options)
-			sha_hash = webservice.generate_checksum
-			if resp = Typhoeus.post(PayuIndia.webservice_url, body: 
-				{ key: payment_gateway_key, command: 'verify_payment', hash: sha_hash, var1: self.txnid}, headers: {'Content-Type' => 'application/x-www-form-urlencoded'})
-				Rails.logger.info(resp.body + ":transaction_id:" + self.id.to_s)
-				begin
-					details = JSON.parse(resp.body)
+		if self.is_gateway?
+			if self.gateway_payment_initiated 
+				options = {:var1 => self.txnid, :command => 'verify_payment'}
+				webservice = PayuIndia::WebService.new(payment_gateway_key,payment_gateway_salt,options)
+				sha_hash = webservice.generate_checksum
+				if resp = Typhoeus.post(PayuIndia.webservice_url, body: 
+					{ key: payment_gateway_key, command: 'verify_payment', hash: sha_hash, var1: self.txnid}, headers: {'Content-Type' => 'application/x-www-form-urlencoded'})
+					Rails.logger.info(resp.body + ":transaction_id:" + self.id.to_s)
+					begin
+						details = JSON.parse(resp.body)
 
-					if status = details["status"].to_s		
-						self.payment_status = 0 if (status == "0")
-							
-						if status == "1"
-							if details["transaction_details"]
-								if details["transaction_details"]["status"]
-									self.payment_status = 1 if details["transaction_details"]["status"].to_s.downcase == "success" 
-									self.payment_status = 0 if details["transaction_details"]["status"].to_s.downcase =~/pending|failed/
-									if payment_status_changed?
-										self.save
+						if status = details["status"].to_s		
+							self.payment_status = 0 if (status == "0")
+								
+							if status == "1"
+								if details["transaction_details"]
+									if details["transaction_details"]["status"]
+										self.payment_status = 1 if details["transaction_details"]["status"].to_s.downcase == "success" 
+										self.payment_status = 0 if details["transaction_details"]["status"].to_s.downcase =~/pending|failed/
+										if payment_status_changed?
+											self.save
+										else
+											self.errors.add(:payment_status,"transaction status was something other than failed|success|pending")
+										end
+
 									else
-										self.errors.add(:payment_status,"transaction status was something other than failed|success|pending")
+										self.errors.add(:payment_status,"transaction details has no status key in it.")
+										
 									end
-
 								else
-									self.errors.add(:payment_status,"transaction details has no status key in it.")
+									self.errors.add(:payment_status,"transaction details key missing from response")
 									
 								end
 							else
-								self.errors.add(:payment_status,"transaction details key missing from response")
+								self.errors.add(:payment_status,"status key is neither 1 not 0")
 								
 							end
+							
 						else
-							self.errors.add(:payment_status,"status key is neither 1 not 0")
+							self.errors.add(:payment_status,"no status key in payment verification response")
 							
 						end
-						
-					else
-						self.errors.add(:payment_status,"no status key in payment verification response")
-						
-					end
 
-				rescue => e
-					Rails.logger.error(e.to_s)
-					self.errors.add(:payment_status,"failure parsing payment response")
+					rescue => e
+						Rails.logger.error(e.to_s)
+						self.errors.add(:payment_status,"failure parsing payment response")
+					end
+				else
+					## does nothing, the caller has to check the payment_status to infer that the call was not successfull.
+					self.errors.add(:payment_status,"no response from verify endpoint")
 				end
 			else
-				## does nothing, the caller has to check the payment_status to infer that the call was not successfull.
-				self.errors.add(:payment_status,"no response from verify endpoint")
+				self.errors.add(:payment_status,"payment was never initiated")
 			end
-		else
-			self.errors.add(:payment_status,"payment was never initiated")
 		end
 	end
 
