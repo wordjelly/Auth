@@ -61,6 +61,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 			false if document.accepted == true
 		end
 
+		after_validation do |document|
+			document.refresh_accepted
+		end
+
+		validate :user_can_only_update_quantity_and_discount_code
+
+		validate :user_cannot_change_anything_if_payment_accepted
+
+
+
 	end
 
 
@@ -88,14 +98,23 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	end
 
-	## if the item is already accepted, then just returns true.
-	## decides whether or not the current item can be accepted , given whatever money has been paid by the resource.
-	## will first set the order as accepted, provided that the cart has enough credit. While checking for the credit, will debit the minimum amount necessary to accept this cart item, from the cart credit.
-	## in the next line, whatever is set using the first line, can be directly overridden setting the override value to true|false.
-	## finally if the cart item is accepted, then it also stores the id of the payment which led to its being accepted.
-	## this is used to generate the receipt, and keep track of which payments led to which cart items being accepted.
-	## returns the result of calling #save on the cart_item.
+	### this is an internal method, cannot be set by admin or anyone, it is done after validation, since it is not necessary for someone to be admin, even the user can call refresh on the record to get the new state of the acceptence.
+	## just checks if the accepted by payment id exists, and if yes, then doesnt do anything, otherwise will update the cart item status as false.
+	def refresh_accepted
+		if self.accepted_by_payment_id
+			begin
+				Auth.configuration.payment_class.constantize.find(self.accepted_by_payment_id)
+			rescue
+				self.accepted = false
+			end
+		end
+	end
+	
+	## called from payment#update_cart_items_accepted
+	## sets accepted to true or false depending on whether the cart has enough credit for the item.
+	## does not SAVE.
 	def set_accepted(payment,override)
+		#return cart_has_sufficient_credit_for_item?(payment.cart)
 		if cart_has_sufficient_credit_for_item?(payment.cart) 
 			## is it already accepted?
 			if self.accepted
@@ -109,6 +128,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.accepted = override if override
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.save
+
 	end
 	
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
@@ -159,6 +179,32 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.resource_class = cart.get_resource.class.name
 		self.resource_id = cart.get_resource.id.to_s
 		self.save
+	end
+
+	#######################################################
+	##
+	## VALIDATIONS
+	##
+	#######################################################
+
+	def user_can_only_update_quantity_and_discount_code
+		if !self.signed_in_resource.is_admin? && !self.new_record?
+			self_keys = self.attributes.keys
+			self_keys.each do |k|
+				if k == "discount" 
+				elsif k == "quantity"
+				else
+					self.send("#{k}=",self.send("#{k}_was"))
+				end
+			end
+			
+		end
+	end
+
+	def user_cannot_change_anything_if_payment_accepted
+		if !self.signed_in_resource.is_admin?
+			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record?
+		end
 	end
 
 end

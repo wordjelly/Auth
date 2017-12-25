@@ -13,6 +13,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		PENDING = "You need to complete this payment"
 
 
+		
 		## the params that are passed into the payment controller at create or update.
 		## used in the before_update callback
 		## for the gateway_callback
@@ -54,6 +55,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## true if it is a refund, false otherwise.
 		field :refund, type: Boolean
 
+		## the cart associated with this payment
 		attr_accessor :cart
 
 		## Hash with two keys:
@@ -334,15 +336,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		end
 
-		## okay so what if this doesn't go through as expected.
-		## here is where all the transactional issues come up
-		## the right thing here is to check if 
-		## ideally it would make most sense to store on the payment itself the list of newly accepted cart items.
-		## that way there is no need for multiple updates.
 		cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
+			cart_item.signed_in_resource = self.signed_in_resource
 			cart_item.set_accepted(self,false)
 		}.compact.uniq
 		self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
+		
+
 		
 	end	
 

@@ -41,11 +41,11 @@ module Auth::Concerns::Shopping::CartControllerConcern
     @cart = @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
     @cart.resource_id = lookup_resource.id.to_s
     @cart.resource_class = lookup_resource.class.name
-    add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
+    @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
     respond_with @cart
   end
-
+=begin
   def add_cart_items
     not_found("could not find that cart") if @cart.new_record?
     add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
@@ -55,12 +55,12 @@ module Auth::Concerns::Shopping::CartControllerConcern
     not_found("could not find that cart") if @cart.new_record?
     add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
   end
-
+=end
   ## always returns an empty array.
   def update
     not_found("please provide a cart id") if @cart.new_record?
-    add_cart_items if @add_cart_item_ids
-    remove_cart_items if @remove_cart_item_ids
+    @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
+    @cart.add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
     @cart.update(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
     respond_with @cart
   end
@@ -80,17 +80,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   private
 
-  ##returns array of cart items if successfully saved and updated, otherwise nil wherever the save was not successfull or the cart item was not found.
-  def add_or_remove(item_ids,add_or_remove)
-    item_ids.map {|id|
-      if cart_item = @cart_item_class.find(id)
-        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart) : cart_item.unset_cart 
-        resp == true ? cart_item : nil
-      else
-        nil
-      end
-    }
-  end
+  
  
   ##override this def in your controller, and add attributes to transaction:[], each of the attributes in the transaction key will be cycled through, and if those fields exist on the cart_item, then they will be set.
   def permitted_params

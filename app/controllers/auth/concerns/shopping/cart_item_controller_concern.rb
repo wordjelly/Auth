@@ -37,6 +37,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     @cart_item.new_record? or not_found("this is not a new record")
     @cart_item.resource_id = lookup_resource.id.to_s
     @cart_item.resource_class = lookup_resource.class.name
+    @cart_item = add_signed_in_resource(@cart_item)
     @cart_item.save
     respond_with @cart_item
   end
@@ -46,9 +47,9 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     not_found if @cart_item.nil?
     !@cart_item.new_record? or not_found("please provide a valid id for the update")
     @cart_item.resource_id = lookup_resource.id.to_s
-    @cart_item.quantity = permitted_params[:cart_item][:quantity] || @cart_item.quantity 
-    @cart_item.discount_code = permitted_params[:cart_item][:discount] || @cart_item.discount
-    @cart_item.save
+    @cart_item.resource_class = lookup_resource.class.name.to_s
+    @cart_item = add_signed_in_resource(@cart_item)
+    @cart_item.update(permitted_params[:cart_item])
     respond_with @cart_item
   end
 

@@ -176,4 +176,20 @@ module Auth::Concerns::Shopping::CartConcern
 		get_cart_items.size > 0
 	end
 
+
+	##adds a validation error if the cart items could not be successfully added or removed.
+	##called from the controller.
+	##TODO: you should change this to be called before_validation instead, so that all code remains in the model.
+	def add_or_remove(item_ids,add_or_remove)
+	    add_remove_results = item_ids.map {|id|
+	      if cart_item = Auth.configuration.cart_item_class.constantize.find(id)
+	        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart) : cart_item.unset_cart 
+	        resp
+	      else
+	        true 
+	      end
+	    }.compact.uniq
+	    self.errors.add(:cart_items,"some cart items could not be added or removed successfully") if ((add_remove_results.size > 1) || (add_remove_results[0] == false))  
+	end
+
 end

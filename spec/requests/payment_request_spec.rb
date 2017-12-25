@@ -47,6 +47,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
+                cart_item.signed_in_resource = @u
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
@@ -377,6 +378,18 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             payment = assigns(:payment)
             expect(payment.errors.full_messages).not_to be_empty
+        end
+
+        it " -- can recover from situation where all cart items couldnt be accepted -- " do 
+
+            ## so basically the cart item gets marked as being accepted by a payment that doesnt exist.
+
+            ## so basically should have a function that can check for such a scene.
+
+            ## should be able to call update on a cart item, and in doing so, search for the payment, if it doesn't exist, then it should update the cart item as not being accepted.
+
+
+
         end
 
     end

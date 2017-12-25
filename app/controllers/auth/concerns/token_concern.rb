@@ -118,6 +118,7 @@ module Auth::Concerns::TokenConcern
   ## @param[Object] : instance of any object that implements the OwnerConcern.
   ## @return : the object passed in.
   def add_signed_in_resource(obj)
+    puts "current signed in resource is: #{current_signed_in_resource}"
     obj.signed_in_resource = current_signed_in_resource
     obj
   end

@@ -1,6 +1,5 @@
 require "auth/notify"
-class Shopping::Payment
-	include Auth::Concerns::Shopping::PaymentConcern
+class Shopping::Payment < Auth::Shopping::Payment
 	include Auth::Concerns::Shopping::PayUMoneyConcern
 	include Auth::Notify
 	after_save do |document|

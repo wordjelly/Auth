@@ -79,6 +79,7 @@ module Auth::Concerns::OmniConcern
   end
 
   ## @return[Boolean] : true if the update was successfull, false otherwise
+  ## method from_view is taken from Auth::ApplicationController
   def update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity_info,provider)
     @resource = from_view(existing_oauth_resources,resource_klazz)
 

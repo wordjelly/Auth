@@ -297,7 +297,10 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 		end
 
 
+		context " -- create and update show validation errors if some cart items cannot be added or removed -- " do 
 
+
+		end
 
 
 

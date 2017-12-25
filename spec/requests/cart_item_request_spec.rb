@@ -18,6 +18,15 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
         
+
+
+        ### CREATE ONE ADMIN USER
+
+        ### It will use the same client as the user.
+        @admin = Admin.new(attributes_for(:admin_confirmed))
+        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin.save
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
         
     end
 
@@ -48,12 +57,13 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 		context "-- update" do 
 
-			it " -- only updates discount and quantity " do 
+			it " -- only updates discount and quantity ",:update_only => true do 
 				
 				
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name.to_s
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 				
 	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
@@ -79,6 +89,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	        	##so basically we are going to use the client from @u only here as well.
 	        	cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 				
 	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
@@ -87,6 +99,28 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
 	            resp = JSON.parse(response.body)
 	            expect(resp.keys).to include("errors")
+			end	
+
+			it " -- cannot change discount or quantity once a payment has been made on the cart item -- " do 
+
+				## need to add a validation that checks for the existence of a payment, and in that case does not allow changes.
+				
+
+
+			end
+
+			
+
+			it " -- auto updates the cart item status as not accepted, if the accepting payment doesnt exists -- " do 
+
+
+
+
+			end
+
+			it " -- user cannot remove cart item after payment has been made -- " do 
+
+
 			end
 
 		end
@@ -98,6 +132,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name.to_s
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
 				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
@@ -112,6 +147,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name.to_s
 				cart_item.accepted = true
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
 				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
@@ -132,6 +168,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 					cart_item.resource_id = @u.id.to_s
 					cart_item.resource_class = @u.class.name
+					cart_item.signed_in_resource = @admin
 					cart_item.save
 					created_cart_item_ids << cart_item.id.to_s
 				end
@@ -185,6 +222,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	        	cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 				
 	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
