@@ -41,27 +41,26 @@ module Auth::Concerns::Shopping::CartControllerConcern
     @cart = @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
     @cart.resource_id = lookup_resource.id.to_s
     @cart.resource_class = lookup_resource.class.name
+    @cart = add_signed_in_resource(@cart)
     @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
     respond_with @cart
   end
-=begin
-  def add_cart_items
-    not_found("could not find that cart") if @cart.new_record?
-    add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
-  end
 
-  def remove_cart_items
-    not_found("could not find that cart") if @cart.new_record?
-    add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
-  end
-=end
   ## always returns an empty array.
   def update
     not_found("please provide a cart id") if @cart.new_record?
+    @cart.assign_attributes(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
+    @cart = add_signed_in_resource(@cart)
+    puts "the add cart item ids are:"
+    puts "#{@add_cart_item_ids}"
     @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
-    @cart.update(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
+    @cart.save
+    puts "result of save:"
+    puts @cart.errors.full_messages.to_s
+    @cart.prepare_cart
+    puts @cart.get_cart_items
     respond_with @cart
   end
 

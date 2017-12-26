@@ -40,8 +40,6 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	
 		context " -- create " do 
 
-
-
 			it " -- creates cart item with all permitted params,and assigns user id. " do 
 				cart_item = attributes_for(:cart_item)
 				post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
@@ -100,26 +98,87 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	            resp = JSON.parse(response.body)
 	            expect(resp.keys).to include("errors")
 			end	
-
-			it " -- cannot change discount or quantity once a payment has been made on the cart item -- " do 
-
-				## need to add a validation that checks for the existence of a payment, and in that case does not allow changes.
-				
-
-
-			end
-
 			
+		end
 
-			it " -- auto updates the cart item status as not accepted, if the accepting payment doesnt exists -- " do 
+		context " -- cart item and payment interaction -- " do 
+
+			before(:example) do 
+	            
+	            Shopping::CartItem.delete_all
+	            Shopping::Cart.delete_all
+	            Shopping::Payment.delete_all
+	            @created_cart_item_ids = []
+	            @cart = Shopping::Cart.new
+	            @cart.resource_id = @u.id.to_s
+	            @cart.resource_class = @u.class.name
+	            @cart.save
+
+            	5.times do 
+                
+	                cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+	                cart_item.resource_id = @u.id.to_s
+	                cart_item.resource_class = @u.class.name
+	                cart_item.parent_id = @cart.id
+	                cart_item.price = 10.00
+	                cart_item.signed_in_resource = @admin
+	                cart_item.save
+	                @created_cart_item_ids << cart_item.id.to_s
+	            
+	            end
+	           
+	        end
+
+	        after(:example) do 
+	            
+	            Shopping::CartItem.delete_all
+	            Shopping::Cart.delete_all
+	            Shopping::Payment.delete_all
+	        
+	        end
 
 
+			it " -- auto updates the cart item status as not accepted, if the accepting payment doesnt exists -- ", :citem_payment_delete do 
 
+
+				## create and save a payment for this entire cart.
+				payment = Shopping::Payment.new
+		        payment.payment_type = "cash"
+		        payment.amount = 50.00
+		        payment.resource_id = @u.id.to_s
+		        payment.resource_class = @u.class.name.to_s
+		        payment.cart_id = @cart.id.to_s
+		        payment.signed_in_resource = @admin
+		        ## this is setting the payment as successfully.
+		        payment.payment_status = 1
+		        ps = payment.save
+		        puts payment.errors.full_messages.to_s
+		        expect(ps).to be_truthy
+
+
+		        ## this should cause all the cart item statuses to get accepted.
+		        @created_cart_item_ids.each do |cid|
+		        	citem = Shopping::CartItem.find(cid)
+		        	expect(citem.accepted).to be_truthy
+		        end
+
+				## then delete the payment.
+				l = payment.delete
+				puts "result of deleting payment : #{l.to_s}"
+				## now call update on the first cart item with no payment.
+				put shopping_cart_item_path({:id => @created_cart_item_ids.first}), {api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+
+
+				## expect the cart item to have accepted set to false.
+				citem = Shopping::CartItem.find(@created_cart_item_ids.first)
+				expect(citem.accepted == false).to be_truthy
 
 			end
+
 
 			it " -- user cannot remove cart item after payment has been made -- " do 
 
+				
 
 			end
 

@@ -45,6 +45,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
+                cart_item.signed_in_resource = @admin
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
 			end
@@ -79,7 +80,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+	                cart_item.signed_in_resource = @admin
 	                cart_item.save
+
 	                @created_cart_item_ids << cart_item.id.to_s
 				end
 			end
@@ -148,6 +151,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	                cart_item.resource_id = @u.id.to_s
 	                cart_item.resource_class = @u.class.name
 	                cart_item.parent_id = @cart.id
+	                cart_item.signed_in_resource = @admin
 	                cart_item.price = 10.00
 	                cart_item.save
 	                @created_cart_item_ids << cart_item.id.to_s
@@ -169,7 +173,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				##this is the new cart item to be added
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
-				
+				cart_item.signed_in_resource = @admin
 				cart_item.save
 
 				##the cart item to be removed
@@ -216,6 +220,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 		            cart_item.resource_id = @u.id.to_s
 		            cart_item.resource_class = @u.class.name
+		            cart_item.signed_in_resource = @admin
 		            cart_item.parent_id = @cart.id.to_s
 		            cart_item.save
 	            	@created_cart_item_ids << cart_item.id.to_s
@@ -226,10 +231,16 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	            @additional_cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
 	            @additional_cart_item.resource_id = @u.id.to_s
 	            @additional_cart_item.resource_class = @u.class.name.to_s
+	            @additional_cart_item.signed_in_resource = @admin
 	            @additional_cart_item.save
 
 			end
 
+			after(:example) do 
+				Shopping::CartItem.delete_all
+				Shopping::Cart.delete_all
+				Shopping::Payment.delete_all
+			end
 
 			it " -- additional cart item is visible before adding to cart -- " do 
 
@@ -239,12 +250,16 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			end
 
-			it " -- additional cart item is not visible after adding to cart -- " do 
+			it " -- additional cart item is not visible after adding to cart -- ", :invisible => true do 
 
 				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
+				puts "response body"
+				puts response.body.to_s
+
 				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
-				
+				puts "first item"
+				puts cart_items.first.to_s
 				expect(cart_items).to be_empty
 
 			end
@@ -263,30 +278,18 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			end
 
 
-			it " -- doesn't remove item if before_unset_cart returns false -- " do 
+			it " -- doesn't remove item if accepted is true -- " do 
 
 				## first add the item into the cart, after setting accepted to true.
 				@additional_cart_item.parent_id = @cart.id.to_s
+				@additional_cart_item.accepted = true
 				@additional_cart_item.save
 
-				Shopping::CartItem.class_eval do 
-
-					def before_unset_cart
-						false
-					end
-
-				end
+				
 
 				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers				
 
-				Shopping::CartItem.class_eval do 
-
-					def before_unset_cart
-						true
-					end
-
-				end
-
+			
 				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
 				
 				expect(cart_items.size).to eq(0)
@@ -299,6 +302,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 		context " -- create and update show validation errors if some cart items cannot be added or removed -- " do 
 
+			
+			
 
 		end
 
@@ -322,6 +327,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	                cart_item.resource_class = @u.class.name
 	                cart_item.parent_id = @cart.id
 	                cart_item.price = 10.00
+	                cart_item.signed_in_resource = @admin
 	                cart_item.save
 	                @created_cart_item_ids << cart_item.id.to_s
 				end
@@ -340,6 +346,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.each_with_index {|c_item,key|
 					if key % 2 == 0
 						c_item.accepted = true
+						c_item.signed_in_resource = @admin
 						c_item.save
 					end
 				}

@@ -47,7 +47,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
-                cart_item.signed_in_resource = @u
+                cart_item.signed_in_resource = @admin
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end

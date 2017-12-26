@@ -44,12 +44,15 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   ##only permits the quantity to be changed, transaction id is internally assigned and can never be changed by the external world.
   def update
+
     not_found if @cart_item.nil?
     !@cart_item.new_record? or not_found("please provide a valid id for the update")
+    @cart_item.assign_attributes(permitted_params[:cart_item])
     @cart_item.resource_id = lookup_resource.id.to_s
     @cart_item.resource_class = lookup_resource.class.name.to_s
-    @cart_item = add_signed_in_resource(@cart_item)
-    @cart_item.update(permitted_params[:cart_item])
+    @cart_item = add_signed_in_resource(@cart_item)  
+    puts "the cart item signed in resource: #{@cart_item.signed_in_resource}"
+    @cart_item.save
     respond_with @cart_item
   end
 
@@ -77,7 +80,20 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   ## this permitted params is overridden in the dummy app, and as a result throws unpermitted parameters for the daughter app parameters, even though they are subsequently permitted, since super is called first.
   def permitted_params
-    params.permit({cart_item: [:product_id,:discount_code,:quantity,:price,:name]},:id)
+
+    
+    if action_name.to_s == "update" && !current_signed_in_resource.is_admin?
+
+      
+      params.permit({cart_item: [:discount_code,:quantity]},:id)
+    
+    else
+
+      params.permit({cart_item: [:product_id,:discount_code,:quantity,:price,:name]},:id)
+
+    end
+
+
   end
 
 end

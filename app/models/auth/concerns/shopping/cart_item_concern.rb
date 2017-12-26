@@ -58,14 +58,18 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 
 		before_destroy do |document|
-			false if document.accepted == true
+			if !skip_callback?("before_destroy")
+				false if document.accepted == true
+			end
 		end
 
 		after_validation do |document|
-			document.refresh_accepted
+			if !skip_callback?("after_validation")
+				document.refresh_accepted
+			end
 		end
 
-		validate :user_can_only_update_quantity_and_discount_code
+		#validate :user_can_only_update_quantity_and_discount_code
 
 		validate :user_cannot_change_anything_if_payment_accepted
 
@@ -93,7 +97,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		def find_cart_items(options)
 			conditions = {:resource_id => nil, :parent_id => nil}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
-			self.where(conditions)
+			Auth.configuration.cart_item_class.constantize.where(conditions)
 		end
 
 	end
@@ -101,10 +105,12 @@ module Auth::Concerns::Shopping::CartItemConcern
 	### this is an internal method, cannot be set by admin or anyone, it is done after validation, since it is not necessary for someone to be admin, even the user can call refresh on the record to get the new state of the acceptence.
 	## just checks if the accepted by payment id exists, and if yes, then doesnt do anything, otherwise will update the cart item status as false.
 	def refresh_accepted
+		
 		if self.accepted_by_payment_id
 			begin
 				Auth.configuration.payment_class.constantize.find(self.accepted_by_payment_id)
 			rescue
+				
 				self.accepted = false
 			end
 		end
@@ -114,60 +120,49 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## sets accepted to true or false depending on whether the cart has enough credit for the item.
 	## does not SAVE.
 	def set_accepted(payment,override)
+
 		#return cart_has_sufficient_credit_for_item?(payment.cart)
 		if cart_has_sufficient_credit_for_item?(payment.cart) 
+			
 			## is it already accepted?
 			if self.accepted
+			
 				return true
 			else
+			
 				self.accepted = true
 			end
 		else
+			
 			self.accepted = false
 		end
-		self.accepted = override if override
+		
+		
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
-		self.save
-
+		self.skip_callbacks = {:after_validation => true}
+		res = self.save
+		
+		res
 	end
 	
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)
 	## the #debit function returns the current cart credit.
 	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
 	def cart_has_sufficient_credit_for_item?(cart)
-		
-		cart.debit((self.accept_order_at_percentage_of_price*self.price)) >= 0
+		cart_has_credit = cart.debit((self.accept_order_at_percentage_of_price*self.price)) >= 0
+		cart_has_credit
 	end
 
-	## will unset the cart if this method returns true.
-	## otherwise will not unset the cart.
-	## override to change the behaviour.
-	def before_unset_cart
-		true
-	end
+	
 
-	## called if self.parent_id remains nil, after calling unset_cart
-	## called in unset_cart
-	def on_unset_failed
-
-	end
-
-
-
-	def on_unset_success
-
-	end
-
-	## unsets the parent id from this cart item. i.e removes the cart item from the cart.
-	## calls the before_unset as a block => that's where you have to add your code to decide whether to allow the parent_id to be set as nil or not.
-	## @used_in : cart_controller_concern # add_or_remove
+	## unsets the cart item , if it has not been accepted upto now.
+	## assume that a payment was made, this cart item was updated wth its id as success, but some others were not, so the payment was not saved. but this item has got accepted as true.
+	## so whether or not the payment that was made exists, 
+	## @used_in : cart_concern # add_or_remove
 	## @return[Boolean] : result of saving the cart item.
 	def unset_cart
-		if before_unset_cart == true
-			self.parent_id = nil
-			self.save
-		end
-		self.parent_id.nil? ? on_unset_success : on_unset_failed
+		self.parent_id = nil if (self.accepted == false || self.accepted.nil?)
+		self.save
 	end
 
 
@@ -186,13 +181,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## VALIDATIONS
 	##
 	#######################################################
-
+=begin
 	def user_can_only_update_quantity_and_discount_code
 		if !self.signed_in_resource.is_admin? && !self.new_record?
 			self_keys = self.attributes.keys
 			self_keys.each do |k|
 				if k == "discount" 
 				elsif k == "quantity"
+				elsif k == "parent_id"
+				elsif k == "resource_class"
+				elsif k == "resource_id"
 				else
 					self.send("#{k}=",self.send("#{k}_was"))
 				end
@@ -200,11 +198,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 			
 		end
 	end
+=end
 
 	def user_cannot_change_anything_if_payment_accepted
 		if !self.signed_in_resource.is_admin?
 			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record?
 		end
 	end
+
+
 
 end

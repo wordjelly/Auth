@@ -44,8 +44,12 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	## sets all the attribute accessors of the cart.
+	## @param[Payment] : a payment object can be passed in.
+	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
 	def prepare_cart
+
 		find_cart_items
+		
 		set_cart_price
 		
 		set_cart_payments
@@ -81,11 +85,17 @@ module Auth::Concerns::Shopping::CartConcern
 
 	
 	def set_cart_payments
+		self.cart_payments = []
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(get_resource,self)
+		
 		payments_made_to_this_cart.each do |payment|
 			payment.verify_payment if payment.payment_pending
+			self.cart_payments << payment
 		end
-		self.cart_payments = payments_made_to_this_cart	
+		
+		
+
+
 		self.cart_payments	 
 	end
 
@@ -107,6 +117,7 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_paid_amount
 	end
 
+	## sum total of all payments made to the cart.
 	def get_cart_paid_amount
 		self.cart_paid_amount 
 	end
@@ -120,6 +131,7 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_pending_balance 
 	end
 
+	## initially is the same as cart_paid_amount, by calling debit, we can debit from credit, the costs of various items.
 	def get_cart_credit
 		self.cart_credit 
 	end
@@ -127,7 +139,11 @@ module Auth::Concerns::Shopping::CartConcern
 	## debits the @amount from the cart credit.
 	## returns the current credit.
 	def debit(amount)
+		#puts "want to debit: #{amount}"
+		#puts "current credit is: #{self.cart_credit}"
 		self.cart_credit-=amount
+		
+		#puts "after debiting: #{self.cart_credit}"
 		self.cart_credit
 	end
 
@@ -183,8 +199,11 @@ module Auth::Concerns::Shopping::CartConcern
 	def add_or_remove(item_ids,add_or_remove)
 	    add_remove_results = item_ids.map {|id|
 	      if cart_item = Auth.configuration.cart_item_class.constantize.find(id)
-	        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(@cart) : cart_item.unset_cart 
+	      	cart_item.signed_in_resource = self.signed_in_resource
+	        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
+	        puts "the response of adding the cart item is:#{resp.to_s}" 
 	        resp
+
 	      else
 	        true 
 	      end

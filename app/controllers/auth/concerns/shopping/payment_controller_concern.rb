@@ -70,6 +70,12 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   def permitted_params
     payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status]
 
+    if !current_signed_in_resource.is_admin?
+      payment_params.delete(:payment_status)
+      if action_name.to_s == "update"
+        payment_params = []
+      end
+    end
     params.permit({payment: payment_params},:id)
     
   end

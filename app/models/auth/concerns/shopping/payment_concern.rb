@@ -23,12 +23,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## and #create methods.
 		attr_accessor :payment_params
 
-		## expected to be a hash with names of callbacks and boolean values.
-		## eg: {:before_save => true, :after_save => false..}
-		## used in conjunction with the provided skip_callback?(callback_name) method to determine whether to execute the callbacks or not.
-		## so basically before saving the document, set this attr_accessor on it, and it will allow you to control if callbacks are executed or not.
-		## currently used in the after_save callback where we dont want the refund being set to accepted, and thereafter to update all other refunds as failed to cascade.
-		attr_accessor :skip_callbacks
+		
 
 		##the amount for this payment
 		field :amount, type: Float
@@ -76,25 +71,29 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validate :cheque_or_card_payment_not_excessive
 		validates :amount, numericality: { :greater_than => 0.00 }, unless: Proc.new { |document| document.refund  }
 		validate :cart_not_empty
-		validate :document_updated_only_by_admin
-		validate :document_status_set_only_by_admin
+		#validate :document_updated_only_by_admin
+		#validate :document_status_set_only_by_admin
 		validate :refund_created_or_approved_only_if_balance_is_negative
 		validate :refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
 
 		before_validation do |document|
 			document.set_cart(document.cart_id)
-			document.payment_callback(document.payment_type,document.payment_params) do 
-						document.update_cart_items_accepted if document.payment_status_changed?
-			end
+			
+			document.payment_callback(document.payment_type,document.payment_params)  
+						
+			
+			
 		end
 
 		## because the validation will not allow the payment status to be changed in case this is not an admin user, and we need to allow the user to refresh the payment state, in case of refunds which need to set as failed because some later refund was accepted but in that callback the nil refund was for some reason not set as failed.
 		## also in case of gateway payments, we need to allow to see if it can be verified.
 		## both these methods change the state of the payment suo moto. it is not necessary that the user should be an admin.
 		after_validation do |document|
-			document.refresh_refund
-			document.verify_payment
-			## what about verify payment.
+			if document.errors.full_messages.empty?
+				document.refresh_refund
+				document.verify_payment
+				document.update_cart_items_accepted if document.payment_status_changed?
+			end
 		end
 
 		before_save do |document|
@@ -150,16 +149,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		end		
 	end
 
-	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
-	## return[Boolean] : true or false.
-	## checks whether the attr_accessor skip_callbacks is set, and if yes, then whether the name of this callback exists in it.
-	## if both above are no, then returns false
-	## if the name exists, then return whatever is stored for the name i.e true or false.
-	## @used_in the after_save and before_save callback blocks, as the first line, basically only executes the block if this method returns false.
-	def skip_callback?(callback_name)
-		return false if (self.skip_callbacks.blank? || self.skip_callbacks[callback_name.to_sym].nil?)
-		return self.skip_callbacks[callback_name.to_sym] == true
-	end
+	
 
 	## called in the payment_controller_concern update action
 	## basically checks if there is any refund that was accepted after this refund_request was created. then in that case sets this refund as failed.
@@ -237,7 +227,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 		if self.new_record?
 			calculate_change
 			self.amount = self.cart.cart_pending_balance if payment_excessive?
-			#self.payment_status = 1 
 		end
 	end
 
@@ -316,8 +305,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 	def set_cart(cart_id)	
 		
 		self.cart = Auth.configuration.cart_class.constantize.find(cart_id)
+	
+
 		
-		self.cart.prepare_cart
+			self.cart.prepare_cart
+		
+
+
 
 	end
 
@@ -336,9 +330,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		end
 
+	
+
 		cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
 			cart_item.signed_in_resource = self.signed_in_resource
-			cart_item.set_accepted(self,false)
+			cart_item.set_accepted(self,nil)
 		}.compact.uniq
 		self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
 		
