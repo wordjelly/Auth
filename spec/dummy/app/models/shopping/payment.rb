@@ -2,6 +2,7 @@ require "auth/notify"
 class Shopping::Payment < Auth::Shopping::Payment
 	include Auth::Concerns::Shopping::PayUMoneyConcern
 	include Auth::Notify
+=begin
 	after_save do |document|
 		notification = Noti.new
 		resource_ids = {}
@@ -11,5 +12,5 @@ class Shopping::Payment < Auth::Shopping::Payment
 		notification.save
 		Auth::Notify.send_notification(notification)
 	end
-
+=end
 end

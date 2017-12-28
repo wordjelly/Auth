@@ -56,7 +56,7 @@ RSpec.describe "password request spec", :type => :request, :authentication => tr
 	 			post user_password_path, user: {email: @u.email}
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
-    			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
+    			reset_password_token = message[rpt_index...message.index(" ", rpt_index)]
     			put user_password_path, user: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
@@ -99,7 +99,7 @@ RSpec.describe "password request spec", :type => :request, :authentication => tr
 	 			post user_password_path, user: {email: @u.email}, current_app_id: @c.app_ids[0], redirect_url: "http://www.google.com"
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
-    			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
+    			reset_password_token = message[rpt_index...message.index(" ", rpt_index)]
     			
     			put user_password_path, {user: {
 			      reset_password_token: reset_password_token, 
@@ -140,7 +140,7 @@ RSpec.describe "password request spec", :type => :request, :authentication => tr
 	 			ActionController::Base.allow_forgery_protection = true
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
-    			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
+    			reset_password_token = message[rpt_index...message.index(" ", rpt_index)]
     			put user_password_path, {user: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 
@@ -172,7 +172,7 @@ RSpec.describe "password request spec", :type => :request, :authentication => tr
 	 			post user_password_path,{user: {email: @u.email}, current_app_id: @c.app_ids[0], api_key: @ap_key}.to_json,@headers
       			message = ActionMailer::Base.deliveries[-1].to_s
     			rpt_index = message.index("reset_password_token")+"reset_password_token".length+1
-    			reset_password_token = message[rpt_index...message.index("\"", rpt_index)]
+    			reset_password_token = message[rpt_index...message.index(" ", rpt_index)]
     			put user_password_path, {user: {
 			      reset_password_token: reset_password_token, 
 			      password: "newpassword", 

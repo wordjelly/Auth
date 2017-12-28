@@ -2,6 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Registration requests", :registration => true,:authentication => true, :type => :request do
   before(:all) do 
+    Auth.configuration.recaptcha = true
     User.delete_all
     Auth::Client.delete_all
     module Devise
