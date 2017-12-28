@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "password request spec", :type => :request, password: true do 
+RSpec.describe "password request spec", :type => :request, :authentication => true, password: true do 
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = true

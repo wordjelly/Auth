@@ -308,7 +308,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	
 
 		
-			self.cart.prepare_cart
+		self.cart.prepare_cart
 		
 
 
@@ -361,6 +361,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	end
 
+=begin
 	## not really a validation, basically doesnt allow any user provided attributes to be set if the user is not an admin and trying to update the document.
 	def document_updated_only_by_admin
 		if !new_record?
@@ -381,6 +382,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 		end
 	end
+=end
 
 	## validation
 	def refund_created_or_approved_only_if_balance_is_negative

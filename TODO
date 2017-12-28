@@ -98,6 +98,19 @@ THINGS TO BE DONE:
 23. after this there will all the stuff to create -> user , collection agent interaction, test updates.
 
 
+---> 
+while running shopping tests : notify has to be false, investigate why getting some weird error inside the notification lib file.
+
+while running authentication tests : the notify has to be set to true, also there is the issue of the queue adapter, and stub sms otp calls as well as recaptcha and other configuration options.
+
+plan would be as follows:
+
+1. all tests should pass under the same settings.
+2. set up elasticbeanstalk and mongolab
+3. add the gem -> follow instructions for queue
+4. start with one aspect at a time.
+
+
 -->
 CARD NUMBER
 5123456789012346

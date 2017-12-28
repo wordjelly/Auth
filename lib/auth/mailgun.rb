@@ -18,8 +18,8 @@ module Auth
 			
 			Auth.configuration.notification_response_class.constantize.find_and_update_notification_response(params[:webhook_identifier], JSON.generate(params)) do |notification_response|
 
-				puts "found email notification response:"
-				puts notification_response.attributes.to_s
+				#puts "found email notification response:"
+				#puts notification_response.attributes.to_s
 
 			end
 		end

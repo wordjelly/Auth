@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Registration requests", :registration => true, :type => :request do
+RSpec.describe "Registration requests", :registration => true,:authentication => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all

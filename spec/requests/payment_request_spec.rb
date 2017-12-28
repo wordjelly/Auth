@@ -47,7 +47,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
-                cart_item.signed_in_resource = @admin
+                cart_item.signed_in_resource = @u
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
@@ -70,6 +70,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
         it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. " do 
+
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(1)
@@ -92,6 +93,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
+            ## need to set the signed in resource as admin, because we are setting the payment status, and that cannot be done as user.
             payment.signed_in_resource = @admin
             ## this is setting the payment as successfully.
             payment.payment_status = 1
@@ -139,14 +141,17 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             expect(ps).to be_truthy
 
             ## now remove an item from the cart.
-            Shopping::CartItem.first.unset_cart
+            ## you cannot remove an item once a payment has been made, unless you are an admin.
+            cart_item_to_remove = Shopping::CartItem.first
+            cart_item_to_remove.signed_in_resource = @admin
+            k = cart_item_to_remove.unset_cart
             
             ## now make a refund request.
             refund_request = Shopping::Payment.new
             refund_request.payment_type = "cash"
             refund_request.refund = true
             ## the amount doesnt matter.
-            refund_request.amount = 50000.00
+            refund_request.amount = -10
             refund_request.resource_id = @u.id.to_s
             refund_request.resource_class = @u.class.name.to_s
             refund_request.cart_id = @cart.id.to_s
@@ -154,6 +159,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## this is setting the payment as successfully.
             ref_res = refund_request.save
             ## then accept that request.
+            puts refund_request.errors.full_messages.to_s
             expect(ref_res).to be_truthy
 
             ## now suppose earlier payment fails.
@@ -209,6 +215,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
+                cart_item.signed_in_resource = @u
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
@@ -263,7 +270,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     end
 
 
-    context " -- payment validations. -- " do 
+    context " -- payment validations. -- ", :payment_validations => true do 
 
         before(:example) do 
             Shopping::CartItem.delete_all
@@ -281,6 +288,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_id = @u.id.to_s
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
+                cart_item.signed_in_resource = @u
                 cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
@@ -297,11 +305,18 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- doesnt allow payment to be created if cart is empty -- ", :payment_into_empty_cart do 
 
-            Shopping::CartItem.all.each do |citem|
-                citem.unset_cart
-            end
+            #Shopping::CartItem.all.each do |citem|
+            #    citem.signed_in_resource = @admin
+            #    citem.unset_cart
+            #end
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            new_cart = Shopping::Cart.new
+            new_cart.resource_id = @u.id.to_s
+            new_cart.resource_class = @u.class.name
+            new_cart.save
+
+
+            post shopping_payments_path, {cart_id: new_cart.id.to_s,payment_type: "cash", amount: 10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(0)
 
@@ -348,6 +363,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_id = @u.id.to_s
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
+                cart_item.signed_in_resource = @u
                 cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
@@ -412,6 +428,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_id = @u.id.to_s
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
+                cart_item.signed_in_resource = @u
                 cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
@@ -483,6 +500,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_id = @u.id.to_s
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
+                cart_item.signed_in_resource = @u
                 cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
@@ -520,6 +538,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
              puts " ------------- finished initial part----------"
             ## now basically remove a cart item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            ## only admin can unset an item , after a payment has already been made
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
             ## now the pending balance should be -ve
@@ -546,6 +566,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             cart_item.resource_id = @u.id.to_s
             cart_item.resource_class = @u.class.name
             cart_item.parent_id = @cart.id
+            cart_item.signed_in_resource = @u
             cart_item.price = 10.00
             cart_item.save            
 
@@ -569,6 +590,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         it " -- accepts a valid refund if the user is an administrator -- " do 
 
         	last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
             ## create a new refund request and set it as pending.
@@ -578,7 +600,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.payment_type = "cheque"
             
             
-            payment.amount = 5000
+            payment.amount = -10.00
             payment.refund = true
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
@@ -610,6 +632,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## remove an item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            ## only admin can unset, once payment has already been made.
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
             ## create a new refund request and set it as pending.
@@ -619,7 +643,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.payment_type = "cheque"
             
             ## this also doesnt matter while creating refunds.
-            payment.amount = 50.00
+            payment.amount = -10.00
             payment.refund = true
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
@@ -645,6 +669,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             cart_item.resource_class = @u.class.name
             cart_item.parent_id = @cart.id
             cart_item.price = 10.00
+            cart_item.signed_in_resource = @u
             cart_item.save            
 
 
@@ -669,6 +694,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## remove an item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
 
@@ -710,6 +736,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## remove an item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
 
@@ -718,7 +745,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             3.times do 
                 payment = Shopping::Payment.new
                 payment.payment_type = "cheque"
-                payment.amount = 50.00
+                payment.amount = -10.00
                 payment.refund = true
                 payment.resource_id = @u.id.to_s
                 payment.resource_class = @u.class.name.to_s
@@ -768,6 +795,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             
 
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
             ## create a new refund request and set it as pending.
@@ -828,6 +856,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
+                cart_item.signed_in_resource = @u
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
@@ -843,7 +872,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.amount = 50.00
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
-            payment.signed_in_resource = @admin
+            payment.signed_in_resource = @u
             payment.cart_id = @cart.id.to_s
             ps = payment.save
 
@@ -873,16 +902,17 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment.payment_status = 1
             ps = payment.save
             expect(ps).to be_truthy
-            puts payment.attributes.to_s
+            
 
             ## remove an item from the cart
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
+            last_cart_item.signed_in_resource = @admin
             last_cart_item.unset_cart
 
             cart = Shopping::Cart.find(payment.cart_id)
             cart.prepare_cart
-            puts "teh cart pending balance. is."
-            puts cart.cart_pending_balance.to_s
+            #puts "teh cart pending balance. is."
+            #puts cart.cart_pending_balance.to_s
 
             ## create a refund
             ref = Shopping::Payment.new
@@ -894,7 +924,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ref.signed_in_resource = @u
             ref.cart_id = @cart.id.to_s
             rs = ref.save
-            puts ref.errors.full_messages.to_s
+            #puts ref.errors.full_messages.to_s
             expect(rs).to be_truthy
 
             ## now try to update it.
@@ -925,6 +955,11 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
+    end
+
+    context " -- payment stores accepted cart items  -- " do 
+        
+        
     end
 
 end

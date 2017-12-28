@@ -4,8 +4,8 @@ class OtpJob < ActiveJob::Base
   include Auth::Mailgun
   include Auth::JobExceptionHandler
 
-  queue_as :shoryuken
-  self.queue_adapter = Auth.configuration.queue_adapter.to_sym
+  queue_as :default
+  #self.queue_adapter = Auth.configuration.queue_adapter.to_sym
 
   ##we currently log all exceptions to redis.
   rescue_from(StandardError) do |exception|

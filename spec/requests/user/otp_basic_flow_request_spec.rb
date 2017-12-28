@@ -1,7 +1,7 @@
 ##THESE TESTS MUST BE RUN IN THE SEQUENCE DEFINED BELOW, i.e AS THEY APPEAR IN THE TEST FILE.
 require "rails_helper"
 
-RSpec.describe "OTP flow requests", :otp => true, :type => :request do
+RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all

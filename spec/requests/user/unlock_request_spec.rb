@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "unlock request spec", :type => :request, unlock: true do 	
+RSpec.describe "unlock request spec", :type => :request,:authentication => true, unlock: true do 	
 
 	before(:example) do 
 		ActionController::Base.allow_forgery_protection = false

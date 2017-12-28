@@ -157,11 +157,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	## unsets the cart item , if it has not been accepted upto now.
 	## assume that a payment was made, this cart item was updated wth its id as success, but some others were not, so the payment was not saved. but this item has got accepted as true.
-	## so whether or not the payment that was made exists, 
+	## so whether or not the payment that was made exists, we dont allow the cart to be unset.
+	## however in case the signed_in_resource is an admin -> it is allowed to unset the cart, whether the item is already accepted or not.
 	## @used_in : cart_concern # add_or_remove
 	## @return[Boolean] : result of saving the cart item.
 	def unset_cart
-		self.parent_id = nil if (self.accepted == false || self.accepted.nil?)
+		if self.signed_in_resource.is_admin?
+			self.parent_id = nil
+		else
+			self.parent_id = nil if (self.accepted == false || self.accepted.nil?)
+		end
 		self.save
 	end
 

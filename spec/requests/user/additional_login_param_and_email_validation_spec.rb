@@ -1,7 +1,7 @@
 ##this checks the validation rules set on both the additional_login_param and email.
 require "rails_helper"
 
-RSpec.describe "Additional login param and email flow requests", :alp_email => true, :type => :request do
+RSpec.describe "Additional login param and email flow requests", :alp_email => true, :authentication => true, :type => :request do
   before(:all) do 
     User.delete_all
     Auth::Client.delete_all

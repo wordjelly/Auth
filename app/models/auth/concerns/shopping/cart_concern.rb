@@ -66,6 +66,7 @@ module Auth::Concerns::Shopping::CartConcern
 	def find_cart_items
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'desc')
+		
 		self.cart_items
 	end
 
