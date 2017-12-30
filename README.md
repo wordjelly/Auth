@@ -25,3 +25,17 @@ This Gem provides a simple Notify class that can be called from anywhere to send
 Rails also does not have a shopping-cart gem that works easily.
 This Gem provides full shopping cart functionality.
 
+#### Drawbacks:
+
+The only drawback for the moment, is that the gem is built around MongoDb as the database backend. We are working on letting you use adapters for RDBS
+
+### How to Use:
+
+Create a new Rails project from the command line:
+
+```
+rails new {your app name}
+```
+
+Edit the Gemfile with the following:
+
