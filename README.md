@@ -34,8 +34,13 @@ The only drawback for the moment, is that the gem is built around MongoDb as the
 Create a new Rails project from the command line:
 
 ```
-rails new {your app name}
+rails new {your app name} --skip-active-record
 ```
 
-Edit the Gemfile with the following:
+Edit the Gemfile to include the following:
+
+```
+
+```
+
 
