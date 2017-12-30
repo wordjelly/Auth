@@ -135,18 +135,18 @@ module Auth
 		end
 
 		def send_otp_response
-			if Auth.configuration.stub_otp_api_calls
+			if Auth.configuration.stub_otp_api_calls == true
 				
 				OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => Faker::Name.name})})
 			else
-				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{self.additional_login_param}/AUTOGEN")
+				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource.additional_login_param}/AUTOGEN")
 			end
 		end
 
 		def verify_otp_response(otp,otp_session_id)
 			
-			if Auth.configuration.stub_otp_api_calls
-				if Auth.configuration.simulate_invalid_otp
+			if Auth.configuration.stub_otp_api_calls == true
+				if Auth.configuration.simulate_invalid_otp == true
 					OpenStruct.new({code: 200, body: JSON.generate({:Status => "failed", :Details => "your otp is invalid"})})
 				else
 

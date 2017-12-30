@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 
- gem 'mongoid_versioned_atomic', :path => "/home/bhargav/Github/mongoid_versioned_atomic"
+ #gem 'mongoid_versioned_atomic', :path => "/home/bhargav/Github/mongoid_versioned_atomic"
+ gem 'mongoid_versioned_atomic', :git => 'https://github.com/wordjelly/mongoid-versioned-atomic' 
  gem 'jquery-rails', :git => "https://github.com/wordjelly/jquery-rails-4.2.2.git"
- gem 'payuindia', :path => '/home/bhargav/Github/payuindia'
+ gem 'payuindia', :git => 'https://github.com/wordjelly/payuindia'
  gem 'mailgun-ruby', :git => 'https://github.com/wordjelly/mailgun-ruby'
  gem 'premailer-rails'
  gem 'sinatra'
  gem 'aws-sdk', '~> 2'
- gem 'shoryuken'
  gem 'dotenv-rails', :groups => [:development, :test]
 # Declare your gem's dependencies in auth.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and

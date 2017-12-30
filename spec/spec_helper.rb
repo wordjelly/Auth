@@ -21,8 +21,12 @@ require 'capybara-webkit'
 require 'selenium-webdriver'
 require 'capybara/rspec'
 require 'capybara/webkit/matchers'
-require 'sidekiq/testing'
-Sidekiq::Testing.inline!
+
+=begin
+#require 'sidekiq/testing'
+#Sidekiq::Testing.inline!
+=end
+
 #Capybara.configure do |config|
 #  config.current_driver = :selenium
 #end

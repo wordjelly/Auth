@@ -1,3 +1,4 @@
+=begin
 require "sidekiq/api"
 module Auth
 	module SidekiqUp
@@ -12,3 +13,4 @@ module Auth
 		end
 	end
 end
+=end

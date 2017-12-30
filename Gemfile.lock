@@ -14,6 +14,23 @@ GIT
     mailgun-ruby (1.1.7)
       rest-client (~> 2.0)
 
+GIT
+  remote: https://github.com/wordjelly/mongoid-versioned-atomic
+  revision: e440c0d94599800885f028dbc60654b4066f03f2
+  specs:
+    mongoid_versioned_atomic (0.0.1)
+      aws-sdk (~> 2)
+      mongoid (~> 5.0.1)
+      mongoid-paperclip
+      rails (~> 4.2.4)
+      rake (= 11.2.2)
+
+GIT
+  remote: https://github.com/wordjelly/payuindia
+  revision: bd6945941df6edcc5ea2b6314389f7ee74ad749b
+  specs:
+    payuindia (0.1.1)
+
 PATH
   remote: .
   specs:
@@ -26,7 +43,6 @@ PATH
       kaminari-mongoid
       materialize-sass (= 0.97.1)
       momentjs-rails
-      mongoid-paperclip (~> 0.0.8)
       omniauth (= 1.4.1)
       omniauth-facebook (= 4.0.0)
       omniauth-google-oauth2 (= 0.4.1)
@@ -34,33 +50,14 @@ PATH
       omniauth-twitter
       rails (~> 4.2.6)
       recaptcha
-      redis
-      remotipart (~> 1.2, >= 1.2.1)
-      request_store
+      redis (= 3.3.1)
       sass-rails
-      shoryuken
-      sidekiq (= 3.2.5)
       simple_token_authentication (~> 1.0)
       thin
       turbolinks
       typhoeus
       underscore-rails
       valid_url
-
-PATH
-  remote: /home/bhargav/Github/mongoid_versioned_atomic
-  specs:
-    mongoid_versioned_atomic (0.0.1)
-      aws-sdk (~> 2)
-      mongoid (~> 5.0.1)
-      mongoid-paperclip
-      rails (~> 4.2.4)
-      rake (= 11.2.2)
-
-PATH
-  remote: /home/bhargav/Github/payuindia
-  specs:
-    payuindia (0.1.1)
 
 GEM
   remote: https://rubygems.org/
@@ -123,19 +120,16 @@ GEM
     capybara-webkit (1.14.0)
       capybara (>= 2.3.0, < 2.14.0)
       json
-    celluloid (0.15.2)
-      timers (~> 1.1.0)
     childprocess (0.8.0)
       ffi (~> 1.0, >= 1.0.11)
     climate_control (0.2.0)
     cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
     concurrent-ruby (1.0.5)
-    connection_pool (2.2.1)
     crass (1.0.2)
     css_parser (1.6.0)
       addressable
-    daemons (1.2.4)
+    daemons (1.2.6)
     devise (4.1.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -150,7 +144,7 @@ GEM
       dotenv (= 2.2.1)
       railties (>= 3.2, < 5.2)
     erubis (2.7.0)
-    ethon (0.10.1)
+    ethon (0.11.0)
       ffi (>= 1.3.0)
     eventmachine (1.2.5)
     factory_girl (4.8.1)
@@ -178,10 +172,10 @@ GEM
     jmespath (1.3.1)
     json (2.1.0)
     jwt (1.5.6)
-    kaminari-actionview (1.0.1)
+    kaminari-actionview (1.1.1)
       actionview
-      kaminari-core (= 1.0.1)
-    kaminari-core (1.0.1)
+      kaminari-core (= 1.1.1)
+    kaminari-core (1.1.1)
     kaminari-mongoid (1.0.1)
       kaminari-core (~> 1.0)
       mongoid
@@ -216,7 +210,7 @@ GEM
     netrc (0.11.0)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
-    oauth (0.5.3)
+    oauth (0.5.4)
     oauth2 (1.4.0)
       faraday (>= 0.8, < 0.13)
       jwt (~> 1.0)
@@ -238,8 +232,8 @@ GEM
     omniauth-oauth (1.1.0)
       oauth
       omniauth (~> 1.0)
-    omniauth-oauth2 (1.4.0)
-      oauth2 (~> 1.0)
+    omniauth-oauth2 (1.5.0)
+      oauth2 (~> 1.1)
       omniauth (~> 1.2)
     omniauth-twitter (1.4.0)
       omniauth-oauth (~> 1.1)
@@ -293,13 +287,9 @@ GEM
     rb-fsevent (0.10.2)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
-    recaptcha (4.4.1)
+    recaptcha (4.6.3)
       json
-    redis (3.3.3)
-    redis-namespace (1.5.3)
-      redis (~> 3.0, >= 3.0.4)
-    remotipart (1.3.1)
-    request_store (1.3.2)
+    redis (3.3.1)
     responders (2.4.0)
       actionpack (>= 4.2.0, < 5.3)
       railties (>= 4.2.0, < 5.3)
@@ -325,12 +315,12 @@ GEM
       rspec-support (~> 3.6.0)
     rspec-support (3.6.0)
     rubyzip (1.2.1)
-    sass (3.5.1)
+    sass (3.5.4)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
-    sass-rails (5.0.6)
+    sass-rails (5.0.7)
       railties (>= 4.0.0, < 6)
       sass (~> 3.1)
       sprockets (>= 2.8, < 4.0)
@@ -339,16 +329,6 @@ GEM
     selenium-webdriver (3.6.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
-    shoryuken (3.1.12)
-      aws-sdk-core (>= 2)
-      concurrent-ruby
-      thor
-    sidekiq (3.2.5)
-      celluloid (= 0.15.2)
-      connection_pool (>= 2.0.0)
-      json
-      redis (>= 3.0.6)
-      redis-namespace (>= 1.3.1)
     simple_token_authentication (1.15.1)
       actionmailer (>= 3.2.6, < 6)
       actionpack (>= 3.2.6, < 6)
@@ -371,7 +351,6 @@ GEM
     thor (0.20.0)
     thread_safe (0.3.6)
     tilt (2.0.8)
-    timers (1.1.0)
     turbolinks (5.0.1)
       turbolinks-source (~> 5)
     turbolinks-source (5.0.3)
@@ -409,7 +388,6 @@ DEPENDENCIES
   premailer-rails
   rspec-rails
   selenium-webdriver
-  shoryuken
   sinatra
 
 BUNDLED WITH
