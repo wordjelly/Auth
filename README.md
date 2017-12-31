@@ -60,4 +60,30 @@ The Auth gem adds the following additional, essential, dependencies to your appl
 10. aws-sdk (for background jobs and queues)
 11. mongoid-versioned-atomic (a gem that allows document versioning with mongoid, also authored by wordjelly)
 
+## Create A Configuration File
 
+To use the gem , create a __preinitializer__ file in your project's _config/initializers_ folder
+
+A sample file can be found in this gem at the following [location](https://github.com/wordjelly/Auth/blob/master/spec/dummy/config/initializers/preinitializer.rb) : _spec/dummy/config/initializers/preinitializer.rb_
+
+The following shows you how to setup a user and an admin model, with oauth, and token authentication:
+
+The basic configuration file should look like this:
+
+```
+Auth.configure do |config|
+## all configuration options go here.
+end
+```
+
+### Mount path
+
+The mount path for the engine is the first thing to configure. Set it as follows:
+
+```
+Auth.configure do |config|
+## all routes defined by the engine will now be after your project root/authenticate/...engine route...
+## eg: http://localhost:3000/authenticate/...whatever engine rout....
+config.mount_path = "/authenticate"
+end
+```
