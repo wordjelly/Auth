@@ -1,36 +1,3 @@
-GIT
-  remote: https://github.com/wordjelly/jquery-rails-4.2.2.git
-  revision: 2fff659065002d3345fe67035b710491c34da569
-  specs:
-    jquery-rails (4.2.2)
-      rails-dom-testing (>= 1, < 3)
-      railties (>= 4.2.0)
-      thor (>= 0.14, < 2.0)
-
-GIT
-  remote: https://github.com/wordjelly/mailgun-ruby
-  revision: 94c57ff7b4503766a6a30defbc8c58f154e5218e
-  specs:
-    mailgun-ruby (1.1.7)
-      rest-client (~> 2.0)
-
-GIT
-  remote: https://github.com/wordjelly/mongoid-versioned-atomic
-  revision: e440c0d94599800885f028dbc60654b4066f03f2
-  specs:
-    mongoid_versioned_atomic (0.0.1)
-      aws-sdk (~> 2)
-      mongoid (~> 5.0.1)
-      mongoid-paperclip
-      rails (~> 4.2.4)
-      rake (= 11.2.2)
-
-GIT
-  remote: https://github.com/wordjelly/payuindia
-  revision: bd6945941df6edcc5ea2b6314389f7ee74ad749b
-  specs:
-    payuindia (0.1.1)
-
 PATH
   remote: .
   specs:
@@ -45,6 +12,7 @@ PATH
       kaminari-mongoid
       materialize-sass (= 0.97.1)
       momentjs-rails
+      mongoid_versioned_atomic (~> 0.0.1)
       omniauth (= 1.4.1)
       omniauth-facebook (= 4.0.0)
       omniauth-google-oauth2 (= 0.4.1)
@@ -62,6 +30,9 @@ PATH
       typhoeus
       underscore-rails
       valid_url
+      wj-jquery-rails (>= 4.2.2.1)
+      wj-mailgun-ruby (>= 1.1.7)
+      wj-payuindia (>= 0.1.1)
 
 GEM
   remote: https://rubygems.org/
@@ -209,6 +180,12 @@ GEM
     mongoid-paperclip (0.0.11)
       mongoid
       paperclip (>= 2.3.6, != 4.3.0)
+    mongoid_versioned_atomic (0.0.1)
+      aws-sdk (~> 2)
+      mongoid (~> 5.0.1)
+      mongoid-paperclip
+      rails (~> 4.2.4)
+      rake (= 11.2.2)
     multi_json (1.12.2)
     multi_xml (0.6.0)
     multipart-post (2.0.0)
@@ -372,6 +349,13 @@ GEM
       rails
     warden (1.2.7)
       rack (>= 1.0)
+    wj-jquery-rails (4.2.2.1)
+      rails-dom-testing (>= 1, < 3)
+      railties (>= 4.2.0)
+      thor (>= 0.14, < 2.0)
+    wj-mailgun-ruby (1.1.7)
+      rest-client (~> 2.0)
+    wj-payuindia (0.1.1)
     xpath (2.1.0)
       nokogiri (~> 1.3)
 
@@ -384,10 +368,6 @@ DEPENDENCIES
   capybara-webkit
   factory_girl_rails
   faker
-  jquery-rails!
-  mailgun-ruby!
-  mongoid_versioned_atomic!
-  payuindia!
   rspec-rails
   selenium-webdriver
 
