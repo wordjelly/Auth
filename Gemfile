@@ -1,9 +1,8 @@
 source 'https://rubygems.org'
 	
- gem 'mongoid_versioned_atomic', :git => 'https://github.com/wordjelly/mongoid-versioned-atomic' 
- gem 'jquery-rails', :git => "https://github.com/wordjelly/jquery-rails-4.2.2.git"
- gem 'payuindia', :git => 'https://github.com/wordjelly/payuindia'
- gem 'mailgun-ruby', :git => 'https://github.com/wordjelly/mailgun-ruby'
+ #gem 'mongoid_versioned_atomic', :git => 'https://github.com/wordjelly/mongoid-versioned-atomic' 
+ 
+ 
 # Declare your gem's dependencies in auth.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
