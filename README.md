@@ -112,6 +112,28 @@ config.auth_resources = {
 
 end
 ```
+
+Now create A 'User' Model as follows:
+
+```
+# app/models/user.rb
+class User
+
+include Auth::Concerns::UserConcern
+
+end
+```
+
+And finally mount the engine in your routes file with this line:
+
+```
+# routes.rb
+Rails.application.routes.draw do
+
+mount_routes Auth.configuration.auth_resources
+
+end
+```
 That's it. No generators or anything else is needed. This will route all your requests to devise's inbuilt controllers, and devise's inbuilt views. From your command line run 'bundle exec rake routes' to see the new routes, that you created, and try out the fully working email based account system. Congratulations!!
 
 #### But of Course, you want more .. much much more..
