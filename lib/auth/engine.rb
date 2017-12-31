@@ -7,7 +7,7 @@ require "auth/mailgun"
 require "auth/job_exception_handler"
 require "auth/url_shortener"
 require "auth/notify"
-require "auth/sidekiq_up"
+#require "auth/sidekiq_up"
 
 module Auth
   class Engine < ::Rails::Engine

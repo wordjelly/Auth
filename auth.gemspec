@@ -41,12 +41,14 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari-mongoid'
   s.add_dependency 'kaminari-actionview'
   s.add_dependency 'googl'
+  s.add_dependency 'premailer-rails'
+  s.add_dependency 'sinatra'
+  s.add_dependency 'aws-sdk', '~> 2'
+  s.add_dependency 'dotenv-rails'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'
   s.add_development_dependency 'selenium-webdriver'
   s.add_development_dependency 'capybara-webkit'
   s.add_development_dependency 'factory_girl_rails'
-
-
 end

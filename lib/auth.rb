@@ -6,7 +6,6 @@ require 'omniauth-facebook'
 require "devise"
 require "mongoid"
 require "simple_token_authentication"
-require "request_store"
 require "thin"
 require "mongoid_versioned_atomic"
 require "jquery-rails"
@@ -24,8 +23,6 @@ require "kaminari/mongoid"
 require "kaminari/actionview"
 require "mailgun-ruby"
 require "googl"
-require "sidekiq"
-require "sidekiq/api"
 require "aws-sdk"
 
 module Auth
