@@ -37,10 +37,27 @@ Create a new Rails project from the command line:
 rails new {your app name} --skip-active-record
 ```
 
-Edit the Gemfile to include the following:
+Edit the Gemfile to include the following, (always use the git source to get the latest version):
 
 ```
-
+gem 'auth', :git => "https://github.com/wordjelly/Auth"
 ```
+
+Now run __bundle update__ from the command line.
+
+
+The Auth gem adds the following additional, essential, dependencies to your application:
+
+1. mongoid (currently only supported database backend)
+2. premailer-rails (for formatting emails with normal css)
+3. mailgun-ruby (for sending emails)
+4. simple-token-authentication (for token authenticatin)
+5. devise (devise is used as the authentication base)
+6. kaminari-mongoid (for paging mongodb results)
+7. materialize-sass (for the css)
+8. typhoeus (for making http requests)
+9. googl (for the url_shortener module included with the gem)
+10. aws-sdk (for background jobs and queues)
+11. mongoid-versioned-atomic (a gem that allows document versioning with mongoid, also authored by wordjelly)
 
 
