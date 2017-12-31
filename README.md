@@ -87,3 +87,32 @@ Auth.configure do |config|
 config.mount_path = "/authenticate"
 end
 ```
+
+### User and Admin Model
+
+To configure users you need create a key called __config.auth_resources__ in the config file.
+Let us say that you want to have a model called "User" which should have full sign in functionality.
+It would be configured as follows:
+
+```
+Auth.configure do |config|
+
+## all routes defined by the engine will now be after your project root/authenticate/...engine route...
+## eg: http://localhost:3000/authenticate/...whatever engine rout....
+
+config.mount_path = "/authenticate"
+
+## Users
+
+config.auth_resources = {
+  "User" => {
+    
+  }
+}
+
+end
+```
+That's it. No generators or anything else is needed. This will route all your requests to devise's inbuilt controllers, and devise's inbuilt views. From your command line run 'bundle exec rake routes' to see the new routes, that you created, and try out the fully working email based account system. Congratulations!!
+
+#### But of Course, you want more .. much much more..
+
