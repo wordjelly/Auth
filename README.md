@@ -221,7 +221,7 @@ In your application layout add the following
 
 #### Application Controller
 
-Engines cause their own layout to be loaded by default. We want your app's layout to be used. This has to be explicitly specified.
+Engines cause their own layout to be loaded by default. We want your app's layout to be used. This has to be explicitly specified. Also you must explicitly allow it to respond to html, js and later on will need json in case you are going to use otp controller.
 
 ```
 # application_controller.rb
@@ -232,5 +232,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   # this line is necessary to add
   layout 'application'
+  respond_to :html,:js,:json
 end
 ```
