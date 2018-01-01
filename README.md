@@ -160,11 +160,7 @@ In order to use this do the following:
 ```
 #app/assets/javascripts
 
-//= require materialize-sprockets
-//= require spinner.js
-//= require main.js
-//= require leanModal.js
-//= require you_need_to_sign_in.js
+//= require auth/auth_modals_and_navbar.js
 
 ```
 
@@ -182,8 +178,27 @@ config.brand_name = "Wordjelly"
 If you also want the sign in modals then add to the config file:
 
 ```
+config.navbar = true
+config.brand_name = "Wordjelly"
 config.enable_sign_in_modals = true
 ```
+
+Also in case you set navbar to true, you have to also tell each auth_resource to be present in the navbar
+
+```
+
+config.navbar = true
+config.brand_name = "Wordjelly"
+config.enable_sign_in_modals = true
+config.auth_resources = {
+  "User" => {
+    :navbar => true    
+  }
+}
+
+```
+
+#### Application layout
 
 In your application layout add the following
 
@@ -204,3 +219,18 @@ In your application layout add the following
 </body>
 ```
 
+#### Application Controller
+
+Engines cause their own layout to be loaded by default. We want your app's layout to be used. This has to be explicitly specified.
+
+```
+# application_controller.rb
+
+class ApplicationController < ActionController::Base
+  # Prevent CSRF attacks by raising an exception.
+  # For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :exception
+  # this line is necessary to add
+  layout 'application'
+end
+```
