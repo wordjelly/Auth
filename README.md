@@ -134,7 +134,54 @@ mount_routes Auth.configuration.auth_resources
 
 end
 ```
-That's it. No generators or anything else is needed. This will route all your requests to devise's inbuilt controllers, and devise's inbuilt views. From your command line run 'bundle exec rake routes' to see the new routes, that you created, and try out the fully working email based account system. Congratulations!!
+That's it. No generators or anything else is needed. 
 
-#### But of Course, you want more .. much much more..
+#### How to add Omniauth for Google and Facebook?
+
+#### How to do token authentication for a json api?
+
+#### How to sign in user from a mobile app ?
+
+#### 
+
+#### How to add the css provided by the engine?
+
+The engine uses Materialize css as a css framework. 
+It provides a modal for all sign-in / sign-up procedures. 
+If you decided to use the engine, for the moment, only the modals work, and they use ONLY ajax requests.
+In order to use this do the following:
+
+##### CSS
+
+```
+#app/assets/stylesheets.scss
+
+/*
+*= require auth/auth_default_css
+....
+*/
+```
+
+##### Javascripts
+
+```
+#app/assets/javascripts
+
+//= require materialize-sprockets
+//= require spinner.js
+//= require main.js
+//= require leanModal.js
+//= require you_need_to_sign_in.js
+
+```
+
+##### Configuration File
+
+In the configuration file you can decide which components you want the engine to provide.
+
+If you want a navbar, alongwith a sign-in / sign-up button on the right side, then in your __preinitializer.rb__ :
+
+```
+
+```
 
