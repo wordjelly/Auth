@@ -91,7 +91,8 @@ end
 ### User and Admin Model
 
 To configure users you need create a key called __config.auth_resources__ in the config file.
-Let us say that you want to have a model called "User" which should have full sign in functionality.
+Let us say that you want to have a model called "User" which should have full sign in functionality, using email.
+__Please note that it is compulsory to add "email" as the first login param__ 
 It would be configured as follows:
 
 ```
@@ -106,7 +107,7 @@ config.mount_path = "/authenticate"
 
 config.auth_resources = {
   "User" => {
-    
+    :login_params => [:email]
   }
 }
 
