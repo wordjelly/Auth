@@ -2,6 +2,8 @@
 
 ### Why This Gem?
 
+BECAUSE I'M SINGLE AND HAVE NOTHING ELSE TO DO. :) ;) 
+
 #### Authentication
 
 Rails does not offer an all-in-one , plug and play style authentication gem.
