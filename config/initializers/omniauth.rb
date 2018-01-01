@@ -510,55 +510,59 @@ end
 
 Rails.application.config.middleware.use OmniAuth::Builder do
 
-	##want to generate a hash that shows:
-	##{:user => 'es', :admin => 'es',......other_models => 'es'}
-	##this es is the additional identifier in addition to the authentication_token.
-	##so it has to be defined for each model.
-	##will also need to add app_id, and client id specific shit here.
-	if Auth.configuration.enable_token_auth
-		SimpleTokenAuthentication.configure do |cf|
-		  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
-		  cf.identifiers = q
-		  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,['aid']]}]
-		  cf.additional_identifiers = q2
+	if Auth.configuration
+
+		##want to generate a hash that shows:
+		##{:user => 'es', :admin => 'es',......other_models => 'es'}
+		##this es is the additional identifier in addition to the authentication_token.
+		##so it has to be defined for each model.
+		##will also need to add app_id, and client id specific shit here.
+		if Auth.configuration.enable_token_auth
+			SimpleTokenAuthentication.configure do |cf|
+			  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
+			  cf.identifiers = q
+			  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,['aid']]}]
+			  cf.additional_identifiers = q2
+			end
 		end
-	end
 
-	
-	on_failure { |env|
-	  #puts "came to on faliure."
-	  #puts JSON.pretty_generate(env)
-	 Auth::OmniauthCallbacksController.action(:failure).call(env) }
-	
-	oauth_credentials = Auth.configuration.oauth_credentials.map{|k,v| [OmniAuth::Utils.camelize(k).downcase, v]}.to_h
-	oauth_keys = oauth_credentials.keys
-
-
-	##determine which models are oauthable, we need to pass this into the builder.
-	oauthable_models = Auth.configuration.auth_resources.keys.reject{|m|
-
-		if Auth.configuration.auth_resources[m][:skip].nil?
-			false
-		elsif (Auth.configuration.auth_resources[m][:skip].include? :omniauthable)
-			true
-		else
-			false
-		end
-	}
-
-
-	OmniAuth::Strategies.constants.each do |constant|
-		puts "Constant is: #{constant}"
-		provider_key = constant.to_s.downcase
 		
-	
-		if oauth_keys.include? provider_key
+		on_failure { |env|
+		  #puts "came to on faliure."
+		  #puts JSON.pretty_generate(env)
+		 Auth::OmniauthCallbacksController.action(:failure).call(env) }
+		
+		oauth_credentials = Auth.configuration.oauth_credentials.map{|k,v| [OmniAuth::Utils.camelize(k).downcase, v]}.to_h
+		oauth_keys = oauth_credentials.keys
 
-						
-			provider(constant.to_s, oauth_credentials[provider_key]["app_id"], oauth_credentials[provider_key]["app_secret"],oauth_credentials[provider_key]["options"].merge!({:path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path, :models => oauthable_models}))
+
+		##determine which models are oauthable, we need to pass this into the builder.
+		oauthable_models = Auth.configuration.auth_resources.keys.reject{|m|
+
+			if Auth.configuration.auth_resources[m][:skip].nil?
+				false
+			elsif (Auth.configuration.auth_resources[m][:skip].include? :omniauthable)
+				true
+			else
+				false
+			end
+		}
+
+
+		OmniAuth::Strategies.constants.each do |constant|
+			puts "Constant is: #{constant}"
+			provider_key = constant.to_s.downcase
+			
+		
+			if oauth_keys.include? provider_key
+
+							
+				provider(constant.to_s, oauth_credentials[provider_key]["app_id"], oauth_credentials[provider_key]["app_secret"],oauth_credentials[provider_key]["options"].merge!({:path_prefix => Auth::OmniAuth::Path.omniauth_prefix_path, :models => oauthable_models}))
+
+			end
+
 
 		end
-
 
 	end
 

@@ -1,3 +1,4 @@
+
 $("#login_title").html("Sign In").show();
 //CONTENT
 $("#login_content").html("<%= escape_javascript(render partial: 'auth/modals/login_default_content.html.erb') %>").show();
@@ -7,6 +8,7 @@ $("#recaptcha_tags").html("<%= escape_javascript(render partial: 'auth/modals/re
 $("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb', locals: {resource: resource}) %>").show();
 
 open_sign_in_modal_if_closed();
+
 
 // Initialize the validator
 try{

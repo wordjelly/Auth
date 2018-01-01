@@ -79,41 +79,114 @@ module Auth
     ## @used in OtpJob
     attr_accessor :queue_adapter
 
+    attr_accessor :navbar
+
     
 
     def initialize
+      
+
+      ##############################################################
+      ##
+      ## CSS BASED OPTIONS.
+      ##
+      ##############################################################
+      
+      ## whether there should be modals for sign-in / sign-up
+      ## ensure to include the css and js files as mentioned in the readme.
+      @enable_sign_in_modals = false
+      
+      ## this is shown on the left hand side of the navbar.
+      @brand_name = "Your App Name"
+
+      ## whether there should be a navbar as shown in the image in the readme.
+      @navbar = false
+
+      #############################################################
+      ##
+      ## AUTHENTICATION OPTIONS.
+      ##
+      #############################################################
+      
+      ## whether token authentication should be enabled
       @enable_token_auth = true
+
+      ##the regeneration time of the auth_token,
+      ##after the following mentioned time, the token is useless
+      @token_regeneration_time = 1.day
+
+      ## the oauth provider details, an empty hash will disable oauth authentication
       @oauth_credentials = {}
-      @mount_path = "/authenticate"
+      
+      ## which models the engine should use for authentication
       @auth_resources = {}
-      @enable_sign_in_modals = true
-      @recaptcha = true
+
+      ## whether recaptcha should be enabled or not.
+      ## false by default.
+      ## if set to true, will produce errors all over the place in case you forget to provide a recaptcha key and secret in the configuration file!
+      @recaptcha = false
+
+
+      ##############################################################
+      ##
+      ## ENGINE BASED OPTIONS.
+      ##
+      ##############################################################
+      @mount_path = "/authenticate"
       @redis_config_file_location = nil
       @third_party_api_keys = {}
+      ##whether to redirect to redirect urls if provided in the
+      ##request.
+      @do_redirect = true;
+
+
+      ###############################################################
+      ##
+      ## OPTIONS FOR TESTS
+      ##
+      ###############################################################
       @stub_otp_api_calls = false
+      @simulate_invalid_otp = false
+
+      ###############################################################
+      ##
+      ## OPTIONS FOR OTP
+      ##
+      ###############################################################
       @otp_controller = nil
 
+
+      ###############################################################
+      ##
+      ## OPTIONS FOR SHOPPING MODULE
+      ##
+      ###############################################################
       @cart_item_controller = nil
       @cart_item_class = nil
       @cart_controller = nil
       @cart_class = nil
-      
       @payment_controller = nil
       @payment_class = nil
-      @mailer_class = nil
       @payment_gateway_info = {}
-      
+        
+
+      ###############################################################
+      ##
+      ## OPTIONS FOR MAILER AND NOTIFICATIONS
+      ##
+      ###############################################################
+      @mailer_class = nil
       @notification_class = nil
       @notification_response_class = nil
 
-      @simulate_invalid_otp = false
-      ##the regeneration time of the auth_token,
-      ##after the following mentioned time, the token is useless
-      @token_regeneration_time = 1.day
-      ##whether to redirect to redirect urls if provided in the
-      ##request.
-      @do_redirect = true;
-      @brand_name = "Wordjelly"
+      
+      
+      
+      ###############################################################
+      ##
+      ## OPTIONS FOR THE BACKGROUND JOB USED BY THE ENGINE.
+      ##
+      ###############################################################
       @queue_adapter = "shoryuken"
 
      
