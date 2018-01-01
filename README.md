@@ -136,22 +136,15 @@ end
 ```
 That's it. No generators or anything else is needed. 
 
-#### How to add Omniauth for Google and Facebook?
 
-#### How to do token authentication for a json api?
-
-#### How to sign in user from a mobile app ?
-
-#### 
-
-#### How to add the css provided by the engine?
+### Use the In-built modals for sign-in/sign-up
 
 The engine uses Materialize css as a css framework. 
 It provides a modal for all sign-in / sign-up procedures. 
 If you decided to use the engine, for the moment, only the modals work, and they use ONLY ajax requests.
 In order to use this do the following:
 
-##### CSS
+#### CSS
 
 ```
 #app/assets/stylesheets.scss
@@ -162,7 +155,7 @@ In order to use this do the following:
 */
 ```
 
-##### Javascripts
+#### Javascripts
 
 ```
 #app/assets/javascripts
@@ -175,13 +168,39 @@ In order to use this do the following:
 
 ```
 
-##### Configuration File
+#### Configuration File
 
 In the configuration file you can decide which components you want the engine to provide.
 
 If you want a navbar, alongwith a sign-in / sign-up button on the right side, then in your __preinitializer.rb__ :
 
 ```
+config.navbar = true
+config.brand_name = "Wordjelly"
+```
 
+If you also want the sign in modals then add to the config file:
+
+```
+config.enable_sign_in_modals = true
+```
+
+In your application layout add the following
+
+```
+# app/views/layouts/application.html.erb
+
+<body> 
+  <!-- for enabling the navbar -->
+  <%= render :partial => "layouts/auth/navbar/navbar.html.erb" %>
+  
+  <div class="container">
+    <%= yield %>
+  </div>
+  
+  <!-- for the sign in modals -->
+  <%= render :partial => "layouts/auth/modals.html.erb" %>
+  
+</body>
 ```
 
