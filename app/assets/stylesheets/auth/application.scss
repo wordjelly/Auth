@@ -10,14 +10,5 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *
- *= require calendar
- *= require calendar_modifications
- *= require_tree .
  *= require_self
  */
-@import "materialize";
-@import "materialize/components/color";
-$primary-color: color("blue", "lighten-2") !default;
-
-.modal { max-height: 90% !important ;}
-.sign_in {background-color: blue; cursor: pointer;}

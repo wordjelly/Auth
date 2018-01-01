@@ -1,18 +1,33 @@
-// This is a manifest file that'll be compiled into application.js, which will include all the files
-// listed below.
-//
-// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
-// or any plugin's vendor/assets/javascripts directory can be referenced here using a relative path.
-//
-// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
-// compiled file.
-//
-// Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
-// about supported directives.
+/***
+all dependenceis listed here are considering that :
+1. materialize based :
+materialize-sprockets
+main.js
+spinner.js
+leanModal.js
+you_need_to_sign_in.js
+all the above are for sign in / sign up using materialize css based modals and full ajax only requests.
 
-//= require auth/auth_modals_and_navbar.js
-//= require_tree .
+2. for the user profile pages
 
+jquery.calendario.js
+moment
+
+
+3. for payments if you use the default payment gateway provided by the engine: payumoney(india only)
+
+payumoney.js 
+****/
+
+//= require auth/auth_dependencies.js
+//= require materialize-sprockets
+//= require spinner.js
+//= require main.js
+//= require leanModal.js
+//= require you_need_to_sign_in.js
+//= require jquery.calendario.js
+//= require moment
+//= require payumoney.js
 
 /////THIS CODE SHOWS HOW TO OVERRIDE ALL THE CLIENT SIDE CODE NEEDED
 /////FOR VALIDATIONS TO WORK FOR THE SIGN_IN_FORM.

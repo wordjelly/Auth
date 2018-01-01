@@ -40,33 +40,9 @@
 
 42. permitted params have to be hard coded somewhere in the devise_concern, to allow the app_id and the api_key.
 
-43.a payment object should have a transaction id, and an optional cart_item_id.
-44.on the amount should be calculated live, by getting the prices of all the cart_items or only the one in the payment object.
-45.to integrate this with salaries and payments.
-46.a salary can be a product, with an id and a price.
-47.suppose payment object can accept optional money paid to, there should also be acknowledgement.
-48.product should get a vendor_id, which has to be a registered user.
-49.user can just use his own client.
+
 50.what if client id becomes nil.
 51.remember to allow in the website only permitted client ids(i.e the one from the app.)
-
-52.user creates a cart item
-then he builds a transaction out of it.
-he clicks checkout – we prompt him to set up drive 
-he does not set it up : we hold the transaction and cart items on server till tests are completed, after tests are completed, we check for drive otherwise -> just email,and then update the cart items to remove references to the product_details, just keep the broad test classificatio
-he sets it up : we hold the transaction and cart items, once test is complete, write them to 
-drive, seperate file per test, and sepereate file per transaction, after that remove the broad refs from the cart_items.
-if he wants to search by test? -> then show a link in the dropdown, saying my diabetes test results.
-if he wants to search by transaction -> this can be done, we can store transaction names
-otherwise, we will have to search the drive remote.
-consider adding timer to short_poll redis query endpoints, though not needed in otp.
-
-
-CART ENDPOINTS:
-##every user has a cart already built in.
-##do we need a seperate cart model?
-##no just create a cart_controller with these endpoints, and have 
-##a array for product ids, so what i will need is a product model that has a method that serializes and deserializes and finds it on needing it.
 
 
 
@@ -105,10 +81,8 @@ while running authentication tests : the notify has to be set to true, also ther
 
 plan would be as follows:
 
-1. all tests should pass under the same settings.
-2. set up elasticbeanstalk and mongolab
-3. add the gem -> follow instructions for queue
-4. start with one aspect at a time.
+1. materialize is being used by default -> provide option.
+2. oauth routes are drawn whether oauth resources are specified or not.
 
 
 -->

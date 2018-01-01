@@ -2,10 +2,10 @@
 <html>
 <head>
   <title><%= Auth.configuration.brand_name %></title>
-  <!-- this uses the stylesheet and javascript files of the engine, as they are prefixed with auth, this automatically also includes the application.js and application.scss files of the current app. -->
-  <%= stylesheet_link_tag    "auth/application", media: "all" %>
+  <!-- to include stylesheet and javascripts from the engine use auth/application -->
+  <%= stylesheet_link_tag    "application", media: "all" %>
   <%= stylesheet_link_tag    "https://fonts.googleapis.com/icon?family=Material+Icons", media: "all" %>
-  <%= javascript_include_tag "auth/application" %>
+  <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
