@@ -45,7 +45,12 @@ Edit the Gemfile to include the following, (always use the git source to get the
 gem 'auth', :git => "https://github.com/wordjelly/Auth"
 ```
 
-Now run __bundle update__ from the command line.
+Now from the command line run:
+
+```
+bundle update
+rails g mongoid:config
+```
 
 
 The Auth gem adds the following additional, essential, dependencies to your application:
