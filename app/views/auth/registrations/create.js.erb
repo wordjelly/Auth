@@ -1,11 +1,11 @@
 <%= render :partial => "auth/modals/resource_errors.js.erb", locals: {resource: resource} %>
 
 <% if resource.errors.size == 0 %>
-	console.log("there were no resource erros");
+	
 	var resource_active = "<%= resource.active_for_authentication? %>";
+	
 	var additional_login_param_status_pending = "<%= resource.additional_login_param_status == 1 %>";
-	console.log("pending status was:");
-	console.log(additional_login_param_status_pending);
+	
 	if(resource_active === "true"){
 		$("#login_footer").html("Redirecting you to your Profile").show();
 		window.location.href = "<%= profile_path(resource.id) %>";
@@ -18,7 +18,7 @@
 		$("#login_title").html("Verify your Account");
 		if(additional_login_param_status_pending === "true"){
 			
-			$("#login_content").html("<%= escape_javascript(render partial: Auth.configuration.auth_resources[resource.class.to_s.capitalize][:additional_login_param_new_otp_partial], locals: {resource: resource, intent: ''}) %>").show();
+			$("#login_content").html("<%= escape_javascript(render partial: Auth::Partials.additional_login_param_new_otp_partial(resource), locals: {resource: resource, intent: ''}) %>").show();
 			//$("#sign_up_inputs").hide();
 			$("#login_footer").html("<%= escape_javascript(render partial: 'auth/modals/login_navigation_options.html.erb', locals: {resource: resource}) %>").show();
 			$("#show_sign_up").hide();

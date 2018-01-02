@@ -1,6 +1,7 @@
 ##here add the internal lib files or anything else that is going to be
 ##needed throughout the app, that was defined or created inside the app itself.
 require "auth/omniauth/path"
+require "auth/partials"
 require "auth/rails/routes"
 require "auth/two_factor_otp"
 require "auth/mailgun"

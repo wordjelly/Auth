@@ -188,6 +188,9 @@ module Auth::Concerns::UserConcern
   		
   		##override active_for_authentication? to say true if additional login param is confirmed.
 		def active_for_authentication?
+			#puts "came to active for authentication,"
+			#puts "the status of additional login param is:"
+			#puts additional_login_param_status.to_s
 			##if additional_login_param is confirmed and 
 			if additional_login_param_status == 2
 				
