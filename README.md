@@ -171,6 +171,8 @@ class User::ParameterSanitizer < Devise::ParameterSanitizer
 end
 ```
 
+#### application_controller.rb
+
 You need to tell your application to use this parameter sanitizer as follows
 
 ```
@@ -200,6 +202,16 @@ The parameter sanitizer above will not be used , unless you tell Rails to autolo
 config.autoload_paths += %W(#{config.root}/lib)
 config.autoload_paths += Dir["#{config.root}/lib/**/"]
 ```
+
+#### Mailer Host configuration
+
+Add this line to you development.rb.
+
+```
+config.action_mailer.default_url_options = { :host => 'localhost' }
+```
+
+Once you go into production, you will need to add a similar line to production.rb, but with your website name instead. 
 
 
 #### Routes File: Mount the Engine
