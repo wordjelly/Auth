@@ -108,6 +108,8 @@ Let us say that you want to have a model called "User" which should have full si
 __Please note that it is compulsory to add "email" as the first login param__ 
 It would be configured as follows:
 
+#### Configuration File
+
 ```
 Auth.configure do |config|
 
@@ -127,6 +129,8 @@ config.auth_resources = {
 end
 ```
 
+#### User Model Creation
+
 Now create A 'User' Model as follows:
 
 ```
@@ -137,6 +141,68 @@ include Auth::Concerns::UserConcern
 
 end
 ```
+
+
+#### Parameter Sanitizer
+
+Create A Parameter Sanitizer, this decides which parameters will be permitted while sign_up or account update.
+Place it in lib/{your_model_name}, and name it parameter_sanitizer.rb
+It should look like this:
+
+Refer to Devise#Parameter_Sanitizer for more information.
+
+```
+class User::ParameterSanitizer < Devise::ParameterSanitizer
+
+  def initialize(resource_class, resource_name, params)
+
+    super(resource_class, resource_name, params)
+
+    permit(:sign_up, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params]) 
+    
+    # if you wanted to permit an additional parameter for the user model at the time of sign up, then do as follows:
+    
+    # permit(:sign_up, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params] + [:another_param])
+
+    permit(:account_update, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params])
+
+  end
+
+end
+```
+
+You need to tell your application to use this parameter sanitizer as follows
+
+```
+# application_controller.rb
+
+  protected
+
+  def devise_parameter_sanitizer
+      if resource_class == User
+        User::ParameterSanitizer.new(User, :user, params)
+      elsif resource_class == Admin
+        Admin::ParameterSanitizer.new(Admin,:admin,params)
+      else
+        super # Use the default one
+      end
+  end
+
+```
+
+#### application.rb
+
+The parameter sanitizer above will not be used , unless you tell Rails to autoload that file at startup, as follows:
+
+```
+# config/application.rb
+
+config.autoload_paths += %W(#{config.root}/lib)
+config.autoload_paths += Dir["#{config.root}/lib/**/"]
+```
+
+
+#### Routes File: Mount the Engine
 
 And finally mount the engine in your routes file with this line:
 
