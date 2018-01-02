@@ -43,6 +43,12 @@ Edit the Gemfile to include the following, (always use the git source to get the
 
 ```
 gem 'auth', :git => "https://github.com/wordjelly/Auth"
+
+## VIMP!!
+## also remember to comment out the gem jquery-rails line, since the auth gem provides a specially modified versino of 
+jquery rails.
+
+# gem jquery-rails
 ```
 
 Now from the command line run:
