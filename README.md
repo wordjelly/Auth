@@ -212,7 +212,30 @@ config.action_mailer.default_url_options = { :host => 'localhost' }
 ```
 
 Once you go into production, you will need to add a similar line to production.rb, but with your website name instead. 
+This tells rails the origin from where you want to send the 
 
+
+To receive emails while developing , using the [mailcatcher gem](https://mailcatcher.me/) you need to do the following:
+
+Add this line to development.rb file (or production if you are in production)
+
+```
+## Either configure for a local mailer recipient or Mailgun.
+## Note that mailgun is provided by default by the gem, using a slightly modified version of the mailgun-ruby gem. Ensure that you don't use the stock mailgun-ruby or it will not work.
+
+## Local MailServer Configuration : eg. for Mailcatcher
+  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {:address => "localhost", :port => 1025}
+
+## Mailgun configuration.  
+  config.action_mailer.delivery_method = :mailgun
+  config.action_mailer.mailgun_settings = {
+    api_key: 'key-6263360b078081b625182ff17d7a92fd',
+    domain: 'sandboxc0248205473845c3a998e44941ee503e.mailgun.org'
+  }
+
+```
 
 #### Routes File: Mount the Engine
 
