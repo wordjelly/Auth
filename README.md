@@ -73,6 +73,24 @@ The Auth gem adds the following additional, essential, dependencies to your appl
 10. aws-sdk (for background jobs and queues)
 11. mongoid-versioned-atomic (a gem that allows document versioning with mongoid, also authored by wordjelly)
 
+
+## Devise Configuration File
+
+Create a configuration file for devise, in initializers.
+We recommend setting scoped_views = true, so that devise will look for views and controllers and mailers in the folder that belongs to the resource, and not the general devise folder.
+
+Any other devise option that you want to configure you can do here. It will override the configuration that is provided in the engine.
+
+N.B: The engine does not in any way change anything in the devise default configuration file. Everything there is left untouched.
+
+```
+# config/initializers/devise.rb
+
+Devise.setup do |config|
+  config.scoped_views = true
+end
+```
+
 ## Create A Configuration File
 
 To use the gem , create a __preinitializer__ file in your project's _config/initializers_ folder
@@ -236,6 +254,153 @@ Add this line to development.rb file (or production if you are in production)
   }
 
 ```
+
+#### How to configure mailers for your application, alongwith CSS.
+
+The gem comes prepackaged with 'premailer-rails'. You can refer to its documentation for more details.
+
+A. Mailer for Notifications:
+
+If you use the Auth::Notify class provided by the gem for notifications, then that class needs a mailer to send emails.
+To configure this, you need to create a mailer that inherits from Auth::Notifier.
+
+Here is what Auth::Notifier looks like:
+
+```
+# auth/app/mailers/auth/notifier.rb
+
+class Auth::Notifier < ::ApplicationMailer
+  default from: "from@example.com"
+  ## make sure that anything going into this argument implements includes globalid, otherwise serialization and deserialization does not work.
+  def notification(resource,notification)
+    @resource = resource
+    @notification = Auth.configuration.notification_class.constantize.new
+    mail to: "someone@gmail.com", subject:  "Hi first notification"
+  end
+end
+```
+
+So you need to create a mailer class and have it inherit from Auth::Mailer, place it in your app/mailers directory
+
+Do this by running the following command from the command line:
+
+```
+rails g mailer MyNotificationMailer
+```
+
+Then edit the file created so that it looks like this:
+
+```
+# app/mailers/my_notification_mailer.rb
+
+class MyNotificationMailer < Auth::Notifier
+    
+end
+```
+
+Now this mailer will be used to send any notification emails.
+
+Here is how the inheritance takes place
+
+              Your App's ApplicationMailer
+                          |
+                          |
+                          |
+                    < Auth::Notifier
+                          |
+                          |
+                          |
+                  < MyNotificationMailer
+
+
+The generate command creates a bunch of files and here is what they all do:
+
+In app/views/layouts : 
+
+It creates a basic mailer.html.erb, and mailer.text.erb. These are layouts that will be used by default for any email sent out from your app. Whether for notification or devise or anything else. The ApplicationMailer by default uses "mailer.html.erb" as its layout file.
+
+In app/views/my_notification_mailer :
+
+This directory is blank by default. Here you can place views that you want to have rendered, inside the layouts mentioned above. 
+
+
+So basically the flow is as follows;
+
+                        Somebody calls 
+                    the #notification def
+                      on the mailer which 
+                  inherits from Auth::Notifier
+                              |
+                              |
+                              |
+                              |           
+                    this def looks for a view
+                         to render the 
+                       email in , in the 
+                            folder 
+                          app/views/
+                    mailer_class_name(in this case MyNotificationMailer)
+                              |
+                              |
+                              |
+                              |
+                              |
+              those views are rendered in the layout
+                 which defaults to mailer.html.erb.
+
+The only missing link in all this , is how does the caller know the name of the mailer class that you use in your app, for the purpose of sending notifications? 
+
+Well that has to be set in the configuration file:
+
+```
+config.mailer_class = "MyNotificationMailer"
+```
+
+The layout mentioned above can be changed by explicitly setting the layout option in your mailer, as follows:
+
+```
+# app/mailers/my_notification_mailer.rb
+
+class MyNotificationMailer < Auth::Notifier
+
+default from: "from@example.com"
+layout 'whatever_layout_you_want'
+
+end
+```
+
+You can set many options in mailers. Refer to documentation of ActionMailer for this purpose.
+
+Pending here : basic notification, notification tests, and webhooks.
+
+
+B. Mailer for Devise Emails:
+
+To use your own views for the devise emails, do as follows:
+
+1. If you set config.scoped_views as true in the devise.rb initializer, then create a folder as follows: 
+
+app/views/{your_resource_pluralized}/mailer
+
+In this folder you can override three files: 
+
+a.confirmation_instructions.html.erb
+b.reset_password_instructions.html.erb
+c.unlock_instructions.html.erb
+
+Add whatever html you want, and remember that it will use the mailer.html.erb layout by default. You cannot change this layout setting. If you want to do that, refer to this [tutorial](https://www.ajostrow.me/articles/custom-devise-emails), you basically have to create a custom_mailer, like we created above and have it inherit from DeviseMailer.
+
+C. Any Other Mailer:
+
+Just run 
+
+```
+rails g WhateverMailer
+```
+
+Everything that follows is similar to point A.
+
+
 
 #### Routes File: Mount the Engine
 
