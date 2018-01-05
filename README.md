@@ -255,7 +255,7 @@ Add this line to development.rb file (or production if you are in production)
 
 ```
 
-#### How to configure mailers for your application, alongwith CSS.
+#### Mailer Configuration + Email CSS
 
 The gem comes prepackaged with 'premailer-rails'. You can refer to its documentation for more details.
 
@@ -317,7 +317,7 @@ The generate command creates a bunch of files and here is what they all do:
 
 In app/views/layouts : 
 
-It creates a basic mailer.html.erb, and mailer.text.erb. These are layouts that will be used by default for any email sent out from your app. Whether for notification or devise or anything else. The ApplicationMailer by default uses "mailer.html.erb" as its layout file.
+It creates a basic __mailer.html.erb__, and __mailer.text.erb__. These are layouts that will be used by default for any email sent out from your app. Whether for notification or devise or anything else. The ApplicationMailer by default uses "mailer.html.erb" as its layout file.
 
 In app/views/my_notification_mailer :
 
@@ -388,7 +388,22 @@ a.confirmation_instructions.html.erb
 b.reset_password_instructions.html.erb
 c.unlock_instructions.html.erb
 
-Add whatever html you want, and remember that it will use the mailer.html.erb layout by default. You cannot change this layout setting. If you want to do that, refer to this [tutorial](https://www.ajostrow.me/articles/custom-devise-emails), you basically have to create a custom_mailer, like we created above and have it inherit from DeviseMailer.
+
+For these views to use the default mailer layout of the app, you must add this line at the top of devise.rb initializer.
+
+
+```
+# config/initializers/devise.rb
+
+Devise::Mailer.layout "mailer"
+Devise.setup do |config|
+  # whatever
+end
+```
+
+To create a custom mailer for devise use this tutorial:
+
+If you want to do that, refer to this [tutorial](https://www.ajostrow.me/articles/custom-devise-emails), you basically have to create a custom_mailer, like we created above and have it inherit from DeviseMailer.
 
 C. Any Other Mailer:
 
@@ -400,6 +415,37 @@ rails g WhateverMailer
 
 Everything that follows is similar to point A.
 
+
+D. How to add CSS to Emails
+
+The gem 'premailer-rails' is present by default in the engine.
+All you need to do is add a link to the css files , in the <head></head> tags of the layout, that is defined in your mailer. In case you haven't defined any mailer, then it will default to mailer.html.erb. So assuming your layout is mailer.html.erb, here is what it should look like:
+
+```
+# app/views/layouts/mailer.html.erb
+
+<html>
+  <head>
+    <%= stylesheet_link_tag 'application.css', media: 'all' %>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>
+
+```
+
+Now in the view that corresponds to your mailer def, add styles from that stylesheet as usual.
+
+eg:
+
+```
+# views/users/mailer/confirmation_instructions.html.erb
+# assuming that your stylesheet uses materialize-css
+
+<a class="blue-text">Hi this text should be in blue</a>
+<a class="teal-text fw-24">Hi this text should have a font weight of 24, and should be teal</a>
+```
 
 
 #### Routes File: Mount the Engine
