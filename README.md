@@ -170,6 +170,9 @@ It should look like this:
 Refer to Devise#Parameter_Sanitizer for more information.
 
 ```
+
+# lib/user/parameter_sanitizer.rb
+
 class User::ParameterSanitizer < Devise::ParameterSanitizer
 
   def initialize(resource_class, resource_name, params)
@@ -561,3 +564,180 @@ class ApplicationController < ActionController::Base
   respond_to :html,:js,:json
 end
 ```
+
+### Mobile-Number Sign Up:
+
+To allow users to sign up by mobile-number do the following:
+
+
+#### Configuration File
+
+Modify the config.auth_resources in the configuration file so that it looks like this:
+
+```
+# config/initializers/preinitializer.rb
+
+config.auth_resources = {
+  "User" => {
+    :login_params => [:email,:additional_login_param],
+    :additional_login_param_name => "mobile"
+  }
+}
+
+``` 
+
+#### Parameter Sanitizer
+
+Modify the Parameter Sanitizer created above to permit the 'additional_login_param' as follows:
+
+```
+# lib/user/parameter_sanitizer.rb
+
+class User::ParameterSanitizer < Devise::ParameterSanitizer
+
+  def initialize(resource_class, resource_name, params)
+
+    super(resource_class, resource_name, params)
+    
+    permit(:sign_up, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params] + [:additional_login_param])
+
+    permit(:account_update, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params] + [:additional_login_param])
+
+  end
+
+end
+```
+
+#### User Model
+
+The engine provides an SMSOtpConcern, to be mixed into the User model.
+This Concern adds a couple of callbacks and methods all hooking into the sign-up process. 
+You only need to override two of them. Basically the Engine needs to know how to send the user the Otp message, and also how to verify the code entered by the user is valid.
+This concern is to be used in conjunction with the _OtpController_ which is described later.
+These methods described below are called from the OtpController, at various points.
+Hence only include this concern in your user model, after you have also specified the name of the otp controller in the configuration file.
+
+
+__Including the SmsOtpConcern__
+
+
+```
+# app/models/user.rb
+
+class User
+  include Auth::Concerns::UserConcern
+  include Auth::Concerns::SmsOtpConcern
+end
+
+```
+
+__How to specify method to send Sms Otp?__
+
+Override this method as follows:
+
+```
+# app/models/user.rb
+
+# remember to call super before specifying how your app sends the sms.
+
+# In the code below, we use the built in OtpJob provided by the engine, to send the sms. This currently only works for INDIAN mobile numbers.
+
+# The OtpJob is a delayed job, provided by the engine.
+
+def send_sms_otp
+  super
+  OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"send_sms_otp"])
+end
+```
+
+__How to verify the sent otp?__
+
+Override this method as follows:
+
+```
+# app/models/user.rb
+
+# remember to call super(otp) before specifying how your app verifies the code entered by the user.
+
+# here too, we use the OTPJob provided by the engine, to verify the code. This also currently works only for INDIAN mobile numbers.
+
+def verify_sms_otp(otp)
+    super(otp)
+    OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp",JSON.generate({:otp => otp})])
+    
+end
+
+```
+
+__How to validate the mobile number?__
+
+Override this method as follows:
+
+```
+# app/models/user.rb
+
+# the engine provides a built-in validation function for the additional login parameter that is run before the sign up process, or update process. You can override this def as per your sign up parameter.
+
+# code below is adjusted for INDIAN MOBILE NUMBERS
+
+def additional_login_param_format
+   
+    if !additional_login_param.blank?
+      
+      if additional_login_param =~/^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/
+        
+      else
+        
+        errors.add(:additional_login_param,"please enter a valid mobile number")
+      end
+    end
+  end 
+
+```
+
+#### Otp Controller
+
+It is necessary to create a controller , that will include the otpconcern provided by the engine, like so:
+
+```
+#app/controllers/otp_controller.rb
+
+class OtpController < Auth::ApplicationController
+  include Auth::Concerns::OtpConcern
+end
+
+```
+
+You must now enter the name of the otp controller in the configuration file, as follows:
+
+```
+# config/initializers/preinitializer.rb
+
+config.otp_controller = "otp"
+```
+
+
+#### How to generate views for use by the otp controller
+
+Currently the engine only provides modal based views for using with the otp controller, and all these only work with ajax requests.
+You can use your own views to be rendered inside the modal.
+If you want to use the default views then copy and paste the following into the configuration file.
+
+```
+# config/initializers/preinitializer.rb
+
+config.auth_resources = {
+  "User" => {
+    :login_params => [:email,:additional_login_param],
+    :additional_login_param_name => "mobile",
+    :additional_login_param_resend_confirmation_message => "Resend OTP",
+    :additional_login_param_new_otp_partial => "auth/modals/new_otp_input.html.erb",
+    :additional_login_param_resend_confirmation_message_partial => "auth/modals/resend_otp.html.erb",
+    :additional_login_param_verification_result_partial => "auth/modals/verify_otp.html.erb"
+  }
+}
+
+```
+
+--------------------------------------------------------------------
+
