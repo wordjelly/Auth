@@ -796,6 +796,8 @@ config.third_party_api_keys = {
 
 ```
 
+## EDGE CASES : I SIGN UP, AND THEN CLOSE SITE, NOW WANT TO RESEND OTP, HOW TO DO IT? 
+
 --------------------------------------------------------------------
 
 
@@ -913,4 +915,40 @@ config.oauth_credentials = {
   }
 ```
 
+## EDGE CASES : SIGNED IN FROM FACEBOOK, WHAT HAPPENS IF WE TRY TO SIGN IN FROM GOOGLE, MOBILE NUMBER INTERACTION FROM OAUTH ACCOUNT, TRYING TO SIGN UP BY SAME EMAIL AS OAUTH ACCOUNT.
+
+---------------------------------------------------------------------
+
 ### Token Authentication for API Access
+
+How to do Token Authentication for API Access:
+
+All requests mentioned henceforth can be directly copied and pasted into PostMan , which is a chrome app that allows API interaction.
+
+
+#### Get an API Key.
+
+After you have successfully signed up:
+
+1. Make a get_request api_call to the following url: -> it will return the client_id. (continue from here.)
+
+2. Then do an update call on that client id.
+
+3. it will return an app id, along with other credentials.
+
+#### Sign Up a User through API
+  
+  a. Using Email:
+  b. Using Mobile Number:
+
+#### Sign In a User through API
+  
+  a. Using Email: 
+  b. Using Mobile Number: 
+
+
+The following is the API TABLE:
+
+------------------------------------------------------------------
+
+### User Sign in from Android App for Google Oauth and Facebook OAuth.

@@ -1,13 +1,11 @@
 require_dependency "auth/application_controller"
 module Auth
   class ClientsController < ApplicationController
-    
-    ##had to add html here, because just adding json does not work.
-    ##the before action, will weed out html requests, so no need to worry about that.
+ 
    
     respond_to :html,:json
     before_action :ensure_json_request  
-    include Auth::Concerns::TokenConcern
+    #include Auth::Concerns::TokenConcern
     before_action :set_client, only: [:show, :edit, :destroy,:update]
 
     ##need to check permissions of 
