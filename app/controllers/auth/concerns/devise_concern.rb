@@ -160,7 +160,7 @@ module Auth::Concerns::DeviseConcern
 
   
     def do_before_request
-    
+       puts "callig do before_request------------------------------"
        clear_client_and_redirect_url
    
        set_client
