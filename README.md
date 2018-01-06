@@ -739,5 +739,62 @@ config.auth_resources = {
 
 ```
 
+# Redis Configuration
+
+If you use the OtpJob provided by the engine for sms's , i.e you are using Indian Mobile Numbers, you need to enable redis, as a global variable called $redis
+
+To do this create an initializer file called redis.rb and add the following code into it:
+
+```
+# config/initializers/redis.rb
+
+cnfg = nil
+REDIS_CONFIG = YAML.load( File.open( Rails.root.join("config/redis.yml") ) ).symbolize_keys
+dflt = REDIS_CONFIG[:default].symbolize_keys
+cnfg = dflt.merge(REDIS_CONFIG[Rails.env.to_sym].symbolize_keys) if REDIS_CONFIG[Rails.env.to_sym]
+$redis = Redis.new(cnfg)
+# To clear out the db before each test
+puts "FLUSHING REDIS DB SINCE ENV IS DEVELOPMENT."
+$redis.flushdb if Rails.env = "development"
+
+```
+
+Now create a file called redis.yml in your config folder, and add the necessary details based on your development environment.
+
+```
+# config/redis.yml
+
+default:
+  host: localhost
+  port: 6379
+development:
+  db: 0
+#  namespace: appname_dev
+test:
+  db: 1
+#  namespace: appname_test
+production:
+  db: 2
+  host: 192.168.1.100
+#  namespace: appname_prod
+
+```
+
+#### API Keys
+
+If you are using the OtpJob for Indian Sms's you need to provide an api key. This key applies to TwoFactorOtp a sms gateway api only.
+In the configuration file do the following:
+
+```
+config/initializers/preinitializer.rb
+
+# you can add all the api keys you use in your app under this key, so that they are easy to find and reference.
+
+config.third_party_api_keys = {
+  :two_factor_sms_api_key => "ac79bc21-6d31-11e7-94da-0200cd936042" 
+}
+
+```
+
 --------------------------------------------------------------------
 
