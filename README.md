@@ -739,7 +739,7 @@ config.auth_resources = {
 
 ```
 
-# Redis Configuration
+#### Redis Configuration
 
 If you use the OtpJob provided by the engine for sms's , i.e you are using Indian Mobile Numbers, you need to enable redis, as a global variable called $redis
 
@@ -798,3 +798,119 @@ config.third_party_api_keys = {
 
 --------------------------------------------------------------------
 
+
+### How to do OAuth Authentication
+
+The engine currently supports OAuth with Google and Facebook. 
+Do the following :
+
+#### Google OAuth:
+
+To get your api key and secret do as follows:
+
+Go to Google Developer console ->
+
+Create A New Project ->
+
+Now Click on Google-Plus-Api, GMail-Api and any other Api that you want, when you go to the Api, click enable ->
+
+Enable as many as you want ->
+
+Now Click on Credentials in the side-bar ->
+
+Now Click on OAuth-Consent-Screen. ->
+
+Now just enter a name for the project (GitHub-Documentation) ->
+
+Now click "Save" ->
+
+Now click on credentials in the top bar ->
+
+Now click on "Create Credentials" ->
+
+Now click on "OAuth-Client-Id" ->
+
+Now in the popup box, fill in the __Authorized Redirect Urls__ with the redirect callback url.
+
+Go to your command line and call
+
+```
+bundle exec rake routes
+```
+
+In the routes look for the route that says:
+
+__google_oauth2_omniauth_callback__
+
+Now take that route path, and prefix it with :
+
+http://localhost:3000/-----whatever_path-----
+
+and paste this in the authorized redirect urls.
+
+
+
+For eg: If the model is User, and the mount path was /authenticate, you will paste a route as follows:
+
+__http://localhost:3000/authenticate/omniauth/google_oauth2/callback__
+
+Then click create, maybe click it again till you get the dialog that gives you the app_id and the secret.
+
+It will then provide you with the client id, and client secret, go to the devise.rb configuration file and under the commented out omniauth section, add the following:
+
+Now go and add the following lines, by creating a key called config.oauth_credentials:
+
+```
+config.oauth_credentials = {
+    "google_oauth2" => {
+      "app_id" => "your app id",
+      "app_secret" => "your app secret",
+      "options" => {
+        :scope => "email, profile",
+            :prompt => "select_account",
+            :image_aspect_ratio => "square",
+            :image_size => 50
+      }
+    }
+  }
+```
+
+#### Facebook OAuth:
+
+To Authenticate with Facebook do the following:
+
+Go to the following [link](http://developers.facebook.com/apps)
+
+If you are not signed in to facebook, sign in, and then if you are not "Registered" as a developer account, it will ask you to register, do that.
+
+After that click "Create New App" on the top right side.
+
+After that go and choose Dashboard.
+Then go to the __FaceBook-Login__ under the __Products__ section in the Dashboard.
+It will give options namely, IOS, Android, and some others.
+Choose "Web" and enter the web page url as "http://locahost:3000"
+
+Now click save.
+Then go the left hand side of the page and click "Settings"
+
+Leave all the settings as default and go and add the callback url, as per your app.
+
+Then click save
+
+Now go to dashboard and pick up the api_key and api_secret, and copy and paste it as follows, in the configuration file:
+
+```
+config.oauth_credentials = {
+    "facebook" => {
+      "app_id" => "1834018783536739",
+      "app_secret" => "c1eb040ecc9d5bb1fd6f518169010420",
+      "options" => {
+        :scope => 'email',
+        :info_fields => 'first_name,last_name,email,work',
+        :display => 'page'
+      }
+    }
+  }
+```
+
+### Token Authentication for API Access
