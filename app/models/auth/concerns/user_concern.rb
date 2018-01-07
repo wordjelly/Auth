@@ -17,6 +17,7 @@ module Auth::Concerns::UserConcern
 		
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
 
+		after_save :set_client_authentication
 
 		before_save do |document|
 			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
@@ -32,7 +33,7 @@ module Auth::Concerns::UserConcern
 		attr_accessor :skip_email_unique_validation
 		field :login,				type: String
 
-		
+		attr_accessor :m_client
 
 		##additional parameter by which login can be done.
 		##it should be defined in the configuration.
@@ -267,16 +268,20 @@ module Auth::Concerns::UserConcern
 	#    end
 	#end
 
-	def set_client_authentication(client)
+	def set_client_authentication
 		
-		client = Auth::Client.new(client) if client.is_a? Hash
-		app_id = client.current_app_id
-		if self.client_authentication[app_id].nil? && self.valid?
-			self.client_authentication[app_id] = SecureRandom.hex(32)
+
+		if !self.m_client.nil?
+			if self.client_authentication[self.m_client.current_app_id].nil? && self.valid?
+				self.client_authentication[self.m_client.current_app_id] = SecureRandom.hex(32)
+				
+				self.save
+			end
+
+		else
 			
-			self.save
 		end
-		self.current_app_id = app_id
+		#
 		
 	end
 
@@ -352,12 +357,12 @@ module Auth::Concerns::UserConcern
 	def as_json(options)
 		 
 		 json = {:nothing => true}
-		
-		 if self.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
+				
+		 if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
 		 	json = super(:only => [:authentication_token])
-	     	json[:es] = self.client_authentication[self.current_app_id]
+	     	json[:es] = self.client_authentication[self.m_client.current_app_id]
 	     	##resetting this before returning the json value.
-	     	self.current_app_id = nil
+	     	##self.current_app_id = nil
 	 	 end
 	 	 if self.errors.full_messages.size > 0
 	 	 	json[:errors] = self.errors.full_messages
@@ -459,6 +464,7 @@ module Auth::Concerns::UserConcern
 		end
 	end
 
+	## no longer used.
 	def set_client_authentication?(act_name,cont_name,client)
 		
 		client && act_name != "destroy" && !(["passwords","confirmations","unlocks"].include? cont_name)
@@ -530,4 +536,6 @@ module Auth::Concerns::UserConcern
 		false
 	end
 	
+
+
 end

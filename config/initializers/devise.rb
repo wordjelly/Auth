@@ -279,12 +279,14 @@ end
 
 DeviseController.class_eval do 
   
+  attr_accessor :m_client
+  
   include Auth::Concerns::DeviseConcern  
   
   ##add to devise concern.
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
-
+  
 
   def redirect_to(options = {}, response_status = {})
 
@@ -318,9 +320,9 @@ DeviseController.class_eval do
         super(options,response_status)
       else
         ##as long as its not destroy.
-        if resource && resource.set_client_authentication?(action_name,controller_name,cli)
-          resource.set_client_authentication(cli)
-        end
+        #if resource && resource.set_client_authentication?(action_name,controller_name,cli)
+        #  resource.set_client_authentication(cli)
+        #end
         if (["passwords","confirmations","unlocks"].include? controller_name)
           super(options,response_status)
         else
@@ -346,16 +348,16 @@ DeviseController.class_eval do
   end
  
   def render(*args)
-       
+
        cli = session[:client]
        if (session[:client] && (session[:client].is_a? Hash))
         cli = Auth::Client.new(session[:client])
        end
 
 
-       if resource && resource.set_client_authentication?(action_name,controller_name,cli)
-         resource.set_client_authentication(cli)
-       end
+       #if resource && resource.set_client_authentication?(action_name,controller_name,cli)
+       #  resource.set_client_authentication(cli)
+       #end
    
         if (["passwords","confirmations","unlocks"].include? controller_name)
             super(*args)
@@ -591,7 +593,7 @@ module Devise
 
           else
             ## do this to force sign in after successfull confirmation
-            
+
             self.resource = nil
           end
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }

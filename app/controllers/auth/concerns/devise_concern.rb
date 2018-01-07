@@ -4,8 +4,9 @@ module Auth::Concerns::DeviseConcern
 
     included do
 		
-	    skip_before_action :verify_authenticity_token, if: :is_json_request?
-
+	    #skip_before_action :verify_authenticity_token, if: :is_json_request?
+        protect_from_forgery with: :null_session
+        
     end
 
     ##returns true if the recaptcha is not specified in the configuration
@@ -97,7 +98,9 @@ module Auth::Concerns::DeviseConcern
 	      else
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          	request.env["omniauth.model"] = path
-
+                
+                self.m_client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
+                
 	          	return true
 	        end
 	      end
