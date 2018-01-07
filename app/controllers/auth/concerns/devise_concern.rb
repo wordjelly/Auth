@@ -6,7 +6,6 @@ module Auth::Concerns::DeviseConcern
 		
 	    skip_before_action :verify_authenticity_token, if: :is_json_request?
 
-
     end
 
     ##returns true if the recaptcha is not specified in the configuration
@@ -127,7 +126,7 @@ module Auth::Concerns::DeviseConcern
                     puts "cient is nil so rendering nothing."
 		      		render :nothing => true , :status => :unauthorized
 		      	else
-                    #puts "client is not nil"
+                    puts "client is not nil"
                 end
 	      	end
 	    end

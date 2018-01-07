@@ -276,6 +276,7 @@ Devise.setup do |config|
 end
 
 
+
 DeviseController.class_eval do 
   
   include Auth::Concerns::DeviseConcern  
@@ -379,28 +380,33 @@ DeviseController.class_eval do
   ##add to devise_concern.
   def require_no_authentication
     
-    
     do_before_request
+    
     assert_is_devise_resource!
     
-    #puts is_navigational_format?
+    
 
     return unless is_navigational_format?
     no_input = devise_mapping.no_input_strategies
     
+   
+
     authenticated = if no_input.present?
       args = no_input.dup.push scope: resource_name
-    
+     
       warden.authenticate?(*args)
     else
-    
+      
       warden.authenticated?(resource_name)
     end
 
+    
+
+    
 
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
-        
+       
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -410,7 +416,6 @@ DeviseController.class_eval do
   end
 
 end
-
 
 module Devise
 
@@ -585,6 +590,8 @@ module Devise
           if current_resource && (current_resource.id.to_s == self.resource.id.to_s)
 
           else
+            ## do this to force sign in after successfull confirmation
+            
             self.resource = nil
           end
           respond_with_navigational(resource){ redirect_to after_confirmation_path_for(resource_name, resource) }
