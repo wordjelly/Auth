@@ -3,8 +3,8 @@ module Auth
   class ClientsController < ApplicationController
  
    
-    respond_to :html,:json
-    before_action :ensure_json_request  
+    respond_to :json
+    include Auth::Concerns::DeviseConcern
     #include Auth::Concerns::TokenConcern
     before_action :set_client, only: [:show, :edit, :destroy,:update]
 
@@ -89,7 +89,7 @@ module Auth
 
       # Only allow a trusted parameter "white list" through.
       def client_params
-        params.require(:client).permit({:redirect_urls => []},:user_id,{:app_ids => []})
+        params.require(:client).permit({:redirect_urls => []},{:app_ids => []})
       end
 
       def ensure_json_request  

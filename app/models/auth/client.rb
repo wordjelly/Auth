@@ -41,7 +41,7 @@ module Auth
     end
 
     def there_are_redirect_urls
-        return self.redirect_urls.size > 0
+        return self.redirect_urls && self.redirect_urls.size > 0
     end
 
     

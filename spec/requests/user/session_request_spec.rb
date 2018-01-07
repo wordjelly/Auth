@@ -192,7 +192,8 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 		end
 
 		before(:each) do 
-			@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+			@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+			#, "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"
 		end
 
 		context " -- no api key" do 
@@ -257,6 +258,15 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
         		user_hash = JSON.parse(response.body)
         		expect(user_hash.keys).to match_array(["authentication_token","es"])
         		
+			end
+
+			it " -- returns a 401 Not Authenticated if login or passwod is wrong -- ", :wrong_password => true do 
+
+				params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				
+				post user_session_path, params.to_json, @headers
+        		expect(response.code).to eq("401")
+
 			end
 
 			it " -- returns 406 when calling DESTROY" do 
