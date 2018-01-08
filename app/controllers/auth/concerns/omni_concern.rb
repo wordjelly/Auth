@@ -82,7 +82,7 @@ module Auth::Concerns::OmniConcern
   ## method from_view is taken from Auth::ApplicationController
   def update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity_info,provider)
     @resource = from_view(existing_oauth_resources,resource_klazz)
-
+    @resource.m_client = self.m_client
     ##identity_info should be a key -> value hash, 
     update_identity_information(identity_info,provider)
 
@@ -133,6 +133,7 @@ module Auth::Concerns::OmniConcern
 
             if existing_oauth_resources.count == 1
               
+              puts "found matching identity."
                 
               if  update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity.attributes.except("_id","provider","uid"),identity.provider)
 
@@ -172,6 +173,11 @@ module Auth::Concerns::OmniConcern
               ## however it is possible that a user with this email exists.
               ## in that case, if we try to do versioned_create, then the prepare_insert block in mongoid_versioned_atomic, runs validations. these include, checking if the email is unique, and in this case, if a user with this email already exists, then the versioned_create doesnt happen at all. We don't want to first check if there is already an account with this email, and in another step then try to do a versioned_update, because in the time in between another user could be created. So instead we simply just set #skip_email_unique_validation to true, and as a result the unique validation is skipped.
               @resource.skip_email_unique_validation = true
+              
+
+              @resource.m_client = self.m_client
+              
+              ## end.
               @resource.versioned_create({"email" => @resource.email})
               ##reset so that no other issues crop up later.
               @resource.skip_email_unique_validation = false
@@ -192,6 +198,9 @@ module Auth::Concerns::OmniConcern
                   @resource.versioned_update({"identities" => 1})
                   if @resource.op_success
                     sign_in @resource
+                    
+
+
                     respond_to do |format|
                       format.html { redirect_to after_sign_in_path_for(@resource) and return}
                       format.json  { render json: @resource, status: :updated and return}

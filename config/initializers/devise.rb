@@ -279,7 +279,7 @@ end
 
 DeviseController.class_eval do 
   
-  attr_accessor :m_client
+  
   
   include Auth::Concerns::DeviseConcern  
   

@@ -121,11 +121,11 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                 end        
 
 
-                it " -- responds with user credentials, and updates access_token and expires at, if a user with same email and identity already exists, and he tries to sign in with oauth, provided that the id_token is valid. -- " do 
+                it " -- responds with user credentials, and updates access_token and expires at, if a user with same email and identity already exists, and he tries to sign in with oauth, provided that the id_token is valid. -- ", :rotten => true do 
 
                     @u1 = User.new(attributes_for(:user_confirmed))
                     @u1.email = "test@gmail.com"
-                    @u1.identities 
+                    
                     @u1.client_authentication["test_app_id"] = "test_es"
                     access_token = "old_access_token"
                     token_expires_at = Time.now.to_i - 100000

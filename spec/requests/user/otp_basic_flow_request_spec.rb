@@ -73,7 +73,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
 
-        it " -- short polls for verification status, returns verified true", :fail => true  do    
+        it " -- short polls for verification status, returns verified true", :one_test => true  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
             
            

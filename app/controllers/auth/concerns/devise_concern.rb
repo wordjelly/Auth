@@ -6,7 +6,7 @@ module Auth::Concerns::DeviseConcern
 		
 	    #skip_before_action :verify_authenticity_token, if: :is_json_request?
         protect_from_forgery with: :null_session
-        
+        attr_accessor :m_client
     end
 
     ##returns true if the recaptcha is not specified in the configuration
