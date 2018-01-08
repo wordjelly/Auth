@@ -262,7 +262,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- returns a 401 Not Authenticated if login or passwod is wrong -- ", :wrong_password => true do 
 
-				params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				params = {user: {login: @u.email, password: "wrong_password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				
 				post user_session_path, params.to_json, @headers
         		expect(response.code).to eq("401")

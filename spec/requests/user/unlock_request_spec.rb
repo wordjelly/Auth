@@ -53,10 +53,15 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				post user_unlock_path,{user:{email: @u.email}}
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
-    			expect(unlock_token).not_to be(nil)
+    			expect(token).not_to be(nil)
     			expect(new_msg_count - prev_msg_count).to eq(1)
 				@u.reload
 						
@@ -68,9 +73,14 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				@u.send_unlock_instructions
 				@u.reload
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
-    			get user_unlock_path,{unlock_token: unlock_token}
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
+    			get user_unlock_path,{unlock_token: token}
     			expect(response.code).to eql("302")
     			@u.reload
     			expect(@u.access_locked?).not_to be_truthy
@@ -97,10 +107,15 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				expect(session[:redirect_url]).not_to be_nil
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
-    			expect(unlock_token).not_to be(nil)
+    			expect(token).not_to be(nil)
     			
     			expect(new_msg_count - prev_msg_count).to eq(1)
 				expect(response.location=~/google/).to be_nil
@@ -111,9 +126,14 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				@u.send_unlock_instructions
 				@u.reload
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
-    			get user_unlock_path,{unlock_token: unlock_token,redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
+    			get user_unlock_path,{unlock_token: token,redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 
     			expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
@@ -148,10 +168,15 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				post user_unlock_path,{user:{email: @u.email},api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,@headers
 				
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
-    			expect(unlock_token).not_to be(nil)
+    			expect(token).not_to be(nil)
     			expect(new_msg_count - prev_msg_count).to eq(1)
 				expect(response.code).to eq("201")
 
@@ -161,9 +186,14 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 				@u.send_unlock_instructions
 				@u.reload
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("unlock_token")+"unlock_token".length+1
-    			unlock_token = message[rpt_index...message.index(" ", rpt_index)]
-    			get user_unlock_path,{unlock_token: unlock_token, api_key: @ap_key, current_app_id: @c.app_ids[0]},@headers
+    			token = nil
+      			message.scan(/unlock_token=(?<unlock_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				token = j[:unlock_token]
+
+      			end
+    			get user_unlock_path,{unlock_token: token, api_key: @ap_key, current_app_id: @c.app_ids[0]},@headers
     			@u.reload
     			expect(@u.unlock_token).to be_nil
     			expect(@u.locked_at).to be_nil

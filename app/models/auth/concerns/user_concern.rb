@@ -354,11 +354,16 @@ module Auth::Concerns::UserConcern
 	##authentication-token and es
 	##if there is none, then it will return nil.
 	##it should return the errors irrespective of these settings.
+	## if otp_verification key is present in the options, then the auth_token and es will not be returned.
+	## this is needed in 
 	def as_json(options)
-		 
+		
+		puts "options coming to as_json:"
+		puts options.to_s
+		puts options[:otp_verification].nil?
 		json = {:nothing => true}
 		
-		unless self.destroyed?	
+		if (!self.destroyed? && options[:otp_verification].nil?)
 			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
 			 	
 			 		json = super(:only => [:authentication_token])

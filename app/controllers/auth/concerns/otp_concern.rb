@@ -7,6 +7,7 @@ module Auth::Concerns::OtpConcern
 	    before_filter :do_before_request
 	    before_filter :initialize_vars
 	    before_filter :check_recaptcha, only: [:send_sms_otp,:verify_otp]
+	    
 	end
 
 	def initialize_vars
@@ -78,6 +79,8 @@ module Auth::Concerns::OtpConcern
 	  	elsif resource = @resource_class.where(conditions).first
 	  		#resource.intent_token = Devise.friendly_token if !@intent.blank?
 	  		#resource.save
+	  		resource.m_client = self.m_client
+	 		resource.set_client_authentication
 	  		resource.send_sms_otp
 	  	elsif resource = @resource_class.new
 	  		@status = 422
@@ -103,7 +106,8 @@ module Auth::Concerns::OtpConcern
 	##VERIFIES THE OTP WITH THE THIRD PARTY API.
 	def verify_otp
 	  	if resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
-	  		
+	  		resource.m_client = self.m_client
+	 		resource.set_client_authentication
 	  		##there are no errors, so we proceed with verification.
 	  		if otp_error = resource.check_otp_errors
 	  			@status = 422
@@ -117,7 +121,7 @@ module Auth::Concerns::OtpConcern
 	  		@status = 400
 	  	end
 	  	respond_to do |format|
-  		  format.json {render json: resource.to_json, status: @status}
+  		  format.json {render json: resource.as_json({:otp_verification => true}), status: @status}
   		  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource, intent: @intent, otp: @otp}}
   		end
 	end
@@ -139,7 +143,8 @@ module Auth::Concerns::OtpConcern
 	  	##first check the errors
 	  	
 	  	if @resource_id && @resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
-	  		
+	  		@resource.m_client = self.m_client
+	 		@resource.set_client_authentication
 	  		if otp_error = @resource.check_otp_errors
 	  			@status = 422
 		  		@resource.errors.add(:additional_login_param,otp_error)
@@ -185,7 +190,7 @@ module Auth::Concerns::OtpConcern
 		end
 
 	  	respond_to do |format|
-	  	  format.json {render json: {:follow_url => intent_url, :errors => @resource.errors.full_messages, :resource => @resource, :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
+	  	  format.json {render json: {:follow_url => intent_url, :errors => @resource.errors.full_messages, :resource => @resource.as_json({:otp_verification => true}), :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
 	  	end
  	end
 

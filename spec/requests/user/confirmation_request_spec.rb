@@ -46,8 +46,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 				post user_confirmation_path,{user:{email: @u.email}}
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
-    			confirmation_token = message[rpt_index...message.index(" ", rpt_index)]
+    			confirmation_token = nil
+      			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				confirmation_token = j[:confirmation_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
     			expect(confirmation_token).not_to be(nil)
     			expect(new_msg_count - prev_msg_count).to eq(1)
@@ -56,12 +61,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 			it "-- show request is successfull" do 
 				##should return redirect.
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			#puts message.to_s
-    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
-    			#puts "the rpt index is : #{rpt_index}"
-    			confirmation_token = message[rpt_index...message.index(" ", rpt_index)]
-    			#puts "the confirmation token is: #{confirmation_token}"
-    			#puts "completed ---------"
+    			confirmation_token = nil
+      			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				confirmation_token = j[:confirmation_token]
+
+      			end
     			get user_confirmation_path,{confirmation_token: confirmation_token}
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
@@ -88,8 +94,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 				expect(response.location=~/google/).to be_nil
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
-    			confirmation_token = message[rpt_index...message.index(" ", rpt_index)]
+    			confirmation_token = nil
+      			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				confirmation_token = j[:confirmation_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
     			expect(confirmation_token).not_to be(nil)
     			expect(new_msg_count - prev_msg_count).to eq(1)
@@ -142,9 +153,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 				post user_confirmation_path,{user:{email: @u.email}, api_key: @ap_key,:current_app_id => "test_app_id"}.to_json,@headers
 				
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
-    			puts message.to_s
-    			confirmation_token = message[rpt_index...message.index(" ", rpt_index)]
+    			confirmation_token = nil
+      			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				confirmation_token = j[:confirmation_token]
+
+      			end
     			new_msg_count = ActionMailer::Base.deliveries.size
     			expect(confirmation_token).not_to be(nil)
     			expect(new_msg_count - prev_msg_count).to eq(1)
@@ -154,8 +169,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 
 			it "-- show request works --" do 
 				message = ActionMailer::Base.deliveries[-1].to_s
-    			rpt_index = message.index("confirmation_token")+"confirmation_token".length+1
-    			confirmation_token = message[rpt_index...message.index(" ", rpt_index)]
+    			confirmation_token = nil
+      			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+      				j = Regexp.last_match
+      				confirmation_token = j[:confirmation_token]
+
+      			end
     			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "test_app_id"}, @headers
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
