@@ -356,18 +356,20 @@ module Auth::Concerns::UserConcern
 	##it should return the errors irrespective of these settings.
 	def as_json(options)
 		 
-		 json = {:nothing => true}
-				
-		 if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
-		 	json = super(:only => [:authentication_token])
-	     	json[:es] = self.client_authentication[self.m_client.current_app_id]
-	     	##resetting this before returning the json value.
-	     	##self.current_app_id = nil
-	 	 end
-	 	 if self.errors.full_messages.size > 0
-	 	 	json[:errors] = self.errors.full_messages
-	 	 end
-	 	 json
+		json = {:nothing => true}
+		
+		unless self.destroyed?	
+			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
+			 	
+			 		json = super(:only => [:authentication_token])
+		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
+		     	
+		 	end
+		 	if self.errors.full_messages.size > 0
+		 	 	json[:errors] = self.errors.full_messages
+		 	end
+	 	end
+	 	json
 	end
 
 	##returns true if there is at least one non empty oauth identity

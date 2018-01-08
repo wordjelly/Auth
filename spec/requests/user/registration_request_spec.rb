@@ -101,7 +101,8 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         ##so that it will set a client authentication.
         cli = Auth::Client.new
         cli.current_app_id = "test_app_id"
-        @user.set_client_authentication(cli)
+        @user.m_client = cli
+        @user.set_client_authentication
 
         ##this client authentication will not change, provided that we use the same api key and same current app id.
 
@@ -322,7 +323,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         @u.client_authentication["test_app_id"] = "test_es_token"
         @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
     end
 
     context " -- fails without an api key --- " do
@@ -394,7 +395,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
             
             user_json_hash = JSON.parse(response.body)
             expect(user_json_hash.keys).to match_array(["authentication_token","es"])
-            expect(session[:client]).not_to be_nil
+            
             expect(@user_created).not_to be_nil
             expect(response.code).to eq("200")
         end
@@ -445,11 +446,12 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
             
           it " -- works -- " do  
             a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
-          
-            put user_registration_path, a.to_json,@headers
+            
+
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
             @user_updated = assigns(:user)
             
-            expect(session[:client]).not_to be_nil
+            
             expect(@user_updated).not_to be_nil
             expect(response.code).to eq("200")
 
@@ -458,11 +460,9 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
           it " -- doesnt respect redirects --- " do 
             a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, redirect_url: "http://www.google.com", :current_app_id => "test_app_id"}
           
-            put user_registration_path, a.to_json,@headers
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
             @user_updated = assigns(:user)
             
-            expect(session[:client]).not_to be_nil
-            expect(session[:redirect_url]).to be_nil
             expect(response.code).to eq("200")
 
 
@@ -476,7 +476,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
          
           a = {:id => @u.id, :api_key => @ap_key, :current_app_id => "test_app_id"}
-          delete user_registration_path(format: :json), a.to_json, @headers
+          delete user_registration_path(format: :json), a.to_json, @headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
           expect(response.code).to eq("200")
 
         end
