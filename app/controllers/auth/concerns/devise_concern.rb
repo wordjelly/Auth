@@ -126,10 +126,10 @@ module Auth::Concerns::DeviseConcern
 	    	else
                 #puts "action name is something else."
 		    	if session[:client].nil?
-                    puts "cient is nil so rendering nothing."
+                    #puts "cient is nil so rendering nothing."
 		      		render :nothing => true , :status => :unauthorized
 		      	else
-                    puts "client is not nil"
+                    #puts "client is not nil"
                 end
 	      	end
 	    end
@@ -162,7 +162,7 @@ module Auth::Concerns::DeviseConcern
 
   
     def do_before_request
-       puts "callig do before_request------------------------------"
+      
        clear_client_and_redirect_url
    
        set_client
