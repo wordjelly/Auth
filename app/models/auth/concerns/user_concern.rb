@@ -358,9 +358,7 @@ module Auth::Concerns::UserConcern
 	## this is needed in 
 	def as_json(options)
 		
-		puts "options coming to as_json:"
-		puts options.to_s
-		puts options[:otp_verification].nil?
+		
 		json = {:nothing => true}
 		
 		if (!self.destroyed? && options[:otp_verification].nil?)

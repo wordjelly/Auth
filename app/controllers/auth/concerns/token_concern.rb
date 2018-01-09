@@ -18,11 +18,7 @@ module Auth::Concerns::TokenConcern
 =begin
     ### in this case, the token authentication will be done on all actions defined below.
     ### so it won't be done on "show"
-    module ClassMethods
-      def token_authentication_conditions
-        {:only => [:create,:update,:destroy,:index]}
-      end
-    end
+    
 =end
 
     ### Example ends
@@ -38,7 +34,12 @@ module Auth::Concerns::TokenConcern
     if Auth.configuration.enable_token_auth
         
       ## conditions can be defined at the controller level .
-      token_auth_controller_conditions = self.respond_to?(:token_authentication_conditions) ? self.token_authentication_conditions : {}
+      ## include a constant called TCONDITIONS, before the line 
+      ## include Auth::Concerns::TokenConcern
+      ## refer to Auth::RegistrationsController or implementation.
+      
+      
+
 
       ## how many models are defined in the preinitializer
       auth_resources_count = Auth.configuration.auth_resources.size
@@ -52,20 +53,22 @@ module Auth::Concerns::TokenConcern
          
           Auth.configuration.auth_resources.keys.slice(0,auth_resources_count - 1).each do |res|
 
-            acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => :none}).merge(token_auth_controller_conditions))
+            acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => :none}).merge(self::TCONDITIONS))
 
             
            
           end
           ## for the last one, just dont add the fallback as none, other conditions are the same.
           res = Auth.configuration.auth_resources.keys[-1]
-          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(token_auth_controller_conditions))
+         
+          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS))
           
 
       else
         ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
         res = Auth.configuration.auth_resources.keys[0]
-        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(token_auth_controller_conditions))
+       
+        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS))
 
       end
     
@@ -83,10 +86,13 @@ module Auth::Concerns::TokenConcern
   ## if yes, sets the resource to the first encoutered such key and breaks the iteration
   ## basically a convenience method to set @resource variable, since when we have more than one model that is being authenticated with Devise, there is no way to know which one to call.
   def set_resource
+    
 
     Auth.configuration.auth_resources.keys.each do |resource|
       break if @resource = self.send("current_#{resource.downcase}") 
     end
+
+    
 
     ## devise in registrations_controller#destroy assumes the existence of an 'resource' variable, so we set that here.
     if devise_controller?
@@ -118,12 +124,12 @@ module Auth::Concerns::TokenConcern
   ## @param[Object] : instance of any object that implements the OwnerConcern.
   ## @return : the object passed in.
   def add_signed_in_resource(obj)
-    puts "current signed in resource is: #{current_signed_in_resource}"
-    obj.signed_in_resource = current_signed_in_resource
-    obj
+        obj.signed_in_resource = current_signed_in_resource
+        obj
   end
 
-  
-
+  def dog
+    "eys"
+  end
 
 end

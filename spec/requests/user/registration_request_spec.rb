@@ -51,7 +51,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     end
 
 
-    it " -- does not need an api_key in the params -- " do 
+    it " -- does not need an api_key in the params -- ", :init => true do 
         get new_user_registration_path
         @user = assigns(:user)
         expect(@user).not_to be_nil
@@ -324,6 +324,13 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         @u.save
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+        
+        ## second user.
+        @u2 = User.new(attributes_for(:user_confirmed))
+        @u2.save
+        @u2.client_authentication["test_app_id"] = "test_es_token1"
+        @u2.save
+
     end
 
     context " -- fails without an api key --- " do
@@ -444,11 +451,11 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
         context " --- UPDATE REQUEST --- " do 
             
-          it " -- works -- " do  
-            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+          it " -- works -- ", :email_update => true do  
+            a = {:id => @u2.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
             
 
-            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u2.authentication_token, "X-User-Es" => "test_es_token1", "X-User-Aid" => "test_app_id"})
             @user_updated = assigns(:user)
             
             

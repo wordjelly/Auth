@@ -55,13 +55,12 @@ module OmniAuth
 	      ##gets.chomp
 	      setup_phase
 	      log :info, 'Request phase initiated.'
-	      puts request.params.to_s
-	      puts request.url.to_s
+	     
 	      # store query params from the request url, extracted in the callback_phase
 	      session['omniauth.params'] = request.params
 	      session['omniauth.model'] = request.url
 	      OmniAuth.config.before_request_phase.call(env) if OmniAuth.config.before_request_phase
-	      puts "Came pa"
+	      
 	      if options.form.respond_to?(:call)
 	        log :info, 'Rendering form from supplied Rack endpoint.'
 	        options.form.call(env)
@@ -425,6 +424,16 @@ module SimpleTokenAuthentication
 		@@additional_identifiers = {}
 	end
 
+	## had to include option force true because otherwise devise does not throw a 401 if you try to do token_authentication inside a devise controller.
+	## took 3 hours to sort this mess out.
+	DeviseFallbackHandler.class_eval do 
+
+		def authenticate_entity!(controller, entity)
+	      controller.send("authenticate_#{entity.name_underscore}!".to_sym,{:force => true})
+	    end
+
+	end
+
 	Entity.class_eval do 
 		def header_names_for_additional_identifiers
 			if additional_identifiers = SimpleTokenAuthentication.additional_identifiers["#{name_underscore}".to_sym]
@@ -455,6 +464,7 @@ module SimpleTokenAuthentication
 		## but then the gem attempts authentication of the second model also, and failing that, triggers the not authenticated fallback.
 		## to prevent that from happening, we ignore the fallback if we are already signed in.
 		def fallback!(entity, fallback_handler)
+		 
       	  return if self.signed_in?
 	      fallback_handler.fallback!(self, entity)
 	    end
@@ -482,8 +492,8 @@ module SimpleTokenAuthentication
 	    end
 
 	    def find_record_from_identifier(entity)
-	    	token = entity.get_token_from_params_or_headers(self)
 	    	
+	    	token = entity.get_token_from_params_or_headers(self)
 		    token && entity.model.find_for_authentication("authentication_token" => token)
 	    end
 
