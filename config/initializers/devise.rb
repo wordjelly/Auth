@@ -442,76 +442,7 @@ module Devise
   end
 
 
-  RegistrationsController.class_eval do 
-
-    ##had to do this, cuz after update, the authentication token changes, and that needs to be communicated back to the client, or they will never be able to update or access the resource again.
-    def respond_with(*args)
-      if is_json_request?
-        if args[0] && args[0].respond_to?(:authentication_token)
-          render :json => args[0] 
-        else
-          super(*args)
-        end
-      else
-        super(*args)
-      end
-    end
-
-    def respond_with_navigational(*args, &block)
-      if is_json_request?
-        respond_with(*args)
-      else
-        respond_with(*args) do |format|
-          format.any(*navigational_formats, &block)
-        end
-      end
-    end
-
-    
-    ## only required in case of registrations controller, for the update action, and destroy actions, wherein we need to make sure that the resource is authenticated before doing anything.
-    ## have overridden the devise method here.
-    ## it has nothing to do with the simple_token_authentication being done in other controllers. 
-    ## this was just done here because we cannot add simple_token_authentication to a devise controller.
-    def authenticate_scope!
-      
-
-      do_before_request  
-=begin
-      if is_json_request?
-        #puts "is a json request"
-        token = request.headers["X-#{resource_name.to_s.capitalize}-Token"]
-        es = request.headers["X-#{resource_name.to_s.capitalize}-Es"]
-        app_id = request.headers["X-#{resource_name.to_s.capitalize}-Aid"]
-        #puts "token is : #{token}, and es is :#{es}"
-        
-        if !(token && es && app_id)
-            #puts "either token or app id or es was missing."
-            send("authenticate_#{resource_name}!",force: true)
-        else
-          self.resource = resource_name.to_s.capitalize.constantize.where("authentication_token" => token, "client_authentication.#{app_id}" => es).first
-
-          self.resource = nil if self.resource.token_expired?
-          
-          if self.resource.nil? 
-            ##do this in case of the token_expired scenario, because there the resource will be present, just the token will have expired.
-            
-            send("authenticate_#{resource_name}!",force: true)
-          else
-
-            ##here also the same thing has to be done again.
-
-            send(:sign_in,self.resource)
-          end
-        end
-      else
-       
-        send("authenticate_#{resource_name}!", force: true)
-        self.resource = send("current_#{resource_name}")
-      end
-=end
-    end
-
-  end
+  
 
   SessionsController.class_eval do 
 
