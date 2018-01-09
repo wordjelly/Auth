@@ -37,7 +37,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
         @u.client_authentication["test_app_id"] = "test_es_token"
         @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
        Auth.configuration.stub_otp_api_calls = true
         
     end

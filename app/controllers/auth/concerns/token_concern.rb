@@ -99,8 +99,7 @@ module Auth::Concerns::TokenConcern
       self.resource = @resource
     end
 
-    # this line is not necessary, since simple_token_authentication already throws non-authorized error if the resource is not signed in.
-    #self.send("authenticate_#{Auth.configuration.auth_resources.keys[0].downcase}!") if @resource.nil?
+    
   end
 
 
@@ -128,8 +127,6 @@ module Auth::Concerns::TokenConcern
         obj
   end
 
-  def dog
-    "eys"
-  end
+
 
 end

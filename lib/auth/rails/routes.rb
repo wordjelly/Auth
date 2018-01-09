@@ -11,6 +11,7 @@ module ActionDispatch::Routing
 		  resources :profiles, :controller => "auth/users/profiles" do 
 		  	collection do 
 		  		get 'credential_exists'
+		  		post 'get_user_id'
 		  	end
 		  end
 		  
