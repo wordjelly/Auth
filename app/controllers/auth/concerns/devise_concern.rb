@@ -119,7 +119,7 @@ module Auth::Concerns::DeviseConcern
 	    if is_json_request? 
             #puts "it is a json request."
 	    	if action_name == "otp_verification_result"
-	    		##we let this action pass because, we make json requests 
+	    		##we let this action pass because, we make json ajax requests 
 	    		##from the web ui to this endpoint, and anyway it does
 	    		##not return anything sensitive.
                 #puts "action name is otp verification result."
