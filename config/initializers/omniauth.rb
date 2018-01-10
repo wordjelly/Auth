@@ -357,7 +357,7 @@ module OmniAuth
     		#puts request.xhr?
     		access_token =
     		if verify_id_token(request.params['id_token'])
-    			puts "came to verify_id_token"
+    			#puts "came to verify_id_token"
     			#puts "id token was verified."
     			##in this case the access token is pointless, because we dont really get any kind of access for the api, so we just build a dummy token to satisfy the way this method works, since the method is exepcte to return an access token.
     			##refer to 
@@ -370,19 +370,19 @@ module OmniAuth
 	          client.auth_code.get_token(verifier, get_token_options('postmessage'), deep_symbolize(options.auth_token_params || {}))
 	        elsif request.params['code'] && request.params['redirect_uri']
 	          #puts "came to option 3"
-	          puts "CODE AND REDIRECT URL."
+	          #puts "CODE AND REDIRECT URL."
 	          verifier = request.params['code']
 	          redirect_uri = request.params['redirect_uri']
 	          client.auth_code.get_token(verifier, get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
 	        elsif verify_token(request.params['access_token'])
-	          puts "came to option 4"
+	          #puts "came to option 4"
 	          ::OAuth2::AccessToken.from_hash(client, request.params.dup)
 	        else
-	        	puts "came to CODE ANALYSIS"
+	        	#puts "came to CODE ANALYSIS"
 	          	##in this case refer to
 	          	##@link: https://developers.google.com/identity/sign-in/android/offline-access
 	          	##@ref: also refer to the signInActivity.java in the android app where we pass in 'code'
-	          	puts "came to option 5"
+	          	#puts "came to option 5"
 
 	          	verifier = request.params["code"]
 	          	client.auth_code.get_token(verifier, get_token_options(callback_url), deep_symbolize(options.auth_token_params))
