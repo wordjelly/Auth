@@ -87,7 +87,7 @@ module Auth::Concerns::OtpConcern
 	  		resource.errors.add(:additional_login_param,"Could not find a resource with that additional login param")
 	  	end 
 	  	respond_to do |format|
-			  format.json {render json: resource.to_json, status: @status}
+			  format.json {render json: resource.to_json({:otp_verification => true}), status: @status}
 			  format.js   {render :partial => "auth/confirmations/new_otp_input.js.erb", locals: {resource: resource, intent: @intent}}
 		end
   	end
@@ -142,14 +142,15 @@ module Auth::Concerns::OtpConcern
 	  	res_verified = false
 	  	##first check the errors
 	  	
-	  	if @resource_id && @resource = @resource_class.where(:_id => @resource_id, :otp => @otp).first
-	  		@resource.m_client = self.m_client
-	 		@resource.set_client_authentication
+
+	  	if @resource = @resource_class.where(:additional_login_param => @additional_login_param, :otp => @otp).first
+	  		
 	  		if otp_error = @resource.check_otp_errors
 	  			@status = 422
 		  		@resource.errors.add(:additional_login_param,otp_error)
 	  		else
-	  			
+	  			@resource.m_client = self.m_client
+	 			@resource.set_client_authentication	
 			  	if @resource.additional_login_param_confirmed? 
 				  	if @intent == "reset_password"
 				  		puts "came to intent with reset password."
@@ -186,7 +187,7 @@ module Auth::Concerns::OtpConcern
 		else
 			@resource = @resource_class.new
 			@status = 422
-			@resource.errors.add(:additional_login_param,"Not Found")
+			@resource.errors.add(:additional_login_param,"Either otp or additional login param is incorrect, try resend otp")
 		end
 
 	  	respond_to do |format|
