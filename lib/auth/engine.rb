@@ -82,7 +82,9 @@ module Auth
 
     attr_accessor :navbar
 
-    
+    ## used in lib/auth/omniauth.rb
+    ## inside Google_OAuth2.class_eval
+    attr_accessor :host_name
 
     def initialize
       
@@ -138,8 +140,8 @@ module Auth
       @third_party_api_keys = {}
       ##whether to redirect to redirect urls if provided in the
       ##request.
-      @do_redirect = true;
-
+      @do_redirect = true
+      @host_name = nil
 
       ###############################################################
       ##
