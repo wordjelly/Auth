@@ -115,6 +115,8 @@ module Auth::Concerns::OmniConcern
            
             omni_hash = get_omni_hash
             
+            #puts "the omni hash is:"
+            #puts omni_hash
             
             identity = Auth::Identity.new.build_from_omnihash(omni_hash)
 
@@ -136,12 +138,9 @@ module Auth::Concerns::OmniConcern
               puts "found matching identity."
                 
               if  update_access_token_and_expires_at(existing_oauth_resources,resource_klazz,identity.attributes.except("_id","provider","uid"),identity.provider)
-
-                 respond_to do |format|
-                    format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                    format.json  { render json: @resource, status: :updated and return}
-                 end
-
+                 
+                 
+                  respond_with @resource, location: after_sign_in_path_for(@resource)               
               else
                 
                 redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to update the acceess token and token expires at"
@@ -182,6 +181,8 @@ module Auth::Concerns::OmniConcern
               ##reset so that no other issues crop up later.
               @resource.skip_email_unique_validation = false
               
+              #puts "@resource email is:"
+              #puts @resource.email.to_s              
 
               if @resource.op_success
 
@@ -201,26 +202,27 @@ module Auth::Concerns::OmniConcern
                     
 
 
-                    respond_to do |format|
-                      format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                      format.json  { render json: @resource, status: :updated and return}
-                    end
+                    respond_with @resource, location: after_sign_in_path_for(@resource)
+
                   else
                     redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
                   end
                 ##create was successfull.
                 elsif @resource.upserted_id 
-                  
+                  #puts "create was successfull"
                   sign_in @resource
-                 
-                    respond_to do |format|
-                      format.html { redirect_to after_sign_in_path_for(@resource) and return}
-                      format.json  { render json: @resource, status: :updated and return}
-                    end                
+                  #puts "signed in resource."
+                  respond_with @resource, location: after_sign_in_path_for(@resource)
+                    #respond_to do |format|
+                    #  format.html { redirect_to after_sign_in_path_for(@resource) and return}
+                    #  format.json  { render json: @resource, status: :updated and return}
+                    #end                
                 end
               
               else
                 
+                #puts "resource create failed."
+                #puts @resource.errors.full_messages.to_s
                 redirect_to omniauth_failed_path_for(resource_klazz.name),:notice => "Failed to create new identity"
               end
 

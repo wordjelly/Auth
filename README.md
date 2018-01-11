@@ -875,6 +875,13 @@ config.oauth_credentials = {
       }
     }
   }
+
+## Also add a key called host_name, since this is used inside GoogleOAuth2.
+## the host name should be the same host that is registered in the oauth credentials screen as the redirect url host
+## this is necessary while doing mobile based oauth authentication.
+
+config.host_name = "http://localhost:3000"
+
 ```
 
 #### Facebook OAuth:
