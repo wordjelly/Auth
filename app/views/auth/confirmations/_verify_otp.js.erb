@@ -12,7 +12,7 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
       		console.log("doing beforeSend with verified:" + verified);
       		
       	},
-      	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {_id : "<%= resource.id.to_s %>", otp: "<%= otp %>"}, intent: "<%= (defined?(intent) != nil) ? intent : "" %>"},
+      	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {additional_login_param : "<%= resource.additional_login_param.to_s %>", otp: "<%= otp %>"}, intent: "<%= (defined?(intent) != nil) ? intent : "" %>"},
       	url: "<%= Auth.configuration.mount_path %>/<%= resource.class.name.downcase.pluralize.to_s %>/otp_verification_result",
       	error: function(){
       		//errors are not handled here, because spinner.js
