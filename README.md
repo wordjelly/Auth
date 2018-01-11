@@ -950,12 +950,14 @@ After you have successfully signed up:
 
 #### Sign In a User through API
   
-  a. Using Email: 
-  b. Using Mobile Number: 
-
-
-The following is the API TABLE:
+Refer to the API table below for all the API Methods.
 
 ------------------------------------------------------------------
 
 ### User Sign in from Android App for Google Oauth and Facebook OAuth.
+
+Refer to the android app repository which shows how to authenticate users through the api via oauth.
+
+
+
+-------------------------------------------------------------------

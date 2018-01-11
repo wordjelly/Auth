@@ -247,7 +247,7 @@ module OmniAuth
 
 	          	verifier = request.params["code"]
 
-	          	puts "url to pass as callback is: #{url_to_pass_as_callback}"
+	          
 
 	          	client.auth_code.get_token(verifier, get_token_options(url_to_pass_as_callback), deep_symbolize(options.auth_token_params))
 	        	#client.auth_code.get_token(verifier, get_token_options(url_to_pass_as_callback), deep_symbolize(options.auth_token_params))
