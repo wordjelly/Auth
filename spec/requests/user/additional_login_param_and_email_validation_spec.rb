@@ -136,7 +136,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                         
                        
-                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
                         expect(user_json_hash["verified"]).to eq(true)
@@ -270,7 +270,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                     
                    
-                    get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                    get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                     user_json_hash = JSON.parse(response.body)
                    
                     expect(user_json_hash["verified"]).to eq(true)
@@ -344,7 +344,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                         
                        
-                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
                         expect(user_json_hash["verified"]).to eq(true)
@@ -421,7 +421,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                         
                        
-                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
                         expect(user_json_hash["verified"]).to eq(true)
@@ -617,7 +617,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                         @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
                         
                        
-                        get otp_verification_result_url({:resource => "users",:user => {:_id => @last_user_created.id.to_s, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+                        get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
                         user_json_hash = JSON.parse(response.body)
                        
                        expect(user_json_hash["verified"]).to eq(true)
