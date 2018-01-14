@@ -138,7 +138,9 @@ module Auth::Concerns::OtpConcern
   	##//the error lands up being shown inside show_error_modal, by means of json parsing the incoming string, and showing json[:errors] as the error message.
   	##on the other hand, if there is any othe rtype of error in the before_filter initialize_vars, then that raises a not_found and is handled by rendering a json response with errors, and a 422 so again it is handled by spinner as above.
   	def otp_verification_result
-	  	intent_url = nil
+
+  		## a message to display on the website after the otp is successfully verified in case of forgot_password or unlock_account.
+	  	intent_verification_message = nil
 	  	res_verified = false
 	  	##first check the errors
 	  	
@@ -153,20 +155,24 @@ module Auth::Concerns::OtpConcern
 	 			@resource.set_client_authentication	
 			  	if @resource.additional_login_param_confirmed? 
 				  	if @intent == "reset_password"
-				  		puts "came to intent with reset password."
+				  		
 				  		##protected method so had to do this.
 				  		if @resource.confirmed? && !@resource.	pending_reconfirmation?
 				  			@resource.class.send_reset_password_instructions(@resource.attributes)
-				  			puts "should have sent the email now."
+				  			
+				  			intent_verification_message = "An email has been sent to your email account, with instructions on resetting your password" if @resource.errors.empty?
+				  			
+
+				  			
 				  			##if successfull_sent ->
 				  			##else
 				  			## here error is added anyway to resource.
 				  			##end
 				  			##we want to send the reset password instructions, but using the email.
 				  		else
-				  			puts "should have encountered and error."
+				  			
 				  			@resource.errors.add(:additional_login_param,"you do not have a confirmed email account set for this account, you cannot recover the password.")
-				  			puts @resource.errors.full_messages.to_s
+				  			
 				  			@status = 400
 				  		end
 				  		#raw_token = resource.send(:set_reset_password_token)
@@ -175,10 +181,28 @@ module Auth::Concerns::OtpConcern
 				  		##here normally would be resource.unlock.
 				  		##code from https://github.com/plataformatec/devise/blob/master/lib/devise/models/lockable.rb#send_unlock_instructions
 				  		#puts "came to unlocks."
-				  		raw, enc = Devise.token_generator.generate(@resource.class, :unlock_token)
-	        			@resource.unlock_token = enc
-	        			@resource.save(validate: false)
-	        			intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
+				  		
+				  		#raw, enc = Devise.token_generator.generate(@resource.class, :unlock_token)
+	        			#@resource.unlock_token = enc
+	        			#@resource.save(validate: false)
+						
+
+
+						if @resource.confirmed? && !@resource.	pending_reconfirmation?
+
+							@resource.send_unlock_instructions 
+
+							intent_verification_message = "An email has been sent to your email account, with instructions on unlocking your account" if @resource.errors.empty?
+						else
+							puts "resource cnfirmed is: #{@resource.confirmed?}"
+							puts "resource pending reconfirmation is: #{@resource.pending_reconfirmation?}"
+							puts "resource email is: #{@resource.email}"
+
+	        				@resource.errors.add(:additional_login_param,"cannot send unlock instructions because you dont have a confirmed email address.")
+
+	        		    end
+				  				        			
+	        			#intent_url = send("#{@resource_symbol.to_s}_unlock_path",{:unlock_token => raw})
 				  	end
 				  	##make the intent token nil, it can be used only thus once.
 				  	
@@ -191,7 +215,7 @@ module Auth::Concerns::OtpConcern
 		end
 
 	  	respond_to do |format|
-	  	  format.json {render json: {:follow_url => intent_url, :errors => @resource.errors.full_messages, :resource => @resource.as_json({:otp_verification => true}), :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
+	  	  format.json {render json: {:intent_verification_message => intent_verification_message, :errors => @resource.errors.full_messages, :resource => @resource.as_json({:otp_verification => true}), :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
 	  	end
  	end
 

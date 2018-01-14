@@ -90,6 +90,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
     context " -- resend otp flow -- ", :resend_otp => true do 
         before(:all) do 
             $otp_session_id = nil
+            User.delete_all
         end
 
         after(:all) do 
@@ -165,6 +166,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
     context " -- invalid otp flow -- " do 
         before(:all) do 
             $otp_session_id = nil
+            User.delete_all
         end
 
         after(:all) do 
@@ -211,7 +213,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
         ##when we call the subsequent call, then ?
         before(:all) do 
             $otp_session_id = nil
-           
+            User.delete_all
         end
 
         after(:all) do 
@@ -316,7 +318,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
         ##when we call the subsequent call, then ?
         before(:all) do 
             $otp_session_id = nil
-           
+            User.delete_all
         end
 
         after(:all) do 
@@ -402,7 +404,7 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
         ##when we call the subsequent call, then ?
         before(:all) do 
             $otp_session_id = nil
-            
+            User.delete_all
         end
 
         after(:all) do 
@@ -442,6 +444,23 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
             expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end
 
+        ##we then manually confirm the user.
+        it " -- updates the user with a new email address " do 
+            @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                   
+            a = {:id => @last_user_created.id.to_s, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
+                   
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @last_user_created.authentication_token, "X-User-Es" => @last_user_created.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+            @user_updated = assigns(:user)
+            ##manually confirm the email.
+            @last_user_created = User.find(@last_user_created.id)
+            @last_user_created.confirm!
+            @last_user_created.save            
+
+            expect(@last_user_created.email).to eq("rihanna@gmail.com")
+           # expect(@last_user_created.errors).to be_empty
+            expect(response.code).to eq("200")
+        end
 
         it " -- resends sms otp this time with an intent of reset password,  " do 
 
@@ -464,18 +483,23 @@ RSpec.describe "OTP flow requests", :otp => true,:authentication => true, :type 
             get verify_otp_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
+
+
             expect(user_json_hash.keys).to match_array(["nothing"])
         end
         
         ##then to short poll with the intent token
-        it " -- short polls for verification status, this time with an intent and an intent token, returns the unlock url , and verified as true"  do    
+        it " -- short polls for verification status, this time with an intent and an intent token, returns verified as true", :nw => true  do    
             @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+
             
-           
+
+            
+
             get otp_verification_result_url({:resource => "users",:user => {:additional_login_param => @last_user_created.additional_login_param, :otp => $otp_session_id},:api_key => @ap_key, :current_app_id => "test_app_id", :intent => "unlock_account"}),nil,@headers
             user_json_hash = JSON.parse(response.body)
             
-            expect(user_json_hash["follow_url"]).not_to be_empty
+           
             expect(user_json_hash["verified"]).to eq(true)
             expect(user_json_hash["resource"]).not_to include("authentication_token","es")
         end

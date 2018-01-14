@@ -31,6 +31,9 @@ module Auth::Concerns::TokenConcern
     ## if there is more than one model : all but the last will have a fallback of :none.
     ## 
 
+    TCONDITIONS = {} unless defined? TCONDITIONS
+
+
     if Auth.configuration.enable_token_auth
         
       ## conditions can be defined at the controller level .
@@ -44,7 +47,7 @@ module Auth::Concerns::TokenConcern
       ## how many models are defined in the preinitializer
       auth_resources_count = Auth.configuration.auth_resources.size
 
-      
+            
 
       ## if we have more than one auth resource model.
       if auth_resources_count > 1
@@ -61,14 +64,14 @@ module Auth::Concerns::TokenConcern
           ## for the last one, just dont add the fallback as none, other conditions are the same.
           res = Auth.configuration.auth_resources.keys[-1]
          
-          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS))
+          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS || {}))
           
 
       else
         ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
         res = Auth.configuration.auth_resources.keys[0]
        
-        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS))
+        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS || {}))
 
       end
     

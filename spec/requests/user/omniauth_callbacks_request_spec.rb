@@ -44,7 +44,8 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                 it " -- handles invalid code -- " do 
 
                     OmniAuth.config.test_mode = false
-                   
+                    
+                    
 
                     post google_oauth2_omniauth_callback_url(:code => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
 

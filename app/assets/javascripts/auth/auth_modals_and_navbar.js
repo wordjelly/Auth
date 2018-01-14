@@ -44,6 +44,8 @@ SO THERE WE DONT NEED TO DO THE FOLLOWING HIDDEN-FIELD-JUGGLING ETC.
 and it juggles the action and the attributes as required, for the otp. 
 ***/
 $(document).on('click','#login_submit',function(event){
+    console.log("detected login submit click");
+
     var current_screen = $('#login_title').text();
     if(current_screen == "Sign Up"){
       //WHAT WE ARE DOING HERE IS CHECKING IF THE USER IS ENTERING A MOBILE OR A EMAIL, AND IF IT IS A MOBILE, THEN WE ARE ADDING A HIDDEN FIELD CALLED ADDITIONAL_LOGIN_PARAM and sending it alongwith the rest of the form.
@@ -59,12 +61,12 @@ $(document).on('click','#login_submit',function(event){
       //since in case of additional_login_param, we send it to send_sms_otp + intent.
       var user_login = $("#" + resource_singular + "_email").val().trim();    
       if(user_login.match(mobile_number_regex)){
-        $("#login_form").attr("action","/" + resource + "/send_sms_otp?intent=reset_password");
-        $("#login_form").attr("method","GET");
+        $("#login_form_password").attr("action","/" + resource + "/send_sms_otp?intent=reset_password");
+        $("#login_form_password").attr("method","GET");
       }
       else{
-        $("#login_form").attr("action","/" + resource + "/password");
-        $("#login_form").attr("method","POST"); 
+        $("#login_form_password").attr("action","/" + resource + "/password");
+        $("#login_form_password").attr("method","POST"); 
       }
     }
 
@@ -73,12 +75,12 @@ $(document).on('click','#login_submit',function(event){
       //since in case of additional_login_param, we send it to send_sms_otp + intent.
       var user_login = $("#" + resource_singular + "_email").val().trim();    
       if(user_login.match(mobile_number_regex)){
-        $("#login_form").attr("action","/" + resource + "/send_sms_otp?intent=unlock_account");
-        $("#login_form").attr("method","GET");
+        $("#login_form_unlock").attr("action","/" + resource + "/send_sms_otp?intent=unlock_account");
+        $("#login_form_unlock").attr("method","GET");
       }
       else{
-        $("#login_form").attr("action","/" + resource + "/unlock");
-        $("#login_form").attr("method","POST"); 
+        $("#login_form_unlock").attr("action","/" + resource + "/unlock");
+        $("#login_form_unlock").attr("method","POST"); 
       }   
     }
     

@@ -9,12 +9,14 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
       $.ajax({ 
       	beforeSend:function(){
       		//check if verified is true?
-      		console.log("doing beforeSend with verified:" + verified);
+      		
       		
       	},
       	data: {"<%= resource.class.name.downcase.underscore.to_s %>" : {additional_login_param : "<%= resource.additional_login_param.to_s %>", otp: "<%= otp %>"}, intent: "<%= (defined?(intent) != nil) ? intent : "" %>"},
       	url: "<%= Auth.configuration.mount_path %>/<%= resource.class.name.downcase.pluralize.to_s %>/otp_verification_result",
       	error: function(){
+      		// clear the verify otp result message.
+      		$("#verify_otp_result").html("");
       		//errors are not handled here, because spinner.js
       		//catches any non 200/201 status and interprets it as an error
       		//thereafter directly show_error_modal is called.
@@ -27,8 +29,15 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
 	        }
 	        counter++;
 	        	if(data["verified"] == true){
-	        		$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue. Does this display in marathi");
-	        			
+
+	        		// in case of unlock or forgot password.
+	        		if(data["intent_verification_message"] != null){
+	        			$("#verify_otp_result").html(data["intent_verification_message"]);
+	        		}
+	        		// in case of normal sign up procedure.
+	        		else{
+	        			$("#verify_otp_result").html("Your account was successfully verified. Sign In to continue");
+	        		}
 	        		/***
 	        		hide the additional login param block if its additional_login_param value is the same as whatever is this resource's.
 	        		***/
@@ -36,10 +45,7 @@ var verified = "<%= resource.additional_login_param_confirmed? %>";
 	        		if(confirmed_additional_login_param == $("#additional_login_param_resend_block").attr("data-additional-login-param")){
 	        			$("#additional_login_param_resend_block").hide();
 	        		}
-	        		//if this is same as whatever is showing in the data_additional_login_param of class
-	        		if(data["follow_url"]){
-	        			window.location = data["follow_url"];
-	        		}
+	        		
 	        	}
 		        else{
 
