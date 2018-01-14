@@ -255,8 +255,7 @@ var get_current_screen = function(){
 provide the input id without the hash.
 ****/
 var invalidate_input_field = function(input_id,error_message,add_error_message){
-	console.log("input id :" + input_id);
-	console.log("error message is:" + error_message);
+	
 	add_error_message = add_error_message || true;
 	var input = $("#" + input_id);
 	var label = $('label[for="'+ input_id +'"]');
@@ -417,11 +416,12 @@ $(document).on('click','#submit',function(event){
 		return false;
 	}
 	else if(login_type == "Forgot Password"){
-		$("#login_form").attr("action","/" + resource + "/password");
-		$("#login_submit").val("Send me reset password instructions");
+		// the name of the form submitted is login_form_password
+		// the submit button inside it is still having an id of login_submit.
+		// we had to change the id of the form, cuz otherwise it does not trigger remote submit.
+		// since the earlier login_form was present on the page.
 		event.preventDefault();
 		event.stopPropagation();
-		//the application.js in the dummy app, binds to this click event, so effectively overrides anythign set here.
 		$("#login_submit").trigger("click");
 		return false;
 	}
