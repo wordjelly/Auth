@@ -28,7 +28,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :quantity, type: Integer, default: 1
 
 		##PERMITTED
-		##when it is paid for, a transaction should get generated.
+		
 		##not permitted
 		field :parent_id, type: String
 
@@ -83,9 +83,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 		## used in cart_item_controller_concern#show
 		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
 		## 
-		def find_cart_item(options)
-			conditions = {:_id => options[:cart_item_id]}
-			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
+		def find_cart_item(cart_item_id,resource)
+			conditions = {:_id => cart_item_id}
+			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
 			all = self.where(conditions)
 			return all.first if all.size > 0 
 			return nil
@@ -176,8 +176,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## @used_in : cart_controller_concern # add_or_remove
 	def set_cart_and_resource(cart)
 		self.parent_id = cart.id.to_s
-		self.resource_class = cart.get_resource.class.name
-		self.resource_id = cart.get_resource.id.to_s
+		# the cart_items will already have
+		#self.resource_class = cart.get_resource.class.name
+		#self.resource_id = cart.get_resource.id.to_s
 		self.save
 	end
 

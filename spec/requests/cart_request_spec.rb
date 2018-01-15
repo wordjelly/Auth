@@ -80,6 +80,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				5.times do 
 					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+					cart_item.resource_class = @u.class.name
+					cart_item.resource_id = @u.id.to_s
 	                cart_item.signed_in_resource = @admin
 	                cart_item.save
 
@@ -91,7 +93,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				Shopping::CartItem.delete_all
 			end
 
-			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- " do 
+			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- ", :qr => true do 
 				
 
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers

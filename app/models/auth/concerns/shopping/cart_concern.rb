@@ -43,6 +43,21 @@ module Auth::Concerns::Shopping::CartConcern
 		
 	end
 
+	module ClassMethods
+
+		## used in cart_item_controller_concern#show
+		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
+		## 
+		def find_cart(cart_id,resource)
+			conditions = {:_id => cart_id}
+			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
+			all = self.where(conditions)
+			return all.first if all.size > 0 
+			return nil
+		end
+
+	end
+
 	## sets all the attribute accessors of the cart.
 	## @param[Payment] : a payment object can be passed in.
 	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
@@ -202,7 +217,7 @@ module Auth::Concerns::Shopping::CartConcern
 	      if cart_item = Auth.configuration.cart_item_class.constantize.find(id)
 	      	cart_item.signed_in_resource = self.signed_in_resource
 	        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
-	        puts "the response of adding the cart item is:#{resp.to_s}" 
+	       
 	        resp
 
 	      else
@@ -210,6 +225,16 @@ module Auth::Concerns::Shopping::CartConcern
 	      end
 	    }.compact.uniq
 	    self.errors.add(:cart_items,"some cart items could not be added or removed successfully") if ((add_remove_results.size > 1) || (add_remove_results[0] == false))  
+	end
+
+	## used in initialize vars in cart_controlller_concern.
+	## override this method to allow an admin to also interact with all the actions of the controller.
+	def self.find_cart(cart_id,resource)
+		if cart_collection = self.where(:id => cart_id, :resource_id => resource_id)
+			cart_collection.size > 0 ? cart_collection.first : nil
+		else
+			nil
+		end
 	end
 
 end

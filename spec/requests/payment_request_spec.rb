@@ -61,7 +61,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        it " -- creates a payment to the cart-- " do 
+        it " -- creates a payment to the cart-- ", :cr => true do 
             
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
                     
@@ -587,7 +587,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
 
-        it " -- accepts a valid refund if the user is an administrator -- " do 
+        it " -- accepts a valid refund if the user is an administrator -- ", :pd => true do 
 
         	last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
             last_cart_item.signed_in_resource = @admin
@@ -620,7 +620,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1, amount: -10},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
           
-            
+            puts response.body.to_s
+
             payment = Shopping::Payment.find(payment.id)
 
             expect(payment.payment_status).to eq(1)

@@ -62,7 +62,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name.to_s
 				cart_item.signed_in_resource = @admin
-				cart_item.save
+				res = cart_item.save
+				puts "save result: #{res.to_s}"
 				
 	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
 	            

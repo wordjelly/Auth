@@ -3,6 +3,7 @@ class Shopping::CartItem < Auth::Shopping::CartItem
     field :sample_type, type: String
     field :public, type: Boolean
 
+=begin
     ##used in cart_item_controller_concern#show
     ##params_cart_item_id,resource,pub=nil
 	def self.find_cart_item(options)
@@ -18,6 +19,6 @@ class Shopping::CartItem < Auth::Shopping::CartItem
 		return super(options) if options[:pub].nil?
 		self.where(:public => options[:pub])
 	end
-
+=end
 
 end
