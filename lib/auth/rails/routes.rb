@@ -23,7 +23,7 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment"].each do |model|
+			["cart_item","cart","payment","product"].each do |model|
 
 				if Auth.configuration.send("#{model}_controller")
 

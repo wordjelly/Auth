@@ -48,6 +48,19 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	end
 
+	def instantiate_product_class
+
+		if @product_class = Auth.configuration.payment_class
+	      begin
+	        @product_class = @product_class.constantize
+	      rescue
+	        not_found("error instatiating class from product class")
+	      end
+	    else
+	      not_found("product class not specified in configuration")
+	    end
+
+	end
 
 	
 	
@@ -56,6 +69,7 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 		instantiate_payment_class
 		instantiate_cart_class
 		instantiate_cart_item_class
+		instantiate_product_class
 	end
 
 

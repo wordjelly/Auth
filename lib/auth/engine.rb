@@ -63,6 +63,8 @@ module Auth
     attr_accessor :cart_item_class
     attr_accessor :cart_controller
     attr_accessor :cart_class
+    attr_accessor :product_class
+    attr_accessor :product_controller
     attr_accessor :payment_class
     attr_accessor :notification_class
     attr_accessor :payment_controller
@@ -171,7 +173,8 @@ module Auth
       @payment_controller = nil
       @payment_class = nil
       @payment_gateway_info = {}
-        
+      @product_class = nil
+      @product_controller = nil
 
       ###############################################################
       ##

@@ -12,7 +12,9 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   def initialize_vars
-  	
+  	instantiate_shopping_classes
+    @cart_params = permitted_params.fetch(:product,{})
+    @cart = params[:id] ? @product_class.find_product(params[:id],current_signed_in_resource) : @product_class.new(@product_params)
   end
 
   def is_admin_user
@@ -20,20 +22,22 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   def create
-  	@product = permitted_params[:product]
-  	@product.resource_id = lookup_resource.id.to_s
-    @product.resource_class = lookup_resource.class.name
-    @product = add_signed_in_resource(@product)
+    check_for_create(@product)
+    @product = add_owner_and_signed_in_resource(@product)
   	@product.save
   	respond_with @product
   end
 
   def update
-
+    check_for_update(@product)
+    @product = add_owner_and_signed_in_resource(@product)
+    @product.assign_attributes(@product_params)
+    @product.save
+    respond_with @product
   end
 
   def index
-
+    @product_class.all
   end
 
   def show
@@ -41,7 +45,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   def destroy
-
+    check_for_destroy(@product)
+    @product.delete
   end
 
   def permitted_params
