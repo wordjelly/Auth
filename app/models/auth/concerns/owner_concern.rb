@@ -35,6 +35,7 @@ module Auth::Concerns::OwnerConcern
 	def get_resource
 		return unless (self.resource_class && self.resource_id) 
 		unless owner_resource
+			
 			owner_resource = self.resource_class.capitalize.constantize.find(self.resource_id)
 		end
 		owner_resource
@@ -46,9 +47,8 @@ module Auth::Concerns::OwnerConcern
 	def resource_id_not_changed
 	  ##this method will give you access to be able to reset the resource_id in case the admin is modifying the resource.
 	  ##need to check if that can be done?
-
 	  if resource_id_changed? && resource_id_was
-	      errors.add(:resource_id, "You cannot change or view this cart item")
+	      errors.add(:resource_id, "You cannot change the ownership of this entity")
 	  end
 	end
 

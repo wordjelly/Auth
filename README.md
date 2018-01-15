@@ -933,31 +933,126 @@ How to do Token Authentication for API Access:
 All requests mentioned henceforth can be directly copied and pasted into PostMan , which is a chrome app that allows API interaction.
 
 
-#### Get an API Key.
+#### API Table
 
-After you have successfully signed up:
 
-1. Make a get_request api_call to the following url: -> it will return the client_id. (continue from here.)
-
-2. Then do an update call on that client id.
-
-3. it will return an app id, along with other credentials.
-
-#### Sign Up a User through API
-  
-  a. Using Email:
-  b. Using Mobile Number:
-
-#### Sign In a User through API
-  
-Refer to the API table below for all the API Methods.
-
+#### TODO: 
+1.Disable creation of api keys through configuration.
+2.Use Post Requests in OTP Controller
 ------------------------------------------------------------------
 
-### User Sign in from Android App for Google Oauth and Facebook OAuth.
+## Shopping API
 
-Refer to the android app repository which shows how to authenticate users through the api via oauth.
+To use the shopping api you need to do the following:
+
+### Create the Models
 
 
+#### A Cart Model
 
--------------------------------------------------------------------
+```
+# app/models/shopping/cart.rb
+
+class Shopping::Cart < Auth::Shopping::Cart
+  
+end
+```
+
+#### A Cart Item Model
+
+```
+# app/models/shopping/cart_item.rb
+
+class Shopping::CartItem < Auth::Shopping::CartItem
+
+end
+```
+
+#### A Payment Model
+
+```
+# app/models/shopping/payment.rb
+
+class Shopping::Payment < Auth::Shopping::Payment
+
+end
+```
+
+### Create the Corresponding Controllers
+
+#### A Carts Controller
+
+```
+# app/controllers/shopping/carts_controller.rb
+
+class Shopping::CartsController < Auth::Shopping::CartsController
+
+
+end
+```
+
+#### A CartItems Controller
+
+```
+# app/controllers/shopping/cart_items_controller.rb
+
+class Shopping::CartItemsController < Auth::Shopping::CartItemsController
+
+end
+```
+
+#### A Payments Controller
+
+```
+# app/controllers/shopping/payments_controller.rb
+
+class Shopping::PaymentsController < Auth::Shopping::PaymentsController
+  
+
+end
+```
+
+### Modify the configuration file 
+
+```
+# config/initializers/preinitializer.rb
+
+config.cart_item_controller = "shopping/cart_items"
+config.cart_item_class = "Shopping::CartItem"
+
+config.cart_controller = "shopping/carts"
+config.cart_class = "Shopping::Cart"
+
+config.payment_controller = "shopping/payments"
+config.payment_class = "Shopping::Payment"
+
+## refer to the section on payment gateways later, for information on this configuration.
+## the configuration you see here is only applicable if you are using the payumoney concern in your payments_controller, that enables payments in india.
+config.payment_gateway_info = {:key => "gtKFFx", :salt => "eCwWELxi", :CardName => "Any Name", :CardNumber => "5123456789012346", :CVV => "123", :Expiry => "May 2017"}
+```
+
+After doing this, run the following from the command line:
+
+```
+bundle exec rake routes
+```
+
+Check routes for cart, cart item, payment are present.
+
+
+### Broad Overview of How Shopping API Works
+
+Any CartItem that is created, automatically becomes a part of the user's wishlist.
+When the cart item is added to a cart it is no longer seen in the wishlist.
+Payments can be made to the cart.
+
+### Shopping API Table
+
+### How to create Shopping Architecture:
+
+1. Create a class in your app called "Product" and inherit from the Auth::Shopping::Product class. Create A Controller called ProductsController, and inherit from the Auth::Shopping::ProductsController. Use this controller to create products that your users can buy. Any Cart Item that is to be bought, or ordered has to be created out of one of these products. Only allow admin to create/update/delete these products. Allow anyone to show/index the products.
+
+
+2. Before a cart item is created or updated, a validation checks to see if the product id exists. 
+
+

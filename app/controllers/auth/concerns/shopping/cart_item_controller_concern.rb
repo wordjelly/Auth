@@ -3,11 +3,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   extend ActiveSupport::Concern
 
   included do
-    ##this ensures api access to this controller.
-    include Auth::Concerns::DeviseConcern
-    include Auth::Concerns::TokenConcern
-    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index]
-    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index]
+   
     
   end
 
@@ -17,41 +13,29 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   #if no id is provided then creates a new cart_item from the permitted params, but excluding the id key.
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
-    @cart_class = Auth.configuration.cart_class.constantize
-    if @cart_item_class = Auth.configuration.cart_item_class
-      begin
-        @cart_item_class = @cart_item_class.constantize
-      rescue
-        not_found("error instatiating class from cart item class")
-      end
-    else
-      not_found("cart item class not specified in configuration")
-    end
-    @cart_item = permitted_params[:id] ? @cart_item_class.find_cart_item({:cart_item_id => permitted_params[:id], :resource => lookup_resource}) : @cart_item_class.new(permitted_params[:cart_item])
+
+    instantiate_shopping_classes
+    @cart_item_params = permitted_params.fetch(:cart_item,{})
+    @cart_item = params[:id] ? @cart_item_class.find_cart_item(params[:id],current_signed_in_resource) : @cart_item_class.new(@cart_item_params)
+
+ 
   end
 
 
   ##expects the product id, resource_id is the logged in resource, and quantity 
   def create
     ##ensure that the cart item is new
-    @cart_item.new_record? or not_found("this is not a new record")
-    @cart_item.resource_id = lookup_resource.id.to_s
-    @cart_item.resource_class = lookup_resource.class.name
-    @cart_item = add_signed_in_resource(@cart_item)
+    check_for_create(@cart_item)
+    @cart_item = add_owner_and_signed_in_resource(@cart_item)
     @cart_item.save
     respond_with @cart_item
   end
 
   ##only permits the quantity to be changed, transaction id is internally assigned and can never be changed by the external world.
   def update
-
-    not_found if @cart_item.nil?
-    !@cart_item.new_record? or not_found("please provide a valid id for the update")
+    check_for_update(@cart_item)
     @cart_item.assign_attributes(permitted_params[:cart_item])
-    @cart_item.resource_id = lookup_resource.id.to_s
-    @cart_item.resource_class = lookup_resource.class.name.to_s
-    @cart_item = add_signed_in_resource(@cart_item)  
-    puts "the cart item signed in resource: #{@cart_item.signed_in_resource}"
+    @cart_item = add_owner_and_signed_in_resource(@cart_item)  
     @cart_item.save
     respond_with @cart_item
   end

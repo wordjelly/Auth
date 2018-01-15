@@ -113,6 +113,11 @@ module Auth::Concerns::TokenConcern
   ##provided that the signed in resource is an admin.
   ## override as needed.
   def lookup_resource
+    ## just look in the raw params for a attribute called proxy_for
+    ## and check that that resource exists, 
+    ## and if the current_signed_in_resource is an admin,
+    ## then use the proxy_for resource.
+    ## otherwise do whatever.
     current_signed_in_resource
   end  
 
@@ -126,10 +131,27 @@ module Auth::Concerns::TokenConcern
   ## @param[Object] : instance of any object that implements the OwnerConcern.
   ## @return : the object passed in.
   def add_signed_in_resource(obj)
-        obj.signed_in_resource = current_signed_in_resource
-        obj
+        if obj.respond_to? :signed_in_resource
+          obj.signed_in_resource = current_signed_in_resource
+        end
+        return obj
   end
 
+
+  def add_owner_resource(obj)
+      if (obj.respond_to? :resource_id) && (obj.respond_to? :resource_class)
+        obj.resource_id = lookup_resource.id.to_s if obj.resource_id.nil?
+        obj.resource_class = lookup_resource.class.name.to_s if obj.resource_class.nil?
+      end
+      return obj
+  end
+
+
+  def add_owner_and_signed_in_resource(obj)
+    obj = add_owner_resource(obj)
+    obj = add_signed_in_resource(obj)
+    obj
+  end
 
 
 end

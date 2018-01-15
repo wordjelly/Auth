@@ -3,25 +3,18 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   extend ActiveSupport::Concern
 
   included do
-    
-
-   include Auth::Concerns::DeviseConcern
-   include Auth::Concerns::TokenConcern
-
-   before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index, :new]
-   before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index, :new]
-    
+  
   end
 
   def initialize_vars
-    @payment_class = Auth.configuration.payment_class.constantize
+    instantiate_shopping_classes
+    @payment_params = permitted_params.fetch(:payment,{})
+    @payment = params[:id] ? @payment_class.find_payment(params[:id],current_signed_in_resource) : @payment_class.new(@payment_params)
   end
 
   def show
-    @payment = @payment_class.find(params[:id])
     @payment = add_signed_in_resource(@payment)
     @payment.set_payment_receipt
-    
   end
 
   def index
@@ -29,18 +22,18 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def new
-    @payment = @payment_class.new(permitted_params[:payment])
-    @payment = add_signed_in_resource(@payment)
+    @payment = add_owner_and_signed_in_resource(@payment)
   end
 
   def create
-    @payment = @payment_class.new(permitted_params[:payment])
+   
+    check_for_create(@payment)
+   
     @payment.payment_params = params
-    @payment.resource_id = lookup_resource.id.to_s
-    @payment.resource_class = lookup_resource.class.name
-    @payment = add_signed_in_resource(@payment)
+    
+    @payment = add_owner_and_signed_in_resource(@payment)
+   
     @payment.save
-
     respond_with @payment
   end
 
@@ -48,9 +41,9 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   ##we render a cash form, then we create a payment and then we should in the show screen,to confirm and commit the payment which finally brings it here.
   ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
-    @payment = @payment_class.find(params[:id])
-    @payment = add_signed_in_resource(@payment)
+    check_for_update(@payment)
     @payment.assign_attributes(permitted_params[:payment])
+    @payment = add_owner_and_signed_in_resource(@payment)
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     @payment.payment_params = params
     @payment.save
@@ -58,7 +51,6 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def destroy
-     @payment = @payment_class.find(params[:id])
      @payment = add_signed_in_resource(@payment)
      if @payment.signed_in_resource.is_admin?
         @payment.delete
