@@ -1,7 +1,14 @@
 FactoryGirl.define do
 
-  factory :cart_item, class:Shopping::CartItem do 
-    product_id {BSON::ObjectId.new.to_s}
+  factory :product, class:Shopping::Product do 
+    name {Faker::Food.ingredient}
+    price {Faker::Number.decimal(2)}
+  end
+
+
+  factory :cart_item, class:Shopping::CartItem do
+    FactoryGirl.create(:product)
+    product_id {Shopping::Product.first.id.to_s}
     quantity 1
     discount_code {Faker::App.name}
     price {Faker::Number.decimal(2)}

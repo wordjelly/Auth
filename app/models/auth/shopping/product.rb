@@ -1,3 +1,3 @@
 class Auth::Shopping::Product
-	include Auth::Shopping::ProductConcern
+	include Auth::Concerns::Shopping::ProductConcern
 end

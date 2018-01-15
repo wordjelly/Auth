@@ -72,7 +72,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		#validate :user_can_only_update_quantity_and_discount_code
 
 		validate :user_cannot_change_anything_if_payment_accepted
-
+		validate :product_id_exists?
 
 
 	end
@@ -212,6 +212,13 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 	end
 
+	def product_id_exists?
+		begin
+			Auth.configuration.product_class.constantize.find(self.product_id)
+		rescue
+			self.errors.add(:product_id,"this product id does not exist")
+		end
+	end
 
 
 end
