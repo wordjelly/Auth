@@ -148,15 +148,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 		end
 
-		def find_payment(payment_id, resource)
-			conditions = {:id => payment_id}
-			conditions[:resource_id => resource.id.to_s] if !resource.is_admin?
-			if payment_collection = self.where(conditions)
-				payment_collection.size > 0 ? payment_collection.first : nil
-			else
-				nil
-			end
-		end		
+			
 	end
 
 	

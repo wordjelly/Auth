@@ -1,24 +1,22 @@
-module Auth::Concerns::Shopping::CartControllerConcern
+module Auth::Concerns::Shopping::ProductControllerConcern
 
   extend ActiveSupport::Concern
 
   included do
-    ##this ensures api access to this controller.
-    include Auth::Concerns::DeviseConcern
-    include Auth::Concerns::TokenConcern
-    before_filter :do_before_request 
-    before_filter :initialize_vars
-    before_filter :is_admin_user , :only => [:create,:update,:destroy]
+    
+    
+
+    
   end
 
   def initialize_vars
   	instantiate_shopping_classes
-    @cart_params = permitted_params.fetch(:product,{})
-    @cart = params[:id] ? @product_class.find_product(params[:id],current_signed_in_resource) : @product_class.new(@product_params)
+    @product_params = permitted_params.fetch(:product,{})
+    @product = params[:id] ? @product_class.find_self(params[:id],current_signed_in_resource) : @product_class.new(@product_params)
   end
 
   def is_admin_user
-  	not_found("You don't have sufficient privileges to complete that action") if !current_signed_in_user.is_admin?
+  	not_found("You don't have sufficient privileges to complete that action") if !current_signed_in_resource.is_admin?
   end
 
   def create
@@ -37,11 +35,14 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   def index
-    @product_class.all
+    instantiate_shopping_classes
+    respond_with @product_class.all
   end
 
   def show
-
+    instantiate_shopping_classes
+    @product = @product_class.find(params[:id])
+    respond_with @product
   end
 
   def destroy
@@ -50,7 +51,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   end
 
   def permitted_params
-  	params.permit({:product => {:name,:price}})
+  	params.permit({:product => [:name,:price]})
   end
 
 end

@@ -8,10 +8,12 @@ module ActionDispatch::Routing
 	def mount_routes(app_route_resources)
 	      
 	  	  resources :clients, :controller => "auth/clients"
-		  resources :profiles, :controller => "auth/users/profiles" do 
+		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 
-		  		get 'credential_exists'
-		  		post 'get_user_id'
+		  		## :resource will be something like users.
+		  		get 'credential_exists', :action => 'credential_exists'
+		  		post ':resource/get_user_id', :action => 'get_user_id'
+		  		put ':resource/update', :action => 'update'
 		  	end
 		  end
 		  

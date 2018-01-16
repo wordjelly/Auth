@@ -24,14 +24,23 @@ module Auth::Concerns::UserConcern
 			if document.additional_login_param_changed? && !document.additional_login_param.blank?
 				document.additional_login_param_status = 1
 			end
+
+			if document.email_changed? || document.additional_login_param_changed? || document.encrypted_password_changed?
+				document.regenerate_token
+			end
 		end
 
 		after_destroy :destroy_client
+
+
 
 		##BASIC USER FIELDS.
 		field :email, 				type: String
 		attr_accessor :skip_email_unique_validation
 		field :login,				type: String
+
+		##admin_or_not
+		field :admin,				type: Boolean, default: false
 
 		attr_accessor :m_client
 
@@ -221,6 +230,23 @@ module Auth::Concerns::UserConcern
 
 	end
 
+	module ClassMethods
+
+		## @param[String] _id : the id sent into the request.
+		## @param[Object] resource : the currently signed in resource.
+		## how this works : it is called in the profiles_controller
+		## if the current signed in resource is admin, then whatever user_id(_id) was requested is searched and returned.
+		## if the current signed in resource is not admin, then _id is instead searched for using the current_signed_in_resource => basically will only return the user that is signed in.
+
+		def find_resource(_id,resource)
+			conditions = {:_id => _id}
+			conditions[:_id] = resource.id.to_s if !resource.is_admin?
+			all = self.where(conditions)
+			return all.first if all.size > 0 
+			return nil
+		end
+
+	end
 
 	##FOR THE LOGIN AUTHENTICATION KEY PARAMETER, WE DEFINE GETTERS AND SETTERS
 	def login=(login)
@@ -231,24 +257,30 @@ module Auth::Concerns::UserConcern
 		 @login || self.email || self.additional_login_param
 	end
 
-
+=begin
 	##reset the auth token if the email or password changes.
 	def email=(email)
 		super
+		#puts "email coming in is: #{email}"
+		#puts "email set called."
 		##method is defined in lib/omniauth#Simpletokenauthentication
+		#if email_changed?
 		regenerate_token
+		#end
 	end
 
 	def additional_login_param=(additional_login_param)
 		super
+		
 		regenerate_token
 	end
 
 	def password=(password)
 		super
+		
 		regenerate_token
 	end
-
+=end
 
 	
 
@@ -438,6 +470,7 @@ module Auth::Concerns::UserConcern
 
 	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
+		#puts "calling additional login param changed"
 		if additional_login_param_changed?  && (self.pending_reconfirmation?)
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{additional_login_param_name}")
 		end
@@ -445,6 +478,7 @@ module Auth::Concerns::UserConcern
 
 	##if you change the email while the additional login param not confirmed, then you will get validation errors on the email, as long as you have enabled an additional_login_param in the configuration.
 	def email_changed_on_unconfirmed_additional_login_param
+		#puts "calling email changed"
 		if email_changed? && (additional_login_param_status == 1) && additional_login_param_name
 			errors.add(:email, "Please add or verify your #{additional_login_param_name} before changing your email id")
 		end
@@ -454,6 +488,7 @@ module Auth::Concerns::UserConcern
 	##what happens is that if submit the update form, it submits empty strings for input fields which we dont fill. so suppose you change the adiditonal_login_param , it will submit email as "", in that case , earlier the email was nil, and now it becomes "", so that is detected as an email change and it feels like both email and additional param have changed and triggers the validation #email_and_additional_login_param_both_changed, so we dont want that to happen, so we check if the param has gone from being blank to blank in the below validation.
 	##@param attr[String] : the param name.
 	def attr_blank_to_blank?(attr)
+		#puts "calling blank to blank."
 		if self.respond_to?(attr)
 			if (self.send("#{attr}_was").blank? && self.send("#{attr}").blank?)
 				
@@ -464,6 +499,7 @@ module Auth::Concerns::UserConcern
 
 	##now what if both have changed?
 	def email_and_additional_login_param_both_changed
+		#puts "calling email and additional login param both changed"
 		##add error saying you cannot change both at the same time.
 		##additional login param can change as long as neither goes from nil to blank or blank to nil.
 
@@ -502,6 +538,7 @@ module Auth::Concerns::UserConcern
 	##
 	def token_expired?
 		if authentication_token_expires_at < Time.now.to_i
+
 			regenerate_token
 			save
 			true
@@ -541,7 +578,7 @@ module Auth::Concerns::UserConcern
 	## it can be used to decide if the user is an admin.
 	## @used_in : payment_concern in the refund_callback 
 	def is_admin?
-		false
+		admin
 	end
 	
 

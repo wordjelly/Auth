@@ -52,6 +52,22 @@ module Auth
 
 
 	 
+	def check_for_update(obj)
+		not_found if obj.nil?
+    	not_found("please provide a valid id for the update") if obj.new_record?
+	end
+
+	def check_for_create(obj)
+		not_found if obj.nil?
+		obj.new_record? or not_found("this is not a new record")
+	end
+  	
+	def check_for_destroy(obj)
+		not_found("please provide a cart id") if obj.new_record?
+	end
+
+
+	 
 
   	
 

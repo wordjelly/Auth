@@ -69,6 +69,11 @@ module Auth::Concerns::Shopping::CartItemConcern
 			end
 		end
 
+
+		before_create do |document|
+			document.assign_product_attributes
+		end
+
 		#validate :user_can_only_update_quantity_and_discount_code
 
 		validate :user_cannot_change_anything_if_payment_accepted
@@ -80,16 +85,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	module ClassMethods
 
-		## used in cart_item_controller_concern#show
-		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
-		## 
-		def find_cart_item(cart_item_id,resource)
-			conditions = {:_id => cart_item_id}
-			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
-			all = self.where(conditions)
-			return all.first if all.size > 0 
-			return nil
-		end
+		
 
 		##used in cart_item_controller_concern#index
 		## if there is a resource, will return all cart items with that resource id.
@@ -133,7 +129,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				self.accepted = true
 			end
 		else
-			
+			puts "Doesnt have sufficient credit"
 			self.accepted = false
 		end
 		
@@ -141,7 +137,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.skip_callbacks = {:after_validation => true}
 		res = self.save
-		
+		puts "result of saving after accepted: #{res.to_s}"
+		puts self.accepted.to_s
 		res
 	end
 	
@@ -220,5 +217,26 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 	end
 
+	## before creating the document assigns attributes defined in the def #product_attributes_to_assign, to the cart item.
+	def assign_product_attributes
+		begin
+			if self.product_id
+	 			if product = Auth.configuration.product_class.constantize.find(product_id)
+	 				product_attributes_to_assign.each do |attr|
+	 					## only if the present attribute is nil, then we assign it from the product.
+	 					if self.send("#{attr}").nil?
+	 						self.send("#{attr}=",product.send("#{attr}"))
+	 					end
+	 				end
+	 			end
+	 		end
+	 	rescue
+
+	 	end
+	end
+
+	def product_attributes_to_assign
+		["name","price"]
+	end
 
 end

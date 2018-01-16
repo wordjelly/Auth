@@ -29,6 +29,21 @@ module Auth::Concerns::OwnerConcern
 
 	end
 
+	module ClassMethods
+
+		## used in cart_item_controller_concern#show
+		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
+		## 
+		def find_self(_id,resource)
+			conditions = {:_id => _id}
+			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
+			all = self.where(conditions)
+			return all.first if all.size > 0 
+			return nil
+		end
+
+	end
+
 	## returns the resource that was associated with the object when the object was created.
 	## it basically uses the resource_id and resource_class that were saved, when creating the resource.
 	## since resources can be created without the resource_class and resource_id being provided, it may return nil if these two are not present.

@@ -1,10 +1,6 @@
 class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
-	include Auth::Concerns::DeviseConcern
-	include Auth::Concerns::TokenConcern
-
-    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index, :new]
-    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index, :new]
+	
 
     def instantiate_cart_class
 		if @cart_class = Auth.configuration.cart_class
@@ -50,10 +46,11 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	def instantiate_product_class
 
-		if @product_class = Auth.configuration.payment_class
+		if @product_class = Auth.configuration.product_class
 	      begin
 	        @product_class = @product_class.constantize
-	      rescue
+	      rescue => e
+	      	puts e.to_s
 	        not_found("error instatiating class from product class")
 	      end
 	    else
@@ -72,19 +69,5 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 		instantiate_product_class
 	end
 
-
-	def check_for_update(obj)
-		not_found if obj.nil?
-    	not_found("please provide a valid id for the update") if obj.new_record?
-	end
-
-	def check_for_create(obj)
-		not_found if obj.nil?
-		obj.new_record? or not_found("this is not a new record")
-	end
-  	
-	def check_for_destroy(obj)
-		not_found("please provide a cart id") if obj.new_record?
-	end
 
 end

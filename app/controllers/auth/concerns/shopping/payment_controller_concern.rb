@@ -3,13 +3,13 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   extend ActiveSupport::Concern
 
   included do
-  
+    
   end
 
   def initialize_vars
     instantiate_shopping_classes
     @payment_params = permitted_params.fetch(:payment,{})
-    @payment = params[:id] ? @payment_class.find_payment(params[:id],current_signed_in_resource) : @payment_class.new(@payment_params)
+    @payment = params[:id] ? @payment_class.find_self(params[:id],current_signed_in_resource) : @payment_class.new(@payment_params)
   end
 
   def show

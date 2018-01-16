@@ -43,20 +43,7 @@ module Auth::Concerns::Shopping::CartConcern
 		
 	end
 
-	module ClassMethods
-
-		## used in cart_item_controller_concern#show
-		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
-		## 
-		def find_cart(cart_id,resource)
-			conditions = {:_id => cart_id}
-			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
-			all = self.where(conditions)
-			return all.first if all.size > 0 
-			return nil
-		end
-
-	end
+	
 
 	## sets all the attribute accessors of the cart.
 	## @param[Payment] : a payment object can be passed in.

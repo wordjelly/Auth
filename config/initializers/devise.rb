@@ -383,32 +383,33 @@ DeviseController.class_eval do
   def require_no_authentication
     
     do_before_request
-    
+    #puts "came past do before request."
+
     assert_is_devise_resource!
-    
+    #puts "came past assert is devise resource"
     
 
     return unless is_navigational_format?
+
+    #puts "came past is navigational format."
+
     no_input = devise_mapping.no_input_strategies
-    
+    #puts "no input is: #{no_input}"
    
 
     authenticated = if no_input.present?
       args = no_input.dup.push scope: resource_name
-     
+      #puts "authenticated already."
       warden.authenticate?(*args)
     else
-      
+      #puts "check if authenticated"
       warden.authenticated?(resource_name)
     end
 
-    
-
-    
 
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
-       
+        #puts "came to failure."
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else

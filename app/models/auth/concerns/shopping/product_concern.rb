@@ -3,6 +3,7 @@ module Auth::Concerns::Shopping::ProductConcern
 
 	extend ActiveSupport::Concern
 	include Auth::Concerns::ChiefModelConcern
+	include Auth::Concerns::OwnerConcern
 	included do 
 		
 		field :price, type: BigDecimal
@@ -10,6 +11,6 @@ module Auth::Concerns::Shopping::ProductConcern
 
 	end
 
-
+	
 
 end
