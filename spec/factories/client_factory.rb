@@ -2,7 +2,7 @@ FactoryGirl.define do
 
   factory :product, class:Shopping::Product do 
     name {Faker::Food.ingredient}
-    price {Faker::Number.decimal(2)}
+    price {10.00}
   end
 
 
@@ -11,7 +11,7 @@ FactoryGirl.define do
     product_id {Shopping::Product.first.id.to_s}
     quantity 1
     discount_code {Faker::App.name}
-    price {Faker::Number.decimal(2)}
+    price {10.00}
     name {Faker::Food.ingredient}
   end
 

@@ -3,7 +3,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   extend ActiveSupport::Concern
 
   included do
-   
+    
     
   end
 
@@ -16,7 +16,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
     instantiate_shopping_classes
     @cart_item_params = permitted_params.fetch(:cart_item,{})
-    @cart_item = params[:id] ? @cart_item_class.find_cart_item(params[:id],current_signed_in_resource) : @cart_item_class.new(@cart_item_params)
+    @cart_item = params[:id] ? @cart_item_class.find_self(params[:id],current_signed_in_resource) : @cart_item_class.new(@cart_item_params)
 
  
   end
@@ -73,7 +73,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     
     else
 
-      params.permit({cart_item: [:product_id,:discount_code,:quantity,:price,:name]},:id)
+      params.permit({cart_item: [:product_id,:discount_code,:quantity]},:id)
 
     end
 

@@ -40,15 +40,23 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	
 		context " -- create " do 
 
-			it " -- creates cart item with all permitted params,and assigns user id. " do 
+			it " -- creates cart item with all permitted params,and assigns user id. ",:c1 => true do 
 				cart_item = attributes_for(:cart_item)
 				post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 	            @cart_item_created = assigns(:cart_item)
+	            
 	            cart_item_hash = JSON.parse(response.body)
-	            cart_item.keys.each do |ck|
-	            	expect(cart_item_hash[ck.to_s]).to eq(cart_item[ck])
-	            end
-	            expect(cart_item_hash["resource_id"]).to eq(@u.id.to_s)
+	            
+
+
+	            expect(@cart_item_created.resource_id).to eq(@u.id.to_s)
+	            expect(@cart_item_created.price).to eq(Shopping::Product.first.price)
+	            expect(@cart_item_created.name).to eq(Shopping::Product.first.name)
+
+	            puts cart_item.to_s
+
+	            expect(@cart_item_created.quantity).to eq(cart_item[:quantity])
+	            expect(@cart_item_created.discount_code).to eq(cart_item[:discount_code])
 			end
 
 		end

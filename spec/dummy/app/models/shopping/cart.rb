@@ -1,3 +1,3 @@
-class Shopping::Cart
-	include Auth::Concerns::Shopping::CartConcern
+class Shopping::Cart < Auth::Shopping::Cart
+	
 end

@@ -26,11 +26,7 @@ module Auth::Concerns::OtpConcern
 	  			@resource_class = collection.singularize.capitalize.constantize
 	  			@resource_symbol = collection.singularize.to_sym
 	  					
-	  			#puts "resource class is:"
-	  			#puts @resource_class
-
-	  			#puts "resource sybmol is:"
-	  			#puts @resource_symbol
+	  			
 	  			##this is either the provided email(in case of forgot_password form, we pass in the additional_login_param under the email key itself.#ref auth/modals/forgot_password_content.html.erb)
 	  			if @resource_params[@resource_symbol]
 				  	@additional_login_param = @resource_params[@resource_symbol][:email] || @resource_params[@resource_symbol][:additional_login_param]

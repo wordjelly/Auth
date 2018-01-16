@@ -3,6 +3,9 @@ require "rails_helper"
 RSpec.describe "payment request spec",:payment => true, :shopping => true, :type => :request do 
 
 	before(:all) do 
+        Shopping::Product.delete_all
+        @product = Shopping::Product.new(attributes_for(:product))
+        @product.save
         ActionController::Base.allow_forgery_protection = false
         User.delete_all
         Auth::Client.delete_all
@@ -35,6 +38,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             Shopping::CartItem.delete_all
             Shopping::Cart.delete_all
             Shopping::Payment.delete_all
+            
+           
             @created_cart_item_ids = []
             @cart = Shopping::Cart.new
             @cart.resource_id = @u.id.to_s
@@ -46,7 +51,6 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_id = @u.id.to_s
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
-                cart_item.price = 10.00
                 cart_item.signed_in_resource = @u
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
@@ -69,10 +73,12 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         
         end
 
-        it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. " do 
+        it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. ",:br => true do 
 
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
-                    
+            
+            puts response.body.to_s
+
             expect(Shopping::Payment.count).to eq(1)
             
             @created_cart_item_ids.each do |id|

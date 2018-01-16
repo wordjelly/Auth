@@ -3,7 +3,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   extend ActiveSupport::Concern
 
   included do
-   
+    
   end
 
   ##if an id is provided in the permitted params then tries to find that in the database, and makes a new cart item out of it.
@@ -12,7 +12,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def initialize_vars
     instantiate_shopping_classes
     @cart_params = permitted_params.fetch(:cart,{})
-    @cart = params[:id] ? @cart_class.find_cart(params[:id],current_signed_in_resource) : @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
+    @cart = params[:id] ? @cart_class.find_self(params[:id],current_signed_in_resource) : @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
     @add_cart_item_ids = @cart_params[:add_cart_item_ids]
     @remove_cart_item_ids = @cart_params[:remove_cart_item_ids]    
   end

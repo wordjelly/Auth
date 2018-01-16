@@ -204,8 +204,6 @@ You need to tell your application to use this parameter sanitizer as follows
   def devise_parameter_sanitizer
       if resource_class == User
         User::ParameterSanitizer.new(User, :user, params)
-      elsif resource_class == Admin
-        Admin::ParameterSanitizer.new(Admin,:admin,params)
       else
         super # Use the default one
       end
@@ -940,7 +938,13 @@ All requests mentioned henceforth can be directly copied and pasted into PostMan
 1.Disable creation of api keys through configuration.
 2.Use Post Requests in OTP Controller
 ------------------------------------------------------------------
+## Creating An Admin Model
 
+Any model can be made admin by setting its admin field to true.
+To do this, execute an update call on the profiles_controller for the resource you want to make an admin, and set its admin to true.
+This will only succeed if the current_signed_in_user is already an admin.
+
+------------------------------------------------------------------
 ## Shopping API
 
 To use the shopping api you need to do the following:
@@ -978,6 +982,17 @@ class Shopping::Payment < Auth::Shopping::Payment
 end
 ```
 
+#### A Product Model
+
+```
+# app/models/shopping/product.rb
+
+class Shopping::Product < Auth::Shopping::Product
+
+end
+```
+
+
 ### Create the Corresponding Controllers
 
 #### A Carts Controller
@@ -1012,6 +1027,17 @@ class Shopping::PaymentsController < Auth::Shopping::PaymentsController
 end
 ```
 
+#### A Products Controller
+
+```
+# app/controllers/shopping/products_controller.rb
+
+class Shopping::ProductsController < Auth::Shopping::ProductsController
+
+end
+```
+
+
 ### Modify the configuration file 
 
 ```
@@ -1025,6 +1051,9 @@ config.cart_class = "Shopping::Cart"
 
 config.payment_controller = "shopping/payments"
 config.payment_class = "Shopping::Payment"
+
+config.product_controller = "shopping/products"
+config.product_class = "Shopping::Product"
 
 ## refer to the section on payment gateways later, for information on this configuration.
 ## the configuration you see here is only applicable if you are using the payumoney concern in your payments_controller, that enables payments in india.
@@ -1048,11 +1077,33 @@ Payments can be made to the cart.
 
 ### Shopping API Table
 
-### How to create Shopping Architecture:
+### How user permissions work in the Shopping Architecture:
 
-1. Create a class in your app called "Product" and inherit from the Auth::Shopping::Product class. Create A Controller called ProductsController, and inherit from the Auth::Shopping::ProductsController. Use this controller to create products that your users can buy. Any Cart Item that is to be bought, or ordered has to be created out of one of these products. Only allow admin to create/update/delete these products. Allow anyone to show/index the products.
+Each Shopping Class has a def called initialize_vars that is called before any of the actions.
+
+This def checks to see if there is an "id" parameter in the incoming params. If yes, it searches for the respective model with that id, by calling a find_{payment/cart/cart_item/product} class method.
+
+The implementation of this method is the same in all the classes, it basically searches for that particular class , with the provided id.
+
+If the currently_signed_inuser is an admin, then it just looks for the class with the id, eg: Cart.find(:id => id)
+
+If the currently_signed_in_user is not an admin, it checks for the class with id and resource id, eg: Cart.where(:id => id, :resource_id => resource.id.to_s)
+
+This ensures that the item will be found only if the resource_id was registered on the item while creating it.
+
+Thus for create/update/show/destroy -> only the user who created the item or the admin can do these actions.
+
+Only for index actions -> 
 
 
-2. Before a cart item is created or updated, a validation checks to see if the product id exists. 
+### How to pass your own permitted params to any of the Shopping Classes:
 
+Assuming that you want to permit additional params to the cart_items_controller, add this to your controller class
 
+```
+## here : description, sample_type and public are the additional parameters that you want to permit.
+
+def permitted_params
+  super.deep_merge(params.permit({cart_item: [:description,:sample_type,:public]}))
+end
+```
