@@ -28,8 +28,7 @@ Postman-Token: 184291bd-8884-acda-5de8-222080323b58
 FOR 95611
 
 {
-    {
-    "authentication_token": "gRaZM57x8NBuhoeyjVwB",
+    "authentication_token": "ztgt3EEvENxXLUZMPB16",
     "es": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2"
 }
     "id": "5a5e3c9b421aa920bad70525"
@@ -53,12 +52,12 @@ all cart items
 [
     {
         "_id": {
-            "$oid": "5a5f8396421aa921b1777c5d"
+            "$oid": "5a5fb006421aa92bde824959"
         },
         "accept_order_at_percentage_of_price": 1,
         "accepted": null,
         "accepted_by_payment_id": null,
-        "created_at": "2018-01-17T17:10:46.968Z",
+        "created_at": "2018-01-17T20:20:22.963Z",
         "discount": null,
         "discount_code": "hello",
         "name": "Renault Lodgy",
@@ -68,16 +67,16 @@ all cart items
         "quantity": 1,
         "resource_class": "User",
         "resource_id": "5a5e3c9b421aa920bad70525",
-        "updated_at": "2018-01-17T17:16:45.561Z"
+        "updated_at": "2018-01-17T20:20:22.963Z"
     },
     {
         "_id": {
-            "$oid": "5a5f8f36421aa922f9545c64"
+            "$oid": "5a5fb026421aa92bde82495a"
         },
         "accept_order_at_percentage_of_price": 1,
         "accepted": null,
         "accepted_by_payment_id": null,
-        "created_at": "2018-01-17T18:00:22.791Z",
+        "created_at": "2018-01-17T20:20:54.321Z",
         "discount": null,
         "discount_code": "hello",
         "name": "Renault Lodgy",
@@ -87,16 +86,16 @@ all cart items
         "quantity": 1,
         "resource_class": "User",
         "resource_id": "5a5e3c9b421aa920bad70525",
-        "updated_at": "2018-01-17T18:00:22.791Z"
+        "updated_at": "2018-01-17T20:20:54.321Z"
     },
     {
         "_id": {
-            "$oid": "5a5f8f38421aa922f9545c65"
+            "$oid": "5a5fb027421aa92bde82495b"
         },
         "accept_order_at_percentage_of_price": 1,
         "accepted": null,
         "accepted_by_payment_id": null,
-        "created_at": "2018-01-17T18:00:24.087Z",
+        "created_at": "2018-01-17T20:20:55.765Z",
         "discount": null,
         "discount_code": "hello",
         "name": "Renault Lodgy",
@@ -106,14 +105,105 @@ all cart items
         "quantity": 1,
         "resource_class": "User",
         "resource_id": "5a5e3c9b421aa920bad70525",
-        "updated_at": "2018-01-17T18:00:24.087Z"
+        "updated_at": "2018-01-17T20:20:55.765Z"
     }
 ]
-
 =========
 
 cart
 
+{
+    "_id": {
+        "$oid": "5a5fb069421aa92bde82495c"
+    },
+    "created_at": "2018-01-17T20:22:01.707Z",
+    "name": null,
+    "notes": null,
+    "resource_class": "User",
+    "resource_id": "5a5e3c9b421aa920bad70525",
+    "updated_at": "2018-01-17T20:22:01.707Z",
+    "cart_items": [
+        {
+            "_id": {
+                "$oid": "5a5fb027421aa92bde82495b"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": null,
+            "accepted_by_payment_id": null,
+            "created_at": "2018-01-17T20:20:55.765Z",
+            "discount": null,
+            "discount_code": "hello",
+            "name": "Renault Lodgy",
+            "parent_id": "5a5fb069421aa92bde82495c",
+            "price": "1012.25",
+            "product_id": "5a5e4e71421aa927d555d442",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:22:01.638Z"
+        },
+        {
+            "_id": {
+                "$oid": "5a5fb026421aa92bde82495a"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": null,
+            "accepted_by_payment_id": null,
+            "created_at": "2018-01-17T20:20:54.321Z",
+            "discount": null,
+            "discount_code": "hello",
+            "name": "Renault Lodgy",
+            "parent_id": "5a5fb069421aa92bde82495c",
+            "price": "1012.25",
+            "product_id": "5a5e4e71421aa927d555d442",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:22:01.633Z"
+        },
+        {
+            "_id": {
+                "$oid": "5a5fb006421aa92bde824959"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": null,
+            "accepted_by_payment_id": null,
+            "created_at": "2018-01-17T20:20:22.963Z",
+            "discount": null,
+            "discount_code": "hello",
+            "name": "Renault Lodgy",
+            "parent_id": "5a5fb069421aa92bde82495c",
+            "price": "1012.25",
+            "product_id": "5a5e4e71421aa927d555d442",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:22:01.627Z"
+        }
+    ],
+    "cart_payments": [],
+    "cart_price": "3036.75",
+    "cart_paid_amount": 0,
+    "cart_pending_balance": "3036.75",
+    "cart_credit": 0
+}
 
-
-
+===========
+payment 1
+{
+    "_id": {
+        "$oid": "5a5fb0b6421aa92bde82495d"
+    },
+    "amount": 1200,
+    "cart_id": "5a5fb069421aa92bde82495c",
+    "created_at": "2018-01-17T20:23:18.040Z",
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "cash",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a5e3c9b421aa920bad70525",
+    "updated_at": "2018-01-17T20:23:18.040Z",
+    "payment_receipt": null,
+    "cash_change": 0
+}
