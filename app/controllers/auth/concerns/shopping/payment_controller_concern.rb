@@ -15,6 +15,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   def show
     @payment = add_signed_in_resource(@payment)
     @payment.set_payment_receipt
+    respond_with @payment
   end
 
   def index

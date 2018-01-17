@@ -67,15 +67,17 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- creates a payment to the cart-- ", :cr => true do 
             
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
                     
             expect(Shopping::Payment.count).to eq(1)
         
         end
 
+
+
         it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. ",:br => true do 
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1, :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
             
             puts response.body.to_s
 
@@ -113,13 +115,16 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             end
 
             ## now update payment as failed
-            payment = Shopping::Payment.find(payment.id)
-            payment.signed_in_resource = @admin
-            payment.payment_status = 0
-            payment.resource_id = @u.id.to_s
-            payment.resource_class = @u.class.name.to_s
-            payment.cart_id = @cart.id.to_s
-            payment.save
+            ##payment = Shopping::Payment.find(payment.id)
+            ##payment.signed_in_resource = @admin
+            ##payment.payment_status = 0
+            ##payment.resource_id = @u.id.to_s
+            ##payment.resource_class = @u.class.name.to_s
+            ##payment.cart_id = @cart.id.to_s
+            ##payment.save
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 0},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
+
+
 
             @created_cart_item_ids.each do |id|
                 cart_item = Shopping::CartItem.find(id)
@@ -172,18 +177,23 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## all cart items should be set as accepted false.
 
             ## only admin can update a payment.
-            payment = Shopping::Payment.find(payment.id)
-            payment.payment_type = "cash"
-            payment.amount = 50.00
-            payment.resource_id = @u.id.to_s
-            payment.resource_class = @u.class.name.to_s
-            payment.cart_id = @cart.id.to_s
-            payment.signed_in_resource = @admin
+            #payment = Shopping::Payment.find(payment.id)
+            #payment.payment_type = "cash"
+            #payment.amount = 50.00
+            #payment.resource_id = @u.id.to_s
+            #payment.resource_class = @u.class.name.to_s
+            #payment.cart_id = @cart.id.to_s
+            #payment.signed_in_resource = @admin
             ## this is setting the payment as successfully.
-            payment.payment_status = 0
-            ps = payment.save
-            expect(ps).to be_truthy
+            #payment.payment_status = 0
+            #ps = payment.save
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 0},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
+
+            #expect(ps).to be_truthy
+            payment = Shopping::Payment.find(payment.id)
             expect(payment.payment_status).to eq(0)
+
+
 
             @cart = Shopping::Cart.find(payment.cart_id)
             @cart.prepare_cart
@@ -235,7 +245,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- cash payment should set amount to pending balance, and pass, with change being calculated -- ", :cash_payment_excess => true do 
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1, :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(1)
 
@@ -246,7 +256,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- cheque payment should fail, saying amount is excessive -- ", :cheque_payment_excess => true do 
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cheque", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cheque", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
             
             puts response.body.to_s
             expect(Shopping::Payment.count).to eq(0)
@@ -259,7 +269,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         it " -- card payment should fail, saying amount is excessive -- ", :card_payment_excess do 
 
             ## this is same as for cheque, just change the payment type.
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "card", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "card", amount: 55.00, :api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
             
             puts response.body.to_s
             expect(Shopping::Payment.count).to eq(0)
@@ -295,7 +305,6 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.resource_class = @u.class.name
                 cart_item.parent_id = @cart.id
                 cart_item.signed_in_resource = @u
-                cart_item.price = 10.00
                 cart_item.save
                 @created_cart_item_ids << cart_item.id.to_s
             end
@@ -322,7 +331,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             new_cart.save
 
 
-            post shopping_payments_path, {cart_id: new_cart.id.to_s,payment_type: "cash", amount: 10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: new_cart.id.to_s,payment_type: "cash", amount: 10.00, :api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(0)
 
@@ -335,7 +344,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         it " -- payment or refund amount must be greater than zero. -- ", :payment_greater_than => true do
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: -10.00, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: -10.00, :api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
                     
             expect(Shopping::Payment.count).to eq(0)
 
@@ -344,6 +353,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             expect(payment.errors.full_messages).not_to be_empty
 
         end
+
+        
 
     end
 
@@ -396,7 +407,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## override set_accepted method in payment_concern to return false.
             
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1, :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
             payment = assigns(:payment)
             expect(payment.errors.full_messages).not_to be_empty
@@ -466,7 +477,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## curr_payment => {with cart item ids, that it has paid for.}
 
             ## expect the payment_receipt hash to be present.
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1}.to_json, @admin_headers
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50.00, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1, :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
             
             assigned_p = assigns(:payment)
 
@@ -541,7 +552,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             @cart.prepare_cart            
             expect(@cart.cart_pending_balance).to eq(0.00)
 
-             puts " ------------- finished initial part----------"
+             
             ## now basically remove a cart item from the cart.
             last_cart_item = Shopping::CartItem.find(@created_cart_item_ids.last.to_s)
             ## only admin can unset an item , after a payment has already been made
@@ -582,7 +593,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## now try to create a refund request, and it should fail
 
-            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers        
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
             
 
 
@@ -624,7 +635,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## it should set the status of the payment as accepted.
 
-            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1, amount: -10},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1, amount: -10},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
           
             puts response.body.to_s
 
@@ -684,7 +695,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## it should not allow the payment status to be changed to anything, since the balance is now positive. basically wont allow the admin to change the status to 
 
-            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
           
             puts response.body.to_s
 
@@ -723,7 +734,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             ## then we accept the last one, by sending in a put request as the admin.
 
-            put shopping_payment_path({:id => refunds_expected_to_have_failed.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => refunds_expected_to_have_failed.last.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
 
             ## we only keep the first two because the last one will not be deleted, we are going to be accepting the last one. 
@@ -787,7 +798,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             res = last_refund.save
             puts "second res: #{res.to_s}"
             ## now do update on this last refund, so that it will call refund_refresh, and we now expect it to have a 0 payment status.
-            put shopping_payment_path({:id => last_refund.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            put shopping_payment_path({:id => last_refund.id}), {:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @headers
 
             puts response.body.to_s
 
@@ -826,7 +837,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             payment = Shopping::Payment.find(payment.id.to_s)
             expect(payment.payment_status).to eq(nil)
 
-            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+            put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 1},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
             ## take all the cart items.
             payment = Shopping::Payment.find(payment.id.to_s)

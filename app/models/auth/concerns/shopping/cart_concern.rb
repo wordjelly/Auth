@@ -101,14 +101,15 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_payments = []
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(get_resource,self)
 		
+		puts "payments_made to the cart are:"
+		puts payments_made_to_this_cart.to_s
+
 		payments_made_to_this_cart.each do |payment|
+			puts payment.id.to_s
 			payment.verify_payment if payment.payment_pending
 			self.cart_payments << payment
 		end
 		
-		
-
-
 		self.cart_payments	 
 	end
 

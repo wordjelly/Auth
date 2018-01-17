@@ -30,6 +30,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
     check_for_create(@cart)
     @cart = add_owner_and_signed_in_resource(@cart)
     @cart.save
+    @cart.prepare_cart
     respond_with @cart
   end
 
