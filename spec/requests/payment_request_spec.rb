@@ -409,6 +409,8 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 50, :api_key => @ap_key, :current_app_id => "test_app_id", :payment_status => 1, :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
+            expect(Shopping::Payment.count).to eq(0)
+
             payment = assigns(:payment)
             expect(payment.errors.full_messages).not_to be_empty
         end

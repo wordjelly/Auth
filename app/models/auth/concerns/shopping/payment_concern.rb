@@ -76,6 +76,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validate :refund_created_or_approved_only_if_balance_is_negative
 		validate :refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
 
+		validate :update_cart_items_accepted
+
 		before_validation do |document|
 			document.set_cart(document.cart_id)
 			
@@ -92,7 +94,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			if document.errors.full_messages.empty?
 				document.refresh_refund
 				document.verify_payment
-				document.update_cart_items_accepted if document.payment_status_changed?
+				
 			end
 		end
 
@@ -164,7 +166,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			already_accepted_refunds = self.class.where(:refund => true, :payment_status => 1, :updated_at => { :$gte => self.created_at})
 			
 			if already_accepted_refunds.size > 0
-				p
+				
 				self.refund_failed
 			end
 		end
@@ -323,24 +325,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## return[Boolean] : true/false depending on whether all the cart items could be successfully updated or not. 
 	def update_cart_items_accepted
 		
-		if payment_status == 1
-			self.cart.cart_credit+= self.amount
-		elsif payment_status == 0 && payment_status_was == 1
-			
-			self.cart.cart_credit-= self.amount
-		else
+		if payment_status_changed?
 
-		end
+			if payment_status == 1
+				self.cart.cart_credit+= self.amount
+			elsif payment_status == 0 && payment_status_was == 1
+				
+				self.cart.cart_credit-= self.amount
+			else
 
-	
+			end
 
-		cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
-			cart_item.signed_in_resource = self.signed_in_resource
-			cart_item.set_accepted(self,nil)
-		}.compact.uniq
-		self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
 		
 
+			cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
+				cart_item.signed_in_resource = self.signed_in_resource
+				cart_item.set_accepted(self,nil)
+			}.compact.uniq
+			self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
+			
+		end
 		
 	end	
 
@@ -406,7 +410,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def as_json(options={})
-		super(options).merge({:payment_receipt => self.payment_receipt})
+		super(options).merge({:payment_receipt => self.payment_receipt,:cash_change => self.cash_change})
 	end
 
 end

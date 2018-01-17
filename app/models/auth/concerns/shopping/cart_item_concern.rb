@@ -129,7 +129,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				self.accepted = true
 			end
 		else
-			puts "Doesnt have sufficient credit"
+			
 			self.accepted = false
 		end
 		
@@ -137,8 +137,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.skip_callbacks = {:after_validation => true}
 		res = self.save
-		puts "result of saving after accepted: #{res.to_s}"
-		puts self.accepted.to_s
 		res
 	end
 	
