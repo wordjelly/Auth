@@ -74,7 +74,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 			document.assign_product_attributes
 		end
 
-		#validate :user_can_only_update_quantity_and_discount_code
+		
 
 		validate :user_cannot_change_anything_if_payment_accepted
 		validate :product_id_exists?
@@ -172,10 +172,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## @returns : true or false depending on whether the cart item was successfully saved or not.
 	## @used_in : cart_controller_concern # add_or_remove
 	def set_cart_and_resource(cart)
+		return true if self.parent_id
 		self.parent_id = cart.id.to_s
-		# the cart_items will already have
-		#self.resource_class = cart.get_resource.class.name
-		#self.resource_id = cart.get_resource.id.to_s
 		self.save
 	end
 

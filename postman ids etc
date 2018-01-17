@@ -1,0 +1,103 @@
+{
+    "authentication_token": "dmnGM7TnfvgmVys5idqA",
+    "es": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb"
+}
+
+POST /authenticate/users/sign_in.json HTTP/1.1
+Host: localhost:3000
+Accept-Encoding: application/json
+Cache-Control: no-cache
+Postman-Token: 184291bd-8884-acda-5de8-222080323b58
+
+{
+	"user" : {
+		"login" : "bhargav.r.raut@gmail.com",
+		"password" : "cocostan"
+	},
+	"api_key":"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+	"current_app_id":"5a5259cb421aa91664913ed1"
+}
+
+FOR 95611
+
+{
+    {
+    "authentication_token": "gRaZM57x8NBuhoeyjVwB",
+    "es": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2"
+}
+    "id": "5a5e3c9b421aa920bad70525"
+}
+
+Product we are working with:
+{
+    "_id": {
+        "$oid": "5a5e4e71421aa927d555d442"
+    },
+    "created_at": "2018-01-16T19:11:45.824Z",
+    "name": "Ford Ecosport",
+    "price": "10.25",
+    "resource_class": "User",
+    "resource_id": "5a5e3c9b421aa920bad70525",
+    "updated_at": "2018-01-16T19:11:45.824Z"
+}
+
+all cart items
+
+[
+    {
+        "_id": {
+            "$oid": "5a5f8396421aa921b1777c5d"
+        },
+        "accept_order_at_percentage_of_price": 1,
+        "accepted": null,
+        "accepted_by_payment_id": null,
+        "created_at": "2018-01-17T17:10:46.968Z",
+        "discount": null,
+        "discount_code": "hello",
+        "name": "Renault Lodgy",
+        "parent_id": null,
+        "price": "1012.25",
+        "product_id": "5a5e4e71421aa927d555d442",
+        "quantity": 1,
+        "resource_class": "User",
+        "resource_id": "5a5e3c9b421aa920bad70525",
+        "updated_at": "2018-01-17T17:10:46.968Z"
+    },
+    {
+        "_id": {
+            "$oid": "5a5f83a3421aa921b1777c5e"
+        },
+        "accept_order_at_percentage_of_price": 1,
+        "accepted": null,
+        "accepted_by_payment_id": null,
+        "created_at": "2018-01-17T17:10:59.147Z",
+        "discount": null,
+        "discount_code": "hello",
+        "name": "Renault Lodgy",
+        "parent_id": null,
+        "price": "1012.25",
+        "product_id": "5a5e4e71421aa927d555d442",
+        "quantity": 1,
+        "resource_class": "User",
+        "resource_id": "5a5e3c9b421aa920bad70525",
+        "updated_at": "2018-01-17T17:10:59.147Z"
+    }
+]
+
+{
+    "_id": {
+        "$oid": "5a5f83ea421aa921b1777c5f"
+    },
+    "created_at": "2018-01-17T17:12:10.466Z",
+    "name": null,
+    "notes": null,
+    "resource_class": "User",
+    "resource_id": "5a5e3c9b421aa920bad70525",
+    "updated_at": "2018-01-17T17:12:10.466Z",
+    "cart_items": null,
+    "cart_payments": null,
+    "cart_price": null,
+    "cart_paid_amount": null,
+    "cart_pending_balance": null,
+    "cart_credit": null
+}
