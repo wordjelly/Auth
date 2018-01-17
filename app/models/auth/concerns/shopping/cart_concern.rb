@@ -13,6 +13,14 @@ module Auth::Concerns::Shopping::CartConcern
 		
 		## debit is calculated live, by first getting all the items already dispatched and their value, and then getting the total payments made and their value, so it infact becomes something at the validation level of the cart item.
 
+		## add cart item ids
+		attr_accessor :add_cart_item_ids
+
+
+		## remove cart item ids
+		attr_accessor :remove_cart_item_ids
+
+
 		## the total price of all the items in the cart
 		attr_accessor :cart_price
 
@@ -41,6 +49,8 @@ module Auth::Concerns::Shopping::CartConcern
 			end
 		end
 		
+		validate :add_or_remove_validation
+
 	end
 
 	
@@ -196,22 +206,31 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 
+	def as_json(options={})
+		super.merge({:cart_items => self.cart_items, :cart_payments => self.cart_payments, :cart_price => self.cart_price, :cart_paid_amount => self.cart_paid_amount, :cart_pending_balance => self.cart_pending_balance, :cart_credit => self.cart_credit})
+	end
+
+	def add_or_remove_validation
+		add_or_remove(add_cart_item_ids,1) if add_cart_item_ids
+		add_or_remove(remove_cart_item_ids,-1) if remove_cart_item_ids
+	end
+
 	##adds a validation error if the cart items could not be successfully added or removed.
 	##called from the controller.
 	##TODO: you should change this to be called before_validation instead, so that all code remains in the model.
 	def add_or_remove(item_ids,add_or_remove)
-	    add_remove_results = item_ids.map {|id|
-	      if cart_item = Auth.configuration.cart_item_class.constantize.find(id)
-	      	cart_item.signed_in_resource = self.signed_in_resource
-	        resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
-	       
-	        resp
-
-	      else
-	        true 
-	      end
-	    }.compact.uniq
-	    self.errors.add(:cart_items,"some cart items could not be added or removed successfully") if ((add_remove_results.size > 1) || (add_remove_results[0] == false))  
+	    item_ids.map {|id|
+	      begin
+		      cart_item = Auth.configuration.cart_item_class.constantize.find(id)
+		      cart_item.signed_in_resource = self.signed_in_resource
+		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
+		      resp
+	  	  rescue Mongoid::Errors::DocumentNotFound => error
+	  	  	true
+	  	  end
+	    }
+	    #self.errors.add(:cart_items,"some cart items could not be added or removed successfully") if ((add_remove_results.size > 1) || (add_remove_results[0] == false))  
+	   
 	end
 
 	## used in initialize vars in cart_controlller_concern.

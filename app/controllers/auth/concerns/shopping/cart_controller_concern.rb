@@ -12,13 +12,13 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def initialize_vars
     instantiate_shopping_classes
     @cart_params = permitted_params.fetch(:cart,{})
-    @cart = params[:id] ? @cart_class.find_self(params[:id],current_signed_in_resource) : @cart_class.new(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
-    @add_cart_item_ids = @cart_params[:add_cart_item_ids]
-    @remove_cart_item_ids = @cart_params[:remove_cart_item_ids]    
+    @cart = params[:id] ? @cart_class.find_self(params[:id],current_signed_in_resource) : @cart_class.new(@cart_params)
+        
   end
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
+    not_found if @cart.nil?
     @cart.prepare_cart
     @cart_items = @cart.cart_items
     respond_with @cart
@@ -29,7 +29,6 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def create
     check_for_create(@cart)
     @cart = add_owner_and_signed_in_resource(@cart)
-    @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
     @cart.save
     respond_with @cart
   end
@@ -37,10 +36,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
   ## always returns an empty array.
   def update
     check_for_update(@cart)
-    @cart.assign_attributes(@cart_params.except(:add_cart_item_ids, :remove_cart_item_ids))
+    @cart.assign_attributes(@cart_params)
     @cart = add_owner_and_signed_in_resource(@cart)
-    @cart.add_or_remove(@add_cart_item_ids,1) if @add_cart_item_ids
-    @cart.add_or_remove(@remove_cart_item_ids,-1) if @remove_cart_item_ids
     @cart.save
     @cart.prepare_cart
     respond_with @cart
@@ -54,6 +51,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
     respond_with @cart
   end
 
+  ## returns all the carts of the user.
+  ## basically all his orders.
   def index
     @carts = @cart_class.where(:resource_id => lookup_resource.id.to_s)
     respond_with @carts
