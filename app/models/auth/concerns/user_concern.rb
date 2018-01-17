@@ -400,6 +400,7 @@ module Auth::Concerns::UserConcern
 		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
 		     		unless options[:show_id].nil?
 		     			json[:id] = self.id.to_s
+		     			json[:admin] = self.admin.to_s
 		     		end
 		     	
 		 	end

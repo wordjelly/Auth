@@ -106,19 +106,27 @@ module Auth::Concerns::TokenConcern
   end
 
 
-  ##this method is to be overridden in the daughter application to allow for a resource to be proxied, for eg, when an administrator wants to make changes on behalf of a resource 
-  ##this method simply returns the resource calculated in the #authenticate_and_set_resource method, for the moment.It should be overridden depending on app requirements.
-  ##for example one strategy would be to store the resource to be proxied into the session, and reference that here, if the logged in resource is an admin.
-  ##best strategy would be to pick up a :resource_id from the params, and use that everywhere.
-  ##provided that the signed in resource is an admin.
-  ## override as needed.
-  def lookup_resource
-    ## just look in the raw params for a attribute called proxy_for
-    ## and check that that resource exists, 
-    ## and if the current_signed_in_resource is an admin,
-    ## then use the proxy_for resource.
-    ## otherwise do whatever.
-    current_signed_in_resource
+  ## if the current signed in resource is an admin,
+  ## this method looks for a param called :proxy_resource_id, and another one called :proxy_resource_class
+  ## it uses these two to find a resource with those specifications
+  ## the lookup resource then becomes that resource
+  ## else
+  ## the lookup resource is the current_signed_in_resource
+  def lookup_resource 
+    return current_signed_in_resource unless current_signed_in_resource.is_admin?
+    
+    proxy_resource_id = params[:proxy_resource_id]
+    proxy_resource_class = params[:proxy_resource_class]
+    return nil unless (proxy_resource_class && proxy_resource_id)
+    return nil unless (Auth.configuration.auth_resources.include? proxy_resource_class.capitalize)
+    proxy_resource_class = proxy_resource_class.capitalize.constantize
+    begin
+      proxy_resource = proxy_resource_class.find(proxy_resource_id)
+      proxy_resource
+    rescue Mongoid::Errors::DocumentNotFound => error
+      nil
+    end
+    
   end  
 
   ## the current signed in resource.

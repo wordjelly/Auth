@@ -179,7 +179,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		Auth.configuration.cart_item_class.constantize.where(:accepted_by_payment_id => self.id.to_s).each do |c_item|
 			self.payment_receipt[:current_payment] <<  c_item
 		end
-		set_cart if self.cart.nil?
+		set_cart(self.cart_id) if self.cart.nil?
 		self.payment_receipt[:cart] = self.cart.prepare_receipt
 	end
 
@@ -403,6 +403,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 		if payment_status_changed? && payment_status == 1 && refund
 			self.errors.add("payment_status","you cannot authorize a refund since the amount you entered is wrong") if self.cart.cart_pending_balance != self.amount
 		end
+	end
+
+	def as_json(options={})
+		super(options).merge({:payment_receipt => self.payment_receipt})
 	end
 
 end
