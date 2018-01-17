@@ -88,7 +88,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## => 
 	def set_cart_price
-		self.cart_price = total_value_of_all_items_in_cart = get_cart_items.map{|c| c = c.price}.sum
+		self.cart_price = total_value_of_all_items_in_cart = get_cart_items.map{|c| c = c.price*c.quantity}.sum
 		self.cart_price
 	end
 

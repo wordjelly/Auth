@@ -567,7 +567,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
             ## so basically here we are just creating a refund request.
-            ## basically here it doesn't matter what payment type and amount is used.
+            ## here it only checks that the amount is negative and not what is the amount sent in by the refund.
+            ## this has to be equal to the cart_pending_balance at the time of accepting the refund.
+            ## so here sent as 10 but this is actually wrong.
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", refund: true, amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers        
             
             puts response.body.to_s
