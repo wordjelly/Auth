@@ -207,3 +207,132 @@ payment 1
     "payment_receipt": null,
     "cash_change": 0
 }
+
+
+PUT /shopping/carts/5a5fb069421aa92bde82495c.json HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+X-User-Token: tkWsTzM51yXcKCLszLbU
+X-User-Aid: 5a5259cb421aa91664913ed1
+X-User-Es: a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb
+Cache-Control: no-cache
+Postman-Token: e2c7e1f9-f565-c186-aa47-55dd214c7d64
+
+{
+    "cart":{
+        "remove_cart_item_ids":["5a5fb006421aa92bde824959"]
+    },
+    "api_key":"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+    "current_app_id":"5a5259cb421aa91664913ed1",
+    "proxy_resource_class":"User",
+    "proxy_resource_id":"5a5e3c9b421aa920bad70525"
+}
+
+{
+    "_id": {
+        "$oid": "5a5fb069421aa92bde82495c"
+    },
+    "created_at": "2018-01-17T20:22:01.707Z",
+    "name": null,
+    "notes": null,
+    "resource_class": "User",
+    "resource_id": "5a5e3c9b421aa920bad70525",
+    "updated_at": "2018-01-17T20:22:01.707Z",
+    "cart_items": [
+        {
+            "_id": {
+                "$oid": "5a5fb027421aa92bde82495b"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": true,
+            "accepted_by_payment_id": "5a5fb0b6421aa92bde82495d",
+            "created_at": "2018-01-17T20:20:55.765Z",
+            "discount": null,
+            "discount_code": "hello",
+            "name": "Renault Lodgy",
+            "parent_id": "5a5fb069421aa92bde82495c",
+            "price": "1012.25",
+            "product_id": "5a5e4e71421aa927d555d442",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:24:37.640Z"
+        },
+        {
+            "_id": {
+                "$oid": "5a5fb026421aa92bde82495a"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": true,
+            "accepted_by_payment_id": "5a5fb202421aa92bde82495e",
+            "created_at": "2018-01-17T20:20:54.321Z",
+            "discount": null,
+            "discount_code": "hello",
+            "name": "Renault Lodgy",
+            "parent_id": "5a5fb069421aa92bde82495c",
+            "price": "1012.25",
+            "product_id": "5a5e4e71421aa927d555d442",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:28:50.946Z"
+        }
+    ],
+    "cart_payments": [
+        {
+            "_id": {
+                "$oid": "5a5fb0b6421aa92bde82495d"
+            },
+            "amount": 1200,
+            "cart_id": "5a5fb069421aa92bde82495c",
+            "created_at": "2018-01-17T20:23:18.040Z",
+            "payment_ack_proof": null,
+            "payment_status": 1,
+            "payment_type": "cash",
+            "refund": null,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:24:37.650Z",
+            "payment_receipt": null,
+            "cash_change": null
+        },
+        {
+            "_id": {
+                "$oid": "5a5fb202421aa92bde82495e"
+            },
+            "amount": 1836.75,
+            "cart_id": "5a5fb069421aa92bde82495c",
+            "created_at": "2018-01-17T20:28:50.952Z",
+            "payment_ack_proof": null,
+            "payment_status": 1,
+            "payment_type": "cash",
+            "refund": null,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T20:28:50.952Z",
+            "payment_receipt": null,
+            "cash_change": null
+        },
+        {
+            "_id": {
+                "$oid": "5a5fc60b421aa92e8ee48054"
+            },
+            "amount": -1012.25,
+            "cart_id": "5a5fb069421aa92bde82495c",
+            "created_at": "2018-01-17T21:54:19.918Z",
+            "payment_ack_proof": null,
+            "payment_status": null,
+            "payment_type": "cash",
+            "refund": true,
+            "resource_class": "User",
+            "resource_id": "5a5e3c9b421aa920bad70525",
+            "updated_at": "2018-01-17T21:54:19.918Z",
+            "payment_receipt": null,
+            "cash_change": null
+        }
+    ],
+    "cart_price": "2024.5",
+    "cart_paid_amount": 3036.75,
+    "cart_pending_balance": "-1012.25",
+    "cart_credit": 3036.75
+}

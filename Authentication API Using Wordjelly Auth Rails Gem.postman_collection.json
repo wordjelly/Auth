@@ -1,0 +1,2366 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Authentication API Using Wordjelly Auth Rails Gem",
+		"_postman_id": "779206c9-db60-f66d-6add-ce5c2bef91d4",
+		"description": "# Introduction\nWhat does your API do?\n\n# Overview\nThings that the developers should know about\n\n# Authentication\nWhat is the preferred way of using the API?\n\n# Error Codes\nWhat errors and status codes can a user expect?\n\n# Rate limit\nIs there a limit to the number of requests an user can send?",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Update the client so that it generates a app_id, doesnt use provided one",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/clients/5a5259b2421aa91664913ece.json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"clients",
+						"5a5259b2421aa91664913ece.json"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"equals": true,
+							"description": "",
+							"disabled": true
+						}
+					],
+					"variable": []
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"description": ""
+					},
+					{
+						"key": "",
+						"value": "",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"client\" : {\n\t\t\"app_ids\" : [\"dog\"]\n\t}\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get a client given the user id",
+			"request": {
+				"url": "http://localhost:3000/clients/5a5259b2421aa91664913ece.json",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create User with email and password",
+			"request": {
+				"url": "http://localhost:3000/authenticate/users.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\" : {\n\t\t\"email\" : \"bhargav.r.raut@gmail.com\",\n\t\t\"password\" : \"cocostan\",\n\t\t\"password_confirmation\" : \"cocostan\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Update user's password",
+			"request": {
+				"url": "http://localhost:3000//authenticate/users.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "Admz5Uzg532Awhjd2iKN",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "2b3e06d4d7c7b13e96300ae0cd7f7409e3eb4a455a4ac1964a17fe0479fa9578",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\" : \"5a524736421aa9104797bce7\",\n\t\"user\" : {\n\t\t\"email\" : \"bhargav.r.raut@gmail.com\",\n\t\t\"current_password\": \"cocostan\",\n\t\t\"password\": \"cocostan111\",\n\t\t\"password_confirmation\": \"cocostan111\"\n\t},\n\t\"current_app_id\": \"5a5259cb421aa91664913ed1\",\n\t\"api_key\": \"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\"\n}"
+				},
+				"description": "Update user password"
+			},
+			"response": []
+		},
+		{
+			"name": "Update user's email",
+			"request": {
+				"url": "http://localhost:3000//authenticate/users.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "456KJnDg-pNzYLr9CnZt",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "2b3e06d4d7c7b13e96300ae0cd7f7409e3eb4a455a4ac1964a17fe0479fa9578",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\" : \"5a524736421aa9104797bce7\",\n\t\"user\" : {\n\t\t\"email\" : \"rotastrain@gmail.com\",\n\t\t\"current_password\": \"cocostan111\"\n\t},\n\t\"current_app_id\": \"5a5259cb421aa91664913ed1\",\n\t\"api_key\": \"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\"\n}"
+				},
+				"description": "Update the User's email, "
+			},
+			"response": []
+		},
+		{
+			"name": "Update user with mobile number",
+			"request": {
+				"url": "http://localhost:3000//authenticate/users.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "XtxN1kqZoAT69ByZB7gx",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "7bed7eea649cbe1962e672acd44d93ac7ab88d91752b94e7a309f9d4d12eb67e",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\" : \"5a551fc5421aa92443d84243\",\n\t\"user\" : {\n\t\t\"additional_login_param\" : \"9561137096\",\n\t\t\"email\" : \"bhargav.r.raut@gmail.com\",\n\t\t\"current_password\": \"password\"\n\t},\n\t\"current_app_id\": \"5a5259cb421aa91664913ed1\",\n\t\"api_key\": \"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\"\n}"
+				},
+				"description": "Add an email, given that an additional login param already exists\n"
+			},
+			"response": []
+		},
+		{
+			"name": "get a user's id by giving his token auth credentials",
+			"request": {
+				"url": "localhost:3000/profiles/users/get_user_id.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "get user id"
+			},
+			"response": []
+		},
+		{
+			"name": "create a user with mobile and password",
+			"request": {
+				"url": "http://localhost:3000/authenticate/users.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"user\":{\n\t\"additional_login_param\" : \"9561137096\",\n\t\"password\" : \"password\",\n\t\"password_confirmation\" : \"password\"\n},\n\"current_app_id\": \"5a5259cb421aa91664913ed1\",\n\"api_key\": \"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\"\n}"
+				},
+				"description": "create a user with a mobile number"
+			},
+			"response": []
+		},
+		{
+			"name": "Submit the otp received by user to the server",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/verify_otp.json?resource=users&user[additional_login_param]=9561137096&user[otp]=777916&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"verify_otp.json"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[otp]",
+							"value": "777916",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "submit otp for verification"
+			},
+			"response": []
+		},
+		{
+			"name": "Check if otp is correct for purpose of confirming account",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/otp_verification_result?resource=users&user[additional_login_param]=9561137096&user[otp]=382927&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"otp_verification_result"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[otp]",
+							"value": "382927",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "poll to verify otp"
+			},
+			"response": []
+		},
+		{
+			"name": "Check if otp is correct, for purpose of reset password",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/otp_verification_result?resource=users&user[additional_login_param]=9561137096&user[otp]=148238&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1&intent=reset_password",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"otp_verification_result"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[otp]",
+							"value": "148238",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "intent",
+							"value": "reset_password",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "poll to verify otp, with intent of reset_password\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Resend an sms otp to a mobile number, for confirming account",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/send_sms_otp.json?resource=users&user[additional_login_param]=9561137096&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"send_sms_otp.json"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "resend sms otp for account confirmation"
+			},
+			"response": []
+		},
+		{
+			"name": "Submit a reset_password request using a mobile number",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/send_sms_otp.json?resource=users&user[additional_login_param]=9561137096&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1&intent=reset_password",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"send_sms_otp.json"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "intent",
+							"value": "reset_password",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "request password reset using otp"
+			},
+			"response": []
+		},
+		{
+			"name": "Submit an unlock account request using a mobile number",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/authenticate/users/send_sms_otp.json?resource=users&user[additional_login_param]=9561137096&api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1&intent=unlock_account",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"authenticate",
+						"users",
+						"send_sms_otp.json"
+					],
+					"query": [
+						{
+							"key": "resource",
+							"value": "users",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "user[additional_login_param]",
+							"value": "9561137096",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "intent",
+							"value": "unlock_account",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "request password reset using otp"
+			},
+			"response": []
+		},
+		{
+			"name": "Sign in user with mobile and password",
+			"request": {
+				"url": "http://localhost:3000/authenticate/users/sign_in.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"9561137096\",\n\t\t\"password\":\"cocostan\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "request unlock account instructions"
+			},
+			"response": []
+		},
+		{
+			"name": "Sign in user with email and password",
+			"request": {
+				"url": "http://localhost:3000/authenticate/users/sign_in.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"bhargav.r.raut@gmail.com\",\n\t\t\"password\":\"cocostan\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "request unlock account instructions"
+			},
+			"response": []
+		},
+		{
+			"name": "Submit a Reset Password Request with Email",
+			"request": {
+				"url": "http://localhost:3000/authenticate/users/password.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\":{\n\t\t\"email\":\"rrphotosoft@gmail.com\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Forgot password request with email"
+			},
+			"response": []
+		},
+		{
+			"name": "Create A Product",
+			"request": {
+				"url": "http://localhost:3000/shopping/products.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"product\":{\n\t\t\"price\": 10.25,\n\t\t\"name\": \"Ford Ecosport\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a new product with an admin_user."
+			},
+			"response": []
+		},
+		{
+			"name": "Create A Cash Payment (as non admin user)",
+			"request": {
+				"url": "http://localhost:3000/shopping/payments.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5f8f85421aa922f9545c66\",\n\t\t\"amount\":1200,\n\t\t\"payment_type\":\"cash\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a new product with an admin_user."
+			},
+			"response": [
+				{
+					"id": "592a883f-5223-4dd5-980f-ccf18d223fd3",
+					"name": "Create A Cash Payment (as non admin user)",
+					"originalRequest": {
+						"url": "http://localhost:3000/shopping/payments.json",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "ztgt3EEvENxXLUZMPB16",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+								"description": "",
+								"warning": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5fb069421aa92bde82495c\",\n\t\t\"amount\":1200,\n\t\t\"payment_type\":\"cash\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"bbc4a1536108dfb1bdf9d8ac3a637ece\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Location",
+							"key": "Location",
+							"value": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d",
+							"description": "Used in redirection, or when a new resource has been created."
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "d61dc2a2-85a3-4684-ac85-d5375c5b5aee",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.070017",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 108,
+					"body": "{\"_id\":{\"$oid\":\"5a5fb0b6421aa92bde82495d\"},\"amount\":1200.0,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:23:18.040Z\",\"payment_ack_proof\":null,\"payment_status\":null,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:23:18.040Z\",\"payment_receipt\":null,\"cash_change\":0}"
+				}
+			]
+		},
+		{
+			"name": "Create A Refund Request",
+			"request": {
+				"url": "http://localhost:3000/shopping/payments.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5fb069421aa92bde82495c\",\n\t\t\"amount\": -1012.25,\n\t\t\"payment_type\":\"cash\",\n\t\t\"refund\":true\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a new product with an admin_user."
+			},
+			"response": [
+				{
+					"id": "9b4097e0-2c07-45cd-ac98-4184b718d46e",
+					"name": "Create A Cash Payment (as non admin user)",
+					"originalRequest": {
+						"url": "http://localhost:3000/shopping/payments.json",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "ztgt3EEvENxXLUZMPB16",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+								"description": "",
+								"warning": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5fb069421aa92bde82495c\",\n\t\t\"amount\":1200,\n\t\t\"payment_type\":\"cash\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"bbc4a1536108dfb1bdf9d8ac3a637ece\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Location",
+							"key": "Location",
+							"value": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d",
+							"description": "Used in redirection, or when a new resource has been created."
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "d61dc2a2-85a3-4684-ac85-d5375c5b5aee",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.070017",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 108,
+					"body": "{\"_id\":{\"$oid\":\"5a5fb0b6421aa92bde82495d\"},\"amount\":1200.0,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:23:18.040Z\",\"payment_ack_proof\":null,\"payment_status\":null,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:23:18.040Z\",\"payment_receipt\":null,\"cash_change\":0}"
+				}
+			]
+		},
+		{
+			"name": "Create A Cash Payment as admin user and set it as accepted",
+			"request": {
+				"url": "http://localhost:3000/shopping/payments.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "tkWsTzM51yXcKCLszLbU",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5f8f85421aa922f9545c66\",\n\t\t\"amount\":4000,\n\t\t\"payment_type\":\"cash\",\n\t\t\"payment_status\":1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a new product with an admin_user."
+			},
+			"response": [
+				{
+					"id": "27d16014-53d5-43fb-ac2d-105cad48f3c9",
+					"name": "Create A Cash Payment as admin user and set it as accepted",
+					"originalRequest": {
+						"url": "http://localhost:3000/shopping/payments.json",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "tkWsTzM51yXcKCLszLbU",
+								"description": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payment\":{\n\t\t\"cart_id\": \"5a5fb069421aa92bde82495c\",\n\t\t\"amount\":4000,\n\t\t\"payment_type\":\"cash\",\n\t\t\"payment_status\":1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\",\n\t\"proxy_resource_id\":\"5a5e3c9b421aa920bad70525\",\n\t\"proxy_resource_class\":\"User\"\n}"
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"5e7254988fae7ace546326da34f04df2\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Location",
+							"key": "Location",
+							"value": "http://localhost:3000/shopping/payments/5a5fb202421aa92bde82495e",
+							"description": "Used in redirection, or when a new resource has been created."
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "1fb173f1-54ad-4dfd-96e2-326c88367fb5",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.115602",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 201,
+					"body": "{\"_id\":{\"$oid\":\"5a5fb202421aa92bde82495e\"},\"amount\":1836.75,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:28:50.952Z\",\"payment_ack_proof\":null,\"payment_status\":1,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.952Z\",\"payment_receipt\":{\"current_payment\":[{\"_id\":{\"$oid\":\"5a5fb006421aa92bde824959\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb202421aa92bde82495e\",\"created_at\":\"2018-01-17T20:20:22.963Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.950Z\"},{\"_id\":{\"$oid\":\"5a5fb026421aa92bde82495a\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb202421aa92bde82495e\",\"created_at\":\"2018-01-17T20:20:54.321Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.946Z\"}],\"cart\":{\"_id\":{\"$oid\":\"5a5fb069421aa92bde82495c\"},\"_type\":\"Shopping::Cart\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"resource_class\":\"User\",\"updated_at\":\"2018-01-17T20:22:01.707Z\",\"created_at\":\"2018-01-17T20:22:01.707Z\",\"cart_items\":[\"5a5fb027421aa92bde82495b\",\"5a5fb026421aa92bde82495a\",\"5a5fb006421aa92bde824959\"],\"cart_payments\":[\"5a5fb0b6421aa92bde82495d\"]}},\"cash_change\":\"2163.25\"}"
+				}
+			]
+		},
+		{
+			"name": "Create A Cart Item",
+			"request": {
+				"url": "http://localhost:3000/shopping/cart_items.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cart_item\":{\n\t\t\"product_id\": \"5a5e4e71421aa927d555d442\",\n\t\t\"discount_code\":\"hello\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a cart item with a non admin user"
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Cart With Cart Items",
+			"request": {
+				"url": "http://localhost:3000/shopping/carts.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cart\":{\n\t\t\"add_cart_item_ids\": [\"5a5fb006421aa92bde824959\",\"5a5fb026421aa92bde82495a\",\"5a5fb027421aa92bde82495b\"]\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Create a cart item with a non admin user"
+			},
+			"response": []
+		},
+		{
+			"name": "Update a cash payment as approved, using admin creds",
+			"request": {
+				"url": "http://localhost:3000/shopping/payments/5a5f8fe5421aa922f9545c67.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "tkWsTzM51yXcKCLszLbU",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payment\":{\n\t\t\"payment_status\": 1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Update a cart item with a non admin user\n"
+			},
+			"response": [
+				{
+					"id": "170adc1a-9622-4518-8e5a-df0a2b47bfbe",
+					"name": "Update a cash payment as approved, using admin creds",
+					"originalRequest": {
+						"url": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "tkWsTzM51yXcKCLszLbU",
+								"description": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payment\":{\n\t\t\"payment_status\": 1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+						}
+					},
+					"status": "No Content",
+					"code": 204,
+					"_postman_previewlanguage": "plainText",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "no-cache",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "ac539ce0-d97d-46df-b569-083ddb1e04bf",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.061589",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 89,
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "Updates a Refund as approved ,using admin credentials.",
+			"request": {
+				"url": "http://localhost:3000/shopping/payments/5a5fc60b421aa92e8ee48054.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "tkWsTzM51yXcKCLszLbU",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payment\":{\n\t\t\"payment_status\": 1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\",\n\t\"proxy_resource_class\":\"User\",\n    \"proxy_resource_id\":\"5a5e3c9b421aa920bad70525\"\n}"
+				},
+				"description": "Update a cart item with a non admin user\n"
+			},
+			"response": [
+				{
+					"id": "289a9c44-988d-408d-a52b-35a631e939b3",
+					"name": "Update a cash payment as approved, using admin creds",
+					"originalRequest": {
+						"url": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "tkWsTzM51yXcKCLszLbU",
+								"description": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payment\":{\n\t\t\"payment_status\": 1\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+						}
+					},
+					"status": "No Content",
+					"code": 204,
+					"_postman_previewlanguage": "plainText",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "no-cache",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "ac539ce0-d97d-46df-b569-083ddb1e04bf",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.061589",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 89,
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "Update a Cart with a name and remove one cart item",
+			"request": {
+				"url": "http://localhost:3000/shopping/carts/5a5f83ea421aa921b1777c5f.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cart\":{\n\t\t\"name\": \"Aditya's Blood Tests\",\n\t\t\"remove_cart_item_ids\":[\"5a5f8396421aa921b1777c5d\"],\n\t\t\"add_cart_item_ids\":[\"5a5f83a3421aa921b1777c5e\"]\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Update a cart item with a non admin user\n"
+			},
+			"response": []
+		},
+		{
+			"name": "update a cart to remove a cart item after payments have been made, as an admin",
+			"request": {
+				"url": "http://localhost:3000/shopping/carts/5a5fb069421aa92bde82495c.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "tkWsTzM51yXcKCLszLbU",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cart\":{\n\t\t\"remove_cart_item_ids\":[\"5a5fb006421aa92bde824959\"]\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\",\n\t\"proxy_resource_class\":\"User\",\n\t\"proxy_resource_id\":\"5a5e3c9b421aa920bad70525\"\n}"
+				},
+				"description": "Update a cart item with a non admin user\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Update a Product",
+			"request": {
+				"url": "http://localhost:3000/shopping/products/5a5e4e71421aa927d555d442.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"product\":{\n\t\t\"price\": 1012.25,\n\t\t\"name\": \"Renault Lodgy\"\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Update a product created as an admin user\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Update User Profile",
+			"request": {
+				"url": "http://localhost:3000/profiles/users/update.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "tkWsTzM51yXcKCLszLbU",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\" : {\n\t\t\"admin\" : false\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\",\n\t\"id\":\"5a5e3c9b421aa920bad70525\"\n}"
+				},
+				"description": "Update a user profile, as an admin, setting this user to admin:true"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a Cart Item",
+			"request": {
+				"url": "http://localhost:3000/shopping/cart_items/5a5e78b3421aa932c653f1c8.json",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Delete a cart item from the wishlist"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a Cart",
+			"request": {
+				"url": "http://localhost:3000/shopping/carts/5a5f83ea421aa921b1777c5f.json",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\"\n}"
+				},
+				"description": "Delete a cart item from the wishlist"
+			},
+			"response": []
+		},
+		{
+			"name": "get a particular product",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/products/5a5e4e71421aa927d555d442.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"products",
+						"5a5e4e71421aa927d555d442.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "get a product, even as a non admin user"
+			},
+			"response": []
+		},
+		{
+			"name": "get a particular cart item",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/cart_items/5a5e78b3421aa932c653f1c8.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"cart_items",
+						"5a5e78b3421aa932c653f1c8.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "gRaZM57x8NBuhoeyjVwB",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "get a cart_item as a non admin user\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Get  cart",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/carts/5a5fb069421aa92bde82495c.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"carts",
+						"5a5fb069421aa92bde82495c.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "get a cart_item as a non admin user\n"
+			},
+			"response": [
+				{
+					"id": "6d540ac6-404f-4987-8dcd-755632457ff1",
+					"name": "Get  cart",
+					"originalRequest": {
+						"url": {
+							"raw": "http://localhost:3000/shopping/carts/5a5fb069421aa92bde82495c.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"shopping",
+								"carts",
+								"5a5fb069421aa92bde82495c.json"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "current_app_id",
+									"value": "5a5259cb421aa91664913ed1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "ztgt3EEvENxXLUZMPB16",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+								"description": "",
+								"warning": ""
+							}
+						],
+						"body": {}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"ce89d359d4344f14e049a0f7ed4c8d0a\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "e9acecfa-ee83-4f4b-8021-114ce172a62d",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.051026",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 92,
+					"body": "{\"_id\":{\"$oid\":\"5a5fb069421aa92bde82495c\"},\"created_at\":\"2018-01-17T20:22:01.707Z\",\"name\":null,\"notes\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:22:01.707Z\",\"cart_items\":[{\"_id\":{\"$oid\":\"5a5fb027421aa92bde82495b\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb0b6421aa92bde82495d\",\"created_at\":\"2018-01-17T20:20:55.765Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:24:37.640Z\"},{\"_id\":{\"$oid\":\"5a5fb026421aa92bde82495a\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb202421aa92bde82495e\",\"created_at\":\"2018-01-17T20:20:54.321Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.946Z\"},{\"_id\":{\"$oid\":\"5a5fb006421aa92bde824959\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb202421aa92bde82495e\",\"created_at\":\"2018-01-17T20:20:22.963Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.950Z\"}],\"cart_payments\":[{\"_id\":{\"$oid\":\"5a5fb0b6421aa92bde82495d\"},\"amount\":1200.0,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:23:18.040Z\",\"payment_ack_proof\":null,\"payment_status\":1,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:24:37.650Z\",\"payment_receipt\":null,\"cash_change\":null},{\"_id\":{\"$oid\":\"5a5fb202421aa92bde82495e\"},\"amount\":1836.75,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:28:50.952Z\",\"payment_ack_proof\":null,\"payment_status\":1,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:28:50.952Z\",\"payment_receipt\":null,\"cash_change\":null}],\"cart_price\":\"3036.75\",\"cart_paid_amount\":3036.75,\"cart_pending_balance\":\"0.0\",\"cart_credit\":3036.75}"
+				}
+			]
+		},
+		{
+			"name": "Get  payment",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"payments",
+						"5a5fb0b6421aa92bde82495d.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "get a cart_item as a non admin user\n"
+			},
+			"response": [
+				{
+					"id": "19fb799f-6a84-49a8-a9d2-7305477c8982",
+					"name": "Get  payment",
+					"originalRequest": {
+						"url": {
+							"raw": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"shopping",
+								"payments",
+								"5a5fb0b6421aa92bde82495d.json"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "current_app_id",
+									"value": "5a5259cb421aa91664913ed1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "ztgt3EEvENxXLUZMPB16",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+								"description": "",
+								"warning": ""
+							}
+						],
+						"body": {}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"abf88e44dcd13d69650a229b4f410191\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "6b11724a-0668-44fc-8aae-8e5c4eb82cb4",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.045108",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 79,
+					"body": "{\"_id\":{\"$oid\":\"5a5fb0b6421aa92bde82495d\"},\"amount\":1200.0,\"cart_id\":\"5a5fb069421aa92bde82495c\",\"created_at\":\"2018-01-17T20:23:18.040Z\",\"payment_ack_proof\":null,\"payment_status\":1,\"payment_type\":\"cash\",\"refund\":null,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:24:37.650Z\",\"payment_receipt\":{\"current_payment\":[{\"_id\":{\"$oid\":\"5a5fb027421aa92bde82495b\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":true,\"accepted_by_payment_id\":\"5a5fb0b6421aa92bde82495d\",\"created_at\":\"2018-01-17T20:20:55.765Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":\"5a5fb069421aa92bde82495c\",\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:24:37.640Z\"}],\"cart\":{\"_id\":{\"$oid\":\"5a5fb069421aa92bde82495c\"},\"_type\":\"Shopping::Cart\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"resource_class\":\"User\",\"updated_at\":\"2018-01-17T20:22:01.707Z\",\"created_at\":\"2018-01-17T20:22:01.707Z\",\"cart_items\":[\"5a5fb027421aa92bde82495b\",\"5a5fb026421aa92bde82495a\",\"5a5fb006421aa92bde824959\"],\"cart_payments\":[\"5a5fb0b6421aa92bde82495d\"]}},\"cash_change\":null}"
+				}
+			]
+		},
+		{
+			"name": "get all products",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/products.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"products.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "see all products, even as a non admin user"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all cart items in the wishlist",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/shopping/cart_items.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"shopping",
+						"cart_items.json"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a5259cb421aa91664913ed1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "ztgt3EEvENxXLUZMPB16",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a5259cb421aa91664913ed1",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": "see all cart items in a users wish list"
+			},
+			"response": [
+				{
+					"id": "d55b2e45-7cbf-42bf-8af3-ba75069bc811",
+					"name": "Get all cart items in the wishlist",
+					"originalRequest": {
+						"url": {
+							"raw": "http://localhost:3000/shopping/cart_items.json?api_key=021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6&current_app_id=5a5259cb421aa91664913ed1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"shopping",
+								"cart_items.json"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "current_app_id",
+									"value": "5a5259cb421aa91664913ed1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Token",
+								"value": "ztgt3EEvENxXLUZMPB16",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Aid",
+								"value": "5a5259cb421aa91664913ed1",
+								"description": "",
+								"warning": ""
+							},
+							{
+								"key": "X-User-Es",
+								"value": "cba67c6a7b4f3e9c37cdf9581b2680fb5f8bbd54fdc7faea430844d462bfafd2",
+								"description": "",
+								"warning": ""
+							}
+						],
+						"body": {}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"_postman_previewtype": "text",
+					"header": [
+						{
+							"name": "Cache-Control",
+							"key": "Cache-Control",
+							"value": "max-age=0, private, must-revalidate",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"name": "Connection",
+							"key": "Connection",
+							"value": "close",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"name": "Content-Type",
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "ETag",
+							"key": "ETag",
+							"value": "W/\"ae81bb1ddc40d55a8163a0048221b92e\"",
+							"description": "An identifier for a specific version of a resource, often a message digest"
+						},
+						{
+							"name": "Server",
+							"key": "Server",
+							"value": "thin",
+							"description": "A name for the server"
+						},
+						{
+							"name": "X-Content-Type-Options",
+							"key": "X-Content-Type-Options",
+							"value": "nosniff",
+							"description": "The only defined value, \"nosniff\", prevents Internet Explorer from MIME-sniffing a response away from the declared content-type"
+						},
+						{
+							"name": "X-Frame-Options",
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN",
+							"description": "Clickjacking protection: \"deny\" - no rendering within a frame, \"sameorigin\" - no rendering if origin mismatch"
+						},
+						{
+							"name": "X-Request-Id",
+							"key": "X-Request-Id",
+							"value": "87c503fb-4084-4f82-9cb1-5636d55d5bfc",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-Runtime",
+							"key": "X-Runtime",
+							"value": "0.050555",
+							"description": "Custom header"
+						},
+						{
+							"name": "X-XSS-Protection",
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block",
+							"description": "Cross-site scripting (XSS) filter"
+						}
+					],
+					"cookie": [],
+					"responseTime": 87,
+					"body": "[{\"_id\":{\"$oid\":\"5a5fb006421aa92bde824959\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":null,\"accepted_by_payment_id\":null,\"created_at\":\"2018-01-17T20:20:22.963Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":null,\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:20:22.963Z\"},{\"_id\":{\"$oid\":\"5a5fb026421aa92bde82495a\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":null,\"accepted_by_payment_id\":null,\"created_at\":\"2018-01-17T20:20:54.321Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":null,\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:20:54.321Z\"},{\"_id\":{\"$oid\":\"5a5fb027421aa92bde82495b\"},\"accept_order_at_percentage_of_price\":1.0,\"accepted\":null,\"accepted_by_payment_id\":null,\"created_at\":\"2018-01-17T20:20:55.765Z\",\"discount\":null,\"discount_code\":\"hello\",\"name\":\"Renault Lodgy\",\"parent_id\":null,\"price\":\"1012.25\",\"product_id\":\"5a5e4e71421aa927d555d442\",\"quantity\":1,\"resource_class\":\"User\",\"resource_id\":\"5a5e3c9b421aa920bad70525\",\"updated_at\":\"2018-01-17T20:20:55.765Z\"}]\n"
+				}
+			]
+		}
+	]
+}
