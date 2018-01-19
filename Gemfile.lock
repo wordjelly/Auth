@@ -13,7 +13,7 @@ PATH
       materialize-sass (= 0.97.1)
       momentjs-rails
       mongoid-elasticsearch
-      mongoid_versioned_atomic (~> 0.0.1)
+      mongoid_versioned_atomic (~> 0.0.2)
       omniauth (= 1.4.1)
       omniauth-facebook (= 4.0.0)
       omniauth-google-oauth2 (= 0.4.1)
@@ -190,7 +190,7 @@ GEM
     mongoid-paperclip (0.0.11)
       mongoid
       paperclip (>= 2.3.6, != 4.3.0)
-    mongoid_versioned_atomic (0.0.1)
+    mongoid_versioned_atomic (0.0.2)
       aws-sdk (~> 2)
       mongoid (~> 5.0.1)
       mongoid-paperclip
