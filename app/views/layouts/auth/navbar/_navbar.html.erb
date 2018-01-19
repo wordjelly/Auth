@@ -9,6 +9,11 @@
           <a href="/" class="brand-logo"><%= Auth.configuration.brand_name %></a>
           <%= render :partial => 'layouts/auth/navbar/progress_spinner.html.erb' %>
         <% end %>
+
+        <!-- search bar -->
+        
+        <!-- end search bar -->
+
         <% if content_for?(:navbar_right) %>
           <%= content_for(:navbar_right)  %>
         <% else %>
@@ -20,5 +25,24 @@
         <% end %>
       </div>
     </nav>
+  </div>
+</div>
+
+<div class="row m-0-bottom">
+  <div class="col l6 m6 s6 offset-l3">
+    <form autocomplete="off">
+          <div class="input-field">
+            <input id="search" type="search" required>
+            <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+            <i class="material-icons">close</i>
+          </div>
+    </form>
+  </div>
+</div>
+<div class="row m-0-top">
+  <div class="col l6 m6 s6 offset-l3 search-results">
+    <div class="card p-10-top p-10-bottom p-10-left p-10-right">
+        hi there
+    </div>
   </div>
 </div>
