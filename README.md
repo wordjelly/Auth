@@ -1094,6 +1094,7 @@ This ensures that the item will be found only if the resource_id was registered 
 Thus for create/update/show/destroy -> only the user who created the item or the admin can do these actions.
 
 Only for index actions -> 
+## TODO EXPLANATION FOR INDEX ACTION PERMISSIONS.
 
 
 ### How to pass your own permitted params to any of the Shopping Classes:
@@ -1107,3 +1108,24 @@ def permitted_params
   super.deep_merge(params.permit({cart_item: [:description,:sample_type,:public]}))
 end
 ```
+
+### Views for Shopping API
+
+The engine offers in built views for the Shopping API.
+These views are organized with the following thoughts in mind:
+
+#### Product:
+
+Basic CRUD Views
+
+#### Cart Item:
+
+Basic CRUD Views
+
+#### Cart:
+
+Basic CRUD Views
+
+#### Payment:
+
+Basic CRUD Views

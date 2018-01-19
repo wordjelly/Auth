@@ -1,6 +1,6 @@
 class Auth::ProfilesController < Auth::ApplicationController
 		
-	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update]
+	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_user]
 
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
 
@@ -9,7 +9,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 
 	before_action :do_before_request, TCONDITIONS
 	before_action :initialize_vars, TCONDITIONS
-
+	before_action :is_admin_user, :only => [:set_proxy_user]
 	
 	
 	def initialize_vars
@@ -38,13 +38,13 @@ class Auth::ProfilesController < Auth::ApplicationController
 	## this method needs the token authentication and an :id, hence the profile resource is updated.
 	def update
 		check_for_update(@profile_resource)
-		puts "did check for update ------------------"
+		
 		@profile_resource.admin = @resource_params[:admin]
-		puts "set the admin paramter ---------------"
+		
 		@profile_resource.m_client = self.m_client
-		puts "set the m_client ==============="
+		
 		@profile_resource.save
-		puts "called save."
+		
 		respond_with @profile_resource
 	end
 
@@ -57,6 +57,24 @@ class Auth::ProfilesController < Auth::ApplicationController
 		respond_with current_signed_in_resource do |format|
 			format.json {render json: current_signed_in_resource.as_json({:show_id => true})}
 		end
+	end
+
+	## this method takes an id.
+	## it also needs current signed in user to be an admin.
+	## it basically takes the @profile_resource
+	## then it shoves it into the session as  proxy_resource_id and proxy_resource_class
+	## then it returns the profile_resource.
+	## it responds only to js
+	## it is meant to be used only for setting the proxied user by an admin in the web application.
+	def set_proxy_user
+		not_found("that user doesn't exist") unless @profile_resource
+		session[:proxy_resource_id] = @profile_resource.id.to_s
+		session[:proxy_resource_class] = @profile_resource.id.to_s
+		## there is only a js erb set_proxy_user file in the profiles_views
+		## so it will only respond to js erb.
+		## it looks for a div called "proxy_user"
+		## and then it populates that div with details of the 
+		## proxy user.
 	end
 
 	##@used_in: email check if already exists. 

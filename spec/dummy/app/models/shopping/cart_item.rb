@@ -1,9 +1,10 @@
 class Shopping::CartItem < Auth::Shopping::CartItem
+=begin
     field :description, type: String
     field :sample_type, type: String
     field :public, type: Boolean
 
-=begin
+
     ##used in cart_item_controller_concern#show
     ##params_cart_item_id,resource,pub=nil
 	def self.find_cart_item(options)

@@ -13,8 +13,36 @@ module Auth::Concerns::UserConcern
 		USER_INFO_FIELDS = ["name","image_url"]
 
 		include MongoidVersionedAtomic::VAtomic
-		##if devise modules are not defined, then define them, by default omniauth contains 
 		
+
+		opts = Auth.configuration.auth_resources[self.name]
+
+		def self.es_mappings
+			{
+				email: {
+					type: "string"
+				},
+				additional_login_param: {
+					type: "string"
+				}
+			}
+		end
+
+
+
+		## if configuration specifies that elasticsearch is to be used as an indexing backend.
+		if Auth.configuration.use_es == true
+			include Mongoid::Elasticsearch
+  			elasticsearch! index_mappings: es_mappings
+		end
+
+		def as_indexed_json(options={})
+		 {
+		    email: email,
+		    additional_login_param: additional_login_param
+		 }
+		end 
+
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
 
 		after_save :set_client_authentication
@@ -64,7 +92,7 @@ module Auth::Concerns::UserConcern
 		unless self.method_defined?(:devise_modules)
 
 		  ##get the options for the current class.
-		  opts = Auth.configuration.auth_resources[self.name]
+		  
 
 		  ## Database authenticatable
 	      ##
@@ -581,7 +609,8 @@ module Auth::Concerns::UserConcern
 	def is_admin?
 		admin
 	end
+
+	 
 	
-
-
+	
 end

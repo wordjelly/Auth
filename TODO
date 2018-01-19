@@ -96,7 +96,18 @@ MAY 2017
 
 
 
-- corporate payments
-- gift cards
-- pay for friend
-- pay first, add/create cart later.
+- whats the best way to do this?
+- they can be made to choose from a drop down?
+- the user for whom they are proxying
+- basically a general purpose search box
+- search query will go to a search query controller
+- from there will be controlled by permissions
+- then will fire to elasticsearch for autocomplete
+- then will return details
+- if user is selected will be another controller action 
+called select user
+- this can be in profiles controller
+- this will add the "proxy" to the session
+- this will be used everywhere in token concern.
+- it will also display in the layout on the top, which 
+- user is being proxied for.

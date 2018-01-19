@@ -49,10 +49,18 @@ class User
       Auth::TwoFactorOtp.check_errors
   end
 
-
+=begin
+  def send_reset_password_instructions
+    token = set_reset_password_token
+    send_reset_password_instructions_notification(token)
+    puts "token is: #{token}"
+    token
+  end
+=end
   ## only will work as long as you specify a default queue adapter at the application level, otherwise defaults to inline which basically means that it will block till email is sent.
   ## refer: https://github.com/mperham/sidekiq/wiki/Active-Job#active-job-setup
   def send_devise_notification(notification, *args)
+    puts "sending devise notification."
     devise_mailer.send(notification, self, *args).deliver_later
   end
   ##############

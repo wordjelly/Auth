@@ -1,5 +1,7 @@
 class Topic
   include Mongoid::Document
+  include Mongoid::Elasticsearch
+  elasticsearch!
   field :name, type: String
   field :place, type: String
 

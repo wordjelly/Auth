@@ -16,6 +16,9 @@ module Auth
     config.generators do |g|
       g.test_framework :rspec
     end
+
+    
+
   end
 
  
@@ -87,6 +90,10 @@ module Auth
     ## used in lib/auth/omniauth.rb
     ## inside Google_OAuth2.class_eval
     attr_accessor :host_name
+
+
+    ## whether to use es or not.
+    attr_accessor :use_es
 
     def initialize
       
@@ -195,8 +202,15 @@ module Auth
       ###############################################################
       @queue_adapter = "shoryuken"
 
-     
-
+      
+      ####################################################
+      ##
+      ##
+      ## elasticsearch options.
+      ##
+      ###################################################
+      @use_es = true
+      
     end
   end
   
