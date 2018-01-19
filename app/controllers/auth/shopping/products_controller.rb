@@ -11,7 +11,7 @@ class Auth::Shopping::ProductsController < Auth::Shopping::ShoppingController
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
     before_filter :do_before_request , TCONDITIONS
-    before_filter :initialize_vars , TCONDITIONS
+    before_filter :initialize_vars , :only => [:create,:update,:destroy,:new]
     before_filter :is_admin_user , :only => [:create,:update,:destroy]
 	
 end

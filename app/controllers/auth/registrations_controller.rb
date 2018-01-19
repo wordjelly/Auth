@@ -4,10 +4,11 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 
 	include Auth::Concerns::TokenConcern
 
-	before_action :check_recaptcha, only: [:create, :update]
+	#before_action :check_recaptcha, only: [:create, :update]
 
 
 	def create
+		check_recaptcha
 		build_resource(sign_up_params)
 		resource.m_client = self.m_client
 	 	resource.set_client_authentication
@@ -36,7 +37,7 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 
 
 	def update
-		
+		check_recaptcha
 		self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
 	    prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
 	    ## added these two lines

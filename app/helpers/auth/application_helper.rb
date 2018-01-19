@@ -46,30 +46,7 @@ module Auth
     ## 
     ##
     ##############################################
-=begin
-                new_user_session GET      /authenticate/users/sign_in(.:format)                   auth/sessions#new
-                    user_session POST     /authenticate/users/sign_in(.:format)                   auth/sessions#create
-            destroy_user_session DELETE   /authenticate/users/sign_out(.:format)                  auth/sessions#destroy
-        cancel_user_registration GET      /authenticate/users/cancel(.:format)                    auth/registrations#cancel
-               user_registration POST     /authenticate/users(.:format)                           auth/registrations#create
-           new_user_registration GET      /authenticate/users/sign_up(.:format)                   auth/registrations#new
-          edit_user_registration GET      /authenticate/users/edit(.:format)                      auth/registrations#edit
-                                 PATCH    /authenticate/users(.:format)                           auth/registrations#update
-                                 PUT      /authenticate/users(.:format)                           auth/registrations#update
-                                 DELETE   /authenticate/users(.:format)                           auth/registrations#destroy
-                   user_password POST     /authenticate/users/password(.:format)                  auth/passwords#create
-               new_user_password GET      /authenticate/users/password/new(.:format)              auth/passwords#new
-              edit_user_password GET      /authenticate/users/password/edit(.:format)             auth/passwords#edit
-                                 PATCH    /authenticate/users/password(.:format)                  auth/passwords#update
-                                 PUT      /authenticate/users/password(.:format)                  auth/passwords#update
-               user_confirmation POST     /authenticate/users/confirmation(.:format)              auth/confirmations#create
-           new_user_confirmation GET      /authenticate/users/confirmation/new(.:format)          auth/confirmations#new
-                                 GET      /authenticate/users/confirmation(.:format)              auth/confirmations#show
-                     user_unlock POST     /authenticate/users/unlock(.:format)                    auth/unlocks#create
-                 new_user_unlock GET      /authenticate/users/unlock/new(.:format)                auth/unlocks#new
-                                 GET      /authenticate/users/unlock(.:format)                    auth/unlocks#show
 
-=end
 
     def new_res_session_path(opts = {})
       send "new_#{res_name_small}_session_path",opts

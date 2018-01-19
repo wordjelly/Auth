@@ -37,14 +37,17 @@ module ActionDispatch::Routing
 
 			 	 		if Regexp.last_match[:scope_path]
 			 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
-			 	 			as_prefix = Regexp.last_match[:scope_path]
+			 	 			## this is done so that the route helper defined inside the engine views also work.
+			 	 			as_prefix = "auth_" + Regexp.last_match[:scope_path]
 			 	 		end
 			 	 		collection = Regexp.last_match[:collection]
 
 			 	 	end
 
 			 	 	if collection
-				 	 	scope :path => scope_path, :as => as_prefix do 
+				 	 	scope :path => scope_path, :as => as_prefix do
+				 	 		puts "As prefix is: #{as_prefix}" 
+				 	 		puts "scope path is: #{scope_path}"
 				 	 		controller_name = Auth.configuration.send("#{model}_controller")
 					    	resources collection.to_sym, controller: controller_name
 					    	##A ROUTE HAS BEEN ADDED IN THE DAUGHTER APP FOR THE POST -> TO THE PAYMENTS_UPDATE FOR PAYUMONEY.
