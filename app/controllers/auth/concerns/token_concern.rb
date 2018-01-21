@@ -107,9 +107,9 @@ module Auth::Concerns::TokenConcern
 
 
   ## if the current signed in resource is an admin,
-  ## this method looks for a param called :proxy_resource_id, and another one called :proxy_resource_class
-  ## it uses these two to find a resource with those specifications
-  ## the lookup resource then becomes that resource
+    ## this method looks for a param called :proxy_resource_id, and another one called :proxy_resource_class
+    ## it uses these two to find a resource with those specifications
+    ## the lookup resource then becomes that resource
   ## else
   ## the lookup resource is the current_signed_in_resource
   def lookup_resource 

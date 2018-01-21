@@ -13,6 +13,7 @@ module Auth::Concerns::ChiefModelConcern
 		## currently used in the after_save callback where we dont want the refund being set to accepted, and thereafter to update all other refunds as failed to cascade.
 		attr_accessor :skip_callbacks
 
+		field :public, type:String, default: "no"
 	end
 
 	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
