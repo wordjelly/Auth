@@ -79,6 +79,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 		validate :user_cannot_change_anything_if_payment_accepted
 		validate :product_id_exists?
 
+		before_save do |document|
+			document.public = "no"
+		end
 
 	end
 

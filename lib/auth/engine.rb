@@ -8,6 +8,7 @@ require "auth/mailgun"
 require "auth/job_exception_handler"
 require "auth/url_shortener"
 require "auth/notify"
+require "auth/search/main"
 #require "auth/sidekiq_up"
 
 module Auth

@@ -59,6 +59,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 		end
 	end
 
+	## THIS IS HOW YOU SET A PROXY USER AS AN ADMIN.
 	## this method takes an id.
 	## it also needs current signed in user to be an admin.
 	## it basically takes the @profile_resource

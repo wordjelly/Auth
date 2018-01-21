@@ -17,15 +17,69 @@ module Auth::Concerns::UserConcern
 
 		opts = Auth.configuration.auth_resources[self.name]
 
-		def self.es_mappings
-			{
-				email: {
-					type: "string"
-				},
-				additional_login_param: {
-					type: "string"
-				}
+		
+		def self.es_index_options
+		{
+			"index_options" => {
+			    "user" => {
+			      	"settings" => {
+				        "analysis" => {
+				            "filter" => {
+				                "nGram_filter" => {
+				                    "type" => "nGram",
+				                    "min_gram" => 2,
+				                    "max_gram" => 20,
+				                    "token_chars" => [
+				                       "letter",
+				                       "digit",
+				                       "punctuation",
+				                       "symbol"
+				                    ]
+				                }
+				            },
+				            "analyzer" => {
+				                "nGram_analyzer" => {
+				                    "type" => "custom",
+				                    "tokenizer" => "whitespace",
+				                    "filter" => [
+				                        "lowercase",
+				                        "asciifolding",
+				                        "nGram_filter"
+				                    ]
+				                },
+				                "whitespace_analyzer" => {
+				                    "type" => "custom",
+				                    "tokenizer" => "whitespace",
+				                    "filter" => [
+				                        "lowercase",
+				                        "asciifolding"
+				                    ]
+				                }
+				            }
+				        }
+				    },
+			        "mappings" => {
+			          "_all" => {
+				            "index_analyzer" => "nGram_analyzer",
+				            "search_analyzer" => "whitespace_analyzer"
+				        },
+			            "properties" => {
+			                "name" => {
+			                	"type" => "string"
+			                },
+			                "email" => {
+			                	"type" => "string",
+			                	"index" => "not_analyzed"
+			                },
+			                "additional_login_param" => {
+			                	"type" => "string",
+			                	"index" => "not_analyzed"
+			                }
+			            }
+			        }
+			    }
 			}
+		}
 		end
 
 
@@ -33,15 +87,82 @@ module Auth::Concerns::UserConcern
 		## if configuration specifies that elasticsearch is to be used as an indexing backend.
 		if Auth.configuration.use_es == true
 			include Mongoid::Elasticsearch
-  			elasticsearch! index_mappings: es_mappings
+  			elasticsearch! ({
+				index_options:  {
+				    settings:  {
+				    		index: {
+						        analysis:  {
+						            filter:  {
+						                nGram_filter:  {
+						                    type: "nGram",
+						                    min_gram: 2,
+						                    max_gram: 20,
+						                   	token_chars: [
+						                       "letter",
+						                       "digit",
+						                       "punctuation",
+						                       "symbol"
+						                    ]
+						                }
+						            },
+						            analyzer:  {
+						                nGram_analyzer:  {
+						                    type: "custom",
+						                    tokenizer:  "whitespace",
+						                    filter: [
+						                        "lowercase",
+						                        "asciifolding",
+						                        "nGram_filter"
+						                    ]
+						                },
+						                whitespace_analyzer: {
+						                    type: "custom",
+						                    tokenizer: "whitespace",
+						                    filter: [
+						                        "lowercase",
+						                        "asciifolding"
+						                    ]
+						                }
+						            }
+						        }
+					    	}
+					    },
+				        mappings: {
+				          "user" => {
+				          _all:  {
+					            index_analyzer: "nGram_analyzer",
+					            search_analyzer: "whitespace_analyzer"
+					        },
+				            properties: {
+				                name: {
+				                	type: "string"
+				                },
+				                email: {
+				                	type: "string",
+				                	index: "not_analyzed"
+				                },
+				                additional_login_param: {
+				                	type: "string",
+				                	index: "not_analyzed"
+				                }
+				            }
+				        }
+				    }
+				}
+			})
+			
+  			def as_indexed_json(options={})
+			 {
+			 	name: name,
+			    email: email,
+			    additional_login_param: additional_login_param,
+			    additional_login_param_status: additional_login_param_status
+			 }
+			end 
+			
 		end
 
-		def as_indexed_json(options={})
-		 {
-		    email: email,
-		    additional_login_param: additional_login_param
-		 }
-		end 
+		
 
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
 

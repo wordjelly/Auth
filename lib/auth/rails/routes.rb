@@ -6,7 +6,12 @@ module ActionDispatch::Routing
   	##value:opts[Hash] -> the options specifying the views, controllers etc for omniauth.
   	##expected to be present in the preinitializer in the routes of the target app.
 	def mount_routes(app_route_resources)
-	      
+
+	      resources :search, :controller => "auth/search" do 
+	      	collection do 
+	      		get 'authenticated_user_search', :action => 'authenticated_user_search', :as => "authenticated_user"
+	      	end
+	      end
 	  	  resources :clients, :controller => "auth/clients"
 		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 
