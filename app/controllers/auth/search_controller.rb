@@ -26,7 +26,7 @@ class Auth::SearchController < ApplicationController
 		query = permitted_params[:query]
 		query[:resource_id] = lookup_resource.id.to_s if !current_signed_in_resource.is_admin?
 		
-		@search_response = Auth::Search::Main.search(permitted_params[:query])
+		@search_response = Auth::Search::Main.search(query)
 		respond_with @search_response
 	end
 

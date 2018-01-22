@@ -15,6 +15,7 @@ module Auth::Concerns::Shopping::ProductConcern
 			self.public = "yes"
 		end
 
+		
 		if Auth.configuration.use_es == true
 			include Mongoid::Elasticsearch
   			elasticsearch! ({
@@ -75,6 +76,10 @@ module Auth::Concerns::Shopping::ProductConcern
 				                	type: "string",
 				                	index: "not_analyzed",
 				                	include_in_all: false
+				                },
+				                resource_id: {
+				                	type: "string",
+				                	index: "not_analyzed"
 				                }
 				            }
 				        }
@@ -83,15 +88,17 @@ module Auth::Concerns::Shopping::ProductConcern
 			})
 			
   			
-			
-		end
-
-		def as_indexed_json(options={})
+			def as_indexed_json(options={})
 			 {
 			 	name: name,
-			    price: price
+			    price: price,
+			    resource_id: resource_id,
+			    public: public
 			 }
-		end 
+			end 
+
+		end
+		
 		
 		
 	end
