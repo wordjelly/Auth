@@ -53,7 +53,7 @@ module Auth
 				query[:body][:query][:filtered][:query][:match][:_all][:query] = args[:query_string]
 				if args[:resource_id]
 					query[:body][:query][:filtered][:filter] = {
-							filter: {
+							
 								bool: {
 									should: [
 										{
@@ -79,7 +79,7 @@ module Auth
 										}
 									]
 								}
-							}
+							
 						}
 				else
 					## if a resource id is not provided then
@@ -90,6 +90,8 @@ module Auth
 					## as is.
 				end
 				query[:size] = args[:size] if args[:size]
+				
+				puts JSON.pretty_generate(query)
 				Mongoid::Elasticsearch.search(query)
 			end
 		end
