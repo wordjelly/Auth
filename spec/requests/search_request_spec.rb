@@ -93,10 +93,12 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 
 		context " -- public resource -- " do 
 			
-			it " -- allows user to search -- " do 
+			it " -- allows user to search -- ",:purr => true do 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "test_app_id", query: {query_string: "Coba", size:10}}),nil,@headers
-
+				
+				puts response.body.to_s
 				results = JSON.parse(response.body)
+
 				expect(results.size).to eq(1)
 			end
 
@@ -104,6 +106,7 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "test_app_id", query: {query_string: "Coba", size:10}}),nil,@admin_headers
 
 				results = JSON.parse(response.body)
+				puts results.to_s
 				expect(results.size).to eq(1)
 			end
 		end
@@ -148,7 +151,7 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 	context " -- no signed in user -- " do 
 		it " -- returns not authenticated -- " do 
 			get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "test_app_id", query: {query_string: "Roc", size:10}}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
-			puts response.body.to_s
+			
 			expect(response.code).to eq("401")
 		end
 	end

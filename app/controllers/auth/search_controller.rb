@@ -20,14 +20,21 @@ class Auth::SearchController < ApplicationController
 	## if he's not an admin, then the lookup_resource user's id is provided.
 	
 	## this action assumes that the user is signed_in, will return not authenticated otherwise.
+
+	## rendering logic : 
+	## @js erb -> renders html erb -> there each result class is detected and the requisite "_search.html.erb" partial is found for that class and rendered.
+	## @json => authenticated_user_search.json is rendered.
+	## @html => currently does not support html request.
 	def authenticated_user_search	
-		
-		
 		query = permitted_params[:query]
 		query[:resource_id] = lookup_resource.id.to_s if !current_signed_in_resource.is_admin?
-		
-		@search_response = Auth::Search::Main.search(query)
-		respond_with @search_response
+		#puts "query is: "
+		#puts query.to_s
+		@search_results = Auth::Search::Main.search(query)
+		#puts "search results are:"
+		#puts @search_results.to_s
+		@search_results = [Shopping::Product.new]
+		respond_with @search_results
 	end
 
 

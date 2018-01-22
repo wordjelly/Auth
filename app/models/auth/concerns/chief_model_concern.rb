@@ -13,6 +13,7 @@ module Auth::Concerns::ChiefModelConcern
 		## currently used in the after_save callback where we dont want the refund being set to accepted, and thereafter to update all other refunds as failed to cascade.
 		attr_accessor :skip_callbacks
 
+
 		field :public, type:String, default: "no"
 	end
 
@@ -25,6 +26,19 @@ module Auth::Concerns::ChiefModelConcern
 	def skip_callback?(callback_name)
 		return false if (self.skip_callbacks.blank? || self.skip_callbacks[callback_name.to_sym].nil?)
 		return self.skip_callbacks[callback_name.to_sym] == true
+	end
+
+	## will iterate the superclasses of this class
+	## until it finds a class that begins with Auth::
+	## or it hits Object
+	## and then it returns that superclass whatever it is.
+	def walk_superclasses
+		my_super_class = self.class.superclass
+		while my_super_class != Object
+			break if my_super_class.to_s =~ /^Auth::/
+			my_super_class = my_super_class.superclass 
+		end
+		return my_super_class
 	end
 
 end

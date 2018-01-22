@@ -28,21 +28,16 @@
   </div>
 </div>
 
-<div class="row m-0-bottom">
-  <div class="col l6 m6 s6 offset-l3">
-    <form autocomplete="off">
-          <div class="input-field">
-            <input id="search" type="search" required>
-            <label class="label-icon" for="search"><i class="material-icons">search</i></label>
-            <i class="material-icons">close</i>
-          </div>
-    </form>
-  </div>
-</div>
-<div class="row m-0-top">
-  <div class="col l6 m6 s6 offset-l3 search-results">
-    <div class="card p-10-top p-10-bottom p-10-left p-10-right">
-        hi there
-    </div>
-  </div>
-</div>
+
+
+<% if content_for?(:search_bar) %>
+  
+<% else %>  
+  <%= render :partial => "auth/search/search_bar.html.erb" %>
+<% end %>
+
+<% if content_for?(:search_results) %>
+  
+<% else %>
+  <%= render :partial => "auth/search/search_results.html.erb" %>
+<% end %>

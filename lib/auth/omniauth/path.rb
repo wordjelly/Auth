@@ -1,6 +1,17 @@
 module Auth
 	module OmniAuth
 		module Path
+			## given something like : shopping/product
+			## will return something like: Shopping::Product
+			def self.path_to_model(path)
+				path.split("/").map{|c| c = c.capitalize}.join("::").constantize
+			end
+
+			## given something like :Shopping::Product
+			## will return something like 
+			def self.model_to_path(model)
+				path.split("::").map{|c| c = c.to_s.downcase}.join("/")
+			end
 
 			##the the path for the request_phase of the omniauth call.
 			def self.omniauth_request_path(resource,provider)

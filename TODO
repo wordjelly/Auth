@@ -111,3 +111,17 @@ called select user
 - this will be used everywhere in token concern.
 - it will also display in the layout on the top, which 
 - user is being proxied for.
+
+
+------------
+
+1. create the search response partial
+2. for both unauth and normal.
+3. inside the erb partials use content_for() so that it can be overridden.
+4. also give a button to set the user
+5. write a test to see the user is set corretly.
+6. write a test to see that user is unset correctly.
+
+I have two hours for all this.
+next three hours -> 
+
