@@ -1,0 +1,32 @@
+<% @search_results.each do |result|
+
+if result.respond_to? :walk_superclasses
+	result_superclass = result.walk_superclasses
+	if result_superclass.to_s =~ /^Auth::/
+		## lookup the view of the base class first.
+		## if that doesnt exist, try the auth class
+		## if that also doesnt exist, then render the base
+		## search result view.
+		if lookup_context.find_all(Auth::OmniAuth::Path.model_to_path(result) + "/search_result.html.erb").any?
+
+			##$("#navbar_search_results").append("");
+
+		else
+			if lookup_context.find_all(Auth::OmniAuth::Path.model_to_path(result_superclass) + "/search_result.html.erb").any?
+
+			else
+
+			end
+		end
+	else
+	end	
+else
+	result_superclass = "Object"
+end
+
+
+
+
+
+
+%>

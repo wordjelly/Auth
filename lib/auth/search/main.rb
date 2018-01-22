@@ -91,8 +91,8 @@ module Auth
 				end
 				query[:size] = args[:size] if args[:size]
 				
-				puts JSON.pretty_generate(query)
-				Mongoid::Elasticsearch.search(query)
+				#puts JSON.pretty_generate(query)
+				Mongoid::Elasticsearch.search(query).results
 			end
 		end
 	end

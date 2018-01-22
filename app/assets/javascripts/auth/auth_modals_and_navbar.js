@@ -27,6 +27,7 @@ payumoney.js
 //= require you_need_to_sign_in.js
 //= require jquery.calendario.js
 //= require moment
+//= require search.js
 //= require payumoney.js
 
 /////THIS CODE SHOWS HOW TO OVERRIDE ALL THE CLIENT SIDE CODE NEEDED

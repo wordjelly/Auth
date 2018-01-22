@@ -88,7 +88,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 			include Mongoid::Elasticsearch
   			elasticsearch! ({
 				index_options:  {
-				    settings:  {
+				        settings:  {
 				    		index: {
 						        analysis:  {
 						            filter:  {
