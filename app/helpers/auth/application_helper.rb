@@ -2,6 +2,8 @@ module Auth
 
   module ApplicationHelper
 
+    
+    
     ##returns the name in small case of the class of the currently signed in resource
     ##@example : will return 'user' or 'admin'
     def get_signed_in_scope

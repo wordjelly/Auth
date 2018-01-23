@@ -82,6 +82,7 @@ module Auth::Concerns::TokenConcern
     ## made this a helper so that it can be used in views as well.
     helper_method :lookup_resource
 
+    helper_method :current_signed_in_resource
   end
 
   ## iterates all the authentication resources in the config.
@@ -115,6 +116,11 @@ module Auth::Concerns::TokenConcern
   def lookup_resource 
     return current_signed_in_resource unless current_signed_in_resource.is_admin?
     
+    puts "session proxy variables:"
+    puts session[:proxy_resource_id]
+    puts session[:proxy_resource_class]
+
+
     proxy_resource_id = params[:proxy_resource_id] || session[:proxy_resource_id]
     proxy_resource_class = params[:proxy_resource_class] || session[:proxy_resource_class]
     return nil unless (proxy_resource_class && proxy_resource_id)

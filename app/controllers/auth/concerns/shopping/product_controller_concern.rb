@@ -19,7 +19,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     check_for_create(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product)
   	@auth_shopping_product.save
-  	respond_with @auth_shopping_product
+  	#respond_with @auth_shopping_product
   end
 
   def update
@@ -27,19 +27,19 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product)
     @auth_shopping_product.assign_attributes(@product_params)
     @auth_shopping_product.save
-    respond_with @auth_shopping_product
+    #respond_with @auth_shopping_product
   end
 
   def index
     instantiate_shopping_classes
     @auth_shopping_products = @product_class.all
-    respond_with @auth_shopping_products
+    #respond_with @auth_shopping_products
   end
 
   def show
     instantiate_shopping_classes
     @auth_shopping_product = @product_class.find(params[:id])
-    respond_with @auth_shopping_product
+    #respond_with @auth_shopping_product
   end
 
   def destroy

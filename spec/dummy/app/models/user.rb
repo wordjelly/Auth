@@ -1,4 +1,4 @@
-class User
+class User < Auth::User
   include Mongoid::Document
   include Auth::Concerns::UserConcern
   include Auth::Concerns::SmsOtpConcern

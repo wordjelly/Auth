@@ -36,7 +36,7 @@
 %>
 	
 	
-	$("#navbar_search_results").append("<%= escape_javascript render :partial => _partial %>")
+	$("#navbar_search_results").append("<%= escape_javascript render :partial => _partial, locals: {result: result, resource: lookup_resource} %>")
 
 <%
 

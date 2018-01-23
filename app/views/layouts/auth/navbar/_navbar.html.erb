@@ -26,6 +26,11 @@
       </div>
     </nav>
   </div>
+  <% if content_for?(:proxy_user) %>
+
+ <% else %>
+  <div id="proxy_user"></div>
+ <% end %>
 </div>
 
 
@@ -41,3 +46,4 @@
 <% else %>
   <%= render :partial => "auth/search/search_results.html.erb" %>
 <% end %>
+
