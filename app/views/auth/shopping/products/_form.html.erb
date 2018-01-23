@@ -1,4 +1,4 @@
-<%= form_for(@auth_shopping_product, as: :product, url: main_app.auth_shopping_products_path) do |f| %>
+<%= form_for(@auth_shopping_product, url: products_path) do |f| %>
   <% if @auth_shopping_product.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@auth_shopping_product.errors.count, "error") %> prohibited this auth_shopping_product from being saved:</h2>
@@ -9,14 +9,8 @@
       <% end %>
       </ul>
     </div>
-   
-
-    
   <% end %>
-   
-    Product Name: <%= f.text_field :name %><br />
-    Product Price : <%= f.text_field :price %><br />
-    
+
   <div class="actions">
     <%= f.submit %>
   </div>

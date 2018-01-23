@@ -16,6 +16,7 @@ module ActionDispatch::Routing
 		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 
 		  		## :resource will be something like users.
+		  		post ':resource/set_proxy_user', :action => 'set_proxy_resource', :as => "set_proxy_resource"
 		  		get 'credential_exists', :action => 'credential_exists'
 		  		post ':resource/get_user_id', :action => 'get_user_id'
 		  		put ':resource/update', :action => 'update'
@@ -43,7 +44,7 @@ module ActionDispatch::Routing
 			 	 		if Regexp.last_match[:scope_path]
 			 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
 			 	 			## this is done so that the route helper defined inside the engine views also work.
-			 	 			as_prefix = "auth_" + Regexp.last_match[:scope_path]
+			 	 			as_prefix =  Regexp.last_match[:scope_path]
 			 	 		end
 			 	 		collection = Regexp.last_match[:collection]
 

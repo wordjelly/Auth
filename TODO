@@ -121,6 +121,11 @@ called select user
 4. also give a button to set the user
 5. write a test to see the user is set corretly.
 6. write a test to see that user is unset correctly.
+7. make all shopping tests pass with the new paths
+8. finish views for cart, cart item and product, and payment.
+
+basically today we finish the whole shopping shit.
+
 
 I have two hours for all this.
 next three hours -> 

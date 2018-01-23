@@ -1,6 +1,41 @@
 module Auth
 	module OmniAuth
 		module Path
+
+			##############################################
+			##
+			## FOR BUILDING THE PATHS FOR SHOPPING CLASSES.
+			##
+			##############################################
+
+			def self.new_path(cls)
+				"new_" + cls.constantize.new.class.name.underscore.gsub(/\//,"_") + "_path"
+			end
+
+
+			def self.show_or_update_or_delete_path(cls)
+				parts = Auth.configuration.product_class.constantize.new.class.name.split("::")
+				parts.map{|c| c.downcase}.join("_") + "_path"
+			end
+
+				
+			def self.create_or_index_path(cls)
+				parts = Auth.configuration.product_class.constantize.new.class.name.split("::")
+				parts[-1] = parts[-1].pluralize
+				parts.map{|c| c.downcase}.join("_") + "_path"
+			end
+
+			def self.edit_path(cls)
+				"edit_" + show_or_update_or_delete_path(cls)
+			end
+
+			##############################################
+			##
+			##
+			##
+			##############################################
+
+
 			## given something like : shopping/product
 			## will return something like: Shopping::Product
 			def self.path_to_model(path)

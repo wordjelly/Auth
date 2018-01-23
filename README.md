@@ -153,9 +153,9 @@ Now create A 'User' Model as follows:
 
 ```
 # app/models/user.rb
-class User
+class User < Auth::User
 
-include Auth::Concerns::UserConcern
+
 
 end
 ```

@@ -1,6 +1,6 @@
 class Auth::ProfilesController < Auth::ApplicationController
 		
-	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_user]
+	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_resource]
 
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
 
@@ -16,12 +16,18 @@ class Auth::ProfilesController < Auth::ApplicationController
 		@resource_params = {}
 		@profile_resource = nil
 		@all_params = permitted_params.deep_symbolize_keys
+		puts "all params are:"
+		puts @all_params.to_s
 	  	if collection = @all_params[:resource]
 	  		##check that the resource exists in the auth_configuration
+	  		puts "collection is: #{collection}"
 	  		if Auth.configuration.auth_resources[collection.singularize.capitalize]
+
 	  			@resource_class = collection.singularize.capitalize.constantize
 	  			@resource_symbol = collection.singularize.to_sym
+	  			puts "resource symbol is: #{@resource_symbol}"
 	  			@resource_params = @all_params.fetch(@resource_symbol,{})
+	  			puts "Resource params are: #{@resource_params}"
 	  			@profile_resource = @all_params[:id] ? @resource_class.find_resource(@all_params[:id],current_signed_in_resource) : @resource_class.new(@resource_params)
 	  		end
 	  	end	    
@@ -67,15 +73,15 @@ class Auth::ProfilesController < Auth::ApplicationController
 	## then it returns the profile_resource.
 	## it responds only to js
 	## it is meant to be used only for setting the proxied user by an admin in the web application.
-	def set_proxy_user
+	## expect the params to contain 
+	## params[:proxy_resource_id] and params[:proxy_resource_class]
+	def set_proxy_resource
 		not_found("that user doesn't exist") unless @profile_resource
 		session[:proxy_resource_id] = @profile_resource.id.to_s
-		session[:proxy_resource_class] = @profile_resource.id.to_s
-		## there is only a js erb set_proxy_user file in the profiles_views
-		## so it will only respond to js erb.
-		## it looks for a div called "proxy_user"
-		## and then it populates that div with details of the 
-		## proxy user.
+		session[:proxy_resource_class] = @profile_resource.class.name.to_s
+		puts "the session variables set are as follows:"
+		puts session[:proxy_resource_id]
+		puts session[:proxy_resource_class]
 	end
 
 	##@used_in: email check if already exists. 

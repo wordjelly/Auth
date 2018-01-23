@@ -31,7 +31,11 @@ class Auth::SearchController < ApplicationController
 		
 		@search_results = Auth::Search::Main.search(query)
 		
-		@search_results = [Auth.configuration.product_class.constantize.new]
+		#dummy_product = Auth.configuration.product_class.constantize.new
+		#dummy_product.name = "test product"
+		#dummy_product.price = 100.20
+		#@search_results = [dummy_product,dummy_product]
+
 		respond_with @search_results
 	end
 
