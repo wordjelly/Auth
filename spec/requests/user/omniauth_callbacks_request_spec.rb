@@ -288,7 +288,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
     end
 
-    context " -- multi provider tests -- " do 
+    context " -- multi provider tests -- ", :multi_pr => true do 
 
         before(:all) do 
             
@@ -303,6 +303,13 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @c.versioned_create
             @u.client_authentication["test_app_id"] = "test_es"
             @u.save
+
+
+
+           
+    
+            
+
             @ap_key = @c.api_key
             @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         end
@@ -317,23 +324,31 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             
             google_oauth2_verify_token_true_verify_hd_true 
 
+           # existing_user_with_email = User.where(:email => "rrphotosoft@gmail.com").first
+    
+           # puts "existing user with email is in google:"
+           # puts existing_user_with_email.attributes.to_s
+
             post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
 
         end
 
-        it " -- creates facebook user with the same email -- " do 
+        it " -- creates facebook user with the same email -- ", :rocko => true do 
+
+
 
             facebook_oauth2_verify_fb_ex_token
 
             OmniAuth.config.test_mode = false
 
-            existing_user_with_email = User.where(:email => "rrphotosoft@gmail.com").first
-            
+                 
 
             post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
+
+
             expect(u).not_to be_nil
             expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
             expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy

@@ -8,9 +8,11 @@ module Auth
 			end
 
 			## given something like :Shopping::Product
-			## will return something like 
-			def self.model_to_path(model)
-				path.split("::").map{|c| c = c.to_s.downcase}.join("/")
+			## will return something like shopping/products
+			def self.model_to_path(cls)
+				parts = cls.to_s.split("::").map{|c| c = c.to_s.downcase}
+				parts[-1] = parts[-1].pluralize
+				parts.join("/")
 			end
 
 			##the the path for the request_phase of the omniauth call.

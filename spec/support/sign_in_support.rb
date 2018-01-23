@@ -45,7 +45,7 @@ module ValidUserRequestHelper
 
   def sign_in_as_a_valid_and_confirmed_admin
     @admin = Admin.new(attributes_for(:admin_confirmed))
-    @admin.save
+    @admin.versioned_create
     sign_in(@admin)
   end
   
@@ -53,7 +53,7 @@ module ValidUserRequestHelper
 
   def sign_in_as_a_valid_and_confirmed_user
     @user = User.new(attributes_for(:user_confirmed))
-    @user.save
+    @user.versioned_create
     sign_in(@user)
   end
 

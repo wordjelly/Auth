@@ -49,7 +49,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'wj-jquery-rails', '>= 4.2.2.1'
   s.add_dependency 'wj-mailgun-ruby', '>= 1.1.7'
   s.add_dependency 'wj-payuindia', '>= 0.1.1'
-  s.add_dependency 'mongoid-elasticsearch'
+  s.add_dependency 'wj-mongoid-elasticsearch', '~> 0.0.1'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'

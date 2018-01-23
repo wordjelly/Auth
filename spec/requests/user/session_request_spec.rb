@@ -18,7 +18,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 	        User.delete_all
 	        Auth::Client.delete_all
 	        @u = User.new(attributes_for(:user_confirmed))
-	        @u.save
+	        @u.versioned_create
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
@@ -177,7 +177,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 	        User.delete_all
 	        Auth::Client.delete_all
 	        @u = User.new(attributes_for(:user_confirmed))
-	        @u.save
+	        @u.versioned_create
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
@@ -287,7 +287,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			Auth::Client.delete_all
 			@u = User.new(attributes_for(:user_confirmed))
 	        #@u.set_client_authentication("test_app_id")
-	        @u.save
+	        @u.versioned_create
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
@@ -298,7 +298,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			##create another user and associated other client.
 			@u2 = User.new(attributes_for(:user_confirmed))
 	        #@u2.set_client_authentication("test_app_id2")
-	        @u2.save
+	        @u2.versioned_create
 			@c2 = Auth::Client.where(:resource_id => @u2.id).first
 	        @c2.api_key = "test2"
 	        @c2.redirect_urls = ["http://www.yahoo.com"]
@@ -332,7 +332,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			Auth::Client.delete_all
 			@u = User.new(attributes_for(:user_confirmed))
 	        
-	        @u.save
+	        @u.versioned_create
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
