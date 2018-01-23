@@ -39,7 +39,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       User.delete_all
       Auth::Client.delete_all
       @u = User.new(attributes_for(:user_confirmed))
-      @u.save
+      @u.versioned_create
       @c = Auth::Client.where(:resource_id => @u.id).first
       @c.api_key = "test"
       @c.redirect_urls = ["http://www.google.com"]
@@ -93,7 +93,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         expect(@user.errors.full_messages).to be_empty
       end
 
-    	it " -- updates the authentication token if the user changes his email, but not the client_authentication -- " do 
+    	it " -- updates the authentication token if the user changes his email, but not the client_authentication -- ", :jass => true do 
         
         sign_in_as_a_valid_and_confirmed_user
 
@@ -316,20 +316,20 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         User.delete_all
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
-        @u.save
+        @u.versioned_create
         @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @u.client_authentication["test_app_id"] = "test_es_token"
-        @u.save
+        @u.versioned_update
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
         
         ## second user.
         @u2 = User.new(attributes_for(:user_confirmed))
-        @u2.save
+        @u2.versioned_create
         @u2.client_authentication["test_app_id"] = "test_es_token1"
-        @u2.save
+        @u2.versioned_update
 
     end
 
@@ -501,7 +501,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     
       ActionController::Base.allow_forgery_protection = false
       @u1 = User.new(attributes_for(:user_confirmed))
-      @u1.save
+      @u1.versioned_create
       @c1 = Auth::Client.new(:resource_id => @u1.id, :api_key => "test1")
       @c1.redirect_urls = ["http://www.google.com"]
       @c1.app_ids << "test_app_id1"
@@ -510,7 +510,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
       ###now create the other client.
       @u2 = User.new(attributes_for(:user_confirmed))
-      @u2.save
+      @u2.versioned_create
       @c2 = Auth::Client.new(:resource_id => @u2.id, :api_key => "test2")
       @c2.redirect_urls = ["http://www.google.com"]
       @c2.app_ids << "test_app_id2"
@@ -558,7 +558,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     before(:example) do 
       ActionController::Base.allow_forgery_protection = false
       @u1 = User.new(attributes_for(:user_confirmed))
-      @u1.save
+      @u1.versioned_create
       @c1 = Auth::Client.new(:resource_id => @u1.id, :api_key => "test1")
       @c1.redirect_urls = ["http://www.google.com"]
       @c1.app_ids << "test_app_id1"

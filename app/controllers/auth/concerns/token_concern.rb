@@ -134,6 +134,7 @@ module Auth::Concerns::TokenConcern
     @resource
   end
 
+
   ## convenience method to add the current signed in resource to the model instance.
   ## the object instance passed in MUST implement the owner concern
   ## @param[Object] : instance of any object that implements the OwnerConcern.
@@ -161,6 +162,7 @@ module Auth::Concerns::TokenConcern
     obj
   end
 
+  ## this is used as a before_filter.
   def is_admin_user
     not_found("You don't have sufficient privileges to complete that action") if !current_signed_in_resource.is_admin?
   end

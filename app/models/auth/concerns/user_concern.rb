@@ -82,6 +82,10 @@ module Auth::Concerns::UserConcern
 				                additional_login_param: {
 				                	type: "string",
 				                	index: "not_analyzed"
+				                },
+				                public: {
+				                	type: "string",
+				                	index: "not_analyzed"
 				                }
 				            }
 				        }
@@ -94,7 +98,8 @@ module Auth::Concerns::UserConcern
 			 	name: name,
 			    email: email,
 			    additional_login_param: additional_login_param,
-			    additional_login_param_status: additional_login_param_status
+			    additional_login_param_status: additional_login_param_status,
+			    public: public
 			 }
 			end 
 			
@@ -500,8 +505,12 @@ module Auth::Concerns::UserConcern
 
 	##returns true if there is at least one non empty oauth identity
 	def has_oauth_identity?
-		return unless self.respond_to? :identities
-		self.identities.keep_if{|c| Auth::Identity.new(c).has_provider?}.size > 0
+		return false unless self.respond_to? :identities
+		self.identities.keep_if{|c| 
+
+			Auth::Identity.new(c).has_provider?
+
+			}.size > 0
 	end
 
 	## skip_email_unique_validation is set to true in omni_concern in the situation:
@@ -669,7 +678,5 @@ module Auth::Concerns::UserConcern
 		admin
 	end
 
-	 
-	
 	
 end

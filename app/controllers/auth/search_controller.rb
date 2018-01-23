@@ -28,12 +28,10 @@ class Auth::SearchController < ApplicationController
 	def authenticated_user_search	
 		query = permitted_params[:query]
 		query[:resource_id] = lookup_resource.id.to_s if !current_signed_in_resource.is_admin?
-		#puts "query is: "
-		#puts query.to_s
+		
 		@search_results = Auth::Search::Main.search(query)
-		#puts "search results are:"
-		#puts @search_results.to_s
-		@search_results = [Shopping::Product.new]
+		
+		@search_results = [Auth.configuration.product_class.constantize.new]
 		respond_with @search_results
 	end
 
