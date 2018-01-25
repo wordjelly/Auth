@@ -126,7 +126,64 @@ called select user
 
 basically today we finish the whole shopping shit.
 
+While creating the sop's
 
-I have two hours for all this.
-next three hours -> 
+it should show the base sop sequence on the screen.
+
+We can create a flow of SOP
+Then we can add alternative sop's at every stage.
+and we can go on doing that. 
+So we will get a big array of arrays
+For each sop, should add id of previous sop.
+
+Now we have to correlate to existing base sop flow.
+
+So let us assume that for step 2 we have four possibilities for hemogram.
+
+and urine is already there with just one possibilty for step 2.
+
+now what happens?
+
+First see if any of them is applicable to any subsequent sop?
+
+If not then where to add them?
+We can just add them all one after the other before the next step, creating base sop's out of them wherever possible, and thats it.
+
+So at scheduling, they will have a relative time frame, 
+
+At every stage a next stage can be repeat.
+In that case how to arrange it wrt base sop? It's not necessary to create a new base sop , it will be the same base sop. But while scheduling we will have to ignore the repeat ones, 
+
+What if its necessary to repeat everything till then?
+- this will invovle - creation of a new plan document -> somehow need to figure out this, and cancelling the existing test from the existing plan document.
+
+
+But the next question is how to modify on the fly scheduling changes?
+
+For ex in eventuality a -> now do b (so we have to always assume while scheduling the longest sop at each stage.)
+
+So basically while scheduling we need to gather by base sop right.
+
+so we have gathered -> but that doesnt give the correct plan document -> it has to also know which of the base sop groups are to be considered together while deciding what sop duration to consider at each stage.
+
+
+SOP IDS IN THE TEST DEFINITION.
+[a],[b,c,d],[e,f,g],[h,i,j]
+
+BASE SOP SEQUENCE:
+a,b,c,d,e,f,g,h,i,j
+
+now if we gather by base sop, we will not get the above groups, of sop id.
+We need to know for each test, inside its each stage, which SOP to consider and which to ignore while calculating the time taken.
+
+So maybe we land up considering : a,d,e,j
+
+Rest of base sop may be relevant only if some other test has that as its longest sop for a particular stage.
+
+So while scheduling we provision for the longest sop.
+And if that one is not needed, or finishes early, then he can jump straight to the next step.
+
+
+
+
 

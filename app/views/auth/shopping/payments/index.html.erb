@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Auth Shopping Payments</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @auth_shopping_payments.each do |auth_shopping_payment| %>
+      <tr>
+        <td><%= link_to 'Show', payment_path(auth_shopping_payment) %></td>
+        <td><%= link_to 'Edit', edit_payment_path(auth_shopping_payment) %></td>
+        <td><%= link_to 'Destroy', payment_path(auth_shopping_payment), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Payment', new_auth_shopping_payment_path %>

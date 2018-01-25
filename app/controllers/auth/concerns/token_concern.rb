@@ -145,7 +145,7 @@ module Auth::Concerns::TokenConcern
   ## the object instance passed in MUST implement the owner concern
   ## @param[Object] : instance of any object that implements the OwnerConcern.
   ## @return : the object passed in.
-  def add_signed_in_resource(obj)
+  def add_signed_in_resource(obj,options={})
         if obj.respond_to? :signed_in_resource
           obj.signed_in_resource = current_signed_in_resource
         end
@@ -153,18 +153,25 @@ module Auth::Concerns::TokenConcern
   end
 
 
-  def add_owner_resource(obj)
+  def add_owner_resource(obj,options={})
       if (obj.respond_to? :resource_id) && (obj.respond_to? :resource_class)
-        obj.resource_id = lookup_resource.id.to_s if obj.resource_id.nil?
-        obj.resource_class = lookup_resource.class.name.to_s if obj.resource_class.nil?
+        if options[:owner_is_current_resource]
+          obj.resource_id = current_signed_in_resource.id.to_s if obj.resource_id.nil?
+          obj.resource_class = current_signed_in_resource.class.name.to_s if obj.resource_class.nil?
+        else
+          obj.resource_id = lookup_resource.id.to_s if obj.resource_id.nil?
+          obj.resource_class = lookup_resource.class.name.to_s if obj.resource_class.nil?
+        end
       end
       return obj
   end
 
-
-  def add_owner_and_signed_in_resource(obj)
-    obj = add_owner_resource(obj)
-    obj = add_signed_in_resource(obj)
+  ## @param[Object] obj: the object whose owner is to be defined.
+  ## @param[Hash] options: possible options include:
+  ## :owner_is_current_resource => if this option exists, the resource_id and resource_class is set to the current resource
+  def add_owner_and_signed_in_resource(obj,options={})
+    obj = add_owner_resource(obj,options)
+    obj = add_signed_in_resource(obj,options)
     obj
   end
 

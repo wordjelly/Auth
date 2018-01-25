@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Auth Shopping Cart Items</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @auth_shopping_cart_items.each do |auth_shopping_cart_item| %>
+      <tr>
+        <td><%= link_to 'Show', cart_item_path(auth_shopping_cart_item) %></td>
+        <td><%= link_to 'Edit', edit_cart_item_path(auth_shopping_cart_item) %></td>
+        <td><%= link_to 'Destroy', cart_item_path(auth_shopping_cart_item), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Cart item', new_auth_shopping_cart_item_path %>
