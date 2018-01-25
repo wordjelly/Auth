@@ -20,13 +20,8 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     check_for_create(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
   	
-
-    
-    if @auth_shopping_product.save
-      redirect_to product_path(@auth_shopping_product)
-    else
-      render new_product_path
-    end
+    @auth_shopping_product.save
+    respond_with @auth_shopping_product
     
   end
 
@@ -34,12 +29,9 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     check_for_update(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     @auth_shopping_product.assign_attributes(@product_params)
+    @auth_shopping_product.save
+    respond_with @auth_shopping_product
     
-    if @auth_shopping_product.save
-      redirect_to product_path(@auth_shopping_product)
-    else
-      render edit_product_path(@auth_shopping_product)
-    end
   end
 
   def index
@@ -53,8 +45,11 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   end
 
   def destroy
+    puts "came to destroy"
     check_for_destroy(@auth_shopping_product)
-    @auth_shopping_product.delete
+    puts "called delete"
+    puts "delete result: " + (@auth_shopping_product.delete).to_s
+    respond_with @auth_shopping_product
   end
 
   def new

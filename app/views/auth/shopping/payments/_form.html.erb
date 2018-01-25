@@ -1,4 +1,4 @@
-<%= form_for(@auth_shopping_payment, url: payments_path) do |f| %>
+<%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put) do |f| %>
   <% if @auth_shopping_payment.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@auth_shopping_payment.errors.count, "error") %> prohibited this auth_shopping_payment from being saved:</h2>
@@ -10,7 +10,16 @@
       </ul>
     </div>
   <% end %>
-
+  <div class="form_fields">
+    <% @auth_shopping_payment.class.attribute_names.keep_if{|c| !@auth_shopping_payment.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
+      <%=
+          text_field :payment, attr.to_sym , :value => @auth_shopping_payment.send("#{attr}")
+      %>
+      <%= 
+          label :payment, attr.to_sym
+      %>
+    <% end %>
+  </div>
   <div class="actions">
     <%= f.submit %>
   </div>

@@ -26,6 +26,10 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @payment = add_owner_and_signed_in_resource(@payment)
   end
 
+  def edit
+
+  end
+
   def create
    
     check_for_create(@payment)

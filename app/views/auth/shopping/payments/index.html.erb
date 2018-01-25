@@ -5,21 +5,39 @@
 <table>
   <thead>
     <tr>
-      <th colspan="3"></th>
+      <!-- id number, this will also hold links to edit and destroy. -->
+      <th>Number</th>
+      <th>Id Number</th>
+      <!-- get the names of the other fields to be shown-->
+      <% @auth_shopping_payments.first.attributes_to_show.each do |attr| %>
+        <th><%= attr %></th>
+      <% end %>
     </tr>
   </thead>
 
   <tbody>
-    <% @auth_shopping_payments.each do |auth_shopping_payment| %>
+    <% @auth_shopping_payments.each_with_index {|auth_shopping_payment,key| %>
       <tr>
-        <td><%= link_to 'Show', payment_path(auth_shopping_payment) %></td>
-        <td><%= link_to 'Edit', edit_payment_path(auth_shopping_payment) %></td>
-        <td><%= link_to 'Destroy', payment_path(auth_shopping_payment), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= key + 1 %></td>
+        <td>
+          <div>
+            <%= link_to auth_shopping_payment.id.to_s, payment_path(auth_shopping_payment) %>
+          </div>
+          <div>
+            <!-- add destory and edit options here -->
+            <!-- end -->
+            <span><%= link_to 'Edit', edit_payment_path(auth_shopping_payment) %></span>
+            <span><%= link_to 'Destroy', payment_path(auth_shopping_payment), medthod: :delete, data: { confirm: 'Are you sure?' } %></span>
+          </div>
+        </td>
+        <% @auth_shopping_payments.first.attributes_to_show.each do |attr| %>
+          <td><%= auth_shopping_payment.send("#{attr}") %></td>
+        <% end %>
       </tr>
-    <% end %>
+    <% } %>
   </tbody>
 </table>
 
 <br>
 
-<%= link_to 'New Payment', new_auth_shopping_payment_path %>
+<%= link_to 'New Payment', new_payment_path %>

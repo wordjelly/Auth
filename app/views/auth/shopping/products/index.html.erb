@@ -27,7 +27,7 @@
             <!-- add destory and edit options here -->
             <!-- end -->
             <span><%= link_to 'Edit', edit_product_path(auth_shopping_product) %></span>
-            <span><%= link_to 'Destroy', product_path(auth_shopping_product), medthod: :delete, data: { confirm: 'Are you sure?' } %></span>
+            <span><%= link_to 'Destroy', product_path(auth_shopping_product), method: :delete, data: { confirm: 'Are you sure?' } %></span>
           </div>
         </td>
         <% @auth_shopping_products.first.attributes_to_show.each do |attr| %>

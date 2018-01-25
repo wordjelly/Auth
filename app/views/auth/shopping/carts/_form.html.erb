@@ -1,4 +1,4 @@
-<%= form_for(@auth_shopping_cart, url: carts_path) do |f| %>
+<%= form_for(@auth_shopping_cart, url: @auth_shopping_cart.new_record? ? carts_path : cart_path(@auth_shopping_cart), method: @auth_shopping_cart.new_record? ? :post : :put) do |f| %>
   <% if @auth_shopping_cart.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@auth_shopping_cart.errors.count, "error") %> prohibited this auth_shopping_cart from being saved:</h2>
@@ -10,7 +10,16 @@
       </ul>
     </div>
   <% end %>
-
+  <div class="form_fields">
+    <% @auth_shopping_cart.class.attribute_names.keep_if{|c| !@auth_shopping_cart.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
+      <%=
+          text_field :cart, attr.to_sym , :value => @auth_shopping_cart.send("#{attr}")
+      %>
+      <%= 
+          label :cart, attr.to_sym
+      %>
+    <% end %>
+  </div>
   <div class="actions">
     <%= f.submit %>
   </div>
