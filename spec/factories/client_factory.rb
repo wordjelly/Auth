@@ -7,7 +7,6 @@ FactoryGirl.define do
 
 
   factory :cart_item, class: Shopping::CartItem do
-    #FactoryGirl.create(:product)
     product_id {Shopping::Product.first.id.to_s}
     quantity 1
     discount_code {Faker::App.name}

@@ -1,8 +1,13 @@
 class Auth::Shopping::CartsController < Auth::Shopping::ShoppingController
 	include Auth::Concerns::Shopping::CartControllerConcern
-	include Auth::Concerns::DeviseConcern
-    include Auth::Concerns::TokenConcern
+		
+	## only these actions need an authenticated user to be present for them to be executed.
+    CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index,:show]
 
-    before_filter :do_before_request  , :only => [:create,:update,:destroy,:show,:index, :new]
-    before_filter :initialize_vars, :only => [:create,:update,:destroy,:show,:index, :new]
+    TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
+    ##this ensures api access to this controller.
+    include Auth::Concerns::DeviseConcern
+    include Auth::Concerns::TokenConcern
+    before_filter :do_before_request , TCONDITIONS
+    before_filter :initialize_vars , TCONDITIONS
 end

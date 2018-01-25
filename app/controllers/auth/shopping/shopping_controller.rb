@@ -3,9 +3,9 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 	
 
     def instantiate_cart_class
-		if @cart_class = Auth.configuration.cart_class
+		if @auth_shopping_cart_class = Auth.configuration.cart_class
 	      begin
-	        @cart_class = @cart_class.constantize
+	        @auth_shopping_cart_class = @auth_shopping_cart_class.constantize
 	      rescue
 	        not_found("error instantiating class from cart class")
 	      end
@@ -17,9 +17,9 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	def instantiate_cart_item_class
 
-	    if @cart_item_class = Auth.configuration.cart_item_class
+	    if @auth_shopping_cart_item_class = Auth.configuration.cart_item_class
 	      begin
-	        @cart_item_class = @cart_item_class.constantize
+	        @auth_shopping_cart_item_class = @auth_shopping_cart_item_class.constantize
 	      rescue
 	        not_found("error instatiating class from cart item class")
 	      end
@@ -32,9 +32,9 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	def instantiate_payment_class
 
-		if @payment_class = Auth.configuration.payment_class
+		if @auth_shopping_payment_class = Auth.configuration.payment_class
 	      begin
-	        @payment_class = @payment_class.constantize
+	        @auth_shopping_payment_class = @auth_shopping_payment_class.constantize
 	      rescue
 	        not_found("error instatiating class from payment class")
 	      end
@@ -46,9 +46,9 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	def instantiate_product_class
 
-		if @product_class = Auth.configuration.product_class
+		if @auth_shopping_product_class = Auth.configuration.product_class
 	      begin
-	        @product_class = @product_class.constantize
+	        @auth_shopping_product_class = @auth_shopping_product_class.constantize
 	      rescue => e
 	      	puts e.to_s
 	        not_found("error instatiating class from product class")

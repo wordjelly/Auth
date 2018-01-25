@@ -10,8 +10,8 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   def initialize_vars
   	instantiate_shopping_classes
-    @product_params = permitted_params.fetch(:product,{})
-    @auth_shopping_product = params[:id] ? @product_class.find_self(params[:id],current_signed_in_resource) : @product_class.new(@product_params)
+    @auth_shopping_product_params = permitted_params.fetch(:product,{})
+    @auth_shopping_product = params[:id] ? @auth_shopping_product_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_product_class.new(@auth_shopping_product_params)
   end
 
   
@@ -28,7 +28,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   def update
     check_for_update(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
-    @auth_shopping_product.assign_attributes(@product_params)
+    @auth_shopping_product.assign_attributes(@auth_shopping_product_params)
     @auth_shopping_product.save
     respond_with @auth_shopping_product
     
@@ -36,19 +36,17 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   def index
     instantiate_shopping_classes
-    @auth_shopping_products = @product_class.all
+    @auth_shopping_products = @auth_shopping_product_class.all
   end
 
   def show
     instantiate_shopping_classes
-    @auth_shopping_product = @product_class.find(params[:id])
+    @auth_shopping_product = @auth_shopping_product_class.find(params[:id])
   end
 
   def destroy
-    puts "came to destroy"
     check_for_destroy(@auth_shopping_product)
-    puts "called delete"
-    puts "delete result: " + (@auth_shopping_product.delete).to_s
+    @auth_shopping_product.delete
     respond_with @auth_shopping_product
   end
 

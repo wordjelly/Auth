@@ -14,18 +14,19 @@ module Auth
 
 
 			def self.show_or_update_or_delete_path(cls)
-				parts = Auth.configuration.product_class.constantize.new.class.name.split("::")
+				
+				parts = cls.constantize.new.class.name.split("::")
 				parts.map{|c| c.downcase}.join("_") + "_path"
 			end
 
 				
 			def self.create_or_index_path(cls)
-				parts = Auth.configuration.product_class.constantize.new.class.name.split("::")
+				parts = cls.constantize.new.class.name.split("::")
 				parts[-1] = parts[-1].pluralize
 				parts.map{|c| c.downcase}.join("_") + "_path"
 			end
 
-			def self.edit_path(cls)
+			def self.edit_path(cls)				
 				"edit_" + show_or_update_or_delete_path(cls)
 			end
 
