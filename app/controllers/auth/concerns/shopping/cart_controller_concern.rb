@@ -11,52 +11,62 @@ module Auth::Concerns::Shopping::CartControllerConcern
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
     instantiate_shopping_classes
-    @cart_params = permitted_params.fetch(:cart,{})
-    @cart = params[:id] ? @cart_class.find_self(params[:id],current_signed_in_resource) : @cart_class.new(@cart_params)
+    #puts "cart params are:"
+    #puts params.to_s
+    @auth_shopping_payment_params = permitted_params.fetch(:cart,{})
+    @auth_shopping_cart = params[:id] ? @auth_shopping_cart_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_cart_class.new(@auth_shopping_payment_params)
         
   end
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
-    not_found if @cart.nil?
-    @cart.prepare_cart
-    @cart_items = @cart.cart_items
-    respond_with @cart
+    not_found if @auth_shopping_cart.nil?
+    @auth_shopping_cart.prepare_cart
+    @auth_shopping_cart_items = @auth_shopping_cart.cart_items
+    respond_with @auth_shopping_cart
   end
 
   ##responds with an array of the created cart items.
   ##resource id is set only during create, never during update.
   def create
-    check_for_create(@cart)
-    @cart = add_owner_and_signed_in_resource(@cart)
-    @cart.save
-    @cart.prepare_cart
-    respond_with @cart
+    check_for_create(@auth_shopping_cart)
+    @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
+    @auth_shopping_cart.save
+    @auth_shopping_cart.prepare_cart
+    respond_with @auth_shopping_cart
   end
 
   ## always returns an empty array.
   def update
-    check_for_update(@cart)
-    @cart.assign_attributes(@cart_params)
-    @cart = add_owner_and_signed_in_resource(@cart)
-    @cart.save
-    @cart.prepare_cart
-    respond_with @cart
+    check_for_update(@auth_shopping_cart)
+    @auth_shopping_cart.assign_attributes(@auth_shopping_payment_params)
+    @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
+    @auth_shopping_cart.save
+    @auth_shopping_cart.prepare_cart
+    respond_with @auth_shopping_cart
   end
 
   ##will respond with nothing, or an array of cart_items that were removed, or whatever errors they have for not remvoing them.
   def destroy    
-    check_for_destroy(@cart)
-    @cart.prepare_cart
-    @cart.destroy
-    respond_with @cart
+    check_for_destroy(@auth_shopping_cart)
+    @auth_shopping_cart.prepare_cart
+    @auth_shopping_cart.destroy
+    respond_with @auth_shopping_cart
   end
 
   ## returns all the carts of the user.
   ## basically all his orders.
   def index
-    @carts = @cart_class.where(:resource_id => lookup_resource.id.to_s)
-    respond_with @carts
+    @auth_shopping_carts = @auth_shopping_cart_class.where(:resource_id => lookup_resource.id.to_s)
+    respond_with @auth_shopping_carts
+  end
+
+  def new
+
+  end
+
+  def edit
+
   end
 
   private

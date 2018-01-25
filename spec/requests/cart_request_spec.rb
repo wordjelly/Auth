@@ -10,6 +10,12 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
+        ## THIS PRODUCT IS USED IN THE CART_ITEM FACTORY, TO PROVIDE AND ID.
+        #@product = Shopping::Product.new(:name => "test product", :price => 400.00)
+       
+        #@product.save
+
+
         @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
@@ -56,10 +62,10 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			Shopping::CartItem.delete_all
 		end
 
-    	it "--- shows the items in the cart " do
+    	it "--- shows the items in the cart ",:sc => true do
     		sign_in(@u)
     		get shopping_cart_path(@cart)
-			cart_items = Hash[assigns(:cart_items).map { |c| c = [c.id.to_s,c]  }]
+			cart_items = Hash[assigns(:auth_shopping_cart_items).map { |c| c = [c.id.to_s,c]  }]
 			@created_cart_item_ids.each do |c|
 				expect(cart_items[c]).not_to be_nil
 			end

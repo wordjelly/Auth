@@ -7,6 +7,13 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
         User.delete_all
         Auth::Client.delete_all
         Shopping::CartItem.delete_all
+        Shopping::Product.delete_all
+        
+        ## THIS PRODUCT IS USED IN THE CART_ITEM FACTORY, TO PROVIDE AND ID.
+        @product = Shopping::Product.new(:name => "test product", :price => 400.00)
+       
+        @product.save
+
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
@@ -42,9 +49,11 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 			it " -- creates cart item with all permitted params,and assigns user id. ",:c1 => true do 
 				cart_item = attributes_for(:cart_item)
+
 				post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-	            @cart_item_created = assigns(:cart_item)
-	            
+				
+	            @cart_item_created = assigns(:auth_shopping_cart_item)
+	            #puts "cart item created is: #{@cart_item_created}"
 	            cart_item_hash = JSON.parse(response.body)
 	            
 
@@ -53,7 +62,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	            expect(@cart_item_created.price).to eq(Shopping::Product.first.price)
 	            expect(@cart_item_created.name).to eq(Shopping::Product.first.name)
 
-	            puts cart_item.to_s
+	            #puts cart_item.to_s
 
 	            expect(@cart_item_created.quantity).to eq(cart_item[:quantity])
 	            expect(@cart_item_created.discount_code).to eq(cart_item[:discount_code])
@@ -71,14 +80,14 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.resource_class = @u.class.name.to_s
 				cart_item.signed_in_resource = @admin
 				res = cart_item.save
-				puts "save result: #{res.to_s}"
+				
 				
 	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
 	            
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
 	           
-				updated_cart_item = assigns(:cart_item)
+				updated_cart_item = assigns(:auth_shopping_cart_item)
 				expect(response.code).to eq("204")
 				##get the updated 
 				#expect(updated_cart_item.discount).to eq(42)
@@ -161,7 +170,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 		        ## this is setting the payment as successfully.
 		        payment.payment_status = 1
 		        ps = payment.save
-		        puts payment.errors.full_messages.to_s
+		        
 		        expect(ps).to be_truthy
 
 
@@ -173,7 +182,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 				## then delete the payment.
 				l = payment.delete
-				puts "result of deleting payment : #{l.to_s}"
+				
 				## now call update on the first cart item with no payment.
 				put shopping_cart_item_path({:id => @created_cart_item_ids.first}), {api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
 
