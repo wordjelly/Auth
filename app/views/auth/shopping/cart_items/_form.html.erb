@@ -1,0 +1,17 @@
+<%= form_for(@auth_shopping_cart_item, url: cart_items_path) do |f| %>
+  <% if @auth_shopping_cart_item.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@auth_shopping_cart_item.errors.count, "error") %> prohibited this auth_shopping_cart_item from being saved:</h2>
+
+      <ul>
+      <% @auth_shopping_cart_item.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -4,7 +4,8 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   included do
     
-  
+    include Auth::Shopping::Products::ProductsHelper
+
   end
 
   def initialize_vars
@@ -17,29 +18,38 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   def create
     check_for_create(@auth_shopping_product)
-    @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product)
-  	@auth_shopping_product.save
-  	#respond_with @auth_shopping_product
+    @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
+  	
+
+    
+    if @auth_shopping_product.save
+      redirect_to product_path(@auth_shopping_product)
+    else
+      render new_product_path
+    end
+    
   end
 
   def update
     check_for_update(@auth_shopping_product)
-    @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product)
+    @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     @auth_shopping_product.assign_attributes(@product_params)
-    @auth_shopping_product.save
-    #respond_with @auth_shopping_product
+    
+    if @auth_shopping_product.save
+      redirect_to product_path(@auth_shopping_product)
+    else
+      render edit_product_path(@auth_shopping_product)
+    end
   end
 
   def index
     instantiate_shopping_classes
     @auth_shopping_products = @product_class.all
-    #respond_with @auth_shopping_products
   end
 
   def show
     instantiate_shopping_classes
     @auth_shopping_product = @product_class.find(params[:id])
-    #respond_with @auth_shopping_product
   end
 
   def destroy
@@ -49,7 +59,10 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   def new
     
-    
+  end
+
+  def edit
+
   end
 
   def permitted_params
@@ -57,3 +70,5 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   end
 
 end
+
+## how to handle situation where the resource_id and resource_class is 
