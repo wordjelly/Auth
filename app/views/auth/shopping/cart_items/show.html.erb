@@ -1,4 +1,13 @@
 <p id="notice"><%= notice %></p>
+<div class="fields">
+
+	<% @auth_shopping_cart_item.attributes_to_show.each do |attr| %>
+
+		
+		<div><%= @auth_shopping_cart_item.send("#{attr}") %></div>
+
+	<% end %>
+</div>
 
 <%= link_to 'Edit', edit_cart_item_path(@auth_shopping_cart_item) %> |
 <%= link_to 'Back', cart_items_path %>

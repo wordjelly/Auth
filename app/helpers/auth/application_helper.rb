@@ -43,6 +43,30 @@ module Auth
 
     ##############################################
     ##
+    ##
+    ## HELPERS DEAL WITH CHECKING IF USER IS ADMIN.
+    ##
+    ##
+    ##############################################
+
+    ## @used to determine if the admin itself should be set as the proxy user.
+    ## @used_in : currently not used anywhere.
+    ## @return[Boolean] : true if the current signed in user is admin and there is no proxy user in the session.
+    def use_admin_as_proxy_user?
+      return false unless respond_to? :current_signed_in_user
+      return current_signed_in_user.is_admin? && session[:proxy_user_id].nil?
+    end
+
+    def decide_proxy_resource(enforce_admin)
+      if enforce_admin == "yes"
+        current_signed_in_resource
+      else
+        lookup_resource
+      end
+    end
+
+    ##############################################
+    ##
     ## DEVISE PATH HELPERS.
     ## ALL HELPERS USE "RES" , instead of a hardcoded scope like user
     ## 

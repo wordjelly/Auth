@@ -1,0 +1,18 @@
+<!-- if the enforce_admin local is defined, then the proxy resource becomes the current_signed_in_resource, otherwise, it becomes the lookup_resource. -->
+
+
+<!-- this partial is expected to be rendered in the context of a form object -->
+
+
+<!-- a form_object local is also expected to be passed in, if its not passed in, then the namespace is assumed to be an empty string. -->
+
+<% enforce_admin||= "no"
+   namespace||= ""
+ %>
+
+
+
+<%= hidden_field_tag "proxy_resource_id", enforce_admin == "yes" ? current_signed_in_resource.id.to_s : lookup_resource.id.to_s, {:id => "#{namespace}_proxy_resource_id"} %>
+
+<%= hidden_field_tag "proxy_resource_class", enforce_admin == "yes" ? current_signed_in_resource.class.to_s : lookup_resource.class.to_s, {:id => "#{namespace}_proxy_resource_class"} %>
+

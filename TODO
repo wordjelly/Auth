@@ -185,5 +185,36 @@ And if that one is not needed, or finishes early, then he can jump straight to t
 
 
 
+--------------------------
+
+1)create a cart item from product, how to deal with it if an admin wants to create a cart item for himself?
+
+Pass in a proxy resource id, and resource class of the admin, if the user is an admin, and there is no proxy-user at the moment, i.e in the session.
+
+
+2)view all such cart items without a cart as the wish-list(index cart items)
+
+3)give link to remove them from wishlist.
+
+4)click "finalize" to add them to a cart.
+
+5)show cart -> to see all the items in it.
+
+6)remove cart items from cart -> by clicking remove.
+
+7)make a cash/card/cheque payment to the cart, only as admin, with a proxy user, cant make a payment without this proxy user
+
+8)make a gateway payment -> get redirected to update the payment as success or failure.
+
+9)on showing payment, update it internally.
+
+10) remove items from cart as admin.
+
+11) make 5 refund requests
+
+12) admin accepts last one.
+
+13) show the status of the refund request, as well as on viewing the refund, auto updates the status.
+
 
 

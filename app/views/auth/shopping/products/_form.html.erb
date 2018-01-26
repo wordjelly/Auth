@@ -13,11 +13,12 @@
   <div class="form_fields">
     <% @auth_shopping_product.class.attribute_names.keep_if{|c| !@auth_shopping_product.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
       <%=
-          text_field :product, attr.to_sym , :value => @auth_shopping_product.send("#{attr}")
+          text_field :product,  attr.to_sym , :value => @auth_shopping_product.send("#{attr}")
       %>
       <%= 
-          label :product, attr.to_sym
+          label  :product, attr.to_sym
       %>
+     
     <% end %>
   </div>
   <div class="actions">
