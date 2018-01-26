@@ -1,5 +1,6 @@
 class Shopping::CartItemsController < Auth::Shopping::CartItemsController
 	
+=begin
 	def index
 		cart_item_params = permitted_params.fetch(:cart_item,{})
 		if pub = cart_item_params[:public]
@@ -19,8 +20,9 @@ class Shopping::CartItemsController < Auth::Shopping::CartItemsController
 		end
 	end
 
+=end
 	def permitted_params
-		super.deep_merge(params.permit({cart_item: [:description,:sample_type,:public]}))
+		super.deep_merge(params.permit({cart_item: [:description,:sample_type]}))
 	end
 
 end

@@ -1,4 +1,7 @@
-<%= form_for(@auth_shopping_cart_item, url: @auth_shopping_cart_item.new_record? ? cart_items_path : cart_item_path(@auth_shopping_cart_item), method: @auth_shopping_cart_item.new_record? ? :post : :put) do |f| %>
+<!-- in the products index action, this show fields is set to no, because we don't want to show the fields there -->
+<% show_fields ||= "yes" %>
+<%= form_for(@auth_shopping_cart_item, url: @auth_shopping_cart_item.new_record? ? cart_items_path : cart_item_path(@auth_shopping_cart_item), method: @auth_shopping_cart_item.new_record? ? :post : :put, namespace: @auth_shopping_cart_item.id.to_s) do |f| %>
+
   <% if @auth_shopping_cart_item.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@auth_shopping_cart_item.errors.count, "error") %> prohibited this auth_shopping_cart_item from being saved:</h2>
@@ -10,18 +13,22 @@
       </ul>
     </div>
   <% end %>
-  <div class="form_fields">
+  <div class="form_fields" style="<%= show_fields == "no" ? "display:none;" : "" %>">
     <% @auth_shopping_cart_item.class.attribute_names.keep_if{|c| !@auth_shopping_cart_item.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
       <%=
-          text_field :cart_item, attr.to_sym , :value => @auth_shopping_cart_item.send("#{attr}")
-      %>
+          text_field_tag "cart_item[#{attr}]" ,@auth_shopping_cart_item.send("#{attr}"), :id => "#{@auth_shopping_cart_item.id.to_s}_cart_item_#{attr}" %>
+
       <%= 
-          label :cart_item, attr.to_sym
+          label_tag("#{@auth_shopping_cart_item.id.to_s}_cart_item_#{attr}")
       %>
+
+       <!-- add these hidden fields only if the current signed in user is admin , since he has to be assigned the resource_id and resource_class -->
+      
     <% end %>
+    <%= render :partial => "auth/shared/proxy_resource.html.erb", locals: {enforce_admin: "yes", namespace: f.options[:namespace]} %>
   </div>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit  class:  "card" %>
   </div>
 <% end %>
 

@@ -25,9 +25,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##expects the product id, resource_id is the logged in resource, and quantity 
   def create
     ##ensure that the cart item is new
-    puts "came to create."
-    puts "cart itemis;"
-    puts @auth_shopping_cart_item.to_s
+   
     check_for_create(@auth_shopping_cart_item)
     @auth_shopping_cart_item = add_owner_and_signed_in_resource(@auth_shopping_cart_item)
      
@@ -74,7 +72,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     if action_name.to_s == "update" && !current_signed_in_resource.is_admin?
 
       
-      params.permit({cart_item: [:discount_code,:quantity]},:id)
+      params.permit({shopping_cart_item: [:discount_code,:quantity]},:id)
     
     else
 
