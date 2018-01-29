@@ -1,4 +1,6 @@
 <p id="notice"><%= notice %></p>
-
+<% if @auth_shopping_payment.is_gateway? %>
+<%= render :partial => "gateway_show.html.erb" %>
+<% end %>
 <%= link_to 'Edit', edit_payment_path(@auth_shopping_payment) %> |
 <%= link_to 'Back', payments_path %>

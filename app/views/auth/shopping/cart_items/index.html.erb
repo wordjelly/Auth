@@ -27,7 +27,7 @@
             <!-- add destory and edit options here -->
             <!-- end -->
             <span><%= link_to 'Edit', edit_cart_item_path(auth_shopping_cart_item) %></span>
-            <span><%= link_to 'Destroy', cart_item_path(auth_shopping_cart_item), medthod: :delete, data: { confirm: 'Are you sure?' } %></span>
+            <span><%= link_to 'Remove from wish list', cart_item_path(auth_shopping_cart_item), method: :delete, data: { confirm: 'Are you sure?' } %></span>
           </div>
         </td>
         <% @auth_shopping_cart_items.first.attributes_to_show.each do |attr| %>
@@ -40,4 +40,13 @@
 
 <br>
 
-<%= link_to 'New Cart Item', new_cart_item_path %>
+<!--- form to create a cart -->
+<% @auth_shopping_cart = Auth.configuration.cart_class.constantize.new 
+   @auth_shopping_cart.add_cart_item_ids = @auth_shopping_cart_items.map{|c| c = c.id.to_s}
+   @auth_shopping_cart.remove_cart_item_ids = []
+%>
+<%= render :partial => "auth/shopping/carts/form.html.erb", locals:{show_fields: "no"} %>
+
+<!-- end form -->
+
+<%= link_to 'Add Another Item to the Wish List', new_cart_item_path %>

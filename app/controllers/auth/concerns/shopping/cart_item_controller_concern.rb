@@ -72,7 +72,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     if action_name.to_s == "update" && !current_signed_in_resource.is_admin?
 
       
-      params.permit({shopping_cart_item: [:discount_code,:quantity]},:id)
+      params.permit({cart_item: [:discount_code,:quantity]},:id)
     
     else
 

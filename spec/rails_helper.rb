@@ -12,6 +12,7 @@ require 'rspec/rails'
 require 'devise'
 require 'support/factory_girl'
 require 'support/omniauth_macros.rb'
+require 'support/payumoney_support.rb'
 require "capybara/rspec"
 require 'capybara/rails'
 
@@ -41,6 +42,7 @@ RSpec.configure do |config|
   config.include Devise::TestHelpers, type: :controller
   config.include Devise::TestHelpers, type: :view
   config.include(OmniauthMacros)
+  config.include(PayumoneySupport)
   config.include WaitForAjax, type: :feature
   #config.expect_with(:rspec) { |c| c.syntax = :should }
 

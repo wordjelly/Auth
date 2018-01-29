@@ -1,5 +1,75 @@
 <p id="notice"><%= notice %></p>
 
-<%= puts "the auth shopping cart is: #{@auth_shopping_cart}" %>
+<div class="fields">
+
+	<% @auth_shopping_cart.attributes_to_show.each do |attr| %>
+
+		
+		<div><%= @auth_shopping_cart.send("#{attr}") %></div>
+
+	<% end %>
+
+	<h3>Items In Your Cart</h3>
+	<table>
+		<thead>
+			<th>Cart Item</th>
+			<th>Status</th>
+			<th>Price</th>
+		</thead>
+		<tbody>
+			<% @auth_shopping_cart.cart_items.each_with_index {|citem,key| %>
+
+			<tr>
+				<td><%= citem.id.to_s %></td>
+				<td><%= citem.accepted.to_s %></td>
+				<td><%= citem.price.to_s %></td>
+			</tr>
+
+			<% } %>
+
+			<% 1.times do |n| %>
+			<tr>
+				<!-- leave one blank row -->
+				<td> </td>
+				<td> </td>
+				<td> </td>
+			</tr>
+			<% end %>
+			
+			<tr>
+				<td>Total</td>
+				<td></td>
+				<td><%= @auth_shopping_cart.cart_price %></td>
+			</tr>
+			<tr>
+				<td>Paid</td>
+				<td></td>
+				<td><%= @auth_shopping_cart.cart_paid_amount %></td>
+			</tr>
+			<tr>
+				<td>Outstanding</td>
+				<td></td>
+				<td><%= @auth_shopping_cart.cart_pending_balance %>
+					
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+
+
+	<h3>Payments & Refunds</h3>
+	<% @auth_shopping_cart.cart_payments.each_with_index {|cpayment,key| %>
+
+	<% } %>
+
+
+	<%= render :partial => "payment_links.html.erb" %>
+
+
+
+</div>
+
+
 <%= link_to 'Edit', edit_cart_path(@auth_shopping_cart) %> |
 <%= link_to 'Back', carts_path %>

@@ -32,6 +32,110 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     end
 
 
+    context " -- web app requests -- " do 
+
+
+        context " -- gateway payment -- " do 
+            
+            before(:example) do 
+                ## create cart items
+                ## create cart
+                ## create a gateway payment.
+                ## then simulate a post request as if its coming from the payment gateway
+                @created_cart_item_ids = []
+                @cart = Shopping::Cart.new
+                @cart.resource_id = @u.id.to_s
+                @cart.resource_class = @u.class.name
+                @cart.save
+
+                5.times do 
+                    cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+                    cart_item.resource_id = @u.id.to_s
+                    cart_item.resource_class = @u.class.name
+                    cart_item.parent_id = @cart.id
+                    cart_item.signed_in_resource = @u
+                    cart_item.save
+                    @created_cart_item_ids << cart_item.id.to_s
+                end
+
+                @cart.prepare_cart
+
+                ## creating payment.    
+                @payment = Shopping::Payment.new
+                @payment.payment_type = "gateway"
+                @payment.cart_id = @cart.id.to_s
+                @payment.amount = @cart.cart_price
+                @payment.signed_in_resource = @u
+                @payment.resource_class = @u.class.name
+                @payment.resource_id = @u.id.to_s
+                @payment.firstname = "bhargav"
+                @payment.email = "bhargav.r.raut@gmail.com"
+                @payment.phone = "9561137096"
+                @payment.productinfo = "hello world"
+                subject { @payment }
+                puts "payment save result:"
+                puts @payment.save.to_s
+                puts @payment.errors.full_messages.to_s
+
+            end 
+
+            after(:example) do 
+                Shopping::Cart.delete_all
+                Shopping::CartItem.delete_all
+                Shopping::Payment.delete_all
+            end
+
+            context " -- gateway does post call to the app -- " do 
+
+                before(:example) do 
+                    expect_any_instance_of(Shopping::Payment).to receive(:gateway_callback)
+                end
+
+                it " -- triggers gateway callback -- ", :first_gateway_test do 
+                    
+                    sign_in @u
+
+
+                    post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
+
+
+
+                end
+
+                it " -- does not trigger verify payment -- " do 
+
+                end
+
+            end
+
+            context " -- user does refresh payment -- " do 
+
+                it " -- does not trigger gateway callback , because .verify_payment attr_accessor is set -- " do 
+
+                end
+
+                it " -- triggers verify payment -- " do 
+
+                end
+
+            end 
+
+            context " -- successfull payment -- " do 
+
+            end
+
+            context " -- failed payment -- " do 
+
+            end
+
+            context " -- user interrupts callback -- " do 
+
+            end
+
+        end
+
+    end
+
     context " -- cash, card, cheque payment -- " do 
 
         before(:example) do 
@@ -281,9 +385,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     end
 
-    context " -- gateway payment -- " do 
 
-    end
 
 
     context " -- payment validations. -- ", :payment_validations => true do 

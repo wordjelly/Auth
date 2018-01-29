@@ -21,7 +21,7 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		## gateway_payment_request
 		## when a request is initialized by the user to make the gateway payment, it first updates the payment object with this url, and then redirects to the url.
 		## this also simplifies checking payment_verification as verification is only intiaated for those payments which have this url, but do not ave 
-		field :gateway_payment_initiated, type: String
+		field :gateway_payment_initiated, type: Boolean
 
 
 
@@ -58,8 +58,11 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	
 
 	## Interpretation: 
-	## check validation errors, if none, then there should be a payment status.
+	## this is expected to be done, whenever the payment is updated.
+	## this can be triggered by the user simply doing an update on the record.
+	## so it should not happen in case the payment is already successfull, or failed.
 	def verify_payment
+		return if (self.new_record? || payment_pending)
 		if self.is_gateway?
 			if self.gateway_payment_initiated 
 				options = {:var1 => self.txnid, :command => 'verify_payment'}
@@ -129,11 +132,15 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 
 
 	 ##this method is overriden here from the payment_concern.
+	 ##suppose the user is calling refresh_payment, basically an update call, then the mihpayid wont be present so the gateway callback becomes pointless.
+	 ## and then we just let verify payment handle the situation.
 	 def gateway_callback(pr,&block)
-	 	return if self.new_record?
+	 	return if (self.new_record? || self.is_verify_payment == true)
 	  	notification = PayuIndia::Notification.new("", options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_info[:salt], :params => pr})
 	  	self.payment_status = 0
-	  	self.payment_status = 1 if(notification.acknowledge && notification.complete?)
+	  	if(notification.acknowledge && notification.complete?)
+	  		self.payment_status = 1 
+	  	end
 	  	yield if block_given?
 	 end
 

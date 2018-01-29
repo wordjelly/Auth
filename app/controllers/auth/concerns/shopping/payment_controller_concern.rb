@@ -7,10 +7,11 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def initialize_vars
-    puts "params are:"
-    puts params.to_s
+   
     instantiate_shopping_classes
     @auth_shopping_payment_params = permitted_params.fetch(:payment,{})
+    puts "params id is:"
+    puts params[:id]
     @auth_shopping_payment = params[:id] ? @auth_shopping_payment_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_payment_class.new(@auth_shopping_payment_params)
   end
 
@@ -48,6 +49,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   ##we render a cash form, then we create a payment and then we should in the show screen,to confirm and commit the payment which finally brings it here.
   ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
+    puts "params coming to update are:"
+    puts params.to_s
     check_for_update(@auth_shopping_payment)
     @auth_shopping_payment.assign_attributes(permitted_params[:payment])
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
@@ -67,12 +70,12 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
 
   def permitted_params
-    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status]
+    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status, :is_verify_payment]
 
     if !current_signed_in_resource.is_admin?
       payment_params.delete(:payment_status)
       if action_name.to_s == "update"
-        payment_params = []
+        payment_params = [:is_verify_payment]
       end
     end
     params.permit({payment: payment_params},:id)

@@ -17,7 +17,7 @@ Rails.application.routes.draw do
     
 
   ##PAYUMONEY CALLBACK ROUTE
-  post 'shopping/payments/:id', to: 'shopping/payments#update'  
+  post 'shopping/payments/:id', to: 'shopping/payments#update', as: "payumoney_payment_gateway_callback_path"  
 
   post 'sms_webhook', to: 'webhooks#sms_webhook'
 
