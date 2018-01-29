@@ -1,8 +1,6 @@
 <% if payment_gateway = Auth.configuration.payment_gateway_info %>
-		
 	
-
-	<% payment_options =  payment_options(@auth_shopping_payment,resource)%>
+	<% payment_options =  payment_options(@auth_shopping_payment,lookup_resource)%>
 
 	<%= form_for(@auth_shopping_payment, as: :payment) do |f| %>
 		<% payment_options[:hidden].each do |k,v| %>

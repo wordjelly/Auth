@@ -94,6 +94,8 @@ EXPIRY:
 MAY 2017
 
 
+create -> then you go to show -> go to payu -> update -> verify if not verified.
+
 
 
 - whats the best way to do this?
@@ -194,7 +196,7 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 
 2)view all such cart items without a cart as the wish-list(index cart items)
 
-3)give link to remove them from wishlist.
+3)give link to remove them from wishlist - done
 
 4)click "finalize" to add them to a cart.
 
@@ -217,4 +219,4 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 13) show the status of the refund request, as well as on viewing the refund, auto updates the status.
 
 
-
+##

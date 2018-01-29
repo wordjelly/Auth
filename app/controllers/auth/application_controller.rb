@@ -53,6 +53,7 @@ module Auth
 
 	 
 	def check_for_update(obj)
+		puts "Came to check for update."
 		not_found if obj.nil?
     	not_found("please provide a valid id for the update") if obj.new_record?
 	end

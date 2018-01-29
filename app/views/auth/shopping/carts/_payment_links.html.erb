@@ -1,0 +1,25 @@
+<% if @auth_shopping_cart.cart_pending_balance > 0 %>
+	<% @auth_shopping_payment = Auth.configuration.payment_class.constantize.new 
+
+		@auth_shopping_payment.cart_id = @auth_shopping_cart.id.to_s
+
+		@auth_shopping_payment.amount = @auth_shopping_cart.cart_pending_balance
+
+	%>
+	<% if current_signed_in_resource.is_admin? %>
+		<!-- suppose that admin is signed in, and is also trying to pay for himself(cash, card and cheque) -> this is not allowed. In this case the ability to pay by cash , card or cheque is not permitted. So here only show the link to pay by gateway.  -->
+		<% if lookup_resource.id.to_s == current_signed_in_resource.id.to_s %>
+			<!-- dont add links for paying by cash card or cheque -->
+		<% else %>
+			<!-- add links for paying by cash card or cheque -->
+		<% end %>
+	<% else %>
+			<!-- add links to pay by cash , card or cheque -->
+	<% end %>
+	<!-- add link to pay by gateway -->
+	<%= render :partial => "auth/shopping/payments/gateway.html.erb" %>
+
+<% elsif @auth_shopping_cart.cart_pending_balance < 0 %>
+	<!-- add link to create a refund request -->
+	<!-- provided that admin is not pushing himself through -->
+<% end %>

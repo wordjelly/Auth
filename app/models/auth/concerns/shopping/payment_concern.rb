@@ -23,7 +23,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## and #create methods.
 		attr_accessor :payment_params
 
-		
+
+		## this is expected to be passed into the params by the user, when he is calling refresh_payment.
+		## if true -> gateway_callback is ignored, and verify payment is done, and vice versa.
+		attr_accessor :is_verify_payment
 
 		##the amount for this payment
 		field :amount, type: Float
@@ -94,7 +97,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 			if document.errors.full_messages.empty?
 				document.refresh_refund
 				document.verify_payment
-				
 			end
 		end
 
@@ -287,9 +289,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	##override this method depending upon the gateway that you use.
-	##
 	def gateway_callback(params,&block)
-		return if self.new_record?
+		return if (self.new_record? || self.is_verify_payment == true) 
 		yield if block_given?
 	end
 	
@@ -298,9 +299,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	## currently does nothing
-	## overridden in the payment gateway to verify payments that have not be either success or failure.
+	## overridden in the payment gateway to verify payments that have not be either success or failure and as long as is_verify_paymet is true.
 	def verify_payment
-		true
+		return unless (self.is_verify_payment == true && payment_pending)
 	end
 
 	## finds the cart that this payment refers to

@@ -26,6 +26,7 @@ require "kaminari/actionview"
 require "mailgun-ruby"
 require "googl"
 require "aws-sdk"
+require "payuindia"
 
 module Auth
 end

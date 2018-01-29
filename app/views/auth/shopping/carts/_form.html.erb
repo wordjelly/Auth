@@ -1,4 +1,5 @@
-<%= form_for(@auth_shopping_cart, url: @auth_shopping_cart.new_record? ? carts_path : cart_path(@auth_shopping_cart), method: @auth_shopping_cart.new_record? ? :post : :put) do |f| %>
+<% show_fields||= "yes" %>
+<%= form_for(@auth_shopping_cart, url: @auth_shopping_cart.new_record? ? carts_path : cart_path(@auth_shopping_cart), method: @auth_shopping_cart.new_record? ? :post : :put, namespace: @auth_shopping_cart.id.to_s) do |f| %>
   <% if @auth_shopping_cart.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@auth_shopping_cart.errors.count, "error") %> prohibited this auth_shopping_cart from being saved:</h2>
@@ -10,15 +11,29 @@
       </ul>
     </div>
   <% end %>
-  <div class="form_fields">
+  <div class="form_fields" style="<%= show_fields == "no" ? "display:none;" : "" %>">
     <% @auth_shopping_cart.class.attribute_names.keep_if{|c| !@auth_shopping_cart.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
       <%=
-          text_field :cart, attr.to_sym , :value => @auth_shopping_cart.send("#{attr}")
-      %>
+          text_field_tag "cart[#{attr}]" ,@auth_shopping_cart.send("#{attr}"), :id => "#{@auth_shopping_cart.id.to_s}_cart_#{attr}" %>
+
       <%= 
-          label :cart, attr.to_sym
+          label_tag("#{@auth_shopping_cart.id.to_s}_cart_#{attr}")
       %>
     <% end %>
+    <!-- add the add_cart_item_ids and remove_cart_item_ids as hidden fields -->
+    <% @auth_shopping_cart.add_cart_item_ids.each do |ac_id| %>
+
+    
+    <%= hidden_field_tag("cart[add_cart_item_ids][]",ac_id.to_s, :id => "#{@auth_shopping_cart.id.to_s}_cart_add_cart_item_ids_#{ac_id.to_s}", :multiple => true) %>
+
+    <% end %>
+
+    <% @auth_shopping_cart.remove_cart_item_ids.each do |r_id| %>
+
+      <%= hidden_field_tag("cart[remove_cart_item_ids][]",r_id.to_s, :id => "#{@auth_shopping_cart.id.to_s}_cart_remove_cart_item_ids_#{r_id.to_s}") %>
+
+    <% end %>
+
   </div>
   <div class="actions">
     <%= f.submit %>

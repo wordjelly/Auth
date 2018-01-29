@@ -37,6 +37,7 @@ module Auth::Concerns::OwnerConcern
 		def find_self(_id,resource)
 			conditions = {:_id => _id}
 			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
+			puts "conditions are: #{conditions}"
 			all = self.where(conditions)
 			return all.first if all.size > 0 
 			return nil

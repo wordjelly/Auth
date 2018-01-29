@@ -107,24 +107,26 @@ module Auth::Concerns::TokenConcern
   end
 
 
-  ## if the current signed in resource is an admin,
-    ## this method looks for a param called :proxy_resource_id, and another one called :proxy_resource_class
-    ## it uses these two to find a resource with those specifications
-    ## the lookup resource then becomes that resource
-  ## else
-  ## the lookup resource is the current_signed_in_resource
+  
   def lookup_resource 
+    ## if the current signed in resource si not an admin, just return it, because the concept of proxy arises only if the current_signed in resource is an admin.
     return current_signed_in_resource unless current_signed_in_resource.is_admin?
     
-    puts "session proxy variables:"
-    puts session[:proxy_resource_id]
-    puts session[:proxy_resource_class]
-
-
+    ## else.
+    
+    ## first check the session or the params for a proxy resource.
     proxy_resource_id = params[:proxy_resource_id] || session[:proxy_resource_id]
     proxy_resource_class = params[:proxy_resource_class] || session[:proxy_resource_class]
+    
+    ## if these are not provided or set, and if the resource is an admin, then the admin becomes the proxy_resource
+    proxy_resource_id = current_signed_in_resource.id.to_s if (current_signed_in_resource.is_admin? && proxy_resource_id.nil?)
+
+    proxy_resource_class = current_signed_in_resource.class.to_s if (current_signed_in_resource.is_admin? && proxy_resource_class.nil?)
+
+    ## now return nil if the proxy resource is still nil.
     return nil unless (proxy_resource_class && proxy_resource_id)
     return nil unless (Auth.configuration.auth_resources.include? proxy_resource_class.capitalize)
+
     proxy_resource_class = proxy_resource_class.capitalize.constantize
     begin
       proxy_resource = proxy_resource_class.find(proxy_resource_id)

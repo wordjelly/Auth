@@ -87,6 +87,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
 	           
+
 				updated_cart_item = assigns(:auth_shopping_cart_item)
 				expect(response.code).to eq("204")
 				##get the updated 
