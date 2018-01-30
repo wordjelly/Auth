@@ -1,16 +1,5 @@
-<% @auth_shopping_payment.attributes.each do |k,v| %>
-<div>
-<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
-</div>
+<% if @auth_shopping_payment.payment_pending %>
+<div>Proceed to PayUMoney By Clicking the button below</div>
+<%= payment_to_gateway_form(@auth_shopping_payment) %>
 <% end %>
-
-<% if @auth_shopping_payment.payment_success %>
-	<div>Payment success</div>
-<% elsif @auth_shopping_payment.payment_failed %>
-	<div>Payment failed</div>
-<% else %>
-	<div>Proceed to PayUMoney By Clicking the button below</div>
-	<%= payment_to_gateway_form(@auth_shopping_payment) %>
-<% end %>
-
 	

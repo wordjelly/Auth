@@ -63,6 +63,7 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 	
 
 	def instantiate_shopping_classes
+		
 		instantiate_payment_class
 		instantiate_cart_class
 		instantiate_cart_item_class

@@ -78,6 +78,42 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	context " -- json requests  -- " do 
 
 
+		context " -- show -- " do 
+
+			before(:example) do 
+				@created_cart_item_ids = []
+				@cart = Shopping::Cart.new
+				@cart.resource_class = @u.class.to_s
+				@cart.resource_id = @u.id.to_s
+				@cart.save
+
+				5.times do 
+					cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+					cart_item.resource_class = @u.class.name
+					cart_item.resource_id = @u.id.to_s
+	                cart_item.signed_in_resource = @admin
+	                cart_item.parent_id = @cart.id.to_s
+	                cart_item.save
+
+	                @created_cart_item_ids << cart_item.id.to_s
+				end
+			end
+
+			after(:example) do 
+				Shopping::CartItem.delete_all
+				Shopping::Cart.delete_all
+			end
+
+			it  " -- shows the cart -- ", :show_cart => true do 
+
+				get shopping_cart_path(:id => @cart.id.to_s), {:api_key => @ap_key, :current_app_id => "test_app_id"}, @headers
+				cart_response = JSON.parse(response.body)
+				expect(cart_response["cart_minimum_payable_amount"]).to eq("10.0")
+				expect(response.code).to eq("200")
+			end
+
+		end
+
 		context " -- create -- " do 
 			before(:example) do 
 				@created_cart_item_ids = []
@@ -97,13 +133,16 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			after(:example) do 
 				Shopping::CartItem.delete_all
+				Shopping::Cart.delete_all
 			end
 
 			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- ", :qr => true do 
 				
 
 				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
-					
+				
+
+				
 				jresp = JSON.parse(response.body)
 				ct = Shopping::Cart.new(jresp)
 				expect(ct.errors).to be_empty
@@ -304,6 +343,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			end
 
+			
+
 
 		end
 
@@ -314,8 +355,6 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			
 
 		end
-
-
 
 
 		context " -- destroy -- " do 

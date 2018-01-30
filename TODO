@@ -220,3 +220,9 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 
 
 ##
+===========================================================
+
+1. add interface for refunds
+2. add way to input image concern, for proof for cheque, and card (how would we do card payment?)
+3. make sure cash change is seen in the show payment callback.
+4. add way to add discount code while creating cart / updating cart.
