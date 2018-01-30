@@ -40,6 +40,9 @@ module Auth::Concerns::Shopping::CartConcern
 		## this is used for sequentially debiting money from the cart_paid amount.
 		attr_accessor :cart_credit
 
+		## the minimum amount payable for all the cart items in the cart that are not yet accepted
+		attr_accessor :cart_minimum_payable_amount
+
 		before_destroy do |document|
 			document.prepare_cart
 			if document.cart_items.keep_if{|c| c.accepted == true}.size > 0
@@ -69,6 +72,8 @@ module Auth::Concerns::Shopping::CartConcern
 		set_cart_paid_amount
 		
 		set_cart_pending_balance
+
+		set_cart_minimum_payable_amount
 
 	end
 
@@ -101,12 +106,8 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_payments = []
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(get_resource,self)
 		
-		puts "payments_made to the cart are:"
-		puts payments_made_to_this_cart.to_s
-
 		payments_made_to_this_cart.each do |payment|
-			puts payment.id.to_s
-			payment.verify_payment if payment.payment_pending
+			
 			self.cart_payments << payment
 		end
 		
@@ -144,6 +145,34 @@ module Auth::Concerns::Shopping::CartConcern
 	def get_cart_pending_balance
 		self.cart_pending_balance 
 	end
+
+
+	## takes all the cart items that are not accepted, and sums their "minimum_price_required_to_accept_cart_item" methods.
+	def set_cart_minimum_payable_amount
+
+		pending_or_unaccepted_cart_items = self.cart_items.select{|c| c.accepted.nil? || c.accepted == false}
+
+		accepted_cart_items = self.cart_items.select{|c| c.accepted == true}
+
+		if pending_or_unaccepted_cart_items.size > 0
+
+			self.cart_minimum_payable_amount = pending_or_unaccepted_cart_items.map{|c| c = c.minimum_price_required_to_accept_cart_item}.inject(:+)
+		
+		elsif accepted_cart_items.size > 0
+
+			self.cart_minimum_payable_amount = 0
+		
+		else
+
+		end
+
+
+		## we can add more stuff here like the credit score of the user.
+		## so that is a function of the cart_owner.
+		## so everytime a cart is fully paid, it can add to the credit score of the user, and that can further titrate this..
+		## so we have discount and all this.
+	end
+
 
 	## initially is the same as cart_paid_amount, by calling debit, we can debit from credit, the costs of various items.
 	def get_cart_credit
@@ -208,7 +237,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 
 	def as_json(options={})
-		super.merge({:cart_items => self.cart_items, :cart_payments => self.cart_payments, :cart_price => self.cart_price, :cart_paid_amount => self.cart_paid_amount, :cart_pending_balance => self.cart_pending_balance, :cart_credit => self.cart_credit})
+		super.merge({:cart_items => self.cart_items, :cart_payments => self.cart_payments, :cart_price => self.cart_price, :cart_paid_amount => self.cart_paid_amount, :cart_pending_balance => self.cart_pending_balance, :cart_credit => self.cart_credit, :cart_minimum_payable_amount => self.cart_minimum_payable_amount})
 	end
 
 	def add_or_remove_validation

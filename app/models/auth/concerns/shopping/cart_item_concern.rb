@@ -267,28 +267,11 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## VALIDATIONS
 	##
 	#######################################################
-=begin
-	def user_can_only_update_quantity_and_discount_code
-		if !self.signed_in_resource.is_admin? && !self.new_record?
-			self_keys = self.attributes.keys
-			self_keys.each do |k|
-				if k == "discount" 
-				elsif k == "quantity"
-				elsif k == "parent_id"
-				elsif k == "resource_class"
-				elsif k == "resource_id"
-				else
-					self.send("#{k}=",self.send("#{k}_was"))
-				end
-			end
-			
-		end
-	end
-=end
 
+	## as long as it is not the accepted_by_payment id that has gone from nil to something, if anything else in the cart_item has changed, and the user is not an admin, and there is an accepted_by_payment id, then the error will be triggered.
 	def user_cannot_change_anything_if_payment_accepted
 		if !self.signed_in_resource.is_admin?
-			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record?
+			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record? && !(self.accepted_by_payment_id_changed? && self.accepted_by_payment_id_was.nil?)
 		end
 	end
 
@@ -320,6 +303,11 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	def product_attributes_to_assign
 		["name","price"]
+	end
+
+	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.
+	def minimum_price_required_to_accept_cart_item
+		price*accept_order_at_percentage_of_price
 	end
 
 end

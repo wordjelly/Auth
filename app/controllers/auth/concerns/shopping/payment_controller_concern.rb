@@ -10,8 +10,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
    
     instantiate_shopping_classes
     @auth_shopping_payment_params = permitted_params.fetch(:payment,{})
-    puts "params id is:"
-    puts params[:id]
+   
     @auth_shopping_payment = params[:id] ? @auth_shopping_payment_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_payment_class.new(@auth_shopping_payment_params)
   end
 
@@ -53,10 +52,16 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     puts params.to_s
     check_for_update(@auth_shopping_payment)
     @auth_shopping_payment.assign_attributes(permitted_params[:payment])
+    #puts "assigned attrs"
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
+    #puts "added owner"
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
+    puts "these are the attributes assigned in the update action."
+    puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment.payment_params = params
+    #puts "assigned params."
     @auth_shopping_payment.save
+
     respond_with @auth_shopping_payment
   end
 

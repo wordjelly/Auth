@@ -12,6 +12,7 @@ FactoryGirl.define do
     discount_code {Faker::App.name}
     price {10.00}
     name {Faker::Food.ingredient}
+    accept_order_at_percentage_of_price {0.2}
   end
 
   factory :client, class: Auth::Client do
