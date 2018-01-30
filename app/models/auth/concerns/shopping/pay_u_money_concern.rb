@@ -62,7 +62,17 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	## this can be triggered by the user simply doing an update on the record.
 	## so it should not happen in case the payment is already successfull, or failed.
 	def verify_payment
-		return if (self.new_record? || payment_pending)
+		#puts "called verify payment with id: #{self.id.to_s}"
+		## if its a new record return nil, because it hasnt even been saved yet, so we should return nil.
+		if self.new_record?
+			return nil
+		## if the user has passed in verify payment as true, and the payment is in pending state, then we do whatever custom logic we have to do.
+		elsif self.is_verify_payment == true && payment_pending
+		## in all other cases we return nil.
+		else
+			return nil
+		end
+
 		if self.is_gateway?
 			if self.gateway_payment_initiated 
 				options = {:var1 => self.txnid, :command => 'verify_payment'}
@@ -118,6 +128,8 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 				self.errors.add(:payment_status,"payment was never initiated")
 			end
 		end
+
+		return true
 	end
 
 
@@ -135,13 +147,19 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 	 ##suppose the user is calling refresh_payment, basically an update call, then the mihpayid wont be present so the gateway callback becomes pointless.
 	 ## and then we just let verify payment handle the situation.
 	 def gateway_callback(pr,&block)
+	 	puts "this is the is verify payment."
+	 	puts self.is_verify_payment.to_s
+
 	 	return if (self.new_record? || self.is_verify_payment == true)
+	 	puts "went past."
 	  	notification = PayuIndia::Notification.new("", options = {:key => Auth.configuration.payment_gateway_info[:key], :salt => Auth.configuration.payment_gateway_info[:salt], :params => pr})
 	  	self.payment_status = 0
 	  	if(notification.acknowledge && notification.complete?)
 	  		self.payment_status = 1 
 	  	end
+
 	  	yield if block_given?
+	  	return true
 	 end
 
 end

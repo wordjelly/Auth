@@ -35,7 +35,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     context " -- web app requests -- " do 
 
 
-        context " -- gateway payment -- " do 
+        context " -- gateway payment -- ", :payumoney => true do 
             
             before(:example) do 
                 ## create cart items
@@ -72,10 +72,12 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 @payment.email = "bhargav.r.raut@gmail.com"
                 @payment.phone = "9561137096"
                 @payment.productinfo = "hello world"
-                subject { @payment }
+               
                 puts "payment save result:"
                 puts @payment.save.to_s
                 puts @payment.errors.full_messages.to_s
+
+               
 
             end 
 
@@ -88,49 +90,183 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             context " -- gateway does post call to the app -- " do 
 
                 before(:example) do 
-                    expect_any_instance_of(Shopping::Payment).to receive(:gateway_callback)
+                   expect_any_instance_of(Shopping::Payment).to receive(:gateway_callback).and_return(true)
+                   expect_any_instance_of(Shopping::Payment).to receive(:verify_payment).and_return(nil) 
                 end
-
-                it " -- triggers gateway callback -- ", :first_gateway_test do 
+                
+                
+                it " -- triggers gateway callback, but returns from the verify_payment callback -- ", :first_gateway_test do 
                     
                     sign_in @u
-
+                    
 
                     post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
 
 
-
                 end
 
-                it " -- does not trigger verify payment -- " do 
-
-                end
-
+               
             end
 
             context " -- user does refresh payment -- " do 
 
-                it " -- does not trigger gateway callback , because .verify_payment attr_accessor is set -- " do 
-
+                before(:example) do 
+                   expect_any_instance_of(Shopping::Payment).to receive(:gateway_callback).and_return(nil)
+                   expect_any_instance_of(Shopping::Payment).to receive(:verify_payment).and_return(true)
                 end
 
-                it " -- triggers verify payment -- " do 
+                it " -- does not trigger gateway callback , because .verify_payment attr_accessor is set -- " do 
+
+                    sign_in @u
+                    
+                    put "/shopping/payments/#{@payment.id.to_s}", {:is_verify_payment => true}
 
                 end
 
             end 
 
-            context " -- successfull payment -- " do 
+            context " -- successfull payment -- ", :success_gateway => true do 
+
+                
+
+                it " -- sets the payment status as 1, when the gateway callback is hit, if the payuindia notification is successfully verified. -- " do 
+
+                    PayuIndia::Notification.any_instance.stub(:acknowledge).and_return(true)
+
+                    PayuIndia::Notification.any_instance.stub(:complete?).and_return(true)
+
+                    sign_in @u
+                    
+
+                    post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
+
+                   # puts response.body.to_s
+
+                    @payment = Shopping::Payment.find(@payment.id)
+
+                    expect(@payment.payment_status).to eq(1)
+
+                end
 
             end
 
             context " -- failed payment -- " do 
 
+                it " -- sets the payment status as 0, when the gateway callback is hit, if the payuindia notification is not successfully verified. -- " do 
+
+                    PayuIndia::Notification.any_instance.stub(:acknowledge).and_return(false)
+
+                    PayuIndia::Notification.any_instance.stub(:complete?).and_return(false)
+
+                    sign_in @u
+                    
+
+                    post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
+
+                   # puts response.body.to_s
+
+                    @payment = Shopping::Payment.find(@payment.id)
+
+                    expect(@payment.payment_status).to eq(0)
+                            
+                end
             end
 
             context " -- user interrupts callback -- " do 
 
+
+                it " -- calls verify_payment if the payment status is pending, and the user passes is_verify_payment -- " do 
+
+                    expect_any_instance_of(Shopping::Payment).to receive(:verify_payment).and_return(true)
+
+                    expect(@payment.payment_status).to be_nil
+
+                    sign_in @u
+                    
+                    put "/shopping/payments/#{@payment.id.to_s}", {:is_verify_payment => true}
+
+                end
+
+                it " -- doesnt call verify_payment if the status is not pending, and even if the user passes is_verify_payment -- ", :sss => true do 
+
+                    ## change the payment status to 0
+                    ## and then calling this will not work.
+                    
+
+                    @payment.payment_status = 0
+                    @payment.signed_in_resource = @admin
+                    @payment.resource_id = @u
+                    @payment.resource_class = @u.class.to_s
+                    ## setting this as true so that it doesn't do the gateway callback(that happens automatically otherwise, and it will lead to an error.)
+                    ## just set this is_verify_payment to avoid the gateway callback, there is no other significance, i would have liked to do skip_callback somehow, but too tired.
+                    @payment.is_verify_payment = true
+                    
+                    sign_in @u
+                    
+                    expect_any_instance_of(Shopping::Payment).to receive(:verify_payment).and_return(nil)
+
+                    put "/shopping/payments/#{@payment.id.to_s}", {:is_verify_payment => true}                    
+
+                end
             end
+
+        end
+
+    end
+
+    context " -- discount code / bulk payment feature -- " do   
+        it " -- should inflate the payment amount, with fake credit, we can have a coupon credit -- " do 
+
+
+        end
+
+        it " -- discount code can refer to a bulk payment -- " do 
+
+        end
+
+        it  " -- discount code can be created, updated, deleted by admin -- " do 
+
+        end
+
+        it " -- discount code can be used only once -- " do 
+
+        end
+
+    end
+
+
+    context " -- refund tests -- " do 
+
+    end
+
+
+    context " -- cash on demand specs -- " do 
+        
+        it " -- cart item provides a minimum payable amount for it. -- " do 
+
+        end
+
+        it " -- cart provides total minimum payable amount -- " do 
+
+        end
+
+        it " -- minimum payable amount is available only for cash , cheque and card payments -- " do 
+
+        end
+
+        it " -- payment cannot be made unless minimum payable amount is satisfied -- " do 
+
+        end
+
+        it " -- minimum payable amount is calculate considering the total number of successfull payments -- " do 
+
+        end
+
+        it " -- admin can override minimum payable amount, for concession  -- " do 
+
+        end
+
+        it " -- user can have a minimum payable setting FOR VIP's -- " do 
 
         end
 
@@ -170,6 +306,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
 
         it " -- creates a payment to the cart-- ", :cr => true do 
+
             
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
                     
@@ -218,14 +355,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 expect(cart_item.accepted).to be_truthy
             end
 
-            ## now update payment as failed
-            ##payment = Shopping::Payment.find(payment.id)
-            ##payment.signed_in_resource = @admin
-            ##payment.payment_status = 0
-            ##payment.resource_id = @u.id.to_s
-            ##payment.resource_class = @u.class.name.to_s
-            ##payment.cart_id = @cart.id.to_s
-            ##payment.save
+            
             put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 0},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
 
@@ -274,7 +404,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## this is setting the payment as successfully.
             ref_res = refund_request.save
             ## then accept that request.
-            puts refund_request.errors.full_messages.to_s
+            #puts refund_request.errors.full_messages.to_s
             expect(ref_res).to be_truthy
 
             ## now suppose earlier payment fails.

@@ -73,32 +73,39 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :resource_class
 		validate :cheque_or_card_payment_not_excessive
 		validates :amount, numericality: { :greater_than => 0.00 }, unless: Proc.new { |document| document.refund  }
+
+
+		## payment is invalid if the minimum payable amount of the cart is not satisfied.
+		
+
 		validate :cart_not_empty
-		#validate :document_updated_only_by_admin
-		#validate :document_status_set_only_by_admin
+		
 		validate :refund_created_or_approved_only_if_balance_is_negative
 		validate :refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
 
 		validate :update_cart_items_accepted
 
+		validate :payment_satisfies_minimum_payment_requirement
+
 		before_validation do |document|
+
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
 						
+			document.refresh_refund
 			
-			
+			document.verify_payment
 		end
 
 		## because the validation will not allow the payment status to be changed in case this is not an admin user, and we need to allow the user to refresh the payment state, in case of refunds which need to set as failed because some later refund was accepted but in that callback the nil refund was for some reason not set as failed.
 		## also in case of gateway payments, we need to allow to see if it can be verified.
 		## both these methods change the state of the payment suo moto. it is not necessary that the user should be an admin.
-		after_validation do |document|
-			if document.errors.full_messages.empty?
-				document.refresh_refund
-				document.verify_payment
-			end
-		end
+		#after_validation do |document|
+		#	if document.errors.full_messages.empty?
+				
+		#	end
+		#end
 
 		before_save do |document|
 			if !document.skip_callback?("before_save")
@@ -157,7 +164,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	
 
-	## called in the payment_controller_concern update action
+	
 	## basically checks if there is any refund that was accepted after this refund_request was created. then in that case sets this refund as failed.
 	## this is basically done because while normally, whenever a refund is accepted, all other pending refunds are updated as failed, but suppose that that operation does not complete and some refunds are left still pending.
 	## then in the controller update action, this method is called on the payment.
@@ -290,6 +297,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	##override this method depending upon the gateway that you use.
 	def gateway_callback(params,&block)
+		## if its a new_record we don't do any callback, because the payment doesnt exist to check it .
+		## if the user has passed in is_verify_payment, we still don;t do this callback, because 
 		return if (self.new_record? || self.is_verify_payment == true) 
 		yield if block_given?
 	end
@@ -301,13 +310,23 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## currently does nothing
 	## overridden in the payment gateway to verify payments that have not be either success or failure and as long as is_verify_paymet is true.
 	def verify_payment
-		return unless (self.is_verify_payment == true && payment_pending)
+		## if its a new record return nil, because it hasnt even been saved yet, so we should return nil.
+		if self.new_record?
+			return nil
+		## if the user has passed in verify payment as true, and the payment is in pending state, then we do whatever custom logic we have to do.
+		elsif self.is_verify_payment == true && payment_pending
+		## in all other cases we return nil.
+		else
+			return nil
+		end
+		
 	end
 
 	## finds the cart that this payment refers to
 	## sets it to an attr_accessor called cart
 	## prepares the cart(refer to cart concern for a description of this method)
 	def set_cart(cart_id)	
+		
 		
 		self.cart = Auth.configuration.cart_class.constantize.find(cart_id)
 	
@@ -408,6 +427,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 		if payment_status_changed? && payment_status == 1 && refund
 			self.errors.add("payment_status","you cannot authorize a refund since the amount you entered is wrong") if self.cart.cart_pending_balance != self.amount
 		end
+	end
+
+	## validation
+	def payment_satisfies_minimum_payment_requirement
+		self.cart.prepare_cart
+		return if self.refund == true 
+		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
 
 	def as_json(options={})
