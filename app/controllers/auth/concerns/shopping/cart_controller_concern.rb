@@ -10,19 +10,22 @@ module Auth::Concerns::Shopping::CartControllerConcern
   #if no id is provided then creates a new cart_item from the permitted params, but excluding the id key.
   #if a collection i.e plural resources is present in the permitted_params and its also there in our auth resources, then create a resource class and resource symbol out of it and assign resource as in the comments.
   def initialize_vars
+    
     instantiate_shopping_classes
-    #puts "cart params are:"
-    #puts params.to_s
+   
     @auth_shopping_payment_params = permitted_params.fetch(:cart,{})
+    
     @auth_shopping_cart = params[:id] ? @auth_shopping_cart_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_cart_class.new(@auth_shopping_payment_params)
         
   end
 
   ##override the as_json for cart_item, to show errors if there are any, otherwise just the id.
   def show
+    
     not_found if @auth_shopping_cart.nil?
     @auth_shopping_cart.prepare_cart
     @auth_shopping_cart_items = @auth_shopping_cart.cart_items
+    
     respond_with @auth_shopping_cart
   end
 

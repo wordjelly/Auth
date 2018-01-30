@@ -1,4 +1,11 @@
 <p id="notice"><%= notice %></p>
+<% @auth_shopping_payment.attributes.each do |k,v| %>
+<div>
+<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
+</div>
+<% end %>
+
+
 <% if @auth_shopping_payment.is_gateway? %>
 <%= render :partial => "gateway_show.html.erb" %>
 <% end %>

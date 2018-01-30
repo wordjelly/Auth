@@ -432,7 +432,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## validation
 	def payment_satisfies_minimum_payment_requirement
 		self.cart.prepare_cart
-		return if self.refund == true 
+		return if self.refund == true  
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
 

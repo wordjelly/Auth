@@ -7,3 +7,6 @@
 //= require modernizr.custom.63321.js
 //= require data.js
 
+$(document).ready(function() {
+    $('select').material_select();
+});

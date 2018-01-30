@@ -96,13 +96,15 @@ module Auth::Concerns::TokenConcern
       break if @resource = self.send("current_#{resource.downcase}") 
     end
 
-    
+    #puts "do we have a resource"
+    #puts @resource.to_s
 
     ## devise in registrations_controller#destroy assumes the existence of an 'resource' variable, so we set that here.
     if devise_controller?
       self.resource = @resource
     end
 
+    puts "we have a resource as: #{@resource}"
     
   end
 

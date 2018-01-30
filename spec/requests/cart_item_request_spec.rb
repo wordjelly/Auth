@@ -44,8 +44,24 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
     	before(:each) do 
     		Shopping::CartItem.delete_all
     	end	
+
+    	context " -- show --" do 
+
+    		it " -- shows the cart item -- ", :show_cart_item do 
+
+    			cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name.to_s
+				cart_item.signed_in_resource = @admin
+				res = cart_item.save
+
+    			get shopping_cart_item_path({:id => cart_item.id.to_s}),{:api_key => @ap_key, :current_app_id => "test_app_id"}, @headers
+    			
+    		end
+
+    	end
 	
-		context " -- create " do 
+		context " -- create --" do 
 
 			it " -- creates cart item with all permitted params,and assigns user id. ",:c1 => true do 
 				cart_item = attributes_for(:cart_item)

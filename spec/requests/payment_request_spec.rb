@@ -235,42 +235,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
     end
 
 
-    context " -- refund tests -- " do 
 
-    end
-
-
-    context " -- cash on demand specs -- " do 
-        
-        it " -- cart item provides a minimum payable amount for it. -- " do 
-
-        end
-
-        it " -- cart provides total minimum payable amount -- " do 
-
-        end
-
-        it " -- minimum payable amount is available only for cash , cheque and card payments -- " do 
-
-        end
-
-        it " -- payment cannot be made unless minimum payable amount is satisfied -- " do 
-
-        end
-
-        it " -- minimum payable amount is calculate considering the total number of successfull payments -- " do 
-
-        end
-
-        it " -- admin can override minimum payable amount, for concession  -- " do 
-
-        end
-
-        it " -- user can have a minimum payable setting FOR VIP's -- " do 
-
-        end
-
-    end
 
     context " -- cash, card, cheque payment -- " do 
 
@@ -314,7 +279,16 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         
         end
 
+        it " -- produces a validation error if payment is less than minimum payment amount -- " do 
 
+            post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: 5, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            
+            payment_made = assigns(:auth_shopping_payment)
+            expect(payment_made.errors.full_messages).not_to be_empty
+
+            expect(Shopping::Payment.count).to eq(0)   
+
+        end
 
         it " -- sets all cart items as accepted, if payment amount is sufficient for all the cart items. ",:br => true do 
 

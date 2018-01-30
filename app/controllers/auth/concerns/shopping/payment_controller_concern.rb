@@ -3,7 +3,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   extend ActiveSupport::Concern
 
   included do
-    
+    include Auth::Shopping::Payments::PaymentsHelper
   end
 
   def initialize_vars
@@ -21,7 +21,9 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def index
-
+    ## need to find all the payments
+    @auth_shopping_payments = @auth_shopping_payment_class.where(:resource_id => lookup_resource.id.to_s)
+    respond_with @auth_shopping_payments
   end
 
   def new
@@ -48,21 +50,23 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   ##we render a cash form, then we create a payment and then we should in the show screen,to confirm and commit the payment which finally brings it here.
   ##validations in the create call should look into whether there is a picture/cash/cheque whatever requirements are there.
   def update
-    puts "params coming to update are:"
-    puts params.to_s
+    #puts "params coming to update are:"
+    #puts params.to_s
     check_for_update(@auth_shopping_payment)
     @auth_shopping_payment.assign_attributes(permitted_params[:payment])
     #puts "assigned attrs"
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
     #puts "added owner"
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
-    puts "these are the attributes assigned in the update action."
-    puts @auth_shopping_payment.attributes.to_s
+    #puts "these are the attributes assigned in the update action."
+    #puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment.payment_params = params
     #puts "assigned params."
-    @auth_shopping_payment.save
-
-    respond_with @auth_shopping_payment
+    save_response = @auth_shopping_payment.save
+    
+    ## if save successfull then otherwise, respond_with edit.
+    respond_with @auth_shopping_payment, location: (save_response == true ? payment_path(@auth_shopping_payment) : edit_payment_path(@auth_shopping_payment))
+  
   end
 
   def destroy

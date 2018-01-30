@@ -12,10 +12,19 @@
 			<!-- dont add links for paying by cash card or cheque -->
 		<% else %>
 			<!-- add links for paying by cash card or cheque -->
+			<%= render :partial => "auth/shopping/payments/payment_with_proof.html.erb" %>
 		<% end %>
 	<% else %>
 			<!-- add links to pay by cash , card or cheque -->
+			<%= render :partial => "auth/shopping/payments/payment_with_proof.html.erb" %>
 	<% end %>
+
+	<!-- this is only for test purposes -->
+	<%= render :partial => "auth/shopping/payments/payment_with_proof.html.erb" %>
+	<!-- end -->
+
+	
+
 	<!-- add link to pay by gateway -->
 	<%= render :partial => "auth/shopping/payments/gateway.html.erb" %>
 
