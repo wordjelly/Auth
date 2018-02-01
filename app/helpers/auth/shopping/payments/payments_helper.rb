@@ -1,5 +1,32 @@
 module Auth::Shopping::Payments::PaymentsHelper
 
+    ###################################################
+    ##
+    ##
+    ## OTHER HELPERS. 
+    ##
+    ##
+    ###################################################
+
+    def payment_status_to_string(payment)
+        if payment.payment_status.nil?
+            "pending"
+        elsif payment.payment_status == 1
+            "successfull"
+        else
+            "failed"
+        end
+    end
+
+
+    ###################################################
+    ##
+    ##
+    ## PATH HELPERS.
+    ##
+    ##
+    ###################################################
+
 	## get /new
 	def new_payment_path(options={})
       main_app.send(Auth::OmniAuth::Path.new_path(Auth.configuration.payment_class),options)

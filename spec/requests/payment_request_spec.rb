@@ -125,52 +125,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
             end 
 
-            context " -- successfull payment -- ", :success_gateway => true do 
-
-                
-
-                it " -- sets the payment status as 1, when the gateway callback is hit, if the payuindia notification is successfully verified. -- " do 
-
-                    PayuIndia::Notification.any_instance.stub(:acknowledge).and_return(true)
-
-                    PayuIndia::Notification.any_instance.stub(:complete?).and_return(true)
-
-                    sign_in @u
-                    
-
-                    post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
-
-                   # puts response.body.to_s
-
-                    @payment = Shopping::Payment.find(@payment.id)
-
-                    expect(@payment.payment_status).to eq(1)
-
-                end
-
-            end
-
-            context " -- failed payment -- " do 
-
-                it " -- sets the payment status as 0, when the gateway callback is hit, if the payuindia notification is not successfully verified. -- " do 
-
-                    PayuIndia::Notification.any_instance.stub(:acknowledge).and_return(false)
-
-                    PayuIndia::Notification.any_instance.stub(:complete?).and_return(false)
-
-                    sign_in @u
-                    
-
-                    post "/shopping/payments/#{@payment.id.to_s}", PayumoneySupport.payment_callback_params(@payment)
-
-                   # puts response.body.to_s
-
-                    @payment = Shopping::Payment.find(@payment.id)
-
-                    expect(@payment.payment_status).to eq(0)
-                            
-                end
-            end
+            
 
             context " -- user interrupts callback -- " do 
 
@@ -548,7 +503,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
         end
 
-        it " -- payment or refund amount must be greater than zero. -- ", :payment_greater_than => true do
+        it " -- payment amount must be greater than zero. -- ", :payment_greater_than => true do
 
             post shopping_payments_path, {cart_id: @cart.id.to_s,payment_type: "cash", amount: -10.00, :api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
                     

@@ -254,6 +254,8 @@ module Auth::Concerns::Shopping::CartConcern
 		      cart_item = Auth.configuration.cart_item_class.constantize.find(id)
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
+		      puts "response of unsetting cart was:"
+		      puts resp.to_s
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
 	  	  	true

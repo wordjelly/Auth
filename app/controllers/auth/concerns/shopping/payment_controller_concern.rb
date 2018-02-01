@@ -41,10 +41,14 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
    
     @auth_shopping_payment.payment_params = params
     
+    puts "the attributes are:"
+    puts @auth_shopping_payment.attributes.to_s
+
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
    
-    @auth_shopping_payment.save
-    
+    resp = @auth_shopping_payment.save
+      
+    puts "teh save response is: #{resp.to_s}"
 
     respond_with @auth_shopping_payment
   end

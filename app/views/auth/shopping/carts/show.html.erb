@@ -10,62 +10,33 @@
 	<% end %>
 
 	<h3>Items In Your Cart</h3>
+	<%= render :partial => "auth/shopping/cart_items/show_cart_items_collection", locals: {cart_items: @auth_shopping_cart.cart_items} %>
+	
+	<%= render :partial => "auth/shopping/carts/show_cart_balance_info", locals: {cart: @auth_shopping_cart} %>
+
+
+	<h3>Payments & Refunds</h3>
 	<table>
 		<thead>
-			<th>Cart Item</th>
+			<th>Payment Id</th>
 			<th>Status</th>
-			<th>Price</th>
+			<th>Amount</th>
+			<th>Payment Type</th>
 		</thead>
 		<tbody>
-			<% @auth_shopping_cart.cart_items.each_with_index {|citem,key| %>
-
-			<tr>
-				<td><%= citem.id.to_s %></td>
-				<td><%= citem.accepted.to_s %></td>
-				<td><%= citem.price.to_s %></td>
-			</tr>
-
+			<% @auth_shopping_cart.cart_payments.each_with_index {|cpayment,key| %>
+				<tr>
+					<td><%= link_to cpayment.id.to_s, payment_path(cpayment) %></td>
+					<td><%= payment_status_to_string(cpayment)%></td>
+					<td><%= cpayment.amount %></td>
+					<td><%= cpayment.payment_type %></td>
+				</tr>
 			<% } %>
-
-			<% 1.times do |n| %>
-			<tr>
-				<!-- leave one blank row -->
-				<td> </td>
-				<td> </td>
-				<td> </td>
-			</tr>
-			<% end %>
-			
-			<tr>
-				<td>Total</td>
-				<td></td>
-				<td><%= @auth_shopping_cart.cart_price %></td>
-			</tr>
-			<tr>
-				<td>Paid</td>
-				<td></td>
-				<td><%= @auth_shopping_cart.cart_paid_amount %></td>
-			</tr>
-			<tr>
-				<td>Outstanding</td>
-				<td></td>
-				<td><%= @auth_shopping_cart.cart_pending_balance %>
-					
-				</td>
-			</tr>
 		</tbody>
 	</table>
 
 
-
-	<h3>Payments & Refunds</h3>
-	<% @auth_shopping_cart.cart_payments.each_with_index {|cpayment,key| %>
-
-	<% } %>
-
-
-	<%= render :partial => "payment_links.html.erb" %>
-
+	
 
 
 </div>

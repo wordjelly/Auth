@@ -1,15 +1,5 @@
 <%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put) do |f| %>
-  <% if @auth_shopping_payment.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@auth_shopping_payment.errors.count, "error") %> prohibited this auth_shopping_payment from being saved:</h2>
-
-      <ul>
-      <% @auth_shopping_payment.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_payment} %>
   
   <div class="form_fields">
     <% @auth_shopping_payment.class.attribute_names.keep_if{|c| !@auth_shopping_payment.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>

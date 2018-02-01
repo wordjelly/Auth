@@ -1,0 +1,10 @@
+<% if @auth_shopping_payment.payment_status == 1 %>
+	<div class="divider"></div>
+	<h4>Receipt</h4>
+	<!-- show the payment receipt -->
+	<div>The following items have been accepted for processing:</div>
+	<%= render :partial => "auth/shopping/cart_items/show_cart_items_collection", locals: {cart_items: @auth_shopping_payment.payment_receipt[:current_payment]} %>
+	<!-- end -->
+	<div>Order Summary</div>
+	<%= render :partial => "auth/shopping/carts/show_cart_balance_info", locals: {cart: @auth_shopping_payment.cart} %>
+<% end %>

@@ -247,7 +247,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## make the amount equal to the pending balance if it is excesive.
 	def cash_callback(params,&block)
 		if self.new_record?
-			puts "came to calculate change"
 			calculate_change
 			self.amount = self.cart.cart_pending_balance if payment_excessive?
 		end
@@ -396,7 +395,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	## validation
 	def cart_not_empty
-		
+		return if self.refund == true
 		self.errors.add(:cart,"cart has to have some items in order to make a payment") if !self.cart.has_items?
 
 	end

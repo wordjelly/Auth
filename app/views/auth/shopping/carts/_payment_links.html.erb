@@ -1,9 +1,9 @@
-<% if @auth_shopping_cart.cart_pending_balance > 0 %>
+<% if cart.cart_pending_balance > 0 %>
 	<% @auth_shopping_payment = Auth.configuration.payment_class.constantize.new 
 
-		@auth_shopping_payment.cart_id = @auth_shopping_cart.id.to_s
+		@auth_shopping_payment.cart_id = cart.id.to_s
 
-		@auth_shopping_payment.amount = @auth_shopping_cart.cart_pending_balance
+		@auth_shopping_payment.amount = cart.cart_pending_balance
 	%>
 
 
@@ -15,7 +15,7 @@
 	
 	
 
-<% elsif @auth_shopping_cart.cart_pending_balance < 0 %>
-	<!-- add link to create a refund request -->
-	<!-- provided that admin is not pushing himself through -->
+<% elsif cart.cart_pending_balance < 0 %>
+		
+		<%= link_to "Create A Refund Request", new_payment_path(payment: {refund: true, amount: cart.cart_pending_balance, cart_id: cart.id.to_s}) %>
 <% end %>
