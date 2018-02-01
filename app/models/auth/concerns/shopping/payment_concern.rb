@@ -25,6 +25,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 
 		## this is expected to be passed into the params by the user, when he is calling refresh_payment.
+		## expected to be a string
+		## can be "true" or "false"
 		## if true -> gateway_callback is ignored, and verify payment is done, and vice versa.
 		attr_accessor :is_verify_payment
 
@@ -36,6 +38,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##cash
 		##cheque
 		field :payment_type, type: String
+
+		## gateway callback called
+		field :gateway_callback_called, type: Boolean, default: false
+
 
 		##the id of the cart for which this payment was made
 		field :cart_id, type: String
@@ -64,7 +70,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		##
 		## how much change should be given to the customer.
 		##
-		attr_accessor :cash_change
+		field :cash_change, type: Float, default: 0
 
 		validates_presence_of :cart_id
 		validates_presence_of :resource_id
@@ -89,11 +95,14 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		before_validation do |document|
 
+
+
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
 						
 			document.refresh_refund
+			
 			
 			document.verify_payment
 		end
@@ -238,6 +247,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## make the amount equal to the pending balance if it is excesive.
 	def cash_callback(params,&block)
 		if self.new_record?
+			puts "came to calculate change"
 			calculate_change
 			self.amount = self.cart.cart_pending_balance if payment_excessive?
 		end
@@ -299,7 +309,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 	def gateway_callback(params,&block)
 		## if its a new_record we don't do any callback, because the payment doesnt exist to check it .
 		## if the user has passed in is_verify_payment, we still don;t do this callback, because 
-		return if (self.new_record? || self.is_verify_payment == true) 
+		return if (self.new_record? || self.is_verify_payment == "true") 
+
 		yield if block_given?
 	end
 	
@@ -307,17 +318,20 @@ module Auth::Concerns::Shopping::PaymentConcern
 		is_card? || is_cash? || is_cheque?
 	end
 
-	## currently does nothing
-	## overridden in the payment gateway to verify payments that have not be either success or failure and as long as is_verify_paymet is true.
+	
 	def verify_payment
-		## if its a new record return nil, because it hasnt even been saved yet, so we should return nil.
 		if self.new_record?
 			return nil
-		## if the user has passed in verify payment as true, and the payment is in pending state, then we do whatever custom logic we have to do.
-		elsif self.is_verify_payment == true && payment_pending
-		## in all other cases we return nil.
 		else
-			return nil
+			if self.is_verify_payment == "true"
+				if self.payment_pending
+					return true
+				else
+					return nil
+				end
+			else
+				return nil
+			end
 		end
 		
 	end

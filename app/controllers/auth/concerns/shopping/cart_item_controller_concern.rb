@@ -37,7 +37,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##only permits the quantity to be changed, transaction id is internally assigned and can never be changed by the external world.
   def update
     check_for_update(@auth_shopping_cart_item)
-    @auth_shopping_cart_item.assign_attributes(permitted_params[:cart_item])
+    @auth_shopping_cart_item.assign_attributes(@auth_shopping_cart_item_params)
     @auth_shopping_cart_item = add_owner_and_signed_in_resource(@auth_shopping_cart_item)  
     @auth_shopping_cart_item.save
     respond_with @auth_shopping_cart_item
