@@ -1,9 +1,13 @@
 <h1>New Auth Shopping Payment</h1>
 
-<% if @auth_shopping_payment.is_gateway? %>
-	<%= render :partial => "gateway.html.erb" %>
+<% if @auth_shopping_payment.refund.nil? || @auth_shopping_payment.refund == false %>
+	<% if @auth_shopping_payment.is_gateway? %>
+		<%= render :partial => "gateway.html.erb" %>
+	<% else %>
+		<%= render :partial => "cash_card_cheque.html.erb" %>
+	<% end %>
 <% else %>
-	<%= render :partial => "cash_card_cheque.html.erb" %>
+		<%= render :partial => "refund.html.erb" %>
 <% end %>
 
 <%= link_to 'Back', payments_path %>

@@ -1,0 +1,12 @@
+<!-- just pass in any active_model object and this partial will display its validation errors -->
+<% if active_model_object.errors.any? %>
+	<div id="error_explanation">
+	  <h2><%= pluralize(active_model_object.errors.count, "error") %> prohibited this resource from being saved:</h2>
+
+	  <ul>
+	  <% active_model_object.errors.full_messages.each do |message| %>
+	    <li><%= message %></li>
+	  <% end %>
+	  </ul>
+	</div>
+<% end %>

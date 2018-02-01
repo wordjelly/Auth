@@ -38,7 +38,7 @@ if dicount_code is provided:
 
 =end
 
-module Auth::Concerns::Shopping::PaymentConcern
+module Auth::Concerns::Shopping::DiscountConcern
 
 	extend ActiveSupport::Concern
 		

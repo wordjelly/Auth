@@ -1,0 +1,35 @@
+<!-- do this once before showing anything -->
+<% cart.prepare_cart %>
+<table>
+	<thead>
+		<th></th>
+		<th></th>
+		<th></th>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Total</td>
+			<td></td>
+			<td><%= cart.cart_price %></td>
+		</tr>
+		<tr>
+			<td>Paid</td>
+			<td></td>
+			<td><%= cart.cart_paid_amount %></td>
+		</tr>
+		<tr>
+			<td>Outstanding</td>
+			<td></td>
+			<td><%= cart.cart_pending_balance %>
+
+				<%= render :partial => "auth/shopping/carts/payment_links.html.erb", locals: {cart: cart} %>
+		
+			</td>
+		</tr>
+		<tr>
+			<td>Minimum Payable Amount To Process Your Newly Added Tests</td>
+			<td></td>
+			<td><%= cart.cart_minimum_payable_amount %></td>
+		</tr>
+	</tbody>
+</table>

@@ -1,0 +1,7 @@
+<%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put, as: :payment) do |f| %>
+	
+	<%= f.select(:payment_status,  [["Disapprove Payment", 0], ['Approve Payment', 1]],{}, {:class => "browser-default"}) %>
+
+	<%= f.submit "Submit" %>
+
+<% end %>

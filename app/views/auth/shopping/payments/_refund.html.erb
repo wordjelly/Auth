@@ -1,0 +1,10 @@
+<%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put, as: :payment) do |f| %>
+	<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_payment} %>
+	<%= f.hidden_field :payment_type, :value => "cash" %>
+	<%= f.hidden_field :refund, :value => true %>
+	<%= f.hidden_field :cart_id, :value => @auth_shopping_payment.cart_id.to_s %>
+	<%= f.hidden_field :amount, :value => @auth_shopping_payment.amount %>
+
+	<%= f.submit "Create Refund Request." %>
+
+<% end %>
