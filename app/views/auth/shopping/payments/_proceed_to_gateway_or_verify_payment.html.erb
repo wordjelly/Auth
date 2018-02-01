@@ -1,0 +1,18 @@
+<% if @auth_shopping_payment.payment_pending %>
+	<% if @auth_shopping_payment.gateway_callback_called == false %>
+		
+		<div>Proceed to PayUMoney By Clicking the button below</div>
+		<%= payment_to_gateway_form(@auth_shopping_payment) %>
+
+	<% else %>
+		
+		<div>Verify Your Payment</div>
+		<%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put) do |f| %>
+				<%= hidden_field :payment, :is_verify_payment, :value => true %>
+				<div class="actions">
+				    <%= f.submit "Verify" %>
+				</div>
+		<% end %>
+	<% end %>
+<% end %>
+	

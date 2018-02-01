@@ -42,7 +42,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   ## always returns an empty array.
   def update
     check_for_update(@auth_shopping_cart)
-    @auth_shopping_cart.assign_attributes(@auth_shopping_payment_params)
+    @auth_shopping_cart.assign_attributes(@auth_shopping_cart_params)
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart

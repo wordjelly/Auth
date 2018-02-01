@@ -1,13 +1,25 @@
 <p id="notice"><%= notice %></p>
-<% @auth_shopping_payment.attributes.each do |k,v| %>
+
+<% @auth_shopping_payment.attributes_to_show.each do |k,v| %>
 <div>
-<span><%= k.to_s + ":" %></span><span><%= v.to_s %></span>
+<span><%= k.to_s + ":" %></span><span><%= @auth_shopping_payment.send("#{k}") %></span>
 </div>
 <% end %>
 
+<!-- should show the cash change if and only if -->
+<% if @auth_shopping_payment.is_cash? && current_signed_in_resource.is_admin? %>
+	<span>Change is: </span>
+	<%= @auth_shopping_payment.cash_change %>	
+<% end %>
 
 <% if @auth_shopping_payment.is_gateway? %>
-<%= render :partial => "gateway_show.html.erb" %>
+	<!-- lets only keep verify payment. and do nothing on payment callback. -->
+	<%= render :partial => "proceed_to_gateway_or_verify_payment.html.erb" %>
 <% end %>
+
+
+
+
+
 <%= link_to 'Edit', edit_payment_path(@auth_shopping_payment) %> |
 <%= link_to 'Back', payments_path %>

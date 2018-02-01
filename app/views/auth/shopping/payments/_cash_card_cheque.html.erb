@@ -1,0 +1,14 @@
+<%= form_for(@auth_shopping_payment, as: :payment) do |f| %>
+	<%= f.hidden_field :cart_id, :value => @auth_shopping_payment.cart_id %>
+    <%= f.label :amount %>
+    <%= f.text_field :amount, :value => @auth_shopping_payment.amount  %>
+    <div class="input-field">
+    <%= f.select(:payment_type,  [['cash', "cash"], ['card', "card"],["cheque","cheque"]],{} ,{:class => "browser-default"}) %>
+    </div>
+    <!-- add an input for payment status if it is an admin -->
+    <% if current_signed_in_resource.is_admin? %>
+      <%= f.select(:payment_status,  [["Payment Not Verified By Cashier", 0], ['Payment Verified By Cashier', 1]],{}, {:class => "browser-default"}) %>
+    <% end %>
+		<%= f.submit 'Proceed' %>
+<% end %>
+<div class="divider m-40-bottom"></div>
