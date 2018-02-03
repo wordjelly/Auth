@@ -678,5 +678,13 @@ module Auth::Concerns::UserConcern
 		admin
 	end
 
+
+
+	## @return[Boolean] true/false : override to decide how the user decides if it can create discount coupons for its contents or not.
+	## the current implementation returns true by default
+	def can_create_discount_coupons?
+		true
+	end
+
 	
 end

@@ -1,6 +1,18 @@
 class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
 	
+	def instantiate_discount_class
+		if @auth_shopping_discount_class = Auth.configuration.discount_class
+	      begin
+	        @auth_shopping_discount_class = @auth_shopping_discount_class.constantize
+	      rescue
+	        not_found("error instantiating class from discount class")
+	      end
+	    else
+	      not_found("discount class not specified in configuration")
+	    end
+	end
+
 
     def instantiate_cart_class
 		if @auth_shopping_cart_class = Auth.configuration.cart_class
@@ -63,11 +75,11 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 	
 
 	def instantiate_shopping_classes
-		
 		instantiate_payment_class
 		instantiate_cart_class
 		instantiate_cart_item_class
 		instantiate_product_class
+		instantiate_discount_class
 	end
 
 

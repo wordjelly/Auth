@@ -57,7 +57,7 @@ module Auth::Concerns::Shopping::DiscountConcern
 		field :product_ids, type: Array, default: []
 		
 		## whether this discount object needs verification by the creator of the cart mentioned below, default is false
-		field :verification, type: Boolean, default: false
+		field :requires_verification, type: Boolean, default: false
 
 		## the total number of times this discount object can be used.
 		field :count, type: Integer
@@ -69,13 +69,16 @@ module Auth::Concerns::Shopping::DiscountConcern
 		field :discount_percentage, type: Float, default: 0.0
 		
 		## the original cart on which this discount object was created from.
-		field :origin_cart_id, type: String
+		field :cart_id, type: String
+
+		## the cart is internally set.
+		attr_accessor :cart
 		
 		## the array of cart_ids, which have requested a verification for this discount code.
-		field :pending_verification, type: Array, default: []
+		field :pending_verification_cart_ids, type: Array, default: []
 			
 		## the array of cart ids that have used this discount code(after verification if necessary)
-		field :used_by, type: Array, default: []
+		field :used_by_cart_ids, type: Array, default: []
 
 		## the hash of user ids who have used this discoutn code
 		## key => [String] user id
@@ -83,16 +86,108 @@ module Auth::Concerns::Shopping::DiscountConcern
 		field :used_by_users, type: Hash, default: {}
 
 
-		#####################################################
-		##
-		## VALIDATIONS
-		##
-		#####################################################
-
-		
+	#########################################################
+	##
+	## VALIDATIONS
+	##
+	#########################################################
 
 
+		validate :cart_exists
 
+		validate :cart_fully_paid
+
+		## d
+		#validate :cart_has_multiples_of_all_items
+
+		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }, allow_blank: true
+
+		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}
+
+	#########################################################
+	##
+	##
+	## CALLBACKS
+	##
+	##
+	#########################################################
+
+		before_validation do |document|
+
+			document.set_cart
+
+			
+			if document.new_record?
+				## assign the cart ids internally.
+				document.product_ids = document.cart.cart_items.map{|citem| citem = citem.product_id}
+
+				## assign count
+				document.count = document.cart.cart_items.first.quantity 
+
+			end
+
+			## if either the discount amount or percentage is nil, set it to 0.
+
+			document.discount_percentage = 0 if document.discount_percentage.nil?
+
+			document.discount_amount = 0 if document.discount_amount.nil?
+
+		end
+
+
+		module ClassMethods
+
+			##used in cart_item_controller_concern#index
+			## if there is a resource, will return all cart items with that resource id.
+			## if there is no resource, will return all cart items with a nil rsource.
+			def find_discounts(options)
+				conditions = {:resource_id => nil}
+				conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
+				Auth.configuration.cart_item_class.constantize.where(conditions)
+			end
+
+		end
+
+	end
+
+	#######################################################
+	##
+	##
+	## CALLBACK METHODS.
+	##
+	##
+	#######################################################
+
+	def set_cart
+		begin
+			self.cart = @auth_shopping_cart_class.find(document.cart_id)
+			self.cart.prepare_cart
+		rescue => e
+			puts e.to_s
+		end
+	end
+
+	#######################################################
+	##
+	##
+	## VALIDATION METHODS.
+	##
+	##
+	#######################################################
+
+
+	def cart_exists
+		self.errors.add(:cart,"the cart does not exist") unless self.cart
+	end
+
+
+	def cart_can_create_discount_coupons
+		self.errors.add(:cart, "you cannot create discount coupons on this cart") unless cart.can_create_discount_coupons? 
+	end
+
+
+	def user_can_create_discount_coupon
+		self.errors.add(:cart,"you cannot create discount coupons") unless owner_resource.can_create_discount_coupons?
 	end
 
 end

@@ -275,4 +275,10 @@ module Auth::Concerns::Shopping::CartConcern
 		end
 	end
 
+	## @return[Boolean] true/false : override to decide how the cart decides if it can create discount coupons for its contents or not.
+	## the current implementation returns true if all cart items have been accepted.
+	def can_create_discount_coupons?
+		return (self.cart_items.select{|c| c.accepted.nil? || c.accepted == false}.size == 0)
+	end
+
 end

@@ -1,5 +1,6 @@
 class Auth::Shopping::DiscountsController < Auth::Shopping::ShoppingController
   
+  include Auth::Concerns::Shopping::DiscountControllerConcern
   ## only these actions need an authenticated user to be present for them to be executed.
   CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index,:show]
 
