@@ -77,10 +77,24 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   end
 
+
+  ############################################################
+  ##
+  ##
+  ## GIVEN product ids, first create cart items, then  CREATE CART
+  ##
+  ## USED FROM THE DISCOUNT_OBJECT_SHOW PAGE
+  ##
+  ############################################################
+
+  def bulk_create
+    ## first create cart items.
+    ## this will bypass the controller and create problems.
+  end
+
+
   private
 
-  
- 
   ##override this def in your controller, and add attributes to transaction:[], each of the attributes in the transaction key will be cycled through, and if those fields exist on the cart_item, then they will be set.
   def permitted_params
     params.permit({cart: [:name, :notes, {:add_cart_item_ids => []},{:remove_cart_item_ids => []}]},:id)

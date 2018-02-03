@@ -31,7 +31,7 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product"].each do |model|
+			["cart_item","cart","payment","product","discount"].each do |model|
 
 				if Auth.configuration.send("#{model}_controller")
 
@@ -52,8 +52,8 @@ module ActionDispatch::Routing
 
 			 	 	if collection
 				 	 	scope :path => scope_path, :as => as_prefix do
-				 	 		puts "As prefix is: #{as_prefix}" 
-				 	 		puts "scope path is: #{scope_path}"
+				 	 		#puts "As prefix is: #{as_prefix}" 
+				 	 		#puts "scope path is: #{scope_path}"
 				 	 		controller_name = Auth.configuration.send("#{model}_controller")
 					    	resources collection.to_sym, controller: controller_name
 					    	##A ROUTE HAS BEEN ADDED IN THE DAUGHTER APP FOR THE POST -> TO THE PAYMENTS_UPDATE FOR PAYUMONEY.
