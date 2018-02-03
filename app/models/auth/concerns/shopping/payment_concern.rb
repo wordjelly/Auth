@@ -100,10 +100,14 @@ module Auth::Concerns::Shopping::PaymentConcern
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
-						
+							
+			## we can hook the refresh into this.
 			document.refresh_refund
 			
 			
+
+
+
 			document.verify_payment
 		end
 
@@ -157,7 +161,27 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 		end
 
-		
+
+		#####################################################
+		##
+		##
+		## DISCOUNT
+		##
+		##
+		#####################################################
+			
+		## id of discount coupon.
+		field :discount_id
+
+		## can be 'verified','pending_verification','verification_denied'
+		DISCOUNT_STATUS_VERIFIED = "verified"
+		DISCOUNT_STATUS_PENDING_VERIFICATION = "pending_verification"
+		DISCOUNT_STATUS_VERIFICATION_DENIED = "verification_denied"
+
+		field :discount_status, type: String
+
+
+
 	end
 
 	module ClassMethods
@@ -231,6 +255,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		
 		if self.refund
 			self.send("refund_callback",params,&block) 
+		elsif self.discount_id
+			self.send("discount_callback",params,&block)
 		else
 			self.send("#{type}_callback",params,&block) if self.respond_to? "#{type}_callback"
 		end
@@ -272,8 +298,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	
 	def refund_callback(params,&block)
-		## onus is on the user to provide the payment status.
-		## some checks and balances can be done for verification purposes.
+		
 	end
 
 	def refund_success
@@ -312,7 +337,44 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		yield if block_given?
 	end
+
+	def discount_callback
+
+		## the callback should fire on create/update, so new_record checking is not required.
+
+		## first check if the discount id exists -> get the discount object.
+		
+		begin
+			discount_obj = Auth.configuration.discount_class.constantize.find(discount_id)
+			if discount_obj.requires_verification == true
+				if discount_obj.pending_verification_payment_ids[self.id.to_s]
+				elsif discount_obj.verified_payment_ids[self.id.to_s]
+					self.payment_status = 1
+				else
+					## we need to add it to the discount obj for pending ids.
+					## and also send a message to the owner of the discount object to verify it
+					#Auth.configuration.discount_class.
+					# Topic.where({"$and" => [{"gar" => {"$ne" => "hello"}}]}).count
+				end
+			end
+		rescue
+
+		end
+		
+		## now verify that the discount amount <=> correlates with the payment amount
+		## check that the amount == discount_amount / the discount_percentage*(cart_pending_balance)
+		## if not then do nothing.
+
+		## then check whether it needs verification
+		## then check if it is already verified.
+		## then find and update where the present payment id does not exist in the pending, or the verified blocks.
+		## then do nothing =>  
+		## if verification is not needed, then simply set the payment status to 1. 
 	
+
+	end
+	
+
 	def physical_payment?
 		is_card? || is_cash? || is_cheque?
 	end

@@ -4,7 +4,8 @@ class Topic
   elasticsearch!
   field :name, type: String
   field :place, type: String
-
+  field :gar, type: Array, default: []
+  field :has, type: Hash, default: {}
   def self.mailgun
 		
 		##########

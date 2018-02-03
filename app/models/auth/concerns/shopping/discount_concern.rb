@@ -75,7 +75,9 @@ module Auth::Concerns::Shopping::DiscountConcern
 		attr_accessor :cart
 		
 		## the array of cart_ids, which have requested a verification for this discount code.
-		field :pending_verification_cart_ids, type: Array, default: []
+		field :pending_verification_payment_ids, type: Array, default: []
+
+		field :verified_payment_ids, type: Array, default:[]
 			
 		## the array of cart ids that have used this discount code(after verification if necessary)
 		field :used_by_cart_ids, type: Array, default: []
@@ -97,10 +99,9 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		validate :cart_fully_paid
 
-		## d
-		#validate :cart_has_multiples_of_all_items
+		validate :cart_has_multiples_of_all_items
 
-		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }, allow_blank: true
+		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }
 
 		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}
 
@@ -189,5 +190,16 @@ module Auth::Concerns::Shopping::DiscountConcern
 	def user_can_create_discount_coupon
 		self.errors.add(:cart,"you cannot create discount coupons") unless owner_resource.can_create_discount_coupons?
 	end
+
+	
+	def cart_has_multiples_of_all_items
+		self.errors.add(:cart,"the cart must have equal numbers of all items") if self.cart.cart_items.select{|c| c.quantity != self.count}
+	end
+
+	## so how does the discount finally work.
+	## this has created a discount item.
+	## now we need to be able to apply this concept
+	## so the idea is that, at the time of calculating the cart total price.
+	## so while creating the cart the discount 
 
 end

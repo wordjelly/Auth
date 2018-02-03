@@ -73,7 +73,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
 
   def permitted_params
 
-    params.permit({discount: [:discount_amount,:discount_percentage,:cart_id]},:id)
+    params.permit({discount: [:discount_amount,:discount_percentage,:cart_id, :requires_verification]},:id)
 
   end
 

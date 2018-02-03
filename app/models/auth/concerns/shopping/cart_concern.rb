@@ -9,8 +9,11 @@ module Auth::Concerns::Shopping::CartConcern
 	included do 
 		field :name, type: String
 		field :notes, type: String
-		field :resource_id, type: String
 		
+
+		
+
+
 		## debit is calculated live, by first getting all the items already dispatched and their value, and then getting the total payments made and their value, so it infact becomes something at the validation level of the cart item.
 
 		## add cart item ids
@@ -51,8 +54,13 @@ module Auth::Concerns::Shopping::CartConcern
 				false
 			end
 		end
+
 		
 		validate :add_or_remove_validation
+
+
+		## how to handle discount exceeds cart balance.
+		## how to handle discount origin cart id, is same as this cart.
 
 	end
 
@@ -74,6 +82,8 @@ module Auth::Concerns::Shopping::CartConcern
 		set_cart_pending_balance
 
 		set_cart_minimum_payable_amount
+
+		#set_discount_status
 
 	end
 
@@ -137,7 +147,7 @@ module Auth::Concerns::Shopping::CartConcern
 		self.cart_paid_amount 
 	end
 
-	## how much money the customer still owes us.
+	
 	def set_cart_pending_balance
 		self.cart_pending_balance = get_cart_price - get_cart_paid_amount
 	end
@@ -173,6 +183,19 @@ module Auth::Concerns::Shopping::CartConcern
 		## so we have discount and all this.
 	end
 
+	## will do first check if the discount id exists, and then if it requires
+	def set_discount_status
+		begin
+			discount = @auth_shopping_discount_class.find(discount_id)
+			if discount.requires_verification == true
+				self.discount_status = DISCOUNT_STATUS_PENDING_VERIFICATION
+			else
+				self.discount_status = DISCOUNT_STATUS_VERIFIED
+			end
+		rescue
+
+		end
+	end
 
 	## initially is the same as cart_paid_amount, by calling debit, we can debit from credit, the costs of various items.
 	def get_cart_credit
