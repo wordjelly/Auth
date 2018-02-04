@@ -80,31 +80,40 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		field :declined, type: Array, default: []
 			
-		## the array of cart ids that have used this discount code(after verification if necessary)
-		field :used_by_cart_ids, type: Array, default: []
-
 		## the hash of user ids who have used this discoutn code
 		## key => [String] user id
 		## value => [Integer] number of times used.
-		field :used_by_users, type: Hash, default: {}
+		field :used_by_users, type: Array, default: []
 
 
+		## these attributes are used in the update action , to add the ids that should be marked as verified or declined.
+
+		attr_accessor :add_verified_ids
+
+		attr_accessor :add_declined_ids 
+		
 	#########################################################
 	##
 	## VALIDATIONS
 	##
 	#########################################################
 
+		## these three validations only apply in case the current_signed_in_resource is not an admin.
+		## and if the  
+		validate :cart_exists, :unless => :admin_and_cart_id_absent
 
-		validate :cart_exists
+		validate :cart_fully_paid, :unless => :admin_and_cart_id_absent
 
-		validate :cart_fully_paid
-
-		validate :cart_has_multiples_of_all_items
+		validate :cart_has_multiples_of_all_items, :unless => :admin_and_cart_id_absent
 
 		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }
 
 		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}
+
+		validate :discount_percentage_permitted, :if => :admin_and_cart_id_absent
+
+		## the maximum discount amount is not validated in case its an admin and the cart id is not provided -> basically provideding a 
+		validate :maximum_discount_amount, :unless => :admin_and_cart_id_absent
 
 	#########################################################
 	##
@@ -134,6 +143,20 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 			document.discount_amount = 0 if document.discount_amount.nil?
 
+			## what is the maximum permissible amount?
+
+
+			## give the add verified and declined ids, default values.
+
+			document.add_verified_ids ||= []
+			document.add_declined_ids ||= []
+
+			document.pending = document.pending - [document.add_declined_ids + document.add_verified_ids]
+
+			document.verified = document.verified + document.add_verified_ids
+
+			document.declined = document.declined + document.add_declined_ids
+
 		end
 
 
@@ -147,6 +170,170 @@ module Auth::Concerns::Shopping::DiscountConcern
 				conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
 				Auth.configuration.cart_item_class.constantize.where(conditions)
 			end
+
+			## @called_from : payment_concern.rb
+			## @param[String] payment_id 
+			## @return[BSON::Document] the document after the update or nil, in case nothing was updated.
+			def add_pending_discount(payment_id,discount_object_id)
+				self.class.
+				constantize.
+				where({
+					"$and" => [
+						{
+							"verified" => {
+								"$ne" => payment_id
+							}
+						},
+						{
+							"pending" => {
+								"$ne" => payment_id
+							}
+						},
+						{
+							"declined" => {
+								"$ne" => payment_id
+							}
+						},
+						{
+							"_id" => discount_object_id
+						}
+					]
+				})
+				.find_one_and_update(
+					{
+						"$push" => {
+							:pending => payment_id
+						}
+					},
+					{
+						:return_document => :after	
+					}
+				)
+			end
+
+			## @called_from : payment_concern.rb
+			## @param[String] payment_id : the id of the payment
+			## @param[String] discount_object_id : the id of the discount object
+			## @return[Integer] payment_status: returns the status that should be set for the payment.
+			## @working: this def will match a discount object with the provided, id, and then filter the resulting fields to include any of the three arrays "pending","verified" or "declined" as long as they contain the payment id. It will return a payment_status that is to be set for the payment, based on teh result. If it finds that none of the arrays contain the payment id, then it will do a find and update to add the payment_id to the pending_array.
+
+			def get_payment_status(payment,discount_object_id)
+
+
+				results = self.class.collection.aggregate([
+
+					"$match" => {
+						"_id" => discount_object_id
+					},
+					"$project" => {
+						"verified" => {
+							"$filter" => {
+			                 	"input" => "$verified",
+			                 	"as" => "verified",
+			                 	"cond" => { 
+			                 		"$eq" => 
+			                 			[ "$$verified", payment.id.to_s 
+			                 			] 
+			                 	}
+			            	}
+						},
+						"pending" => {
+							"$filter" => {
+			                 	"input" => "$pending",
+			                 	"as" => "pending",
+			                 	"cond" => { 
+			                 		"$eq" => 
+			                 			[ "$$pending", payment.id.to_s 
+			                 			] 
+			                 	}
+			            	}
+						},
+						"declined" => {
+							"$filter" => {
+			                 	"input" => "$declined",
+			                 	"as" => "declined",
+			                 	"cond" => { 
+			                 		"$eq" => 
+			                 			[ "$$declined", payment.id.to_s 
+			                 			] 
+			                 	}
+			            	}
+						}
+					}
+
+				])
+
+				results_as_mongoid_docs = []
+
+				results.each do |r|
+					results_as_mongoid_docs << Mongoid::Factory.from_db(self.class,r)
+				end
+
+				if results_as_mongoid_docs.empty?
+					## this discont object does not exist
+					## return 0
+					0
+				elsif !results_as_mongoid_docs[0].verified.empty?
+					## it has been verified
+					## so return 1
+					1
+				elsif !results_as_mongoid_docs[0].declined.empty?
+					## it has been declined
+					## so return 0
+					0
+				elsif !results_as_mongoid_docs[0].pending.empty?
+					## it has not yet been acted on
+					## so return nil
+					nil 
+				else
+					## it has to still be added
+					## so in this case also the payment status will remain nil
+					## but this has to indicate that it should be still added.
+					## execute a find_and_update, where the payment id is not present in any of the three arrays, and then add it to the pending array.
+					doc_after = self.class.add_pending_discount(payment.id,discount_object_id)
+					return 0 unless doc_after
+					return nil
+				end
+
+			end
+
+
+			## @called_from : payment_concern.rb
+			## decrements the count by 1
+			## if enforce_single_use is passed as false, a given user can utilize the discount any number of times.
+			## checks that the count of the discount_object is greater than one before doing this.
+			## returns the updated document after the update is complete.
+			## if the document returned afterwards is nil, then it means that the payment_status will be set as failed.
+			## otherwise, set the payment_status as 1. 
+			def use_discount(discount_object_id,payment,enforce_single_use = true)
+				query_hash = {
+					:_id => discount_object_id,
+					:pending => {"$ne" => payment.id.to_s},
+					:declined => {"$ne" => payment.id.to_s},
+					:count => {"$gte" => 1}
+				}
+				if enforce_single_use == true
+					query_hash[:used_by_users => {"$ne" => payment.resource_id.to_s}]
+				end
+				updated_doc = self.class.where(query_hash).find_one_and_update({
+						"$inc" => {
+							:count => -1
+						},
+						"$push" => {
+							:used_by_users => payment.resource_id.to_s
+						}
+					},
+					{
+						:return_document => :after
+					}
+				)
+
+				return 0 if updated_doc.nil?
+				return 1
+
+			end
+
+
 
 		end
 
@@ -197,10 +384,25 @@ module Auth::Concerns::Shopping::DiscountConcern
 		self.errors.add(:cart,"the cart must have equal numbers of all items") if self.cart.cart_items.select{|c| c.quantity != self.count}
 	end
 
-	## so how does the discount finally work.
-	## this has created a discount item.
-	## now we need to be able to apply this concept
-	## so the idea is that, at the time of calculating the cart total price.
-	## so while creating the cart the discount 
+
+	def discount_percentage_permitted
+		## cannot be greater than zero ,
+		self.errors.add(:discount_percentage,"you cannot set a discount percentage") if self.discount_percentage > 0
+	end
+
+
+	def maximum_discount_amount
+		## cannot exceed the sum of all cart items prices.
+		self.errors.add(:discount_amount,"the discount amount cannot exceed:") if self.discount_amount > (self.cart.cart_items.map{|c| c = c.price}.inject(:+))
+	end
+
+
+
+	## returns true if:
+	## 1. the user is an admin
+	## 2. there is no cart id.
+	def admin_and_cart_id_absent
+		signed_in_resource.is_admin? && cart_id.nil?
+	end
 
 end

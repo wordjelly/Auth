@@ -10,7 +10,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
   
     instantiate_shopping_classes
 
-    @auth_shopping_discount_object_params = permitted_params.fetch(:discount_object,{})
+    @auth_shopping_discount_object_params = permitted_params.fetch(:discount,{})
     
     @auth_shopping_discount = @auth_shopping_discount_object_params[:id] ? @auth_shopping_discount_class.find_self(@auth_shopping_discount_object_params[:id],current_signed_in_resource) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
   
@@ -71,9 +71,17 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
 
   private
 
+
   def permitted_params
 
-    params.permit({discount: [:discount_amount,:discount_percentage,:cart_id, :requires_verification]},:id)
+    params_list = [:discount_amount,:discount_percentage,:cart_id, :requires_verification]
+
+    ## if its an update, we can allow the add_verified_ids and the add_declined_ids.
+    if action_name.to_s == "update"
+      params_list << [{:add_verified_ids => []}, {:add_declined_ids => []}]
+    end
+
+    params.permit({discount: params_list},:id)
 
   end
 
