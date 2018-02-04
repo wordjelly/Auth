@@ -74,10 +74,11 @@ module Auth::Concerns::Shopping::DiscountConcern
 		## the cart is internally set.
 		attr_accessor :cart
 		
-		## the array of cart_ids, which have requested a verification for this discount code.
-		field :pending_verification_payment_ids, type: Array, default: []
+		field :verified, type: Array, default:[]
 
-		field :verified_payment_ids, type: Array, default:[]
+		field :pending, type: Array, default: []
+
+		field :declined, type: Array, default: []
 			
 		## the array of cart ids that have used this discount code(after verification if necessary)
 		field :used_by_cart_ids, type: Array, default: []
