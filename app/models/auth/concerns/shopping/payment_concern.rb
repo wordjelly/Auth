@@ -351,11 +351,63 @@ module Auth::Concerns::Shopping::PaymentConcern
 				elsif discount_obj.verified_payment_ids[self.id.to_s]
 					self.payment_status = 1
 				else
+
+					## query where id is = discount_obj.id
+					## payment_id is nin in pending_verification array
+					## payment id is nin in verified_payments_array
+					## payment id is nin denied verification array
+					## then add it to pending verification
+					## if n matched is 
 					## we need to add it to the discount obj for pending ids.
 					## and also send a message to the owner of the discount object to verify it
 					#Auth.configuration.discount_class.
 					# Topic.where({"$and" => [{"gar" => {"$ne" => "hello"}}]}).count
+
+					resulting_document = Auth.configuration.discount_class.constantize
+						.where({
+							"$and" => [
+								{
+									"verified" => {
+										"$ne" => self.id.to_s
+									}
+								},
+								{
+									"pending" => {
+										"$ne" => self.id.to_s
+									}
+								},
+								{
+									"declined" => {
+										"$ne" => self.id.to_s
+									}
+								},
+								{
+									"_id" => discount_obj.id.to_s
+								}
+							]
+						})
+						.find_one_and_update(
+							{
+								"$push" => {
+									:pending => self.id.to_s
+								}
+							},
+							{
+								:return_document => :after	
+							}
+						)
+
+					if !resulting_document
+						## do an aggregation query, to see which of the three arrays it is in,
+						## if the result returns nothing, then it means the document no longer exists.
+						## finally 
+					end
 				end
+			else
+				## we need to decrement the count in the discount object
+				## as long as its greater than one , decrementit.
+				## then if success, mark the payment as successfull.
+				## that's it really.
 			end
 		rescue
 
@@ -364,6 +416,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## now verify that the discount amount <=> correlates with the payment amount
 		## check that the amount == discount_amount / the discount_percentage*(cart_pending_balance)
 		## if not then do nothing.
+		## this is a part of a validation.
 
 		## then check whether it needs verification
 		## then check if it is already verified.

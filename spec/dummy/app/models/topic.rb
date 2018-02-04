@@ -6,6 +6,41 @@ class Topic
   field :place, type: String
   field :gar, type: Array, default: []
   field :has, type: Hash, default: {}
+
+
+  def self.agg
+
+    Topic.collection.aggregate([
+
+      {
+        "$match" => {
+          "$or" => [
+            {
+              "gar" => "hello"
+            },
+            {
+              "name" => "eminem"
+            }
+          ]
+        }
+      },
+      {
+        "$project" => {
+           "gar" => {
+              "$filter" => {
+                 "input" => "$gar",
+                 "as" => "gar",
+                 "cond" => { "$eq" => [ "$$gar", "hello" ] }
+              }
+           }
+        }
+      }  
+
+    ])
+
+  end
+
+
   def self.mailgun
 		
 		##########
