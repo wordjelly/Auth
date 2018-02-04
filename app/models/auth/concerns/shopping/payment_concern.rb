@@ -93,6 +93,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		validate :payment_satisfies_minimum_payment_requirement
 
+		validate :payment_amount_corresponds_to_discount_amount
+
 		before_validation do |document|
 
 
@@ -173,12 +175,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## id of discount coupon.
 		field :discount_id
 
-		## can be 'verified','pending_verification','verification_denied'
-		DISCOUNT_STATUS_VERIFIED = "verified"
-		DISCOUNT_STATUS_PENDING_VERIFICATION = "pending_verification"
-		DISCOUNT_STATUS_VERIFICATION_DENIED = "verification_denied"
+		## the discount_object => set in the discount_callback.
+		attr_accessor :discount
 
-		field :discount_status, type: String
 
 
 
@@ -345,86 +344,33 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## first check if the discount id exists -> get the discount object.
 		
 		begin
-			discount_obj = Auth.configuration.discount_class.constantize.find(discount_id)
-			if discount_obj.requires_verification == true
-				if discount_obj.pending_verification_payment_ids[self.id.to_s]
-				elsif discount_obj.verified_payment_ids[self.id.to_s]
-					self.payment_status = 1
-				else
+			self.discount = Auth.configuration.discount_class.constantize.find(discount_id)
 
-					## query where id is = discount_obj.id
-					## payment_id is nin in pending_verification array
-					## payment id is nin in verified_payments_array
-					## payment id is nin denied verification array
-					## then add it to pending verification
-					## if n matched is 
-					## we need to add it to the discount obj for pending ids.
-					## and also send a message to the owner of the discount object to verify it
-					#Auth.configuration.discount_class.
-					# Topic.where({"$and" => [{"gar" => {"$ne" => "hello"}}]}).count
-
-					resulting_document = Auth.configuration.discount_class.constantize
-						.where({
-							"$and" => [
-								{
-									"verified" => {
-										"$ne" => self.id.to_s
-									}
-								},
-								{
-									"pending" => {
-										"$ne" => self.id.to_s
-									}
-								},
-								{
-									"declined" => {
-										"$ne" => self.id.to_s
-									}
-								},
-								{
-									"_id" => discount_obj.id.to_s
-								}
-							]
-						})
-						.find_one_and_update(
-							{
-								"$push" => {
-									:pending => self.id.to_s
-								}
-							},
-							{
-								:return_document => :after	
-							}
-						)
-
-					if !resulting_document
-						## do an aggregation query, to see which of the three arrays it is in,
-						## if the result returns nothing, then it means the document no longer exists.
-						## finally 
-					end
-				end
+			if self.discount.requires_verification == true
+				self.payment_status = Auth.configuration.discount_class.constantize.get_discount_status(self.id.to_s,discount_id)
 			else
-				## we need to decrement the count in the discount object
-				## as long as its greater than one , decrementit.
-				## then if success, mark the payment as successfull.
-				## that's it really.
+				## what about floating discount codes?
+				## can a user use them repeatedly?
+				self.payment_status = Auth.configuration.discount_class.constantize.use_discount(discount_id,self)
 			end
+
+			## now also set the payment amount to be equal to the discount amount or the discount percentage whichever works out be greater.
+			## first preference is given to check the discount amount.
+			if self.discount.discount_amount > 0
+				self.amount = self.discount.discount_amount
+			elsif self.discount.discount_percentage > 0
+				self.amount = self.cart.cart_pending_balance*self.discount.discount_percentage
+			else
+				self.amount = 0
+			end
+
+			##finally ensure its not more than the cart_pending_balance
+			self.amount = self.cart_pending_balance = self.amount > self.cart_pending_balance
+
 		rescue
-
+			self.payment_status = 0
 		end
-		
-		## now verify that the discount amount <=> correlates with the payment amount
-		## check that the amount == discount_amount / the discount_percentage*(cart_pending_balance)
-		## if not then do nothing.
-		## this is a part of a validation.
-
-		## then check whether it needs verification
-		## then check if it is already verified.
-		## then find and update where the present payment id does not exist in the pending, or the verified blocks.
-		## then do nothing =>  
-		## if verification is not needed, then simply set the payment status to 1. 
 	
-
 	end
 	
 
@@ -458,12 +404,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 		
 		self.cart = Auth.configuration.cart_class.constantize.find(cart_id)
 	
-
 		
 		self.cart.prepare_cart
 		
-
-
 
 	end
 
@@ -563,6 +506,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 		return if self.refund == true  
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
+
+
+
 
 	def as_json(options={})
 		super(options).merge({:payment_receipt => self.payment_receipt,:cash_change => self.cash_change})

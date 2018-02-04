@@ -1,0 +1,11 @@
+1)after a payment is created -> the option is provided to create a discount coupon -> clicking on that will take you to "new" action for discount coupon -> passing in the cart id, here you can decide the other things like required_verificatino as well as the 
+
+2)viewing a discount item should provide a link to create an entire cart using that discount -> should do a post to create multiple cart items -> should then give a link to create a cart -> and there the discount_code should be present -> with a link to create a payment using that discount id.
+
+3)on creating a payment with the discount id it should -> give the message that the verification si pending
+
+4)on viewing the discount object it should show all the pending discounts -> and provide an option to mark each as accepted or declined
+
+5)on refreshing the payment -> by passing is verify payment as true -> should now set the payment as successfull.
+
+6)end.
