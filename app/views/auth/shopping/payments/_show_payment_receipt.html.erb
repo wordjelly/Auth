@@ -3,7 +3,9 @@
 	<h4>Receipt</h4>
 	<!-- show the payment receipt -->
 	<div>The following items have been accepted for processing:</div>
-	<%= render :partial => "auth/shopping/cart_items/show_cart_items_collection", locals: {cart_items: @auth_shopping_payment.payment_receipt[:current_payment]} %>
+	<%= puts "the shopping cart is;" %>
+	<%= puts @auth_shopping_payment.cart %>
+	<%= render :partial => "auth/shopping/cart_items/show_cart_items_collection", locals: {cart_items: @auth_shopping_payment.payment_receipt[:current_payment], cart: @auth_shopping_payment.cart} %>
 	<!-- end -->
 	<div>Order Summary</div>
 	<%= render :partial => "auth/shopping/carts/show_cart_balance_info", locals: {cart: @auth_shopping_payment.cart} %>

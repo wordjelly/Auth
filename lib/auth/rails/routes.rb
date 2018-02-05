@@ -55,7 +55,18 @@ module ActionDispatch::Routing
 				 	 		#puts "As prefix is: #{as_prefix}" 
 				 	 		#puts "scope path is: #{scope_path}"
 				 	 		controller_name = Auth.configuration.send("#{model}_controller")
-					    	resources collection.to_sym, controller: controller_name
+				 	 		
+			 	 			resources collection.to_sym, controller: controller_name do
+			 	 				collection do 
+			 	 				## for the option to create multiple cart items at one time.
+				 	 				if model == "cart_item"
+				 	 					post 'create_multiple', :action => 'create_multiple'
+				 	 				end
+			 	 				end
+
+			 	 			end
+				 	 		
+					    	
 					    	##A ROUTE HAS BEEN ADDED IN THE DAUGHTER APP FOR THE POST -> TO THE PAYMENTS_UPDATE FOR PAYUMONEY.
 					    	##refer payumoney_controller_concern.rb
 					    end

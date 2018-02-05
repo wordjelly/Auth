@@ -98,13 +98,15 @@ module Auth::Concerns::Shopping::DiscountConcern
 	##
 	#########################################################
 
-		## these three validations only apply in case the current_signed_in_resource is not an admin.
-		## and if the  
 		validate :cart_exists, :unless => :admin_and_cart_id_absent
 
-		validate :cart_fully_paid, :unless => :admin_and_cart_id_absent
+		validate :one_discount_object_per_cart, if: Proc.new{|a| a.new_record?}
 
 		validate :cart_has_multiples_of_all_items, :unless => :admin_and_cart_id_absent
+
+		validate :cart_can_create_discount_coupons, if: Proc.new { |a| a.cart_id }
+
+		validate :user_can_create_discount_coupons
 
 		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }
 
@@ -134,6 +136,8 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 				## assign count
 				document.count = document.cart.cart_items.first.quantity 
+				puts "the document count is:" 
+				puts document.count
 
 			end
 
@@ -348,12 +352,17 @@ module Auth::Concerns::Shopping::DiscountConcern
 	#######################################################
 
 	def set_cart
-		begin
-			self.cart = @auth_shopping_cart_class.find(document.cart_id)
+		#begin
+			puts "self cart id is: #{self.cart_id}"
+			self.cart = Auth.configuration.cart_class.constantize.find(self.cart_id)
+			
+			#puts "set the cart"
 			self.cart.prepare_cart
-		rescue => e
-			puts e.to_s
-		end
+			#puts "prepared the cart."
+		
+		#rescue => e
+		#	puts e.to_s
+		#end
 	end
 
 	#######################################################
@@ -364,24 +373,30 @@ module Auth::Concerns::Shopping::DiscountConcern
 	##
 	#######################################################
 
+	def one_discount_object_per_cart
+		discount_coupons_with_cart = 
+		Auth.configuration.discount_class.constantize.where(:cart_id => self.cart_id.to_s)
+		self.errors.add(:cart,"you can only create one discount coupon per cart") if discount_coupons_with_cart.size > 0
+	end
+
 
 	def cart_exists
 		self.errors.add(:cart,"the cart does not exist") unless self.cart
 	end
 
-
+	## this should only be if a cart id is provided.
 	def cart_can_create_discount_coupons
 		self.errors.add(:cart, "you cannot create discount coupons on this cart") unless cart.can_create_discount_coupons? 
 	end
 
 
-	def user_can_create_discount_coupon
-		self.errors.add(:cart,"you cannot create discount coupons") unless owner_resource.can_create_discount_coupons?
+	def user_can_create_discount_coupons
+		self.errors.add(:cart,"you cannot create discount coupons") unless get_resource.can_create_discount_coupons?
 	end
 
 	
 	def cart_has_multiples_of_all_items
-		self.errors.add(:cart,"the cart must have equal numbers of all items") if self.cart.cart_items.select{|c| c.quantity != self.count}
+		self.errors.add(:cart,"the cart must have equal numbers of all items") if self.cart.cart_items.select{|c| c.quantity != self.count}.size > 0
 	end
 
 

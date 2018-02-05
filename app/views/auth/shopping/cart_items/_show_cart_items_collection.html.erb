@@ -4,12 +4,13 @@
 		<th>Status</th>
 		<th>Price</th>
 	</thead>
+	
 	<tbody>
 		<% cart_items.each_with_index {|citem,key| %>
 
 		<tr>
 			<td><%= citem.id.to_s %>
-				<%= render :partial => "remove_cart_item.html.erb", locals: {cart_item: citem} %>
+				<%= render :partial => "auth/shopping/carts/remove_cart_item.html.erb", locals: {cart_item: citem, cart: cart} %>
 			</td>
 			<td><%= citem.accepted.to_s %></td>
 			<td><%= citem.price.to_s %></td>

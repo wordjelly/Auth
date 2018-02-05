@@ -93,7 +93,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		validate :payment_satisfies_minimum_payment_requirement
 
-		validate :payment_amount_corresponds_to_discount_amount
+		
 
 		before_validation do |document|
 

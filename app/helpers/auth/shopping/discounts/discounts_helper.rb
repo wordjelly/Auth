@@ -1,4 +1,4 @@
-module Auth::Shopping::DiscountsHelper
+module Auth::Shopping::Discounts::DiscountsHelper
 
 	###################################################
     ##
@@ -28,8 +28,12 @@ module Auth::Shopping::DiscountsHelper
     end
 
     ##/shopping/discounts/:id/edit
-    def edit_discount_path(discount)
-    	main_app.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.discount_class),discount)
+    def edit_discount_path(options = {})
+        
+
+    	main_app.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.discount_class),options)
     end
+
+    
 
 end
