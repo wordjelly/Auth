@@ -22,4 +22,8 @@ module Auth::Shopping::CartItems::CartItemsHelper
     	main_app.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.cart_item_class),cart_item)
     end
 
+    def create_multiple_cart_items_path(options={})
+        main_app.send("create_multiple_" + Auth.configuration.cart_item_class.underscore.pluralize.gsub("\/","_")+ "_path",options)
+    end
+
 end

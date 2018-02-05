@@ -1,2 +1,15 @@
-<h1>Auth::Shopping::Discounts#show</h1>
-<p>Find me in app/views/auth/shopping/discounts/show.html.erb</p>
+<p id="notice"><%= notice %></p>
+<div class="fields">
+
+	<% @auth_shopping_discount.attributes_to_show.each do |attr| %>
+
+		<div><%= attr %></div>
+		<div><%= @auth_shopping_discount.send("#{attr}") %></div>
+
+	<% end %>
+</div>
+<%= link_to 'Edit', edit_discount_path({:id => @auth_shopping_discount.id}) %> |
+<%= link_to 'Back', discounts_path %>
+
+<!-- the user should be able to use the discount to create multiple cart items , so make a form that posts to create_multiple_cart_items -->
+<%= render :partial => "form_for_create_multiple_cart_items" %>

@@ -46,6 +46,10 @@ module Auth::Concerns::Shopping::CartConcern
 		## the minimum amount payable for all the cart items in the cart that are not yet accepted
 		attr_accessor :cart_minimum_payable_amount
 
+
+		## the discount object id, passed in so that it can be rendered in the show_cart action where we provide a link to create a payment.
+		attr_accessor :discount_id
+
 		before_destroy do |document|
 			document.prepare_cart
 			if document.cart_items.keep_if{|c| c.accepted == true}.size > 0
@@ -274,13 +278,17 @@ module Auth::Concerns::Shopping::CartConcern
 	def add_or_remove(item_ids,add_or_remove)
 	    item_ids.map {|id|
 	      begin
-		      cart_item = Auth.configuration.cart_item_class.constantize.find(id)
+	      	  puts " ---------- FINDING CART ITEM---------------"
+		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
+		      puts "finished finding."
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
-		      puts "response of unsetting cart was:"
-		      puts resp.to_s
+		      puts "response of add or remove is: #{resp.to_s}"
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
+	  	  	puts "--------------------------------------------DIDNT FIND THE CART ITEM"
+	  	  	puts error.to_s
+	  	  	puts "--------------------------------------------"
 	  	  	true
 	  	  end
 	    }

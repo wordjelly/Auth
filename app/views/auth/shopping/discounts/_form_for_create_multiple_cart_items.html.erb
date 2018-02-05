@@ -1,0 +1,17 @@
+<%= form_for(@auth_shopping_discount, url: create_multiple_cart_items_path({:id => @auth_shopping_discount.id}), method: :post, as: :discount) do |f| %>
+  <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_discount} %>
+  
+  <div class="form_fields">
+  	<div>Add these items to your cart,and get a <%= @auth_shopping_discount.discount_amount %> discount!</div>
+    <% @auth_shopping_discount.product_ids.each do |pr_id| %>
+
+    
+      <%= hidden_field_tag("discount[product_ids][]",pr_id.to_s, :id => "#{@auth_shopping_discount.id.to_s}_product_id_#{pr_id.to_s}", :multiple => true) %>
+
+    <% end %>
+
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,18 @@
+<%= form_for(@auth_shopping_discount, url: @auth_shopping_discount.new_record? ? discounts_path : discount_path(@auth_shopping_discount), method: @auth_shopping_discount.new_record? ? :post : :put, as: :discount) do |f| %>
+  <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_discount} %>
+  
+  <div class="form_fields">
+
+    <%= f.text_field :discount_amount %>
+    <%= f.label :discount_amount %>
+    
+    <%= f.hidden_field :cart_id, :value => @auth_shopping_discount.cart_id %>
+
+    <!-- add a selection to decide whether this discount option needs a verification or not -->
+    <%= f.select(:requires_verification,  [["Verify those who claim this discount", true], ['This discount doesnt need verification', false]],{}, {:class => "browser-default"}) %>
+
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

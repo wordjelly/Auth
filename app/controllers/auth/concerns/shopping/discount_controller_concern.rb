@@ -12,7 +12,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
 
     @auth_shopping_discount_object_params = permitted_params.fetch(:discount,{})
     
-    @auth_shopping_discount = @auth_shopping_discount_object_params[:id] ? @auth_shopping_discount_class.find_self(@auth_shopping_discount_object_params[:id],current_signed_in_resource) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
+    @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
   
   end
 
@@ -54,7 +54,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
   ##since these are the pending cart items.
   ##all remaining cart items have already been assigned to carts
   def index
-    @auth_shopping_discounts = @auth_shopping_discount_class.where({:resource => lookup_resource})
+    @auth_shopping_discounts = @auth_shopping_discount_class.where({:resource_id => lookup_resource.id.to_s})
     respond_with @auth_shopping_discounts
   end
 

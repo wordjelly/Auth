@@ -34,6 +34,8 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def create
     check_for_create(@auth_shopping_cart)
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
+    puts "the cart created is:" 
+    puts @auth_shopping_cart.attributes.to_s
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart
     respond_with @auth_shopping_cart
@@ -94,7 +96,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   ##override this def in your controller, and add attributes to transaction:[], each of the attributes in the transaction key will be cycled through, and if those fields exist on the cart_item, then they will be set.
   def permitted_params
-    params.permit({cart: [:name, :notes, {:add_cart_item_ids => []},{:remove_cart_item_ids => []}]},:id)
+    params.permit({cart: [:discount_id,:name, :notes, {:add_cart_item_ids => []},{:remove_cart_item_ids => []}]},:id)
   end
 
 end

@@ -1,8 +1,8 @@
 <% if current_signed_in_resource.is_admin? %>
-	<%= form_for(@auth_shopping_cart, as: :cart) do |f| %>
+	<%= form_for(cart, as: :cart) do |f| %>
 		<% [cart_item.id.to_s].each do |r_id| %>
 
-      		<%= hidden_field_tag("cart[remove_cart_item_ids][]",r_id.to_s, :id => "#{@auth_shopping_cart.id.to_s}_cart_remove_cart_item_ids_#{r_id.to_s}") %>
+      		<%= hidden_field_tag("cart[remove_cart_item_ids][]",r_id.to_s, :id => "#{cart.id.to_s}_cart_remove_cart_item_ids_#{r_id.to_s}") %>
 
     	<% end %>
 		<%= f.submit 'Remove This Cart Item' %>

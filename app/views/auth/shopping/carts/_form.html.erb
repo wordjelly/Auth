@@ -24,6 +24,8 @@
 
     <% end %>
 
+    <%= hidden_field_tag("cart[discount_id]",@auth_shopping_cart.discount_id) %>
+
   </div>
   <div class="actions">
     <%= f.submit %>

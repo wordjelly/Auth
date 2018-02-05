@@ -1,8 +1,5 @@
 <% if @auth_shopping_payment.payment_status == 1 && @auth_shopping_payment.cart.cart_pending_balance == 0 %>
 	
-	<%= link_to "Create Coupons For your Friends/Family/Employees", new_discount_path(:cart_id => @auth_shopping_payment.cart.cart_id) %>
-
-	
-
+	<%= link_to "Create Coupons For your Friends/Family/Employees", new_discount_path(:discount => {:cart_id => @auth_shopping_payment.cart.id.to_s}) %>
 
 <% end %>

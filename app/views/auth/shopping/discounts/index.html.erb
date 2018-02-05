@@ -1,2 +1,40 @@
-<h1>Auth::Shopping::Discounts#index</h1>
-<p>Find me in app/views/auth/shopping/discounts/index.html.erb</p>
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Auth Shopping Discounts</h1>
+
+<table>
+  <thead>
+    <tr>
+      <!-- id number, this will also hold links to edit and destroy. -->
+      <th>Number</th>
+      <th>Id Number</th>
+      <!-- get the names of the other fields to be shown-->
+      <% @auth_shopping_discounts.first.attributes_to_show.each do |attr| %>
+        <%= puts "doing: #{attr}" %>
+        <th><%= attr %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+      <% @auth_shopping_discounts.each_with_index {|auth_shopping_discount,key| %>
+      <tr>
+        <td><%= key + 1 %></td>
+        <td>
+          <div>
+            <%= link_to auth_shopping_discount.id.to_s, discount_path(auth_shopping_discount) %>
+          </div>
+          <div>
+            <!-- add destory and edit options here -->
+            <!-- end -->
+            <span><%= link_to 'Edit', edit_discount_path(auth_shopping_discount) %></span>
+            <span><%= link_to 'Destroy', discount_path(auth_shopping_discount), method: :delete, data: { confirm: 'Are you sure?' } %></span>
+            <!-- here how to show a button, and how to change the form id's so that it uses the object id, -->
+          </div>
+        </td>
+        <% @auth_shopping_discounts.first.attributes_to_show.each do |attr| %>
+          <td><%= auth_shopping_discount.send("#{attr}") %></td>
+        <% end %>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
