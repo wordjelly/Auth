@@ -48,7 +48,9 @@ module Auth::Concerns::Shopping::CartConcern
 
 
 		## the discount object id, passed in so that it can be rendered in the show_cart action where we provide a link to create a payment.
-		attr_accessor :discount_id
+		field :discount_id, type: String
+
+		attr_accessor :discount
 
 		before_destroy do |document|
 			document.prepare_cart
@@ -87,7 +89,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 		set_cart_minimum_payable_amount
 
-		#set_discount_status
+		set_discount
 
 	end
 
@@ -188,16 +190,16 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	## will do first check if the discount id exists, and then if it requires
-	def set_discount_status
+	def set_discount
 		begin
-			discount = @auth_shopping_discount_class.find(discount_id)
-			if discount.requires_verification == true
-				self.discount_status = DISCOUNT_STATUS_PENDING_VERIFICATION
-			else
-				self.discount_status = DISCOUNT_STATUS_VERIFIED
-			end
-		rescue
-
+			self.discount = Auth.configuration.discount_class.constantize.find(discount_id)
+			puts "----------------------------------------------------DISCOUNT IS-------------------------------"
+			puts discount.to_s
+			puts "----------------------------------------------------------------------------"
+		rescue => e
+			puts "----------------------THIS IS THE DISCOunt ERROR."
+			puts e.to_s
+			puts '-------------------------'
 		end
 	end
 

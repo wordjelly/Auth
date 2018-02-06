@@ -12,6 +12,8 @@ module Auth::Concerns::UserConcern
 
 		USER_INFO_FIELDS = ["name","image_url"]
 
+		PUBLICLY_VISIBLE_FIELD_NAMES = ["email","additional_login_param"]
+
 		include MongoidVersionedAtomic::VAtomic
 		
 

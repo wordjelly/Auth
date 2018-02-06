@@ -108,14 +108,18 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		validate :user_can_create_discount_coupons
 
-		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }
+		validates :discount_percentage, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 100.0 }, if: Proc.new {|a| a.discount_percentage_changed?}
 
-		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}
+		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}, if: Proc.new {|a| a.discount_amount_changed?}
 
-		validate :discount_percentage_permitted, :if => :admin_and_cart_id_absent
+		validate :discount_percentage_permitted, if: Proc.new {|a| a.discount_amount_changed? && a.admin_and_cart_id_absent}
+
+
 
 		## the maximum discount amount is not validated in case its an admin and the cart id is not provided -> basically provideding a 
-		validate :maximum_discount_amount, :unless => :admin_and_cart_id_absent
+		validate :maximum_discount_amount, if: Proc.new {|a| (a.discount_amount_changed? || a.cart_id_changed? || a.discount_percentage_changed?) && !a.admin_and_cart_id_absent}
+
+		## add the pending ids to be added, i think i already did that.
 
 	#########################################################
 	##
@@ -136,8 +140,7 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 				## assign count
 				document.count = document.cart.cart_items.first.quantity 
-				puts "the document count is:" 
-				puts document.count
+				
 
 			end
 
@@ -155,7 +158,9 @@ module Auth::Concerns::Shopping::DiscountConcern
 			document.add_verified_ids ||= []
 			document.add_declined_ids ||= []
 
-			document.pending = document.pending - [document.add_declined_ids + document.add_verified_ids]
+			
+
+			document.pending = document.pending - ([document.add_declined_ids + document.add_verified_ids].flatten)
 
 			document.verified = document.verified + document.add_verified_ids
 
@@ -164,71 +169,80 @@ module Auth::Concerns::Shopping::DiscountConcern
 		end
 
 
-		module ClassMethods
+		
 
-			##used in cart_item_controller_concern#index
-			## if there is a resource, will return all cart items with that resource id.
-			## if there is no resource, will return all cart items with a nil rsource.
-			def find_discounts(options)
-				conditions = {:resource_id => nil}
-				conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
-				Auth.configuration.cart_item_class.constantize.where(conditions)
-			end
+	end
 
-			## @called_from : payment_concern.rb
-			## @param[String] payment_id 
-			## @return[BSON::Document] the document after the update or nil, in case nothing was updated.
-			def add_pending_discount(payment_id,discount_object_id)
-				self.class.
-				constantize.
-				where({
-					"$and" => [
-						{
-							"verified" => {
-								"$ne" => payment_id
-							}
-						},
-						{
-							"pending" => {
-								"$ne" => payment_id
-							}
-						},
-						{
-							"declined" => {
-								"$ne" => payment_id
-							}
-						},
-						{
-							"_id" => discount_object_id
-						}
-					]
-				})
-				.find_one_and_update(
+	module ClassMethods
+
+		
+
+
+
+		
+		def find_discounts(options)
+			conditions = {:resource_id => nil}
+			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
+			Auth.configuration.discount_class.constantize.where(conditions)
+		end
+
+		## @called_from : payment_concern.rb
+		## @param[String] payment_id 
+		## @return[BSON::Document] the document after the update or nil, in case nothing was updated.
+		def add_pending_discount(payment_id,discount_object_id)
+			Auth.configuration.discount_class.constantize.
+			where({
+				"$and" => [
 					{
-						"$push" => {
-							:pending => payment_id
+						"verified" => {
+							"$ne" => payment_id
 						}
 					},
 					{
-						:return_document => :after	
+						"pending" => {
+							"$ne" => payment_id
+						}
+					},
+					{
+						"declined" => {
+							"$ne" => payment_id
+						}
+					},
+					{
+						"_id" => BSON::ObjectId(discount_object_id)
 					}
-				)
-			end
+				]
+			})
+			.find_one_and_update(
+				{
+					"$push" => {
+						:pending => payment_id
+					}
+				},
+				{
+					:return_document => :after	
+				}
+			)
+		end
 
-			## @called_from : payment_concern.rb
-			## @param[String] payment_id : the id of the payment
-			## @param[String] discount_object_id : the id of the discount object
-			## @return[Integer] payment_status: returns the status that should be set for the payment.
-			## @working: this def will match a discount object with the provided, id, and then filter the resulting fields to include any of the three arrays "pending","verified" or "declined" as long as they contain the payment id. It will return a payment_status that is to be set for the payment, based on teh result. If it finds that none of the arrays contain the payment id, then it will do a find and update to add the payment_id to the pending_array.
+		## @called_from : payment_concern.rb
+		## @param[String] payment_id : the id of the payment
+		## @param[String] discount_object_id : the id of the discount object
+		## @return[Integer] payment_status: returns the status that should be set for the payment.
+		## @working: this def will match a discount object with the provided, id, and then filter the resulting fields to include any of the three arrays "pending","verified" or "declined" as long as they contain the payment id. It will return a payment_status that is to be set for the payment, based on teh result. If it finds that none of the arrays contain the payment id, then it will do a find and update to add the payment_id to the pending_array.
 
-			def get_payment_status(payment,discount_object_id)
+		def get_payment_status(payment,discount_object_id)
 
 
-				results = self.class.collection.aggregate([
 
+			results = Auth.configuration.discount_class.constantize.collection.aggregate([
+
+				{
 					"$match" => {
-						"_id" => discount_object_id
-					},
+					"_id" => BSON::ObjectId(discount_object_id)
+					}
+				},
+				{
 					"$project" => {
 						"verified" => {
 							"$filter" => {
@@ -264,82 +278,86 @@ module Auth::Concerns::Shopping::DiscountConcern
 			            	}
 						}
 					}
-
-				])
-
-				results_as_mongoid_docs = []
-
-				results.each do |r|
-					results_as_mongoid_docs << Mongoid::Factory.from_db(self.class,r)
-				end
-
-				if results_as_mongoid_docs.empty?
-					## this discont object does not exist
-					## return 0
-					0
-				elsif !results_as_mongoid_docs[0].verified.empty?
-					## it has been verified
-					## so return 1
-					1
-				elsif !results_as_mongoid_docs[0].declined.empty?
-					## it has been declined
-					## so return 0
-					0
-				elsif !results_as_mongoid_docs[0].pending.empty?
-					## it has not yet been acted on
-					## so return nil
-					nil 
-				else
-					## it has to still be added
-					## so in this case also the payment status will remain nil
-					## but this has to indicate that it should be still added.
-					## execute a find_and_update, where the payment id is not present in any of the three arrays, and then add it to the pending array.
-					doc_after = self.class.add_pending_discount(payment.id,discount_object_id)
-					return 0 unless doc_after
-					return nil
-				end
-
-			end
-
-
-			## @called_from : payment_concern.rb
-			## decrements the count by 1
-			## if enforce_single_use is passed as false, a given user can utilize the discount any number of times.
-			## checks that the count of the discount_object is greater than one before doing this.
-			## returns the updated document after the update is complete.
-			## if the document returned afterwards is nil, then it means that the payment_status will be set as failed.
-			## otherwise, set the payment_status as 1. 
-			def use_discount(discount_object_id,payment,enforce_single_use = true)
-				query_hash = {
-					:_id => discount_object_id,
-					:pending => {"$ne" => payment.id.to_s},
-					:declined => {"$ne" => payment.id.to_s},
-					:count => {"$gte" => 1}
 				}
-				if enforce_single_use == true
-					query_hash[:used_by_users => {"$ne" => payment.resource_id.to_s}]
-				end
-				updated_doc = self.class.where(query_hash).find_one_and_update({
-						"$inc" => {
-							:count => -1
-						},
-						"$push" => {
-							:used_by_users => payment.resource_id.to_s
-						}
-					},
-					{
-						:return_document => :after
-					}
-				)
 
-				return 0 if updated_doc.nil?
-				return 1
+			])
 
+			results_as_mongoid_docs = []
+
+			results.each do |r|
+				results_as_mongoid_docs << Mongoid::Factory.from_db(Auth.configuration.discount_class.constantize,r)
 			end
 
-
+			if results_as_mongoid_docs.empty?
+				## this discont object does not exist
+				## return 0
+				puts "------------------------there was no such discount object-----------------------------"
+				0
+			elsif !results_as_mongoid_docs[0].verified.empty?
+				## it has been verified
+				## so return 1
+				puts "it has been verified"
+				1
+			elsif !results_as_mongoid_docs[0].declined.empty?
+				## it has been declined
+				## so return 0
+				puts "it has been declined"
+				0
+			elsif !results_as_mongoid_docs[0].pending.empty?
+				## it has not yet been acted on
+				## so return nil
+				puts "it is still pending."
+				nil 
+			else
+				## it has to still be added
+				## so in this case also the payment status will remain nil
+				## but this has to indicate that it should be still added.
+				## execute a find_and_update, where the payment id is not present in any of the three arrays, and then add it to the pending array.
+				puts "came to add pending discount."
+				doc_after = self.add_pending_discount(payment.id.to_s,discount_object_id)
+				return 0 unless doc_after
+				return nil
+			end
 
 		end
+
+
+		## @called_from : payment_concern.rb
+		## decrements the count by 1
+		## if enforce_single_use is passed as false, a given user can utilize the discount any number of times.
+		## checks that the count of the discount_object is greater than one before doing this.
+		## returns the updated document after the update is complete.
+		## if the document returned afterwards is nil, then it means that the payment_status will be set as failed.
+		## otherwise, set the payment_status as 1. 
+		def use_discount(discount_object_id,payment,enforce_single_use = true)
+			query_hash = {
+				:_id => discount_object_id,
+				:pending => {"$ne" => payment.id.to_s},
+				:declined => {"$ne" => payment.id.to_s},
+				:count => {"$gte" => 1}
+			}
+			if enforce_single_use == true
+				query_hash[:used_by_users => {"$ne" => payment.resource_id.to_s}]
+			end
+			updated_doc = Auth.configuration.discount_class.constantize.where(query_hash).find_one_and_update({
+					"$inc" => {
+						:count => -1
+					},
+					"$push" => {
+						:used_by_users => payment.resource_id.to_s
+					}
+				},
+				{
+					:return_document => :after
+				}
+			)
+
+			return 0 if updated_doc.nil?
+			return 1
+
+		end
+
+
 
 	end
 
@@ -352,17 +370,20 @@ module Auth::Concerns::Shopping::DiscountConcern
 	#######################################################
 
 	def set_cart
-		#begin
-			puts "self cart id is: #{self.cart_id}"
+		begin
+		
 			self.cart = Auth.configuration.cart_class.constantize.find(self.cart_id)
 			
 			#puts "set the cart"
 			self.cart.prepare_cart
-			#puts "prepared the cart."
+
+
+
+
 		
-		#rescue => e
-		#	puts e.to_s
-		#end
+		rescue => e
+			puts e.to_s
+		end
 	end
 
 	#######################################################

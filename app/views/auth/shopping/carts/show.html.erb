@@ -10,9 +10,7 @@
 	<% end %>
 
 	<h3>Items In Your Cart</h3>
-	<%= puts "-------------------------------------------------" %>
-	<%= puts "the cart items are: #{@auth_shopping_cart.cart_items.size.to_s}" %>
-	<%= puts "-------------------------------------------------" %>
+	
 	<%= render :partial => "auth/shopping/cart_items/show_cart_items_collection", locals: {cart_items: @auth_shopping_cart.cart_items, cart: @auth_shopping_cart} %>
 	
 	<%= render :partial => "auth/shopping/carts/show_cart_balance_info", locals: {cart: @auth_shopping_cart} %>
@@ -37,7 +35,6 @@
 			<% } %>
 		</tbody>
 	</table>
-
 
 	
 

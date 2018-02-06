@@ -1,2 +1,29 @@
-<h1>Auth::Shopping::Discounts#edit</h1>
-<p>Find me in app/views/auth/shopping/discounts/edit.html.erb</p>
+<!-- i think it should use, javascript to populate two accessors, add_to_declined,
+add_to_verified.
+so on clicking the checkbox, the value of the reject checkbox will be 
+discount[add_to_declined][]
+
+the value of the accept checkbox will be
+discount[add_to_verified][] -->
+<%= form_for(@auth_shopping_discount, url: @auth_shopping_discount.new_record? ? discounts_path : discount_path(@auth_shopping_discount), method: @auth_shopping_discount.new_record? ? :post : :put, as: :discount) do |f| %>
+<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_discount} %>
+	<% @auth_shopping_discount.pending.each do |pending_id| %>
+		<%= puts "the pending id is: #{pending_id}" %>
+		<div class="input-field">
+			
+			<%= render :partial => "show_pending_discount_request.html.erb", locals: {payment_id: pending_id} %>
+			
+			<div class="row">
+				<div class="col l4 m4 s4">
+				<%= check_box_tag("discount[add_verified_ids][]",pending_id,false,{:id => "discount_add_verified_ids_#{pending_id}"}) %>
+				<%= label_tag("discount_add_verified_ids_#{pending_id}","Allow this person to use discount") %>
+				</div>
+				<div class="col l4 m4 s4">
+				<%= check_box_tag("discount[add_declined_ids][]",pending_id,false,{:id => "discount_add_declined_ids_#{pending_id}"}) %>
+				<%= label_tag("discount_add_declined_ids_#{pending_id}","Permission Denied") %>
+				</div>
+			</div>
+		</div>
+	<% end %>
+	<%= f.submit %>
+<% end %>

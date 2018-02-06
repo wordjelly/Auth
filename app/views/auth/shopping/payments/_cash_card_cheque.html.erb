@@ -1,13 +1,23 @@
 <%= form_for(@auth_shopping_payment, as: :payment) do |f| %>
-	<%= f.hidden_field :cart_id, :value => @auth_shopping_payment.cart_id %>
-    <%= f.label :amount %>
-    <%= f.text_field :amount, :value => @auth_shopping_payment.amount  %>
-    <div class="input-field">
-    <%= f.select(:payment_type,  [['cash', "cash"], ['card', "card"],["cheque","cheque"]],{} ,{:class => "browser-default"}) %>
-    </div>
-    <!-- add an input for payment status if it is an admin -->
-    <% if current_signed_in_resource.is_admin? %>
-      <%= f.select(:payment_status,  [["Payment Not Verified By Cashier", 0], ['Payment Verified By Cashier', 1]],{}, {:class => "browser-default"}) %>
+	<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_payment} %>
+    <%= f.hidden_field :cart_id, :value => @auth_shopping_payment.cart_id %>
+
+    <% if @auth_shopping_payment.discount_id %>
+        Use Your Discount Token
+        <!-- for the discount type of payment we make hidden field of the amount, type, and discount_id.-->
+        <%= f.hidden_field :amount, :value => 0.0 %>
+        <%= f.hidden_field :discount_id, :value => @auth_shopping_payment.discount_id %>
+        <%= f.hidden_field :payment_type, :value => "cash" %> 
+    <% else %>
+        <%= f.label :amount %>
+        <%= f.text_field :amount, :value => @auth_shopping_payment.amount  %>
+        <div class="input-field">
+        <%= f.select(:payment_type,  [['cash', "cash"], ['card', "card"],["cheque","cheque"]],{} ,{:class => "browser-default"}) %>
+        </div>
+        <!-- add an input for payment status if it is an admin -->
+        <% if current_signed_in_resource.is_admin? %>
+          <%= f.select(:payment_status,  [["Payment Not Verified By Cashier", 0], ['Payment Verified By Cashier', 1]],{}, {:class => "browser-default"}) %>
+        <% end %>
     <% end %>
 		<%= f.submit 'Proceed' %>
 <% end %>

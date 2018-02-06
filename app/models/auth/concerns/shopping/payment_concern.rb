@@ -106,10 +106,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 			## we can hook the refresh into this.
 			document.refresh_refund
 			
-			
-
-
-
 			document.verify_payment
 		end
 
@@ -173,7 +169,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 		#####################################################
 			
 		## id of discount coupon.
-		field :discount_id
+		field :discount_id, type: String
 
 		## the discount_object => set in the discount_callback.
 		attr_accessor :discount
@@ -337,17 +333,25 @@ module Auth::Concerns::Shopping::PaymentConcern
 		yield if block_given?
 	end
 
-	def discount_callback
-
+	def discount_callback(params,&block)
+		puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------"
+		puts "the discount callback has been called"
+		puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------"
 		## the callback should fire on create/update, so new_record checking is not required.
 
 		## first check if the discount id exists -> get the discount object.
 		
-		begin
+		#begin
+		
 			self.discount = Auth.configuration.discount_class.constantize.find(discount_id)
 
+			puts "discount is: #{self.discount}"
+
+
 			if self.discount.requires_verification == true
-				self.payment_status = Auth.configuration.discount_class.constantize.get_discount_status(self.id.to_s,discount_id)
+				puts "detected discount requires verification"
+				self.payment_status = Auth.configuration.discount_class.constantize.get_payment_status(self,discount_id)
+				puts "the payment status is detected as: #{self.payment_status}"
 			else
 				## what about floating discount codes?
 				## can a user use them repeatedly?
@@ -356,8 +360,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 			## now also set the payment amount to be equal to the discount amount or the discount percentage whichever works out be greater.
 			## first preference is given to check the discount amount.
+			puts "the discount amount is: #{self.discount.discount_amount}"
 			if self.discount.discount_amount > 0
 				self.amount = self.discount.discount_amount
+				puts "setting amount as: #{self.amount}"
 			elsif self.discount.discount_percentage > 0
 				self.amount = self.cart.cart_pending_balance*self.discount.discount_percentage
 			else
@@ -365,11 +371,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 
 			##finally ensure its not more than the cart_pending_balance
-			self.amount = self.cart_pending_balance = self.amount > self.cart_pending_balance
+			self.amount = self.cart.cart_pending_balance if self.amount > self.cart.cart_pending_balance
 
-		rescue
-			self.payment_status = 0
-		end
+		#rescue
+		#	self.payment_status = 0
+		#end
 	
 	end
 	
@@ -503,7 +509,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## validation
 	def payment_satisfies_minimum_payment_requirement
 		self.cart.prepare_cart
-		return if self.refund == true  
+		return if (self.refund == true || self.discount)  
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
 

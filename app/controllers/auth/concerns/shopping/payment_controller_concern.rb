@@ -41,15 +41,14 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
    
     @auth_shopping_payment.payment_params = params
     
-    puts "the attributes are:"
-    puts @auth_shopping_payment.attributes.to_s
+   
 
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
    
     resp = @auth_shopping_payment.save
-      
-    puts "teh save response is: #{resp.to_s}"
-
+    
+       
+   
     respond_with @auth_shopping_payment
   end
 
@@ -89,7 +88,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
 
   def permitted_params
-    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status, :is_verify_payment]
+    payment_params = [:payment_type, :amount, :cart_id,:payment_ack_proof, :refund, :payment_status, :is_verify_payment,:discount_id]
 
     if !current_signed_in_resource.is_admin?
       payment_params.delete(:payment_status)

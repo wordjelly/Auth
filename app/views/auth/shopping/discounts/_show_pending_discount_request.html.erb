@@ -1,0 +1,17 @@
+<% payment = Auth.configuration.payment_class.constantize.find(payment_id) 
+
+
+   owner_resource = payment.get_resource
+
+%>
+<div class="row">
+	<div class="col l4 m4 s4">
+		<% if owner_resource %>
+			<% owner_resource.public_attributes_to_show.each do |p_attr| %>
+			<div>
+				<%= owner_resource.send("#{p_attr}") %>
+			</div>
+			<% end %>
+		<% end %>
+	</div>
+</div>

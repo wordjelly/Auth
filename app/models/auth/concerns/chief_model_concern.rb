@@ -7,6 +7,9 @@ module Auth::Concerns::ChiefModelConcern
 		## @used_in : all shopping views, whenever 
 		FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM = ["_id","_type","resource_id","resource_class","created_at","updated_at","public"]
 
+		## override this in each model to decide which field names can be shown publicly.
+		PUBLICLY_VISIBLE_FIELD_NAMES = []
+
 		include Mongoid::Document
 		include Mongoid::Timestamps
 
@@ -26,6 +29,11 @@ module Auth::Concerns::ChiefModelConcern
 		## @return[Array] array_of_strings : field name.
 		def attributes_to_show
 			self.class.attribute_names.keep_if{|c| !self.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}
+		end
+
+		## @return[Array]
+		def public_attributes_to_show
+			self.class::PUBLICLY_VISIBLE_FIELD_NAMES
 		end
 
 	end
