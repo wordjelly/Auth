@@ -34,8 +34,7 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def create
     check_for_create(@auth_shopping_cart)
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
-    puts "the cart created is:" 
-    puts @auth_shopping_cart.attributes.to_s
+   
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart
     respond_with @auth_shopping_cart

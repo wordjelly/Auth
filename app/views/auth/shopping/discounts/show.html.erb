@@ -5,10 +5,13 @@
 
 		<div><%= attr %></div>
 		<div><%= @auth_shopping_discount.send("#{attr}") %></div>
+		<% if attr == "pending" %>
+			<%= link_to "Approve pending discount verification requests", edit_discount_path({:id => @auth_shopping_discount.id}) %>
+		<% end %>
 
 	<% end %>
 </div>
-<%= link_to 'Edit', edit_discount_path({:id => @auth_shopping_discount.id}) %> |
+
 <%= link_to 'Back', discounts_path %>
 
 <!-- the user should be able to use the discount to create multiple cart items , so make a form that posts to create_multiple_cart_items -->

@@ -24,7 +24,9 @@
 
     <% end %>
 
+    <% if @auth_shopping_cart.discount_id %>
     <%= hidden_field_tag("cart[discount_id]",@auth_shopping_cart.discount_id) %>
+    <% end %>
 
   </div>
   <div class="actions">

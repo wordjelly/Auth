@@ -8,11 +8,17 @@
 
 
 	<% ["cash","card","cheque","gateway"].each do |p_type| %>
-
-		<%= link_to "Pay By #{p_type.capitalize}", new_payment_path(payment: {payment_type: p_type, cart_id: @auth_shopping_payment.cart_id, amount: @auth_shopping_payment.amount}) %>
-
+		<div>
+		<%= link_to "Pay By #{p_type.capitalize}", new_payment_path(payment: {payment_type: p_type, cart_id: @auth_shopping_payment.cart_id, amount: @auth_shopping_payment.amount}),{:class => "button"} %>
+		</div>
 	<% end %>
 	
+	
+	<% if !cart.discount_id.blank? %>
+		<div>
+		<%= link_to "Click here to use Code #{cart.discount_id} and get #{cart.discount.discount_amount} off", new_payment_path(payment: {payment_type: "cash", cart_id: @auth_shopping_payment.cart_id, amount: 0, discount_id: cart.discount_id}),{:class => "button"} %>
+		</div>
+	<% end %>
 	
 
 <% elsif cart.cart_pending_balance < 0 %>

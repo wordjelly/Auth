@@ -85,23 +85,20 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
       @auth_shopping_discount.product_ids.each do |product_id|
         
         if product = @auth_shopping_product_class.find(product_id)
-          puts "teh auth shopping cart item class is:"
-          puts @auth_shopping_cart_item_class.to_s
+         
           cart_item = @auth_shopping_cart_item_class.new(product.attributes.except(:_id,:_type).merge({:product_id => product_id}))
           cart_item = add_owner_and_signed_in_resource(cart_item)  
           if cart_item.save == true
             @auth_shopping_cart_items << cart_item
             @auth_shopping_cart.add_cart_item_ids << cart_item.id.to_s
           else
-            puts "---------------------ERRROR"
-            puts cart_item.errors.full_messages.to_s
+            
           end
         end
         
       end
     end
-    puts "---------------ADD CART ITEM IDS-----------------"
-    puts @auth_shopping_cart.add_cart_item_ids.to_s
+    
     #respond_with @auth_shopping_cart_items
 
   end
