@@ -213,13 +213,15 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			##scenario -> add a few new cart items, but also add name on transaction, and remove some of the older cart items
 
-			it " -- adds name and notes to cart, and adds the new cart items, and removes the required cart items." do 
+			it " -- adds name and notes to cart, and adds the new cart items, and removes the required cart items.", :cart_update => true do 
 
 				##
 
 
 				##this is the new cart item to be added
 				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name
 				cart_item.signed_in_resource = @admin
 				cart_item.save
 

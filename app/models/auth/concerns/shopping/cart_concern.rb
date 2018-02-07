@@ -173,6 +173,9 @@ module Auth::Concerns::Shopping::CartConcern
 		if pending_or_unaccepted_cart_items.size > 0
 
 			self.cart_minimum_payable_amount = pending_or_unaccepted_cart_items.map{|c| c = c.minimum_price_required_to_accept_cart_item}.inject(:+)
+
+			## it can happen that he has payed somewhere halfway between the required amount and the full price of the cart -> see the tests.
+			self.cart_minimum_payable_amount = self.cart_pending_balance if (self.cart_pending_balance < self.cart_minimum_payable_amount)
 		
 		elsif accepted_cart_items.size > 0
 
@@ -280,17 +283,19 @@ module Auth::Concerns::Shopping::CartConcern
 	def add_or_remove(item_ids,add_or_remove)
 	    item_ids.map {|id|
 	      begin
-	      	  puts " ---------- FINDING CART ITEM---------------"
+	      	  puts "the signed in resource is:"
+	      	  puts self.signed_in_resource
+	      	  
 		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
-		      puts "finished finding."
+		      
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
-		      puts "response of add or remove is: #{resp.to_s}"
+		      
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
-	  	  	puts "--------------------------------------------DIDNT FIND THE CART ITEM"
-	  	  	puts error.to_s
-	  	  	puts "--------------------------------------------"
+	  	  	#puts "--------------------------------------------DIDNT FIND THE CART ITEM"
+	  	  	#puts error.to_s
+	  	  	#puts "--------------------------------------------"
 	  	  	true
 	  	  end
 	    }

@@ -1,0 +1,7 @@
+<div>Verify/Refresh Payment Status</div>
+<%= form_for(@auth_shopping_payment, url: @auth_shopping_payment.new_record? ? payments_path : payment_path(@auth_shopping_payment), method: @auth_shopping_payment.new_record? ? :post : :put) do |f| %>
+		<%= hidden_field :payment, :is_verify_payment, :value => true %>
+		<div class="actions">
+		    <%= f.submit "Verify/Refresh Payment Status" %>
+		</div>
+<% end %>
