@@ -12,9 +12,9 @@
 	<%= @auth_shopping_payment.cash_change %>	
 <% end %>
 
-<% if @auth_shopping_payment.is_gateway? %>
-	<%= render :partial => "proceed_to_gateway_or_verify_payment.html.erb" %>
-<% end %>
+
+<%= render :partial => "proceed_to_gateway_or_verify_payment.html.erb" %>
+
 
 
 

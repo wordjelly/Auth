@@ -47,6 +47,10 @@ module Auth::Concerns::Shopping::CartControllerConcern
     @auth_shopping_cart.assign_attributes(@auth_shopping_cart_params)
     
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
+
+    puts 'the auth shopping cart signed in resource is:' 
+    puts @auth_shopping_cart.signed_in_resource
+
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart
     respond_with @auth_shopping_cart

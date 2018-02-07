@@ -48,7 +48,7 @@ module Auth::Shopping::Payments::PaymentsHelper
 
     ##/shopping/payments/:id/edit
     def edit_payment_path(payment)
-    	main_app.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.payment_class),payment)
+    	main_app.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.payment_class),{:id => payment.id.to_s})
     end
 
 end
