@@ -2,7 +2,8 @@ class Auth::Shopping::DiscountsController < Auth::Shopping::ShoppingController
   
   include Auth::Concerns::Shopping::DiscountControllerConcern
   ## only these actions need an authenticated user to be present for them to be executed.
-  CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index,:show]
+  ## SHOW IS EXCLUDED SO THAT NON SIGNED IN USERS CAN view any discount/ product bundle.
+  CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index]
 
   TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
   ##this ensures api access to this controller.

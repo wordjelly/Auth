@@ -13,7 +13,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
    
     @auth_shopping_discount_params = permitted_params.fetch(:discount,{})
     
-    @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_discount_class.new(@auth_shopping_discount_params)
+    @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find(params[:id]) : @auth_shopping_discount_class.new(@auth_shopping_discount_params)
   
   end
 
@@ -51,7 +51,8 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
   end
 
   def show
-    not_found if @auth_shopping_discount.nil?
+    instantiate_shopping_classes
+    @auth_shopping_discount = @auth_shopping_discount_class.find(params[:id])
     respond_with @auth_shopping_discount 
   end
 

@@ -17,7 +17,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
     @auth_shopping_discount_object_params = permitted_params.fetch(:discount,{})
     
-    @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
+    @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find(params[:id]) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
 
     @auth_shopping_cart_item_params = permitted_params.fetch(:cart_item,{})
     @auth_shopping_cart_item = params[:id] ? @auth_shopping_cart_item_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_cart_item_class.new(@auth_shopping_cart_item_params)
@@ -78,9 +78,18 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##
   ############################################################
   def create_multiple
+    puts "came to create multiple."
+    puts "params are:"
+    puts params.to_s
     @auth_shopping_cart_items = []
     @auth_shopping_cart = @auth_shopping_cart_class.new(:add_cart_item_ids => [], :remove_cart_item_ids => [])
+    puts "auth shopping discount is:"
+    puts @auth_shopping_discount.to_s
     @auth_shopping_cart.discount_id = @auth_shopping_discount.id.to_s
+    
+
+    puts "is it is a new record"
+    puts @auth_shopping_discount.new_record?
     unless @auth_shopping_discount.new_record?
       @auth_shopping_discount.product_ids.each do |product_id|
         
@@ -92,11 +101,14 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
             @auth_shopping_cart_items << cart_item
             @auth_shopping_cart.add_cart_item_ids << cart_item.id.to_s
           else
-            
+            puts "the errors trying to save the item"
+            puts cart_item.errors.full_messages.to_s
           end
         end
         
       end
+    else
+
     end
     
     #respond_with @auth_shopping_cart_items

@@ -121,6 +121,8 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		## add the pending ids to be added, i think i already did that.
 
+		validates :product_ids, presence: true
+
 	#########################################################
 	##
 	##
@@ -168,6 +170,11 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		end
 
+
+		## all discounts are public to be searched.
+		before_save do |document|
+			self.public = "yes"
+		end
 
 		
 
