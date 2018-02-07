@@ -196,13 +196,9 @@ module Auth::Concerns::Shopping::CartConcern
 	def set_discount
 		begin
 			self.discount = Auth.configuration.discount_class.constantize.find(discount_id)
-			puts "----------------------------------------------------DISCOUNT IS-------------------------------"
-			puts discount.to_s
-			puts "----------------------------------------------------------------------------"
+			
 		rescue => e
-			puts "----------------------THIS IS THE DISCOunt ERROR."
-			puts e.to_s
-			puts '-------------------------'
+			
 		end
 	end
 

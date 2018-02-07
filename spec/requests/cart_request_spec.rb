@@ -7,13 +7,14 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         User.delete_all
         Auth::Client.delete_all
         Shopping::CartItem.delete_all
+        Shopping::Product.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
         ## THIS PRODUCT IS USED IN THE CART_ITEM FACTORY, TO PROVIDE AND ID.
-        #@product = Shopping::Product.new(:name => "test product", :price => 400.00)
+        @product = Shopping::Product.new(:name => "test product", :price => 400.00)
        
-        #@product.save
+        @product.save
 
 
         @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
@@ -52,7 +53,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
                 cart_item.parent_id = @cart.id
                 cart_item.price = 10.00
                 cart_item.signed_in_resource = @admin
-                cart_item.save
+                k = cart_item.save
+                puts cart_item.product_id.to_s
+                puts "result of save is: #{k.to_s}"
                 @created_cart_item_ids << cart_item.id.to_s
 			end
 
