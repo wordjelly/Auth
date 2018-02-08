@@ -120,7 +120,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				it " -- signed in user can create a cart from those cart items -- " do 
 
-=begin
+
 					cart_items = create_cart_items(@u)
 					
 					cart = create_cart(@u)
@@ -134,31 +134,87 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 					multiple_created_cart_items = create_multiple_cart_items(discount,@u2)
 
+					expect(Shopping::CartItem.count).to eq(10)
+
 					post shopping_carts_path,{cart: {add_cart_item_ids: multiple_created_cart_items.map{|c| c = c.id.to_s}},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
 
 					expect(response.code).to eq("201")
-=end
 
+					expect(Shopping::Cart.count).to eq(2)
 				end
 
 
-				it " -- signed in user, is shown option to pay for cart with coupon -- " do 
+				it " -- signed in user, is shown option to 	pay for cart with coupon -- " do 
 
+					## make a payment using the discount id.
+					cart_items = create_cart_items(@u)
+					
+					cart = create_cart(@u)
+					
+					add_cart_items_to_cart(cart_items,cart,@u)
+					
+					payment = create_payment(cart,50,@u)
+					
+					authorize_payment_as_admin(payment,@admin)					
+					discount = create_discount(cart,@u)
+
+					multiple_created_cart_items = create_multiple_cart_items(discount,@u2)
+
+					user_two_cart = create_cart(@u2)
+
+					add_cart_items_to_cart(multiple_created_cart_items,user_two_cart,@u2)
+
+					
+					post shopping_payments_path, {cart_id: user_two_cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: discount.id.to_s, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
+
+					expect(response.code).to eq("201")
+					payment_created = assigns(:auth_shopping_payment)
+					expect(payment_created.payment_status).to be_nil
 				end
 
-				it " -- he gets a notification that his request is pending -- " do 
+				it " -- cart id shows up in the to_be_verified array of the discount object. -- " do 
+
+					cart_items = create_cart_items(@u)
+					
+					cart = create_cart(@u)
+					
+					add_cart_items_to_cart(cart_items,cart,@u)
+					
+					payment = create_payment(cart,50,@u)
+					
+					authorize_payment_as_admin(payment,@admin)					
+					discount = create_discount(cart,@u)
+
+					multiple_created_cart_items = create_multiple_cart_items(discount,@u2)
+
+					user_two_cart = create_cart(@u2)
+
+					add_cart_items_to_cart(multiple_created_cart_items,user_two_cart,@u2)
+
+					
+					discount_payment = create_payment_using_discount(discount,user_two_cart,@u2)
+
+					get shopping_discount_path({:id => discount.id.to_s}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}		
+
+					discount_obj = JSON.parse(response.body)
+
+					puts discount_obj.to_s
+
+					pending = discount_obj["pending"]
+					
+					expect(pending.include? discount_payment.id.to_s).to be_truthy
 
 				end
 
 				it " -- coupon creator an verify the payment -- " do 
+					
 
 				end
 
-				it " -- payment creator gets a notification that his payment has been sent for verification -- " do 
-
-				end
+				
 
 				it " -- payment creator can verify and view the that his payment is now verified -- " do 
+
 
 				end
 

@@ -183,6 +183,26 @@ module DiscountSupport
 
   end
 
+  def create_payment_using_discount(discount,cart,signed_in_res,user = nil)
+    
+    user ||= signed_in_res
+    payment = Shopping::Payment.new
+    payment.signed_in_resource = signed_in_res
+    payment.resource_id = user.id.to_s
+    payment.resource_class = user.class.name
+    payment.amount = 0.0
+    payment.cart_id = cart.id.to_s
+    payment.discount_id = discount.id.to_s
+    payment.payment_type = "cash"
+    res = payment.save
+    puts "Result of saving payment"
+    puts res.to_s
+    puts "errors saving payment:"
+    puts payment.errors.full_messages
+    payment
+
+  end
+
 end
 
 RSpec.configure do |config|
