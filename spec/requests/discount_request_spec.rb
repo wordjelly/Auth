@@ -206,8 +206,35 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				end
 
-				it " -- coupon creator an verify the payment -- " do 
+				it " -- coupon creator an verify the payment -- ", :verify_discount do 
 					
+					cart_items = create_cart_items(@u)
+					
+					cart = create_cart(@u)
+					
+					add_cart_items_to_cart(cart_items,cart,@u)
+					
+					payment = create_payment(cart,50,@u)
+					
+					authorize_payment_as_admin(payment,@admin)					
+					discount = create_discount(cart,@u)
+
+					multiple_created_cart_items = create_multiple_cart_items(discount,@u2)
+
+					user_two_cart = create_cart(@u2)
+
+					add_cart_items_to_cart(multiple_created_cart_items,user_two_cart,@u2)
+
+					
+					discount_payment = create_payment_using_discount(discount,user_two_cart,@u2)
+
+
+					put shopping_discount_path({:id => discount.id.to_s}), {:discount => {:add_verified_ids => [discount_payment.id.to_s]}, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+
+					expect(response.code).to eq("204")
+					discount = Shopping::Discount.find(discount.id.to_s)
+					expect(discount.verified.include? discount_payment.id.to_s).to be_truthy
+					expect(discount.pending).to be_empty
 
 				end
 
@@ -215,6 +242,36 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				it " -- payment creator can verify and view the that his payment is now verified -- " do 
 
+					## payment should pass now as successfull
+
+					cart_items = create_cart_items(@u)
+					
+					cart = create_cart(@u)
+					
+					add_cart_items_to_cart(cart_items,cart,@u)
+					
+					payment = create_payment(cart,50,@u)
+					
+					authorize_payment_as_admin(payment,@admin)					
+					discount = create_discount(cart,@u)
+
+					multiple_created_cart_items = create_multiple_cart_items(discount,@u2)
+
+					user_two_cart = create_cart(@u2)
+
+					add_cart_items_to_cart(multiple_created_cart_items,user_two_cart,@u2)
+
+					
+					discount_payment = create_payment_using_discount(discount,user_two_cart,@u2)
+
+					approve_pending_discount_request(discount,discount_payment,@u,user=nil)
+
+					##now call update on the discount payment as user u2, and it should have a payment status as passed.
+					put shopping_payment_path({:id => discount_payment.id.to_s}), {:is_verify_payment => true, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@u2_headers
+
+					expect(response.code).to eq("204")
+					discount_payment = Shopping::Payment.find(discount_payment.id.to_s)
+					expect(discount_payment.payment_status).to eq(1)
 
 				end
 

@@ -203,6 +203,23 @@ module DiscountSupport
 
   end
 
+  def approve_pending_discount_request(discount,pending_payment,signed_in_res,user=nil)
+
+    user||= signed_in_res
+
+    dis = Shopping::Discount.find(discount.id.to_s)
+    dis.verified << pending_payment.id.to_s
+    dis.pending.delete(pending_payment.id.to_s)
+    dis.signed_in_resource = signed_in_res
+    res = dis.save  
+    puts "Result of saving discount"
+    puts res.to_s
+    puts "errors saving payment:"
+    puts dis.errors.full_messages
+    dis
+
+  end
+
 end
 
 RSpec.configure do |config|
