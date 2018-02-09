@@ -100,9 +100,9 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		validate :cart_exists, :unless => :admin_and_cart_id_absent
 
-		validate :one_discount_object_per_cart, if: Proc.new{|a| a.new_record?}
+		validate :one_discount_object_per_cart, if: Proc.new{|a| a.cart_id }
 
-		validate :cart_has_multiples_of_all_items, :unless => :admin_and_cart_id_absent
+		validate :cart_has_multiples_of_all_items, if: Proc.new{|a| a.cart_id }
 
 		validate :cart_can_create_discount_coupons, if: Proc.new { |a| a.cart_id }
 
@@ -112,16 +112,18 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		validates :discount_amount, numericality: {greater_than_or_equal_to: 0.0}, if: Proc.new {|a| a.discount_amount_changed?}
 
-		validate :discount_percentage_permitted, if: Proc.new {|a| a.discount_amount_changed? && a.admin_and_cart_id_absent}
+		validate :discount_percentage_permitted, if: Proc.new {|a| a.discount_percentage_changed? && !a.admin_and_cart_id_absent}
 
 
+		## SHOULD BE TESTED.
+		## the maximum discount amount is not validated in case its an admin and the cart id is not provided
+		validate :maximum_discount_amount, if: Proc.new {|a| (a.discount_amount_changed? || a.discount_percentage_changed?) && a.cart_id}
 
-		## the maximum discount amount is not validated in case its an admin and the cart id is not provided -> basically provideding a 
-		validate :maximum_discount_amount, if: Proc.new {|a| (a.discount_amount_changed? || a.cart_id_changed? || a.discount_percentage_changed?) && !a.admin_and_cart_id_absent}
+		## does not validate for product ids if the user is admin, and the cart is not present.
+		validates :product_ids, presence: true, if: Proc.new{|a| a.cart_id}
 
-		## add the pending ids to be added, i think i already did that.
-
-		validates :product_ids, presence: true
+		## validates for count irrespective.
+		validates :count, presence: true
 
 	#########################################################
 	##
@@ -134,15 +136,19 @@ module Auth::Concerns::Shopping::DiscountConcern
 		before_validation do |document|
 
 			document.set_cart
-
 			
 			if document.new_record?
-				## assign the cart ids internally.
-				document.product_ids = document.cart.cart_items.map{|citem| citem = citem.product_id}
 
-				## assign count
-				document.count = document.cart.cart_items.first.quantity 
-				
+				if document.cart
+					## assign the cart ids internally.
+					document.product_ids = document.cart.cart_items.map{|citem| citem = citem.product_id}
+
+					## assign count
+					document.count = document.cart.cart_items.first.quantity
+				else
+					## whatever was sent in the params.
+					## the count param is permitted only if the user is an admin.
+				end				
 
 			end
 
@@ -192,6 +198,9 @@ module Auth::Concerns::Shopping::DiscountConcern
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
 			Auth.configuration.discount_class.constantize.where(conditions)
 		end
+
+
+		
 
 		## @called_from : payment_concern.rb
 		## @param[String] payment_id 
@@ -336,31 +345,44 @@ module Auth::Concerns::Shopping::DiscountConcern
 		## returns the updated document after the update is complete.
 		## if the document returned afterwards is nil, then it means that the payment_status will be set as failed.
 		## otherwise, set the payment_status as 1. 
-		def use_discount(discount_object_id,payment,enforce_single_use = true)
-			query_hash = {
-				:_id => discount_object_id,
-				:pending => {"$ne" => payment.id.to_s},
-				:declined => {"$ne" => payment.id.to_s},
-				:count => {"$gte" => 1}
-			}
-			if enforce_single_use == true
-				query_hash[:used_by_users => {"$ne" => payment.resource_id.to_s}]
-			end
-			updated_doc = Auth.configuration.discount_class.constantize.where(query_hash).find_one_and_update({
-					"$inc" => {
-						:count => -1
-					},
-					"$push" => {
-						:used_by_users => payment.resource_id.to_s
-					}
-				},
-				{
-					:return_document => :after
-				}
-			)
+		def use_discount(discount,payment,enforce_single_use = true)
 
-			return 0 if updated_doc.nil?
-			return 1
+			## so we can check here if the cart has any items pending, before running this.
+			## so we can only use the discount if all cart items are accepted
+			if discount.cart_id
+				discount.cart_can_create_discount_coupons
+			end
+
+			if discount.errors.full_messages.empty?
+			
+				query_hash = {
+					:_id => discount.id.to_s,
+					:pending => {"$ne" => payment.id.to_s},
+					:declined => {"$ne" => payment.id.to_s},
+					:count => {"$gte" => 1}
+				}
+				if enforce_single_use == true
+					query_hash[:used_by_users => {"$ne" => payment.resource_id.to_s}]
+				end
+				updated_doc = Auth.configuration.discount_class.constantize.where(query_hash).find_one_and_update({
+						"$inc" => {
+							:count => -1
+						},
+						"$push" => {
+							:used_by_users => payment.resource_id.to_s
+						}
+					},
+					{
+						:return_document => :after
+					}
+				)
+
+				return 0 if updated_doc.nil?
+				return 1
+
+			else
+				return 0
+			end
 
 		end
 
@@ -378,16 +400,16 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 	def set_cart
 		begin
-		
-			self.cart = Auth.configuration.cart_class.constantize.find(self.cart_id)
-			
-			#puts "set the cart"
-			self.cart.prepare_cart
+	
+			if self.cart_id
 
+				self.cart = Auth.configuration.cart_class.constantize.find(self.cart_id)
+				
+				
+				self.cart.prepare_cart
 
+			end
 
-
-		
 		rescue => e
 			puts e.to_s
 		end
@@ -404,7 +426,11 @@ module Auth::Concerns::Shopping::DiscountConcern
 	def one_discount_object_per_cart
 		discount_coupons_with_cart = 
 		Auth.configuration.discount_class.constantize.where(:cart_id => self.cart_id.to_s)
-		self.errors.add(:cart,"you can only create one discount coupon per cart") if discount_coupons_with_cart.size > 0
+		
+		count = self.new_record? ? 0 : 1
+
+		self.errors.add(:cart,"you can only create one discount coupon per cart") if discount_coupons_with_cart.size > count
+		
 	end
 
 
@@ -414,6 +440,7 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 	## this should only be if a cart id is provided.
 	def cart_can_create_discount_coupons
+		set_cart unless self.cart
 		self.errors.add(:cart, "you cannot create discount coupons on this cart") unless cart.can_create_discount_coupons? 
 	end
 
@@ -429,13 +456,12 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 
 	def discount_percentage_permitted
-		## cannot be greater than zero ,
 		self.errors.add(:discount_percentage,"you cannot set a discount percentage") if self.discount_percentage > 0
 	end
 
 
 	def maximum_discount_amount
-		## cannot exceed the sum of all cart items prices.
+		## cannot exceed the sum of all cart items prices, we mean one multiple of the cart item prices.
 		self.errors.add(:discount_amount,"the discount amount cannot exceed:") if self.discount_amount > (self.cart.cart_items.map{|c| c = c.price}.inject(:+))
 	end
 
@@ -445,6 +471,11 @@ module Auth::Concerns::Shopping::DiscountConcern
 	## 1. the user is an admin
 	## 2. there is no cart id.
 	def admin_and_cart_id_absent
+		#puts "signed in resource is:"
+		#puts signed_in_resource.to_s
+		#puts "is it an admin?"
+		#puts signed_in_resource.is_admin?
+		#puts "cart id is nil: #{cart_id.nil?}"
 		signed_in_resource.is_admin? && cart_id.nil?
 	end
 

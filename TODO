@@ -72,7 +72,7 @@ THINGS TO BE DONE:
 21. custom user and test creation -> admin ui, and shopping cart for admin
 22. write test suite for shopping module
 23. after this there will all the stuff to create -> user , collection agent interaction, test updates.
-
+24. 
 
 ---> 
 while running shopping tests : notify has to be false, investigate why getting some weird error inside the notification lib file.

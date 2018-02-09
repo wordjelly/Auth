@@ -82,6 +82,8 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
 
     params_list = [:discount_amount,:discount_percentage,:cart_id, :requires_verification]
 
+    params_list << :count if (current_signed_in_resource && current_signed_in_resource.is_admin?)
+
     ## if its an update, we can allow the add_verified_ids and the add_declined_ids.
     if action_name.to_s == "update"
       params_list << [{:add_verified_ids => []}, {:add_declined_ids => []}]

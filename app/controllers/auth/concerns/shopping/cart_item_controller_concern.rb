@@ -16,8 +16,13 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     instantiate_shopping_classes
 
     @auth_shopping_discount_object_params = permitted_params.fetch(:discount,{})
+
     
+    if !@auth_shopping_discount_object_params.blank?
+
     @auth_shopping_discount = params[:id] ? @auth_shopping_discount_class.find(params[:id]) : @auth_shopping_discount_class.new(@auth_shopping_discount_object_params)
+    
+    end
 
     @auth_shopping_cart_item_params = permitted_params.fetch(:cart_item,{})
     @auth_shopping_cart_item = params[:id] ? @auth_shopping_cart_item_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_cart_item_class.new(@auth_shopping_cart_item_params)
