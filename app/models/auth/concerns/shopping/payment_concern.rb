@@ -87,6 +87,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validate :cart_not_empty
 		
 		validate :refund_created_or_approved_only_if_balance_is_negative
+
+		validate :refund_created_or_approved_only_if_sum_of_discount_payments_does_not_cover_cart_pending_balance
+
 		validate :refund_approved_if_cart_pending_balance_is_equal_to_refund_amount
 
 		validate :update_cart_items_accepted
@@ -187,6 +190,24 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 		end
 
+		## will return discount_payments of this cart id with a payments_status of 1.
+		def get_discount_payments(cart_id)
+
+			discount_payments = Auth.configuration.payment_class.constantize.where(:cart_id => cart_id, :discount_id.nin => ["", nil], :payment_status => 1)
+			discount_payments
+		end
+
+		## will return the sum of the amounts of all successfull discount_payments.
+		def get_sum_of_discount_payments(cart_id)
+
+			sum_of_discount_payments = 0
+			
+			get_discount_payments(cart_id).each do |dp|
+				sum_of_discount_payments+= dp.amount
+			end
+
+			sum_of_discount_payments
+		end
 			
 	end
 
@@ -334,9 +355,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def discount_callback(params,&block)
-		puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------"
-		puts "the discount callback has been called"
-		puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------"
+		
 		## the callback should fire on create/update, so new_record checking is not required.
 
 		## first check if the discount id exists -> get the discount object.
@@ -345,25 +364,25 @@ module Auth::Concerns::Shopping::PaymentConcern
 		
 			self.discount = Auth.configuration.discount_class.constantize.find(discount_id)
 
-			puts "discount is: #{self.discount}"
+			#puts "discount is: #{self.discount}"
 
 
 			if self.discount.requires_verification == true
-				puts "detected discount requires verification"
+				#puts "detected discount requires verification"
 				self.payment_status = Auth.configuration.discount_class.constantize.get_payment_status(self,discount_id)
-				puts "the payment status is detected as: #{self.payment_status}"
+				#puts "the payment status is detected as: #{self.payment_status}"
 			else
 				## what about floating discount codes?
 				## can a user use them repeatedly?
-				self.payment_status = Auth.configuration.discount_class.constantize.use_discount(discount_id,self)
+				self.payment_status = Auth.configuration.discount_class.constantize.use_discount(self.discount,self)
 			end
 
 			## now also set the payment amount to be equal to the discount amount or the discount percentage whichever works out be greater.
 			## first preference is given to check the discount amount.
-			puts "the discount amount is: #{self.discount.discount_amount}"
+			
 			if self.discount.discount_amount > 0
 				self.amount = self.discount.discount_amount
-				puts "setting amount as: #{self.amount}"
+				
 			elsif self.discount.discount_percentage > 0
 				self.amount = self.cart.cart_pending_balance*self.discount.discount_percentage
 			else
@@ -504,6 +523,26 @@ module Auth::Concerns::Shopping::PaymentConcern
 		if payment_status_changed? && payment_status == 1 && refund
 			self.errors.add("payment_status","you cannot authorize a refund since the amount you entered is wrong") if self.cart.cart_pending_balance != self.amount
 		end
+	end
+
+	## validation
+	def refund_created_or_approved_only_if_sum_of_discount_payments_does_not_cover_cart_pending_balance
+
+		if refund
+
+			## get the approved discount payments
+
+			## then check the sum of those payments.
+			discount_sum = self.class.get_sum_of_discount_payments(self.cart_id)
+
+			if self.cart.cart_pending_balance < 0
+				if discount_sum > self.cart.cart_pending_balance*-1
+					self.errors.add("amount","the discounts you availed, cover the need for the refund.")
+				end
+			end
+
+		end
+
 	end
 
 	## validation

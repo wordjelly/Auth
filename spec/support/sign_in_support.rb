@@ -144,11 +144,36 @@ module DiscountSupport
     discount
   end
 
-  def create_discount(cart,signed_in_res,user=nil)
+  def build_cartless_productless_discount
+    discount = Shopping::Discount.new
+    discount.discount_percentage = 100
+    discount.discount_amount = 10
+    discount.count = 4
+    discount
+  end
+
+  def create_cartless_productless_discount(signed_in_res,user=nil)
+
+    user||= signed_in_res
+    discount = Shopping::Discount.new
+    discount.discount_percentage = 100
+    discount.discount_amount = 10
+    discount.count = 4
+    discount.signed_in_resource = signed_in_res
+    discount.resource_id = user.id.to_s
+    discount.resource_class = user.class.name
+    res = discount.save
+    puts "result of saving discount: #{res.to_s}"
+    puts "errors while saving discount.."
+    puts discount.errors.full_messages.to_s
+    discount
+  end
+
+  def create_discount(cart,signed_in_res,user=nil,req_ver=true)
     cart.prepare_cart
     user ||= signed_in_res
     discount = Shopping::Discount.new
-    discount.requires_verification = true
+    discount.requires_verification = req_ver
     discount.cart_id = cart.id.to_s
     discount.discount_amount = cart.cart_paid_amount
     discount.resource_id = user.id.to_s
@@ -195,6 +220,7 @@ module DiscountSupport
     payment.discount_id = discount.id.to_s
     payment.payment_type = "cash"
     res = payment.save
+    puts " ------------ Look here ---------------------------"
     puts "Result of saving payment"
     puts res.to_s
     puts "errors saving payment:"
@@ -218,6 +244,28 @@ module DiscountSupport
     puts dis.errors.full_messages
     dis
 
+  end
+
+  def use_discount(discount_payment,signed_in_res,user=nil)
+     user ||= signed_in_res
+     discount_payment.signed_in_resource = signed_in_res
+     res = discount_payment.save
+     puts "result of saving payment: #{res.to_s}"
+     puts "the errors of saving discount payment."
+     puts discount_payment.errors.full_messages.to_s
+     discount_payment
+  end
+
+
+  def update_payment_as_failed(payment,signed_in_res,user=nil)
+    user ||= nil
+    payment.signed_in_resource = signed_in_res
+    payment.payment_status = 0
+    res = payment.save
+    puts "result of saving payment: #{res.to_s}"
+    puts "the errors of saving payment."
+    puts payment.errors.full_messages.to_s
+    payment
   end
 
 end

@@ -279,8 +279,8 @@ module Auth::Concerns::Shopping::CartConcern
 	def add_or_remove(item_ids,add_or_remove)
 	    item_ids.map {|id|
 	      begin
-	      	  puts "the signed in resource is:"
-	      	  puts self.signed_in_resource
+	      	  #puts "the signed in resource is:"
+	      	  #puts self.signed_in_resource
 	      	  
 		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
 		      
@@ -310,9 +310,14 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	## @return[Boolean] true/false : override to decide how the cart decides if it can create discount coupons for its contents or not.
-	## the current implementation returns true if all cart items have been accepted.
+	## the current implementation returns true if all items have been fully paid for.
 	def can_create_discount_coupons?
-		return (self.cart_items.select{|c| c.accepted.nil? || c.accepted == false}.size == 0)
+		#return (self.cart_items.select{|c| c.accepted.nil? || c.accepted == false}.size == 0)
+		puts "CAME TO CAN CREATE DISCOUNT COUPONS."
+		prepare_cart
+
+		self.cart_pending_balance == 0		
+
 	end
 
 end
