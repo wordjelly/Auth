@@ -1,0 +1,21 @@
+<%= form_for(@auth_user, url: @auth_user.new_record? ? admin_create_users_path : admin_create_user_path({:id => @auth_user.id.to_s}), method: @auth_user.new_record? ? :post : :put, namespace: @auth_user.id.to_s, as: :user) do |f| %>
+  <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_user} %>
+  <div id="form_fields">
+    <h3>Create A New User</h3>
+    <div class="divider"></div>
+    <!-- so here we have to provide for the email, mobile number, and whether they want to resend_sms_otp, or confirmation_email, for these two it can be a checkbox. -->
+    <%= f.text_field :email %>
+    <%= f.label :email %>
+      
+    <%= f.text_field :additional_login_param %>
+    <%= f.label :additional_login_param %>
+
+    <%= f.select(:request_resend_sms_otp,  [["False", false], ['Resend Sms Otp To User Mobile', true]],{}, {:class => "browser-default"}) %>
+
+    <%= f.select(:request_resend_confirmation_email,  [["False", false], ['Resend Confirmation Email To User', true]],{}, {:class => "browser-default"}) %>
+
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

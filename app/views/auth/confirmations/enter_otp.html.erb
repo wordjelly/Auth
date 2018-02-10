@@ -1,0 +1,28 @@
+<!-- this goes to the otp controller, here i will have to enable html responses -->
+<% if @auth_user.additional_login_param_status == 1 %>
+	<h3>Please enter the OTP received by the Customer</h3>
+	<% if defined?(intent) == nil %>
+		<% intent = "" %>
+	<% end %>
+	<%= form_for(@auth_user, as: @auth_user.class.name.underscore, url: verify_otp_url(@auth_user.class.name.underscore.downcase.pluralize,{:intent => intent}), :authenticity_token => true, method: "GET") do |f| %>
+		
+		<%= f.text_field(:otp) %>
+		<%= f.label(:otp) %>
+
+
+		<%= f.hidden_field(:additional_login_param,:value => @auth_user.additional_login_param) %>
+
+		<div style="text-align:center; padding-top:1.5rem; padding-bottom:1.5rem;" id="recaptcha_tags">
+	    	<% if Auth.configuration.recaptcha %>
+				<%= recaptcha_tags %>
+			<% end %>
+	  	</div>
+		
+		<%= f.submit "Submit" %>
+
+	<% end %>
+	<!-- end -->
+<% end %>
+
+<h3>Click below to resend the SMS OTP</h3>
+<%= render :partial => "auth/confirmations/resend_sms_otp.html.erb" %>

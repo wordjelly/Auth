@@ -126,14 +126,33 @@ module Auth::Concerns::UserConcern
 
 		after_destroy :destroy_client
 
+		after_save :send_password, if: Proc.new{|a| a.created_by_admin == true && (a.confirmed_at_was.nil? && a.confirmed_at_changed?)}
+
+		########################################################
+		# FIELDS FOR ALLOWING THE ADMIN TO CREATE USERS, AND ALSO REQUEST 
+		#
+		#
+		#
+		########################################################
+		field :created_by_admin, type: Boolean, default: false
+
+		attr_accessor :request_resend_sms_otp
+
+		attr_accessor :request_resend_confirmation_email
 
 
+
+		########################################################
+		##
+		##
 		##BASIC USER FIELDS.
+		##
+		##
+		########################################################
 		field :email, 				type: String
 		attr_accessor :skip_email_unique_validation
 		field :login,				type: String
-
-		##admin_or_not
+		
 		field :admin,				type: Boolean, default: false
 
 		attr_accessor :m_client
@@ -473,6 +492,10 @@ module Auth::Concerns::UserConcern
 	end
 
 
+	def send_password
+		puts "--- CALLED SEND PASSWORD ---- "
+		## notification will have to be called, if and
+	end
 	
 
 	##for the api responses.
