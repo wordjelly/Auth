@@ -85,6 +85,7 @@ module Auth::Concerns::OtpConcern
 	  	respond_to do |format|
 			  format.json {render json: resource.to_json({:otp_verification => true}), status: @status}
 			  format.js   {render :partial => "auth/confirmations/new_otp_input.js.erb", locals: {resource: resource, intent: @intent}}
+			  format.html {render "enter_otp"}
 		end
   	end
 
@@ -101,24 +102,27 @@ module Auth::Concerns::OtpConcern
 	##CALLED WHEN THE USER ENTERS THE OTP SENT ON HIS MOBILE
 	##VERIFIES THE OTP WITH THE THIRD PARTY API.
 	def verify_otp
-	  	if resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
-	  		resource.m_client = self.m_client
-	 		resource.set_client_authentication
+	  	if @resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
+	  		@resource.m_client = self.m_client
+	 		@resource.set_client_authentication
 	  		##there are no errors, so we proceed with verification.
-	  		if otp_error = resource.check_otp_errors
+	  		if otp_error = @resource.check_otp_errors
 	  			@status = 422
-	  			resource.errors.add(:additional_login_param,otp_error)
+	  			@resource.errors.add(:additional_login_param,otp_error)
 	  		else
-	  			resource.verify_sms_otp(@otp)
+	  			@resource.verify_sms_otp(@otp)
+	  			## just setting so that it is available on the resource object.
+	  			@resource.otp = @otp
 	  		end
 	  	else
-	  		resource = @resource_class.new
-	  		resource.errors.add(:additional_login_param,"Not Found")
+	  		@resource = @resource_class.new
+	  		@resource.errors.add(:additional_login_param,"Not Found")
 	  		@status = 400
 	  	end
 	  	respond_to do |format|
-  		  format.json {render json: resource.as_json({:otp_verification => true}), status: @status}
-  		  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: resource, intent: @intent, otp: @otp}}
+  		  format.json {render json: @resource.as_json({:otp_verification => true}), status: @status}
+  		  format.js   {render :partial => "auth/confirmations/verify_otp.js.erb", locals: {resource: @resource, intent: @intent, otp: @otp}}
+  		  format.html {render "auth/confirmations/get_otp_status.html.erb"}
   		end
 	end
 
@@ -190,9 +194,7 @@ module Auth::Concerns::OtpConcern
 
 							intent_verification_message = "An email has been sent to your email account, with instructions on unlocking your account" if @resource.errors.empty?
 						else
-							puts "resource cnfirmed is: #{@resource.confirmed?}"
-							puts "resource pending reconfirmation is: #{@resource.pending_reconfirmation?}"
-							puts "resource email is: #{@resource.email}"
+							
 
 	        				@resource.errors.add(:additional_login_param,"cannot send unlock instructions because you dont have a confirmed email address.")
 
@@ -207,11 +209,15 @@ module Auth::Concerns::OtpConcern
 		else
 			@resource = @resource_class.new
 			@status = 422
+			puts "came here."
 			@resource.errors.add(:additional_login_param,"Either otp or additional login param is incorrect, try resend otp")
 		end
 
+		puts @resource.attributes.to_s
+
 	  	respond_to do |format|
 	  	  format.json {render json: {:intent_verification_message => intent_verification_message, :errors => @resource.errors.full_messages, :resource => @resource.as_json({:otp_verification => true}), :verified => (@resource.additional_login_param_confirmed? && @resource.errors.empty?)}, status: @status}
+	  	  format.html {render "auth/confirmations/otp_status_result.html.erb"}
 	  	end
  	end
 

@@ -12,6 +12,9 @@ module ActionDispatch::Routing
 	      		get 'authenticated_user_search', :action => 'authenticated_user_search', :as => "authenticated_user"
 	      	end
 	      end
+
+	      resources :admin_create_users, :controller => "auth/admin_create_users"
+
 	  	  resources :clients, :controller => "auth/clients"
 		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 

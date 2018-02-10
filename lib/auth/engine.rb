@@ -76,6 +76,7 @@ module Auth
     attr_accessor :payment_controller
     attr_accessor :payment_gateway_info
     attr_accessor :token_regeneration_time
+    attr_accessor :user_class
     attr_accessor :do_redirect
     attr_accessor :brand_name
     attr_accessor :notification_response_class
@@ -154,6 +155,8 @@ module Auth
       ##request.
       @do_redirect = true
       @host_name = nil
+      ## for the user.
+      @user_class = nil
 
       ###############################################################
       ##
