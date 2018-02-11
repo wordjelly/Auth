@@ -134,7 +134,7 @@ module Auth::Concerns::UserConcern
 
 		after_destroy :destroy_client
 
-		after_save :send_password, if: Proc.new{|a| a.created_by_admin == true && (a.confirmed_at_was.nil? && a.confirmed_at_changed?)}
+		after_save :send_reset_password_link
 
 		#######################################################
 		#
@@ -450,6 +450,40 @@ module Auth::Concerns::UserConcern
 	end
 
 
+	## @called_from : after_save -> override 
+	def send_reset_password_link
+		
+		
+		reset_password_link = nil
+
+		
+		if self.confirmed_at_was.nil? && self.confirmed_at_changed?
+			puts "the email was just confirmed"
+			self.class.send_reset_password_instructions(self.attributes)
+		end
+
+		if self.additional_login_param_status_changed? && self.additional_login_param_status == 2
+			puts "setting the reset password link."
+			begin
+				self.class.skip_callback(:save, :after, :send_reset_password_link)
+				reset_password_link = Rails.application.routes.url_helpers.send("edit_#{self.class.name.downcase}_password_path",{:reset_password_token => self.set_reset_password_token})
+				puts "-----------------------reset password link becomes------------------------------"
+				puts reset_password_link.to_s	
+			rescue => e
+				puts e.to_s
+			ensure
+				self.class.set_callback(:save, :after, :send_reset_password_link)
+			end
+			
+		end	
+
+		puts "Returning:"
+		puts reset_password_link
+		reset_password_link
+		
+	end
+
+
 	def destroy_client
 		@client = Auth::Client.find(self.id)
 		@client.delete
@@ -510,11 +544,10 @@ module Auth::Concerns::UserConcern
 		return Hash[keys.map{|c| [c,self.send("#{c}")]}]
 	end
 
+	
 
-	def send_password
-		puts "--- CALLED SEND PASSWORD ---- "
-		## notification will have to be called, if and
-	end
+
+
 	
 
 	##for the api responses.
@@ -526,17 +559,11 @@ module Auth::Concerns::UserConcern
 	## this is needed in 
 	def as_json(options={})
 		
-		puts "the self m clinet is:"
-		puts self.m_client.to_s
+		
 		json = {:nothing => true}
 		
 		if (!self.destroyed? && options[:otp_verification].nil?)
-			puts "is there current app id:"
-			puts self.m_client.current_app_id
-			puts 'is there at least one auth key confirmed'
-			puts at_least_one_authentication_key_confirmed?
-			puts "are the errors empty"
-			puts self.errors.full_messages.to_s
+			
 			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
 			 	
 			 		json = super(:only => [:authentication_token])

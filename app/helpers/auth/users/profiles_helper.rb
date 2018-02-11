@@ -7,4 +7,6 @@ module Auth::Users::ProfilesHelper
 		{resource: {:id => resource.id.to_s}}
 	end
 
+
+	
 end

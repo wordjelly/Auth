@@ -147,7 +147,7 @@ module Auth::Concerns::NotificationConcern
 		recipients = send_to
 		recipients[:resources].map{|r|
 			send_email_background(r) if send_by_email?(r)
-			send_sms_background(r) if send_by_sms?(r)
+			send_sms_background(r) if send_by_sms?(r) 
 			#r.send_mobile_notification(self) if send_by_mobile?(r)
 			#r.send_desktop_notification(self) if send_by_desktop?(r)
 		}

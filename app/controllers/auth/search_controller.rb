@@ -26,8 +26,7 @@ class Auth::SearchController < ApplicationController
 	## @json => authenticated_user_search.json is rendered.
 	## @html => currently does not support html request.
 	def authenticated_user_search	
-		puts "the m client is:"
-		puts self.m_client.to_s
+		
 		## m client will be available at this stage.
 		## the problem is that it is hard to pass it forward to the mongoid elasticsearch object.
 		## because while initializing the user it will have to first be set on the user.
