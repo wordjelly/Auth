@@ -27,7 +27,6 @@ module Auth
 						}
 					},
 					size: 20
-
 				}
 			end
 
@@ -47,9 +46,10 @@ module Auth
 				args = args.deep_symbolize_keys
 				return [] unless args[:query_string]
 				query = base_ngram_query
-
+				
 				## set all the required values.
-				query[:body][:size] = args[:size] || 20
+				query[:size] = args[:size] || 20
+				
 				query[:body][:query][:filtered][:query][:match][:_all][:query] = args[:query_string]
 				if args[:resource_id]
 					query[:body][:query][:filtered][:filter] = {
@@ -91,8 +91,8 @@ module Auth
 				end
 				query[:size] = args[:size] if args[:size]
 				
-				#puts JSON.pretty_generate(query)
-				Mongoid::Elasticsearch.search(query).results
+				puts JSON.pretty_generate(query)
+				Mongoid::Elasticsearch.search(query,{:wrapper => :load}).results
 			end
 		end
 	end

@@ -29,7 +29,8 @@ RSpec.describe "search request spec",:search => true, :type => :request do
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
         @u.client_authentication["test_app_id"] = "test_es_token"
-        @u.save
+        @u.confirm!
+        sr = @u.save
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
         
@@ -123,6 +124,17 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 				expect(results.size).to eq(2)
 
 			end
+
+			it " -- allows user to find itself -- ", :search_self => true do 
+
+				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "test_app_id", query: {query_string: @u.email[0..4]}}),nil,@headers
+				results = JSON.parse(response.body)
+				puts "this is the response body."
+				puts results.to_s
+				expect(results.size).to eq(1)
+			end
+
+
 			
 			it " -- allows admin to search -- " do 
 
