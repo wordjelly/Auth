@@ -25,8 +25,7 @@ module Auth
 								}
 							}
 						}
-					},
-					size: 20
+					}
 				}
 			end
 
@@ -49,7 +48,7 @@ module Auth
 				
 				## set all the required values.
 				query[:size] = args[:size] || 20
-				
+	
 				query[:body][:query][:filtered][:query][:match][:_all][:query] = args[:query_string]
 				if args[:resource_id]
 					query[:body][:query][:filtered][:filter] = {
@@ -89,9 +88,8 @@ module Auth
 					## so in that case we leave the query
 					## as is.
 				end
-				query[:size] = args[:size] if args[:size]
-				
-				puts JSON.pretty_generate(query)
+
+				#puts JSON.pretty_generate(query)
 				Mongoid::Elasticsearch.search(query,{:wrapper => :load}).results
 			end
 		end

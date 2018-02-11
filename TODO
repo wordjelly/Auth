@@ -234,12 +234,7 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 {"_id"=>BSON::ObjectId('5a72f29d421aa91ab807e9f5'), "public"=>"no", "_type"=>"Shopping::Payment", "productinfo"=>"shopping_cart", "firstname"=>"rudonlf", "email"=>"bhargav.r.raut@gmail.com", "phone"=>"939939898989", "payment_type"=>"gateway", "amount"=>1244.3412, "cart_id"=>"5a6b67c3421aa9256540e2f6", "gateway_callback_called"=>true, "resource_id"=>"5a676bc8421aa9339fec9ed8", "resource_class"=>"User", "updated_at"=>2018-02-01 10:57:53 UTC, "created_at"=>2018-02-01 10:57:33 UTC, "furl"=>"http://localhost:3000/shopping/payments/5a72f29d421aa91ab807e9f5", "surl"=>"http://localhost:3000/shopping/payments/5a72f29d421aa91ab807e9f5", "txnid"=>"5a72f29d421aa91ab807e9f5", "hast"=>"54f679554a86a028e24234c14094f14e98ad9d7e7c98dd17f7af5c42800a459e5f3cec1bb0cd2f9297e321d79107f545dcd65d4cc22a580bba096b23fc7909e3"}
 
 
-
-### discount concern, with callbacks and validations
-### discount controller concern, hook into token concern.
-### discount show action.
-### discount update on cart create
-### discount verify request
-### discount verify approval
-### hooking into payment completion.
-### option after payment to generate a discount coupon : which user should be able to do it?
+## send the password to the user, after confirmation.
+## show option to resend the sms otp
+## show option to resend confirmation email
+## admin should be able to directly use the unconfirmed user.

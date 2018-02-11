@@ -19,19 +19,19 @@ class Noti
 	def send_sms_background(resource)
 		
 		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
-		Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
-			k = OtpJob.perform_later(job_arguments)
+		#Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+		k = OtpJob.perform_later(job_arguments)
 			puts "send sms background : perform_later returns: #{k.to_s}"
-		end
+		#end
 	end
 
 
 	def send_email_background(resource)
 		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_email",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
-		Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
-			k = OtpJob.perform_later(job_arguments)
-			puts "send email background : perform_later returns: #{k.to_s}"
-		end
+		#Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+		k = OtpJob.perform_later(job_arguments)
+		puts "send email background : perform_later returns: #{k.to_s}"
+		#end
 	end
 	
 

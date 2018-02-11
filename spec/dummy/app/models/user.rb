@@ -63,11 +63,32 @@ class User < Auth::User
     puts "sending devise notification."
     devise_mailer.send(notification, self, *args).deliver_later
   end
+  
+  def send_reset_password_link
+    super.tap do |r|
+      ## if r is not nil,then it is the reset password link.
+      puts "the r is: #{r}"
+      if r
+          notification = Noti.new
+          resource_ids = {}
+          resource_ids[User.name] = [self.resource_id]
+          notification.resource_ids = JSON.generate(resource_ids)
+          notification.objects[:payment_id] = r
+          notification.save
+          Auth::Notify.send_notification(notification)
+      else
+        puts "no r."
+      end
+    end
+  end
+
   ##############
   ##
   ##
   ## END OVERRIDE.
   ##
   ###############
+
+  
 
 end
