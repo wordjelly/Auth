@@ -88,6 +88,10 @@ module Auth::Concerns::UserConcern
 				                public: {
 				                	type: "string",
 				                	index: "not_analyzed"
+				                },
+				                resource_id: {
+				                	type: "string",
+				                	index: "not_analyzed"
 				                }
 				            }
 				        }
@@ -101,6 +105,7 @@ module Auth::Concerns::UserConcern
 			    email: email,
 			    additional_login_param: additional_login_param,
 			    additional_login_param_status: additional_login_param_status,
+			    resource_id: resource_id,
 			    public: public
 			 }
 			end 
@@ -114,6 +119,9 @@ module Auth::Concerns::UserConcern
 		after_save :set_client_authentication
 
 		before_save do |document|
+			## set the document resource id if its not already set.
+			document.resource_id = document.id.to_s unless document.resource_id
+
 			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
 			if document.additional_login_param_changed? && !document.additional_login_param.blank?
 				document.additional_login_param_status = 1
@@ -127,6 +135,17 @@ module Auth::Concerns::UserConcern
 		after_destroy :destroy_client
 
 		after_save :send_password, if: Proc.new{|a| a.created_by_admin == true && (a.confirmed_at_was.nil? && a.confirmed_at_changed?)}
+
+		#######################################################
+		#
+		#
+		# Owner concern is not included in user concern.
+		# but we add the field "resource_id", because it allows
+		# search in elasticsearch, for a user to find his own  record.
+		#
+		#######################################################
+
+		field :resource_id, type: String
 
 		########################################################
 		# FIELDS FOR ALLOWING THE ADMIN TO CREATE USERS, AND ALSO REQUEST 
@@ -505,12 +524,19 @@ module Auth::Concerns::UserConcern
 	##it should return the errors irrespective of these settings.
 	## if otp_verification key is present in the options, then the auth_token and es will not be returned.
 	## this is needed in 
-	def as_json(options)
+	def as_json(options={})
 		
-		
+		puts "the self m clinet is:"
+		puts self.m_client.to_s
 		json = {:nothing => true}
 		
 		if (!self.destroyed? && options[:otp_verification].nil?)
+			puts "is there current app id:"
+			puts self.m_client.current_app_id
+			puts 'is there at least one auth key confirmed'
+			puts at_least_one_authentication_key_confirmed?
+			puts "are the errors empty"
+			puts self.errors.full_messages.to_s
 			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
 			 	
 			 		json = super(:only => [:authentication_token])
