@@ -20,10 +20,6 @@ module Auth::Concerns::UserConcern
 		opts = Auth.configuration.auth_resources[self.name]
 
 		
-
-
-
-
 		## if configuration specifies that elasticsearch is to be used as an indexing backend.
 		if Auth.configuration.use_es == true
 			include Mongoid::Elasticsearch
@@ -134,8 +130,9 @@ module Auth::Concerns::UserConcern
 
 		after_destroy :destroy_client
 
+		## if a or b or c.
 		after_save :send_reset_password_link
-
+		
 		#######################################################
 		#
 		#
@@ -155,9 +152,7 @@ module Auth::Concerns::UserConcern
 		########################################################
 		field :created_by_admin, type: Boolean, default: false
 
-		attr_accessor :request_resend_sms_otp
-
-		attr_accessor :request_resend_confirmation_email
+		
 
 
 
@@ -451,36 +446,58 @@ module Auth::Concerns::UserConcern
 
 
 	## @called_from : after_save -> override 
+	## @working : 
+	## if the resource was created by an administrator, and the attr_accessor request_send_reset_password_link is true, then it will check if the email is confirmed, and then send the reset_password_instructions to the email. otherwise will check if the mobile is confirmed, and will just generate that reset_password_link
 	def send_reset_password_link
-		
 		
 		reset_password_link = nil
 
-		
-		if self.confirmed_at_was.nil? && self.confirmed_at_changed?
-			puts "the email was just confirmed"
-			self.class.send_reset_password_instructions(self.attributes)
-		end
+		#puts "came to send reset password link, and this is the attr accessor."
+		#puts self.request_send_reset_password_link.to_s
 
-		if self.additional_login_param_status_changed? && self.additional_login_param_status == 2
-			puts "setting the reset password link."
-			begin
-				self.class.skip_callback(:save, :after, :send_reset_password_link)
-				reset_password_link = Rails.application.routes.url_helpers.send("edit_#{self.class.name.downcase}_password_path",{:reset_password_token => self.set_reset_password_token})
-				puts "-----------------------reset password link becomes------------------------------"
-				puts reset_password_link.to_s	
-			rescue => e
-				puts e.to_s
-			ensure
-				self.class.set_callback(:save, :after, :send_reset_password_link)
+		## if there was an unconfirmed_email present.
+
+		if self.created_by_admin
+
+			#puts "the request send is true."
+			#puts self.attributes.to_s
+			#puts "is the additional login param confirmed"
+			#puts self.additional_login_param_confirmed?
+			## this case is exceptional because the user will have gone to 
+			if self.confirmed?
+				#puts "self is confirmed."
+				begin
+					self.class.skip_callback(:save, :after, :send_reset_password_link)
+					
+					self.class.send_reset_password_instructions(self.attributes)
+				rescue
+				ensure
+					self.created_by_admin = false
+					self.save
+					self.class.set_callback(:save, :after, :send_reset_password_link)
+				end
+
+			elsif self.additional_login_param_confirmed?
+				#puts "additiona login param is confirmed."
+				begin
+					#self.created_by_admin = false
+					self.class.skip_callback(:save, :after, :send_reset_password_link)
+					reset_password_link = Rails.application.routes.url_helpers.send("edit_#{self.class.name.downcase}_password_path",{:reset_password_token => self.set_reset_password_token})
+						
+				rescue => e
+					puts e.to_s
+				ensure
+					self.created_by_admin = false
+					self.save
+					self.class.set_callback(:save, :after, :send_reset_password_link)
+				end
+				
 			end
-			
-		end	
 
-		puts "Returning:"
-		puts reset_password_link
-		reset_password_link
+		end		
 		
+		reset_password_link
+
 	end
 
 
