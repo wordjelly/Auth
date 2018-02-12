@@ -83,13 +83,14 @@ module Auth::Concerns::OtpConcern
 	  		resource.errors.add(:additional_login_param,"Could not find a resource with that additional login param")
 	  	end 
 	  	respond_to do |format|
-			  format.json {render json: resource.to_json({:otp_verification => true}), status: @status}
-			  format.js   {render :partial => "auth/confirmations/new_otp_input.js.erb", locals: {resource: resource, intent: @intent}}
-			  format.html {render "enter_otp"}
+			format.json {render json: resource.to_json({:otp_verification => true}), status: @status}
+			format.js   {render :partial => "auth/confirmations/new_otp_input.js.erb", locals: {resource: resource, intent: @intent}}
+			format.html {render "auth/confirmations/enter_otp.html.erb"}
 		end
   	end
 
-
+  	## this is only used for the modal based things
+  	## has no role otherwise.
   	##CALLED WHEN WE WANT TO SHOW THE USER A MODAL TO RE-ENTER HIS MOBILE NUMBER SO THAT WE CAN AGAIN SEND AN OTP TO IT.
   	def resend_sms_otp
   		resource = @resource_class.new
@@ -105,6 +106,7 @@ module Auth::Concerns::OtpConcern
 	  	if @resource = @resource_class.where(:additional_login_param => @additional_login_param).first 
 	  		@resource.m_client = self.m_client
 	 		@resource.set_client_authentication
+	 		
 	  		##there are no errors, so we proceed with verification.
 	  		if otp_error = @resource.check_otp_errors
 	  			@status = 422

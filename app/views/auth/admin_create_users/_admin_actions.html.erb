@@ -1,0 +1,43 @@
+<!-- expects a local called "user", which refers to the user for which the admin is executing actions -->
+
+<!-- if user.additional_login_param && user.additional_login_param_status == 1 -->
+<h4> Resend the SMS OTP To the User </h4>
+<% @auth_user = user %>
+<%= render :partial => "auth/confirmations/resend_sms_otp.html.erb" %>
+
+
+<!-- if !user.confirmed? || user.pending_reconfirmation? -->
+<h4> Resend the Confirmation Email to the User </h4>
+<%= form_for(user, as: user.class.name.underscore, url: confirmation_path(user.class.name.underscore), html: { method: :post, id: "resend_confirmation_email_form"}) do |f| %>
+	<div class="form fields">
+		<div class="input_field">
+			<%= f.text_field :email, :value => user.email %>
+		</div>
+		<div class="input_field">
+			<%= f.label :email %>
+		</div>
+	</div>
+	<div class="submit">
+		<%= f.submit "RESEND CONFIRMATION EMAIL" %>
+	</div>
+<% end %>
+
+
+<!-- we are planning to call update profile -->
+<h4> Resend the Reset Password Link to the User</h4>
+
+<%= form_for(user, as: user.class.name.underscore, url: profile_path({:id => user.id.to_s}), html: { method: :put, id: "resend_reset_password_link_form"}) do |f| %>
+	<div class="form fields">
+		<%= hidden_field_tag("resource",user.class.name.downcase.pluralize) %>
+		<%= f.hidden_field(:created_by_admin,:value => true) %>
+	</div>
+	<div class="submit">
+		<%= f.submit "Send reset password instructions" %>
+	</div>
+<% end %>
+
+
+
+
+
+

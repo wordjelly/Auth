@@ -23,6 +23,7 @@ module ActionDispatch::Routing
 		  		get 'credential_exists', :action => 'credential_exists'
 		  		post ':resource/get_user_id', :action => 'get_user_id'
 		  		put ':resource/update', :action => 'update'
+		  		
 		  	end
 		  end
 		  

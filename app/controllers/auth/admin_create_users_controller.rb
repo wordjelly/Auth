@@ -52,7 +52,7 @@ class Auth::AdminCreateUsersController < ApplicationController
       if @auth_user.additional_login_param
         render "auth/confirmations/enter_otp.html.erb"
       else
-      ## render some partail to show him that he has to confirm the accoutn by the email.
+        
       end
     else
       
@@ -75,7 +75,7 @@ class Auth::AdminCreateUsersController < ApplicationController
   end
 
   def permitted_params
-    params.permit({user: [:email,:additional_login_param, :password, :password_confirmation, :request_resend_sms_otp, :request_resend_email_confirmation]},:id)    
+    params.permit({user: [:email,:additional_login_param, :password, :password_confirmation]},:id)    
   end
 
 end

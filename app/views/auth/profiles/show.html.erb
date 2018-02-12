@@ -1,0 +1,8 @@
+<h4><%= flash[:notice] %></h4>
+<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @profile_resource} %>
+<!-- if the current signed in resource is admin -->
+	<!-- give options to resend sms otp, resend confirmation email, basically render the options partial from admin_create_users -->
+	<%= render :partial => "auth/admin_create_users/admin_actions.html.erb", locals: {user: @profile_resource} %>
+<!-- else -->
+	
+<!-- end -->
