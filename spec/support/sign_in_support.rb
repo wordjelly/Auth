@@ -283,8 +283,69 @@ module AdminCreateUserSupport
     u = User.new
     u.additional_login_param = "9561137096"
     u.password = u.password_confirmation = SecureRandom.hex(24)
+    u.created_by_admin = true
     u.save
     u
+  end
+
+  ## just sets the additional_login_param_status to 2.
+  def verify_user_mobile(user_created)
+    user_created.additional_login_param_status = 2
+    user_created.otp = 123456
+    user_created.save
+    user_created
+  end
+
+  def unverify_user_mobile(user_created)
+    user_created.additional_login_param_status = 0
+    user_created.otp = 123455
+    user_created.save
+    user_created
+  end
+
+  def update_mobile_number(user_created)
+    user_created.additional_login_param = "9612344556"
+    user_created.save
+  end
+
+  ## @return[String] confirmation_token.
+  def get_confirmation_token_from_email
+    message = ActionMailer::Base.deliveries[-1].to_s
+    confirmation_token = nil
+    message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+      j = Regexp.last_match
+      confirmation_token = j[:confirmation_token]
+    end    
+    confirmation_token
+  end
+
+  def create_user_with_email
+    u = User.new
+    u.email = "rrphotosoft@gmail.com"
+    u.password = u.password_confirmation = SecureRandom.hex(24)
+    u.created_by_admin = true
+    u.save
+    u
+  end
+
+  def get_reset_password_token_from_email(position = -1)
+    message = ActionMailer::Base.deliveries[position].to_s
+    reset_password_token = nil
+    message.scan(/reset_password_token=(?<reset_password_token>.*)\"/) do |ll|
+      j = Regexp.last_match
+      reset_password_token = j[:reset_password_token]
+    end    
+    reset_password_token
+  end
+
+  def verify_user_email(user_created)
+    user_created.confirm
+    user_created.save
+  end
+
+  def update_user_email(user_created)
+    user_created.email = "doctor@gmail.com"
+    user_created.save
   end
 
 end
