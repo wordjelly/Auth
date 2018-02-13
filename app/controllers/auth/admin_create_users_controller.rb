@@ -52,7 +52,7 @@ class Auth::AdminCreateUsersController < ApplicationController
       if @auth_user.additional_login_param
         render "auth/confirmations/enter_otp.html.erb"
       else
-        
+      ## render some partail to show him that he has to confirm the accoutn by the email.
       end
     else
       

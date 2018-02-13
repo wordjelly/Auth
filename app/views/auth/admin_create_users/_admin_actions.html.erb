@@ -2,8 +2,8 @@
 
 <!-- if user.additional_login_param && user.additional_login_param_status == 1 -->
 <h4> Resend the SMS OTP To the User </h4>
-<% @auth_user = user %>
-<%= render :partial => "auth/confirmations/resend_sms_otp.html.erb" %>
+
+<%= render :partial => "auth/confirmations/resend_sms_otp.html.erb", locals: {user: user} %>
 
 
 <!-- if !user.confirmed? || user.pending_reconfirmation? -->

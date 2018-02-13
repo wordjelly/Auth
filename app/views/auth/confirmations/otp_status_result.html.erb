@@ -1,15 +1,15 @@
 <!-- shows the result of querying for the otp status -->
-<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @resource} %>
-<% if @resource.additional_login_param_confirmed? && @resource.errors.empty? %>
+<%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_user} %>
+<% if @auth_user.additional_login_param_confirmed? && @auth_user.errors.empty? %>
 	The user is confirmed.
 <% else %>
-	<% if @resource.additional_login_param_status == 1 %>
+	<% if @auth_user.additional_login_param_status == 1 %>
 	Confirmation is pending.
 	<!-- render the form to query again the otp status here -->
-		<%= render :partial => "auth/confirmations/get_otp_status", locals: {resource: @resource} %>
+		<%= render :partial => "auth/confirmations/get_otp_status", locals: {resource: @auth_user} %>
 	<!-- end -->
 	<% else %>
-	<% if @resource.additional_login_param_status == 2 %>
+	<% if @auth_user.additional_login_param_status == 2 %>
 	The status is confirmed.
 	<% else %>
 	Failed to confirm the user.
