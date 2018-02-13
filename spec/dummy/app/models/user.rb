@@ -67,8 +67,6 @@ class User < Auth::User
   
   def send_reset_password_link
     super.tap do |r|
-      ## if r is not nil,then it is the reset password link.
-      puts "the r is: #{r}"
       if r
           notification = Noti.new
           resource_ids = {}
@@ -77,8 +75,10 @@ class User < Auth::User
           notification.objects[:payment_id] = r
           notification.save
           Auth::Notify.send_notification(notification)
+          
       else
         puts "no r."
+        
       end
     end
   end
