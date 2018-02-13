@@ -42,22 +42,26 @@ class Auth::AdminCreateUsersController < ApplicationController
   def edit
   end
 
+  #  User.where(:email => "bhargav.r.raut@gmail.com").first.delete
   # POST /auth/admin_create_users
   def create
     @auth_user.password = @auth_user.password_confirmation =SecureRandom.hex(24)
     @auth_user.created_by_admin = true
     ## no this will not happen here.
     ## here we will only create.
-    if @auth_user.save
-      if @auth_user.additional_login_param
-        render "auth/confirmations/enter_otp.html.erb"
+    respond_to do |format|
+      if @auth_user.save
+        if !@auth_user.additional_login_param.blank?
+          format.html {render "auth/confirmations/enter_otp.html.erb"}
+          format.json {render json: @auth_user.to_json, status: :created}
+        else
+          format.html {render "auth/admin_create_users/show.html.erb"}
+          format.json {render json: @auth_user.to_json, status: :created}
+        end
       else
-      ## render some partail to show him that he has to confirm the accoutn by the email.
+        format.html {render "new.html.erb"}
+        format.json {render json:  {:errors => @auth_user.errors}, status: 422}
       end
-    else
-      
-      render "new.html.erb"
-
     end
   end
 
