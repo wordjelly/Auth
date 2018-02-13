@@ -1,0 +1,27 @@
+<% if user.additional_login_param_status == 1 %>
+	<h3>Please enter the OTP received by the Customer</h3>
+	<% if defined?(intent) == nil %>
+		<% intent = "" %>
+	<% end %>
+	<%= form_for(user, as: user.class.name.underscore, url: verify_otp_url(user.class.name.underscore.downcase.pluralize,{:intent => intent}), :authenticity_token => true, method: "GET") do |f| %>
+		
+		<%= f.text_field(:otp) %>
+		<%= f.label(:otp) %>
+
+
+		<%= f.hidden_field(:additional_login_param,:value => user.additional_login_param) %>
+
+		<%= f.hidden_field(:created_by_admin,:value => true) %>
+
+		
+		<div style="text-align:center; padding-top:1.5rem; padding-bottom:1.5rem;" id="recaptcha_tags">
+	    	<% if Auth.configuration.recaptcha %>
+				<%= recaptcha_tags %>
+			<% end %>
+	  	</div>
+		
+		<%= f.submit "Submit" %>
+
+	<% end %>
+	<!-- end -->
+<% end %>

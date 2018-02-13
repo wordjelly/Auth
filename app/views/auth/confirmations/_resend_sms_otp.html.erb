@@ -1,7 +1,7 @@
 <% if defined?(intent) == nil %>
 	<% intent = "" %>
 <% end %>
-<%= form_for(@auth_user, as: @auth_user.class.name.underscore, url: send_sms_otp_url(@auth_user.class.name.underscore.downcase.pluralize,{:intent => intent}), :authenticity_token => true, method: "GET") do |f| %>
+<%= form_for(user, as: user.class.name.underscore, url: send_sms_otp_url(user.class.name.underscore.downcase.pluralize,{:intent => intent}), :authenticity_token => true, method: "GET") do |f| %>
 	
 	<%= f.text_field(:additional_login_param) %>
 	<%= f.label(:additional_login_param) %>
