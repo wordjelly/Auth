@@ -40,7 +40,7 @@ class User < Auth::User
 
       super(otp)
       ## will need to pass the request_send_password_link here. as well.
-      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp",JSON.generate({:otp => otp,:request_send_reset_password_link => self.request_send_reset_password_link})])
+      OtpJob.perform_later([self.class.name.to_s,self.id.to_s,"verify_sms_otp",JSON.generate({:otp => otp})])
       
   end
 
