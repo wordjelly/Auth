@@ -46,7 +46,11 @@ class Auth::AdminCreateUsersController < ApplicationController
   # POST /auth/admin_create_users
   def create
     @auth_user.password = @auth_user.password_confirmation =SecureRandom.hex(24)
+    @auth_user.m_client = self.m_client
     @auth_user.created_by_admin = true
+
+    ## we will have to set the m_client.
+    ## but what if that client is different from the client that was used to create the user?
     ## no this will not happen here.
     ## here we will only create.
     respond_to do |format|
