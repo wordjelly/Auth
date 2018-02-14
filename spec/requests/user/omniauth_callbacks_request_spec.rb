@@ -304,11 +304,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @u.client_authentication["test_app_id"] = "test_es"
             @u.save
 
-
-
-           
-    
-            
+            Auth.configuration.prevent_oauth_merger = false
 
             @ap_key = @c.api_key
             @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -397,7 +393,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
         context " -- repeated oauth sign in , does not update confirmed_at -- " do 
             
             before(:all) do 
-            
+                Auth.configuration.prevent_oauth_merger = false
                 User.delete_all
                 Auth::Client.delete_all
                 @u = User.new(attributes_for(:user_confirmed))
@@ -444,7 +440,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
         context " -- sign in with different identities, does not update confirmed_at -- " do 
 
             before(:all) do 
-            
+                Auth.configuration.prevent_oauth_merger = false
                 User.delete_all
                 Auth::Client.delete_all
                 @u = User.new(attributes_for(:user_confirmed))
@@ -498,6 +494,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
     context " -- does not allow email update , after signing up with oauth ", change_password_after_oauth: true do 
 
         before(:all) do     
+            Auth.configuration.prevent_oauth_merger = false
             User.delete_all
             Auth::Client.delete_all
             @u = User.new(attributes_for(:user_confirmed))
@@ -517,7 +514,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
         ##TESTS MUST BE RUN IN SEQUENCE
         it " -- signs up with google oauth 2 " do 
-             OmniAuth.config.test_mode = false
+            OmniAuth.config.test_mode = false
             
             google_oauth2_verify_token_true_verify_hd_true 
 
@@ -531,6 +528,155 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             
         end
 
+        it " -- does not allow email update -- " do 
+            ## because this will need the password.            
+            ## so we just ensured in the previous test, that he cannot change his password.
+        end
+
+    end
+
+    context " -- user signs up with email address -- ", :confirm_lafda => true do 
+
+        
+
+        context " -- confirms it -- " do 
+
+            before(:example) do 
+                Auth.configuration.prevent_oauth_merger = false
+                User.delete_all
+                Auth::Client.delete_all
+                @u = User.new(attributes_for(:user_confirmed))
+                ## ensure email is set to rrphotosoft so that it 
+                @u.email = "rrphotosoft@gmail.com"
+                @u.save
+                @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
+                @c.redirect_urls = ["http://www.google.com"]
+                @c.app_ids << "test_app_id"
+                @c.path = "omniauth/users/"
+                @c.versioned_create
+                @u.client_authentication["test_app_id"] = "test_es"
+                @u.save
+                @ap_key = @c.api_key
+                @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                #@confirmed_at_times = []
+                #ActionMailer::Base.deliveries = []
+            end
+
+            it " -- on signing up with oauth of the same email, error message says account is already in use. -- " do 
+
+                OmniAuth.config.test_mode = false
+            
+                google_oauth2_verify_token_true_verify_hd_true 
+
+                post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+                
+                response_body = JSON.parse(response.body)
+                expect(response_body["errors"]).to eq("That email is in use by another account")
+                expect(response.code).to eq("500")
+                
+            end
+
+        end
+
+    end
+
+    context " -- prevent oauth merger is set to true -- " do 
+        before(:all) do 
+            
+            User.delete_all
+            Auth::Client.delete_all
+            @u = User.new(attributes_for(:user_confirmed))
+            @u.save
+            @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
+            @c.redirect_urls = ["http://www.google.com"]
+            @c.app_ids << "test_app_id"
+            @c.path = "omniauth/users/"
+            @c.versioned_create
+            @u.client_authentication["test_app_id"] = "test_es"
+            @u.save
+
+            Auth.configuration.prevent_oauth_merger = true
+
+            @ap_key = @c.api_key
+            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+        end
+
+        ###
+        ## THESE TESTS MUST BE RUN IN SEQUENCE, THEY ARE RELATED.
+        ###
+
+        it " -- creates google_oauth2 user -- " do 
+
+            OmniAuth.config.test_mode = false
+            
+            google_oauth2_verify_token_true_verify_hd_true 
+
+           # existing_user_with_email = User.where(:email => "rrphotosoft@gmail.com").first
+    
+           # puts "existing user with email is in google:"
+           # puts existing_user_with_email.attributes.to_s
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+        end
+
+        it " -- creates facebook user with the same email -- ", :rocko => true do 
+
+
+
+            facebook_oauth2_verify_fb_ex_token
+
+            OmniAuth.config.test_mode = false
+
+                 
+
+            post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            
+
+
+            expect(u).not_to be_nil
+            expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).not_to be_truthy
+            expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
+        end
+
+        it " -- can sign in subsequently with google, updating access_token and es. -- " do 
+
+            google_oauth2_verify_token_true_verify_hd_true
+
+            OmniauthMacros::MOCK_TOKEN = 'new_mock_token'
+            OmniauthMacros::EXPIRES_AT = 40000
+
+            OmniAuth.config.test_mode = false
+           
+
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            
+           
+            expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"new_mock_token", "token_expires_at" => 40000 })).to be_truthy
+
+        end
+
+        it " -- can sign in subsequently with facebook, updating access_token and es. -- " do 
+                            
+            facebook_oauth2_verify_fb_ex_token
+
+            OmniAuth.config.test_mode = false
+            OmniauthMacros::MOCK_TOKEN = 'new_mock_token'
+            OmniauthMacros::EXPIRES_AT = 40000
+
+            post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+
+            u = User.where(:email => "rrphotosoft@gmail.com").first
+            
+           
+            expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"new_mock_token", "token_expires_at" => 40000 })).not_to be_truthy
+
+        end
     end
 
 end
