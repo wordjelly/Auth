@@ -5,25 +5,11 @@ module Auth::Concerns::UserConcern
 		
 	extend ActiveSupport::Concern
 	include Auth::Concerns::ChiefModelConcern
-	
+	include Auth::Concerns::EsConcern
+
 	included do 
 
-		include GlobalID::Identification
-
-		USER_INFO_FIELDS = ["name","image_url"]
-
-		PUBLICLY_VISIBLE_FIELD_NAMES = ["email","additional_login_param"]
-
-		include MongoidVersionedAtomic::VAtomic
-		
-
-		opts = Auth.configuration.auth_resources[self.name]
-
-		
-		## if configuration specifies that elasticsearch is to be used as an indexing backend.
-		if Auth.configuration.use_es == true
-			include Mongoid::Elasticsearch
-  			elasticsearch! ({
+		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
 				    		index: {
@@ -93,21 +79,21 @@ module Auth::Concerns::UserConcern
 				        }
 				    }
 				}
-			})
-			
-  			def as_indexed_json(options={})
-			 {
-			 	name: name,
-			    email: email,
-			    additional_login_param: additional_login_param,
-			    additional_login_param_status: additional_login_param_status,
-			    resource_id: resource_id,
-			    public: public
-			 }
-			end 
-			
-		end
+			}
 
+		include GlobalID::Identification
+
+		USER_INFO_FIELDS = ["name","image_url"]
+
+		PUBLICLY_VISIBLE_FIELD_NAMES = ["email","additional_login_param"]
+
+		include MongoidVersionedAtomic::VAtomic
+		
+
+		opts = Auth.configuration.auth_resources[self.name]
+
+		
+		
 		
 
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
@@ -766,7 +752,7 @@ module Auth::Concerns::UserConcern
 		false
 	end
 
-	## this method is to be overridden, it returns false by default.
+	## this method is to be overridden, it returns the value of the admin_variable.
 	## it can be used to decide if the user is an admin.
 	## @used_in : payment_concern in the refund_callback 
 	def is_admin?
@@ -781,5 +767,16 @@ module Auth::Concerns::UserConcern
 		true
 	end
 
+
+	def as_indexed_json(options={})
+       {
+          name: name,
+          email: email,
+          additional_login_param: additional_login_param,
+          additional_login_param_status: additional_login_param_status,
+          resource_id: resource_id,
+          public: public
+       }
+  	end 
 	
 end

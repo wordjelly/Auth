@@ -59,11 +59,9 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     #puts "params coming to update are:"
     #puts params.to_s
     check_for_update(@auth_shopping_payment)
-    puts "the attributes for assignment are:"
-    puts @auth_shopping_payment_params.to_s
+    
     @auth_shopping_payment.assign_attributes(@auth_shopping_payment_params)
-    puts "assigned attrs"
-    puts @auth_shopping_payment.attributes.to_s
+    
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
     #puts "added owner"
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
@@ -72,7 +70,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @auth_shopping_payment.payment_params = params
     #puts "assigned params."
     save_response = @auth_shopping_payment.save
-    puts "save response is: #{save_response.to_s}"
+    
     ## if save successfull then otherwise, respond_with edit.
     respond_with @auth_shopping_payment, location: (save_response == true ? payment_path(@auth_shopping_payment) : edit_payment_path(@auth_shopping_payment))
   
