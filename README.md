@@ -119,7 +119,7 @@ config.mount_path = "/authenticate"
 end
 ```
 
-### User and Admin Model
+### User Model
 
 To configure users you need create a key called __config.auth_resources__ in the config file.
 Let us say that you want to have a model called "User" which should have full sign in functionality, using email.
@@ -143,6 +143,8 @@ config.auth_resources = {
     :login_params => [:email]
   }
 }
+
+config.user_class = "User"
 
 end
 ```
@@ -922,28 +924,29 @@ config.oauth_credentials = {
 
 ## EDGE CASES : SIGNED IN FROM FACEBOOK, WHAT HAPPENS IF WE TRY TO SIGN IN FROM GOOGLE, MOBILE NUMBER INTERACTION FROM OAUTH ACCOUNT, TRYING TO SIGN UP BY SAME EMAIL AS OAUTH ACCOUNT.
 
----------------------------------------------------------------------
-
+--------------------------------------------------------------
 ### Token Authentication for API Access
 
-How to do Token Authentication for API Access:
+If you do not want token authentication, add the following in the configuration file:
 
-All requests mentioned henceforth can be directly copied and pasted into PostMan , which is a chrome app that allows API interaction.
+This has not been extensively tested, and is currently __not__ recommended. For one, the Shopping Api will throw extensive errors.
 
+```
+config.enable_token_auth = nil
+```
 
-#### API Table
-
-
-#### TODO: 
-1.Disable creation of api keys through configuration.
-2.Use Post Requests in OTP Controller
-------------------------------------------------------------------
+--------------------------------------------------------------
 ## Creating An Admin Model
 
-Any model can be made admin by setting its admin field to true.
-To do this, execute an update call on the profiles_controller for the resource you want to make an admin, and set its admin to true.
-This will only succeed if the current_signed_in_user is already an admin.
+Any model that you want to have as admin by default should define the following attribute as true;
 
+```
+## app/models/whatever.rb
+class Whatever
+  include Auth::UserConcern
+  field :admin, type: Boolean, default: true  
+end
+```
 ------------------------------------------------------------------
 ## Shopping API
 
@@ -992,6 +995,14 @@ class Shopping::Product < Auth::Shopping::Product
 end
 ```
 
+### A Discount Model 
+
+```
+# app/models/shopping/discount.rb
+class Shopping::Discount < Auth::Shopping::Discount
+
+end
+```
 
 ### Create the Corresponding Controllers
 
@@ -1037,6 +1048,16 @@ class Shopping::ProductsController < Auth::Shopping::ProductsController
 end
 ```
 
+### A Discounts Controller
+
+```
+# app/controllers/shopping/discounts_controller.rb
+
+class Shopping::DiscountsController < Auth::Shopping::DiscountsController
+
+end
+```
+
 
 ### Modify the configuration file 
 
@@ -1055,6 +1076,9 @@ config.payment_class = "Shopping::Payment"
 config.product_controller = "shopping/products"
 config.product_class = "Shopping::Product"
 
+config.discount_controller = "shopping/discounts"
+config.discount_class = "Shopping::Discount"
+
 ## refer to the section on payment gateways later, for information on this configuration.
 ## the configuration you see here is only applicable if you are using the payumoney concern in your payments_controller, that enables payments in india.
 config.payment_gateway_info = {:key => "gtKFFx", :salt => "eCwWELxi", :CardName => "Any Name", :CardNumber => "5123456789012346", :CVV => "123", :Expiry => "May 2017"}
@@ -1066,35 +1090,7 @@ After doing this, run the following from the command line:
 bundle exec rake routes
 ```
 
-Check routes for cart, cart item, payment are present.
-
-
-### Broad Overview of How Shopping API Works
-
-Any CartItem that is created, automatically becomes a part of the user's wishlist.
-When the cart item is added to a cart it is no longer seen in the wishlist.
-Payments can be made to the cart.
-
-### Shopping API Table
-
-### How user permissions work in the Shopping Architecture:
-
-Each Shopping Class has a def called initialize_vars that is called before any of the actions.
-
-This def checks to see if there is an "id" parameter in the incoming params. If yes, it searches for the respective model with that id, by calling a find_{payment/cart/cart_item/product} class method.
-
-The implementation of this method is the same in all the classes, it basically searches for that particular class , with the provided id.
-
-If the currently_signed_inuser is an admin, then it just looks for the class with the id, eg: Cart.find(:id => id)
-
-If the currently_signed_in_user is not an admin, it checks for the class with id and resource id, eg: Cart.where(:id => id, :resource_id => resource.id.to_s)
-
-This ensures that the item will be found only if the resource_id was registered on the item while creating it.
-
-Thus for create/update/show/destroy -> only the user who created the item or the admin can do these actions.
-
-Only for index actions -> 
-## TODO EXPLANATION FOR INDEX ACTION PERMISSIONS.
+Check routes for cart, cart item, payment, product and discount are present.
 
 
 ### How to pass your own permitted params to any of the Shopping Classes:
@@ -1109,23 +1105,132 @@ def permitted_params
 end
 ```
 
+#### TODO : Add tests to all shopping controller to evaluate that additional parameters can be passed and saved/updated.
+
+
 ### Views for Shopping API
 
-The engine offers in built views for the Shopping API.
-These views are organized with the following thoughts in mind:
+The engine offers in built views for the Shopping API. These are all html based views. No js / ajax views are supported in built.
+You can override all the views by creating a folder with the same name as the controller actions.
+None of the shopping controllers directly render any view. All of them just call "respond_with {whatever_object}".
 
-#### Product:
+--------------------------------------------------------------
+## Search API
 
-Basic CRUD Views
 
-#### Cart Item:
+### ElasticSearch Configuration
 
-Basic CRUD Views
+The wj-mongoid-elasticsearch gem is required by default in the engine. The engine does no other configuration. If you want to alter the port/ any other elasticsearch options, you can place the necessary modifications in the preinitializer file. The following adds a prefix to all indices from the app.
 
-#### Cart:
+```
+## config/preinitializer.rb
 
-Basic CRUD Views
+## For eg if you want to add a prefix to all the app indices, do this, always makesure it is lowercase:
+Mongoid::Elasticsearch.prefix = 'doggy'
 
-#### Payment:
+## To add other elasticsearch client specific options, you can add them here itself, refer to rspro-mongoid-elasticsearch to see these options.
 
-Basic CRUD Views
+....
+
+## After that, you have to do , for every single model that you have added an elastisearch index definition to:
+
+ModelName.es.index.create
+
+## additionally you must add the following lines, to create the indexes for certain models from the engine, which also need elasticsearch.
+```
+## will create indexes for the shopping classes and user class, as defined by you in the configuration.
+[Auth.configuration.product_class, Auth.configuration.cart_class, Auth.configuration.cart_item_class, Auth.configuration.payment_class, Auth.configuration.discount_class, Auth.configuration.user_class]. each do |cl|
+
+  if ((cl) && (cl.constantize.respond_to? :es))
+    puts "CREATING INDEX : #{cl}  , IF IT DOESNT EXIST"
+    cl.constantize.es.index.create
+  end
+
+end
+```
+
+
+### Adding ElasticSearch to Models:
+
+```
+# app/models/whatever.rb
+
+
+include Auth::Concerns::EsConcern
+
+## make the call to the following function
+
+index_definition = {....}
+
+create_es_index(index_definition)
+   
+## this must include the names of the fields, that are already defined in the mapping.
+
+def as_indexed_json(options={})
+ {
+  name: name,
+    price: price,
+    resource_id: resource_id,
+    public: public
+ }  
+end
+
+```
+
+Two fields __must__ to be included in the mapping:
+
+1. public : "yes/no"
+if set to "yes" => it can be searched by any signed in user.
+if set to "no" => it can be searched only by the user whose resource_id is the same as the resource_id specified in the record, or any admin user.
+
+2. resource_id : the resource id of the user who owns this record. 
+
+### How to override the index definition of those models where the index definition is inbuilt:
+
+In models where the engine has provided the index definition, like : user, and all shopping models. do the following:
+
+```
+app/models/user.rb
+
+class User < Auth::User
+  
+  ## these models which inherit from the engine, already have a constant defined in their respective concerns, called INDEX_DEFINITION.
+  ## so you have to use that if you want to specifiy the stock index definition
+  ## otherwise you can use your own index definition.
+  ## the as_indexed_json is also already defined in their concerns.
+  ## so if you want you can override that here as well.
+  create_es_index(INDEX_DEFINITION)
+
+end
+```
+
+
+### How user access works for search:
+-------------------------------------------------------------
+## User Permissions and Token Concern:
+
+### Lookup_Resource
+
+### Signed In Resource
+
+### Model level assignments
+
+### Proxy Resource Class and Id
+
+### Which instance attributes are reserved in controllers.
+
+### How to Protect A Controller with Authentication
+
+### How to Get the currently signed in user
+
+### How to use owner_concern
+
+### How to assign variables at the controller level
+
+### How to use the m_client
+
+
+-------------------------------------------------------------
+## Admin Create Users
+
+No special configuration is needed. The routes are added automatically, and the views and controller are provided by the engine.

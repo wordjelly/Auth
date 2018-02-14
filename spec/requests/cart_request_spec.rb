@@ -440,5 +440,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 	end		
 
+	context " -- accepts additional parameters -- " do 
+		
+	end
+
 end
 

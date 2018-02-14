@@ -238,3 +238,24 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 ## show option to resend the sms otp
 ## show option to resend confirmation email
 ## admin should be able to directly use the unconfirmed user.
+
+
+## TODO :
+
+## 1. test json api for :
+
+## a. discounts api
+## b. admin create users api
+## c. search api
+, and fill up the tables for it.
+----> two days.
+
+## 4. look for mailbox api.
+
+
+
+## 5. write instructions to use in a new app.
+---> two days.
+
+from 19 - 24 : put it on amazon.
+

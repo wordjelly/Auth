@@ -4,21 +4,10 @@ module Auth::Concerns::Shopping::ProductConcern
 	extend ActiveSupport::Concern
 	include Auth::Concerns::ChiefModelConcern
 	include Auth::Concerns::OwnerConcern
+	include Auth::Concerns::EsConcern
+
 	included do 
-		
-		#include MongoidVersionedAtomic::VAtomic	
-		field :price, type: BigDecimal
-		field :name, type: String
-
-		## all products are public to be searched.
-		before_save do |document|
-			self.public = "yes"
-		end
-
-		
-		if Auth.configuration.use_es == true
-			include Mongoid::Elasticsearch
-  			elasticsearch! ({
+	INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
 				    		index: {
@@ -85,23 +74,28 @@ module Auth::Concerns::Shopping::ProductConcern
 				        }
 				    }
 				}
-			})
-			
-  			
-			def as_indexed_json(options={})
-			 {
-			 	name: name,
-			    price: price,
-			    resource_id: resource_id,
-			    public: public
-			 }
-			end 
+			}
+		#include MongoidVersionedAtomic::VAtomic	
+		field :price, type: BigDecimal
+		field :name, type: String
 
+		## all products are public to be searched.
+		before_save do |document|
+			self.public = "yes"
 		end
+
 		
-		
-		
+
 	end
+
+	def as_indexed_json(options={})
+	 {
+	 	name: name,
+	    price: price,
+	    resource_id: resource_id,
+	    public: public
+	 }
+	end 
 
 	
 

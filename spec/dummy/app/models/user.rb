@@ -6,7 +6,7 @@ class User < Auth::User
 
   field :name, type: String
 
-
+  create_es_index(INDEX_DEFINITION)
   
   ##FUNCTION OVERRIDEN FROM THE USER CONCERN TO FORMAT AND PARSE THE ADDITIONAL_LOGIN_PARAM.
   ##here we are processing it assuming it is a mobile number
