@@ -57,6 +57,7 @@ module Auth
     attr_accessor :mount_path
     attr_accessor :auth_resources
     attr_accessor :enable_sign_in_modals
+    attr_accessor :prevent_oauth_merger
     attr_accessor :recaptcha
     attr_accessor :redis_config_file_location
     attr_accessor :third_party_api_keys
@@ -142,6 +143,10 @@ module Auth
       ## if set to true, will produce errors all over the place in case you forget to provide a recaptcha key and secret in the configuration file!
       @recaptcha = false
 
+
+      ## if set to true, wil prevent merging of oauth accounts if they share the same email id.
+      ## by default is false.
+      @prevent_oauth_merger = false
 
       ##############################################################
       ##

@@ -3,6 +3,7 @@ source 'https://rubygems.org'
  #gem 'mongoid_versioned_atomic', :git => 'https://github.com/wordjelly/mongoid-versioned-atomic' 
  
  gem 'wj-mongoid-elasticsearch', :path => "/home/bhargav/Github/mongoid-elasticsearch"
+ gem 'mongoid_versioned_atomic', :path => "/home/bhargav/Github/mongoid_versioned_atomic"
 # Declare your gem's dependencies in auth.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.

@@ -12,7 +12,6 @@ PATH
       kaminari-mongoid
       materialize-sass (= 0.97.1)
       momentjs-rails
-      mongoid_versioned_atomic (~> 0.0.2)
       omniauth (= 1.4.1)
       omniauth-facebook (= 4.0.0)
       omniauth-google-oauth2 (= 0.4.1)
@@ -42,6 +41,16 @@ PATH
       elasticsearch (~> 1.0.13)
       mongoid (>= 3.0, < 6.0)
       ruby-progressbar
+
+PATH
+  remote: /home/bhargav/Github/mongoid_versioned_atomic
+  specs:
+    mongoid_versioned_atomic (0.0.5)
+      aws-sdk (~> 2)
+      mongoid (~> 5.0.1)
+      mongoid-paperclip
+      rails (~> 4.2.4)
+      rake (= 11.2.2)
 
 GEM
   remote: https://rubygems.org/
@@ -83,13 +92,13 @@ GEM
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
     arel (6.0.4)
-    aws-sdk (2.10.123)
-      aws-sdk-resources (= 2.10.123)
-    aws-sdk-core (2.10.123)
+    aws-sdk (2.10.129)
+      aws-sdk-resources (= 2.10.129)
+    aws-sdk-core (2.10.129)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.10.123)
-      aws-sdk-core (= 2.10.123)
+    aws-sdk-resources (2.10.129)
+      aws-sdk-core (= 2.10.129)
     aws-sigv4 (1.0.2)
     bcrypt (3.1.11)
     bson (4.3.0)
@@ -194,12 +203,6 @@ GEM
     mongoid-paperclip (0.0.11)
       mongoid
       paperclip (>= 2.3.6, != 4.3.0)
-    mongoid_versioned_atomic (0.0.5)
-      aws-sdk (~> 2)
-      mongoid (~> 5.0.1)
-      mongoid-paperclip
-      rails (~> 4.2.4)
-      rake (= 11.2.2)
     multi_json (1.13.1)
     multi_xml (0.6.0)
     multipart-post (2.0.0)
@@ -236,7 +239,7 @@ GEM
       rack
     origin (2.3.1)
     orm_adapter (0.5.0)
-    paperclip (5.1.0)
+    paperclip (5.2.1)
       activemodel (>= 4.2.0)
       activesupport (>= 4.2.0)
       cocaine (~> 0.5.5)
@@ -377,6 +380,7 @@ DEPENDENCIES
   capybara-webkit
   factory_girl_rails
   faker
+  mongoid_versioned_atomic!
   rspec-rails
   selenium-webdriver
   wj-mongoid-elasticsearch!
