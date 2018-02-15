@@ -1122,6 +1122,9 @@ None of the shopping controllers directly render any view. All of them just call
 
 The wj-mongoid-elasticsearch gem is required by default in the engine. The engine does no other configuration. If you want to alter the port/ any other elasticsearch options, you can place the necessary modifications in the preinitializer file. The following adds a prefix to all indices from the app.
 
+
+
+
 ```
 ## config/preinitializer.rb
 
@@ -1152,6 +1155,9 @@ end
 
 ### Adding ElasticSearch to Models:
 
+
+
+
 ```
 # app/models/whatever.rb
 
@@ -1174,8 +1180,10 @@ def as_indexed_json(options={})
     public: public
  }  
 end
-
 ```
+
+
+
 
 Two fields __must__ to be included in the mapping:
 
@@ -1189,8 +1197,12 @@ if set to "no" => it can be searched only by the user whose resource_id is the s
 
 In models where the engine has provided the index definition, like : user, and all shopping models. do the following:
 
+
+
+
+
 ```
-app/models/user.rb
+#app/models/user.rb
 
 class User < Auth::User
   
