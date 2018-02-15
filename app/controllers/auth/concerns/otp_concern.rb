@@ -158,11 +158,13 @@ module Auth::Concerns::OtpConcern
 	  			resource.m_client = self.m_client
 	 			resource.set_client_authentication	
 			  	if resource.additional_login_param_confirmed? 
+				  	puts "resource additional login param is confirmed."
+				  	puts "intent is: #{@intent}"
 				  	if @intent == "reset_password"
 				  		
 				  		##protected method so had to do this.
 				  		if resource.confirmed? && !resource.	pending_reconfirmation?
-				  			resource.class.send_reset_password_instructions(@resource.attributes)
+				  			resource.class.send_reset_password_instructions(resource.attributes)
 				  			
 				  			intent_verification_message = "An email has been sent to your email account, with instructions on resetting your password" if resource.errors.empty?
 				  			
@@ -240,6 +242,7 @@ module Auth::Concerns::OtpConcern
 	  			filters << {model.downcase.to_sym => [:additional_login_param, :otp, :email, :_id]}
 	  		end
 	  		filters << [:intent, :resource,:api_key,:current_app_id]
+	  		filters << "g-recaptcha-response".to_sym
 	  		params.permit(filters)
 	  	end
 	end	
