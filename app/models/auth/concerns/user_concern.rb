@@ -95,8 +95,9 @@ module Auth::Concerns::UserConcern
 		
 		
 		
-
-		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) }
+		## so if it doesnt respond to confirmed_at -> then create a client anyways
+		## if it responds to and the confirmed_at has changed, then create a client.
+		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) || (a.additional_login_param_status_changed? && a.additional_login_param_status == 2) }
 
 		after_save :set_client_authentication
 
@@ -514,6 +515,7 @@ module Auth::Concerns::UserConcern
 		##first find out if there is already a client for this user id.
 		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :resource_id => self.id)
 
+		#puts "Came to create a client."
 
 		c.versioned_create({:resource_id => self.id})
 		op_count = 10
@@ -523,14 +525,18 @@ module Auth::Concerns::UserConcern
 		while(true)
 			
 			if c.op_success?
+				#puts "the op was a success"
 				break
 			elsif op_count == 0
+				#puts "op count was 0"
 				break
 			elsif (Auth::Client.where(:resource_id => self.id).count == 0)
+				#puts "tried to create here."
 				c.api_key = SecureRandom.hex(32)
 				c.versioned_create({:resource_id => self.id})
 				op_count-=1
 			else
+				#puts "finally broke."
 				break
 			end
 
