@@ -144,12 +144,37 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
     context " -- client create update on user create update destroy -- " do 
 
+
+
       it " -- creates a client when a user is created -- " do 
 
       
         c = Auth::Client.all.count
         post user_registration_path, user: attributes_for(:user_confirmed)
         c1 = Auth::Client.all.count
+        expect(c1-c).to eql(1)
+
+      end
+
+      it " -- creates a client when a user is created with a mobile number -- ", :client_with_mobile => true do 
+
+        Auth.configuration.stub_otp_api_calls = true
+        
+        c = Auth::Client.all.count
+        
+
+        post user_registration_path, user: attributes_for(:user_mobile)
+
+        usr = assigns(:user)
+
+        u = User.where(:additional_login_param => usr.additional_login_param).first
+
+        u.additional_login_param_status = 2
+
+        result = u.save
+        
+        c1 = Auth::Client.all.count
+
         expect(c1-c).to eql(1)
 
       end
