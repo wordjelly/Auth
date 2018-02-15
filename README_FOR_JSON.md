@@ -9,10 +9,10 @@
 
 ## Table of Contents:
 
-[Get A App Id, and Api Key](#Get A App Id, and Api Key)  
+[Get A App Id, and Api Key](#App_Id_And_Api_Key)  
 [Emphasis](#emphasis)  
 
 
     
-<a name="Get A App Id, and Api Key"/>
+<a name="App_Id_And_Api_Key"/>
 ## Get A App Id, and Api Key
