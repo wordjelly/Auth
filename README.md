@@ -258,6 +258,23 @@ Add this line to development.rb file (or production if you are in production)
 
 ```
 
+Add the following to your user model so that devise notification emails are also queued to the job queue.
+
+```
+#app/models/user.rb
+
+class User
+include Auth::Concerns::UserConcern
+...
+  
+  ## read comments for this in auth/spec/dummy/app/models/user.rb
+  def send_devise_notification(notification, *args)
+      puts "sending devise notification."
+      devise_mailer.send(notification, self, *args).deliver_later
+  end
+end
+```
+
 #### Mailer Configuration + Email CSS
 
 The gem comes prepackaged with 'premailer-rails'. You can refer to its documentation for more details.
@@ -1218,6 +1235,10 @@ end
 
 
 ### How user access works for search:
+
+
+### Search Response format:
+
 -------------------------------------------------------------
 ## User Permissions and Token Concern:
 
@@ -1246,3 +1267,13 @@ end
 ## Admin Create Users
 
 No special configuration is needed. The routes are added automatically, and the views and controller are provided by the engine.
+
+Add the following code to the user model to determine how a nofitication will be sent to the user so that they can reset the password after their account has been created by the admin.
+
+-------------------------------------------------------------
+## Add Recaptcha To Your Site
+
+In the configuration file add the following:
+
+
+-------------------------------------------------------------
