@@ -9,8 +9,8 @@
 
 ## Table of Contents:
 
-[Get An App Id and Api Key](#App_Id_And_Api_Key)  
-[Emphasis](#emphasis)  
+### 1. [Get An App Id and Api Key](#App_Id_And_Api_Key)  
+
 
 
     
