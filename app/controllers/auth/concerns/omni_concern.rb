@@ -15,6 +15,8 @@ module Auth::Concerns::OmniConcern
   def set_devise_mapping_for_omniauth
     model = nil
     if !request.env["omniauth.model"].blank?
+      puts "the request env is:"
+      puts request.env["omniauth.model"]
       request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
         jj = Regexp.last_match
         model = jj[:model]
