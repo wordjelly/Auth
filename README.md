@@ -1270,6 +1270,38 @@ No special configuration is needed. The routes are added automatically, and the 
 
 Add the following code to the user model to determine how a nofitication will be sent to the user so that they can reset the password after their account has been created by the admin.
 
+
+The super def, is defined in the user concern, it returns a value "r" which is the reset_password_link, in case the user has a mobile number, otherwise if the user has a confirmed email account, then it sends a reset_password_confirmation message to that account. It does not return anything like "r" if the user has an email, since sending the reset password instructions is handled by devise inside the user_concern itself. 
+
+So in the implementing model, we assume that you use the Notification Concern provided and documented herein, and so you should use the notification concern as below to send an sms to the user with the reset password link.
+
+"Noti" in the below code block is the class created in your app that inherits the Notification Concern. Refer to the documentation of the Notification System for more details.
+
+Payment_id  is just an arbitary variable. It has no special meaning.
+
+```
+# app/models/user.rb
+
+def send_reset_password_link
+  super.tap do |r|
+    if r
+        notification = Noti.new
+        resource_ids = {}
+        resource_ids[User.name] = [self.resource_id]
+        notification.resource_ids = JSON.generate(resource_ids)
+        notification.objects[:payment_id] = r
+        notification.save
+        Auth::Notify.send_notification(notification)
+        
+    else
+      puts "no r."
+      
+    end
+  end
+end
+```
+
+
 -------------------------------------------------------------
 ## Add Recaptcha To Your Site
 
@@ -1277,3 +1309,116 @@ In the configuration file add the following:
 
 
 -------------------------------------------------------------
+## Add Notifications To Your Site
+
+To Add Notifications to your app, do the following:
+
+### Configuration File
+
+```
+# config/initializers/preinitializer.rb
+
+Auth.configuration do |config|
+
+# all the usual configuration
+
+config.notification_class = "Noti"
+config.notification_response_class = "NotiResponse"
+
+end
+
+```
+
+### Models
+
+Create two new models
+
+1. One model to handle the notification class.
+
+Here you can override various methods for the purpose of notification.
+
+```
+# app/models/noti.rb
+class Noti
+  include Auth::Concerns::NotificationConcern
+ 
+  def format_for_sms(resource)
+    ## in our case we are using two factor so it needs some parameters to be sent in.
+    ## it expects:
+    ## to_number,template_name,var_hash,template_sender_id
+    ## so here we return an array of arguments.
+    response = {}
+    response[:to_number] = resource.additional_login_param
+
+    ## the following three are things which will be specific to the template configured in twofactor.
+    response[:template_name] = "test2"
+    response[:var_hash] = {var1: resource.id.to_s, var2: objects[:payment_id]}
+    response[:template_sender_id] = "PATHOF"
+    
+    response
+  end
+
+  def send_sms_background(resource)
+    
+    job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
+    #Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+    k = OtpJob.perform_later(job_arguments)
+      puts "send sms background : perform_later returns: #{k.to_s}"
+    #end
+  end
+
+
+  def send_email_background(resource)
+    job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_email",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
+    #Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
+    k = OtpJob.perform_later(job_arguments)
+    puts "send email background : perform_later returns: #{k.to_s}"
+    #end
+  end
+  
+
+
+end
+```
+
+2. The other model to handle the response from the remote services to the notifications that you sent out.
+
+```
+## app/models/noti_response.rb
+class NotiResponse
+  include Auth::Concerns::NotificationResponseConcern
+  
+  def set_webhook_identifier(response)
+    Auth::Mailgun.set_webhook_identifier(self,response)
+    Auth::TwoFactorOtp.set_webhook_identifier(self,response)
+  end
+
+end
+```
+
+
+### Controllers
+
+Create A Controller to handle webhooks from the remote services that will handle the responses to your notifications.
+
+Inherit from the Auth::WebhooksController
+The Auth::WebhooksController does nothing much other than skipping verification of authenticity tokens.
+
+```
+# app/controllers/webhooks_controller.rb
+class WebhooksController < Auth::WebhooksController
+  def sms_webhook 
+    ## send to a background job in the respective module.
+    OtpJob.perform_later([nil,nil,"sms_webhook",JSON.generate(params)])
+    render :nothing => true, :status => 200
+  end
+
+  def email_webhook
+    ## send to a background job in the respective module.
+    OtpJob.perform_later([nil,nil,"email_webhook",JSON.generate(params)])
+    render :nothing => true, :status => 200
+  end
+end
+```
+
+You need to configure routes in your app, to service whatever methods you specify in your webhooks_controller.
