@@ -17,12 +17,15 @@
 4. Client Id: 5a857eec421aa919635263fe
 
 
-Content-Type:application/json
-X-User-Token:M_RjjjCxs8ps8TdYsx8t
-X-User-Aid:5a85ae25e138231aa93495e3
-X-User-Es:d8b05d593e4612f4d063cd52d9096ac6100611f4a64183d00019941b3a2662de
 
-User Id: 5a85fe9a421aa9081fd7b516
+Content-Type:application/json
+X-User-Token:3j79sRhhc3bajDX7Q4Wm
+X-User-Aid:5a85ae25e138231aa93495e3
+X-User-Es:7c151a22631cfcdd4517b2f44043df2d46be0e3411ff0500170ed95a64a2e27f
+
+User Id: 5a86c78c421aa92e0a8afeca
+
+
 
 
 
@@ -365,5 +368,163 @@ Note the authentication token changes on adding the mobile. This is because ther
 
 ### 10. Request Unlock Account with Mobile:
 
-Follow all the same instructions as for point (9), but replace intent in all requests with "unlock_account"
+1. This is only possible if the user has a confirmed email account.
 
+2. If the user does not have a confirmed email account, tell him that he can't do this, or don't show the option at all.
+
+3. Make A Request to :
+
+"Submit a unlock_account request using a mobile number"
+
+4. Expected Code : 200, Expected Response :
+{
+"nothing" : true
+}
+
+5. Now do step : 2b
+
+6. Now make request to  "Check if otp is correct, for purpose of unlock account"
+
+7. Expected Response Code : 200
+
+8. Expected Response Body: 
+
+```
+{
+    "intent_verification_message": "An email has been sent to your email account, with instructions on unlocking your account",
+    "errors": [],
+    "resource": {
+        "nothing": true
+    },
+    "verified": true
+}
+```
+
+9. Any other errors, or validation errors, to be handled as usual.
+
+
+<a href="Forgot_Password_With_Email" /a>
+
+### 11. Request Forgot Password Instructions with Email
+
+1. Make The Request "Submit a Reset Password Request with Email"
+
+2. Response code expected : 201
+
+3. Response expected : {}
+
+4. Follow usual instructions for validation errors / other errors.
+
+
+<a href="Unlock_Account_With_Email" /a>
+
+### 12. Request Unlock Account With Email
+
+1. Make the request "Submit An Unlock Account Request With Email".
+
+2.Response Code expected : 201
+
+3.Response Expected : {}
+
+4.Validation Errors look like: 
+
+```
+{
+    "errors": {
+        "email": [
+            "was not locked"
+        ]
+    }
+}
+```
+
+5. Handle errors as usual.
+
+
+<a href="Change_User_Password" /a>
+
+### 13. Change the Password
+
+1. Make the Request "Update the User's Password"
+
+2. Expected Response code : 200 
+
+3. Expected Response : 
+
+```
+{
+    "authentication_token": "sMy6tVJczEs17vNy7V21",
+    "es": "d8b05d593e4612f4d063cd52d9096ac6100611f4a64183d00019941b3a2662de"
+}
+```
+
+4. Note that the authentication token changes whenever you change the password.
+
+5. Handle errors as usual
+
+
+
+<a href="Google_OAuth" /a>
+
+### 14. Sign In Using Google OAuth2
+
+1. There are two possibilities for doing a google oauth2 sign in .
+
+2. From the app you can request : 
+
+a. "Sign In With Google Oauth 2 and Id Token" - if you request an id token for google oauth.
+b. "Sign In With Google Oauth 2 and Access Token" - if you request access token with google oauth.
+
+3. Whichever one you request , expected response code : 201
+
+4. Expected Response:
+
+{
+    "authentication_token": "uy-jf453dobNoCpaCzB8",
+    "es": "7bed7eea649cbe1962e672acd44d93ac7ab88d91752b94e7a309f9d4d12eb67e"
+}
+
+5. In case of failure :
+
+Response Code : 500
+
+Response :
+
+{
+    "failure_message": null
+}
+
+6. Handle 401, as usual.
+
+7. Any other error handle as usual.
+
+<a href="Facebook_OAuth" /a>
+
+### 15. Sign In Using Facebook OAuth2
+
+1. First do the facebook oauth flow in the app.
+
+2. Make the request to : Sign In With Facebook Oauth2 fb_exchange_token
+
+3. Expected Response code : 201
+
+4. Expected Response:
+
+{
+    "authentication_token": "uy-jf453dobNoCpaCzB8",
+    "es": "7bed7eea649cbe1962e672acd44d93ac7ab88d91752b94e7a309f9d4d12eb67e"
+}
+
+5. In case of failure :
+
+Response Code : 500
+
+Response :
+
+{
+    "failure_message": null
+}
+
+6. Handle 401, as usual.
+
+7. Any other error handle as usual.

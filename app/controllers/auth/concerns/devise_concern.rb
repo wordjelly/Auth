@@ -74,8 +74,11 @@ module Auth::Concerns::DeviseConcern
 	      return true
 
 	    else
-	      #puts "params are: #{params.to_s}"
-	      state = nil
+	      puts "params are: #{params.to_s}"
+	      puts params[:state]
+          puts JSON.is_json?(params[:state])
+          puts "---- end --- "
+          state = nil
 	      api_key = nil
 	      current_app_id = nil
 	      path = nil
@@ -88,6 +91,7 @@ module Auth::Concerns::DeviseConcern
 	        current_app_id = state["current_app_id"]
 	        path = state["path"]
 	      elsif params[:api_key] && params[:current_app_id]
+            puts "the params api key and current app id are there."
 	        api_key = params[:api_key]
 	        current_app_id = params[:current_app_id]
 	      else
@@ -96,11 +100,13 @@ module Auth::Concerns::DeviseConcern
 	      if api_key.nil? || current_app_id.nil?
 	        
 	      else
-            #puts "api key:#{api_key}"
-            #puts "current app id: #{current_app_id}"
-
+            puts "api key:#{api_key}"
+            puts "current app id: #{current_app_id}"
+            puts "path is: #{path}"
+            
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
-	          	
+	          	    
+                puts "found valid clinet."
                 request.env["omniauth.model"] = path
                 
                 self.m_client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
