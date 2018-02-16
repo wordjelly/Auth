@@ -11,24 +11,44 @@
 
 ## Id's and other details generated / used while buildling this tutorial 
 
-1. App developer user id: 5a857ed5421aa919635263fc
+1. App developer user id: 
 "current_app_id" : "5a85ae25e138231aa93495e3",
 "api_key" : "3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5"
 4. Client Id: 5a857eec421aa919635263fe
 
+--------------------------------------------------------------
 
+ADMIN USER
+-----------
 
 Content-Type:application/json
-X-User-Token:3j79sRhhc3bajDX7Q4Wm
+X-User-Token:wYHQ_6rqxH_QUvQ3mVE6
 X-User-Aid:5a85ae25e138231aa93495e3
-X-User-Es:7c151a22631cfcdd4517b2f44043df2d46be0e3411ff0500170ed95a64a2e27f
+X-User-Es:5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2
 
-User Id: 5a86c78c421aa92e0a8afeca
+User Id: 5a870959421aa90f36a35558
+E-Mail : bhargav.r.raut@gmail.com
+password : password
+
+---------------------------------------------------------------
+
+OTHER USER
+-----------
+
+Content-Type:application/json
+X-User-Token:AicEbTzVxuiu8SYq47LQ
+X-User-Aid:5a85ae25e138231aa93495e3
+X-User-Es:ca4685bfcc90b9a1cb13ae92919b0e9acf751f5ce0365a87c5c64270ee8a97a3
+
+
+User Id: 5a87111b421aa91047c428b9
+mobile : 9561137096
+E-Mail : none
+password: password
 
 
 
-
-
+---------------------------------------------------------------
 
 ## Specific Prerequisites for Android App
    
@@ -61,6 +81,18 @@ User Id: 5a86c78c421aa92e0a8afeca
 ### [13. Change the Password](Change_User_Password)
 ### [14. Sign In Using Google OAuth2](Google_OAuth)
 ### [15. Sign In Using Facebook OAuth2](Facebook_OAuth)
+
+### [16. Set A User As Admin](Set_User_As_Admin)
+### [17. Admin Creates User With Mobile](Admin_Creates_User_With_Mobile)
+### [18. Admin Creates User With Email](Admin_Creates_User_With_Email)
+### [19. Admin Resends Confirmation Email For User](Admin_Resends_Confirmation_Email)
+### [20. Admin Resends Confirmation Otp For User](Admin_Resends_Otp)
+### [20a. Admin Resends the Reset Password Link to the User](Resend_Reset_Password_link)
+### [21. Searching for A String at Search Endpoint For Authenticated User](Search_Authenticated)
+### [22. Creating A Product](Create_Product)
+### [23. Viewing A Product](View_Product)
+### [24. Updating A Product](Update_Product)
+
 
 <a name="SignIn_Flows" /a>
 
@@ -143,6 +175,7 @@ You need to store these in your app, and distribute them with every copy of the 
 2. If the response is 200, show the message "now verifying your otp" and proceed to the next step.
 
 3. If the response is something other than 200, then show the user the option -> 1) retry 2) resend otp
+
 
 
 <a name="Poll_Verification_Status" />
@@ -528,3 +561,117 @@ Response :
 6. Handle 401, as usual.
 
 7. Any other error handle as usual.
+
+
+<a href="Set_User_As_Admin" /a>
+
+### 16. Set A User As Admin
+
+1. To do this the user executing the request has to be an admin user.
+2. Get the User who you want to make admin by searching for it.
+3. From the response get the id.
+4. Make the Request "Update User Profile"
+5. While making this request, pass the headers (Auth Token, es and app id) of the admin user.
+6. In the request body , pass the "id" of the user who you searched for above.
+7. Expected Response Code : 204
+8. Expected Response Body : null
+9. Handle any other errors, as usual.
+10. Call the get user id endpoint after this to check if the admin has been set to true.
+
+
+<a href="Admin_Creates_User_With_Mobile" /a>
+
+### 17. Admin Creates User With Mobile
+
+1. Make the request "Admin creates user with mobile and password"
+
+2. Headers : Provide the Auth token and es of the admin user.
+
+3. Provide the additional_login_param as the mobile number of the user who the admin wants to create.
+
+4. Exepcted Response Code : 201
+
+5. Expected Response :
+
+{
+ "nothing" : true
+}
+
+6. Any validation errors, to be handled as usual
+
+7. Any other error to be handled as usual.
+
+8. Now do request (2b)
+
+8a. Now do request (2c) -> and it will tell that the user is confirmed.
+
+9. At the end ->  tell the admin, that the user should have got an sms with reset password instructions.
+
+
+
+<a href="Admin_Creates_User_With_Email" /a>
+
+### 18. Admin Creates User With Email:
+
+1. Make the Request : "Admin creates user with email and password"
+
+2. Expected Response Code: 201
+
+3. Exepcted Response: 
+
+```
+{
+    "nothing" : true
+}
+```
+
+4. This should result in a confirmation email being sent to the user.
+
+5. If the user doesnt receive the confirmation email, then follow (19)
+
+
+
+<a href="Admin_Resends_Confirmation_Email" /a>
+
+### 19. Admin Resends Confirmation Email for User:
+
+1. Follow point (6)
+
+
+<a href="Admin_Resends_Otp" /a>
+
+### 20. Admin Resends Confirmation Otp For User
+
+1. Just follow request (2a) -> with the mobile number of the user
+
+
+<a href="Resend_Reset_Password_link" /a>
+
+### 20a. Admin Resends the Reset Password Link to the User
+
+1. Make the request : Resend the Reset Password Link to the User created by Admin
+2. Expected Response Code : 204
+3. Expected Response : null
+4. Handle validation and other errors as usual.
+
+
+
+
+<a href="Search_Authenticated" /a>
+
+### 21. Searching for A String at Search Endpoint For Authenticated User
+
+1. Make Request : Search Authenticated
+
+2. Expected Response Code : 200
+
+3. Expected Response :
+
+Array Of Json Objects, each object will have for sure the key _type, you can use that to instantiate views in your app depending on the model.
+
+[
+    {
+        _type : "Model Name"
+    }
+]
+

@@ -81,6 +81,76 @@
 			"response": []
 		},
 		{
+			"name": "Search Authenticated",
+			"request": {
+				"url": {
+					"raw": "http://localhost:3000/search/authenticated_user_search.json?query[query_string]=956&query[size]=10&current_app_id=5a85ae25e138231aa93495e3&api_key=3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"search",
+						"authenticated_user_search.json"
+					],
+					"query": [
+						{
+							"key": "query[query_string]",
+							"value": "956",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "query[size]",
+							"value": "10",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "current_app_id",
+							"value": "5a85ae25e138231aa93495e3",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "api_key",
+							"value": "3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "wYHQ_6rqxH_QUvQ3mVE6",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a85ae25e138231aa93495e3",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "Create User with email and password",
 			"request": {
 				"url": "http://localhost:3000/authenticate/users.json",
@@ -94,7 +164,77 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"user\" : {\n\t\t\"email\" : \"jhakova@gmail.com\",\n\t\t\"password\" : \"cocostan\",\n\t\t\"password_confirmation\" : \"cocostan\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"g-recaptcha-response\":\"\"\n}"
+					"raw": "{\n\t\"user\" : {\n\t\t\"email\" : \"bhargav.r.raut@gmail.com\",\n\t\t\"password\" : \"password\",\n\t\t\"password_confirmation\" : \"password\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"g-recaptcha-response\":\"\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Admin creates user with mobile and password",
+			"request": {
+				"url": "http://localhost:3000/admin_create_users.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "wYHQ_6rqxH_QUvQ3mVE6",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a85ae25e138231aa93495e3",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\" : {\n\t\t\"additional_login_param\" : \"9561137096\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"g-recaptcha-response\":\"\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Admin creates user with email and password",
+			"request": {
+				"url": "http://localhost:3000/admin_create_users.json",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "wYHQ_6rqxH_QUvQ3mVE6",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a85ae25e138231aa93495e3",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\" : {\n\t\t\"email\" : \"rotastrain@gmail.com\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"g-recaptcha-response\":\"\"\n}"
 				},
 				"description": ""
 			},
@@ -238,7 +378,7 @@
 					},
 					{
 						"key": "X-User-Token",
-						"value": "3j79sRhhc3bajDX7Q4Wm",
+						"value": "AicEbTzVxuiu8SYq47LQ",
 						"description": ""
 					},
 					{
@@ -248,7 +388,7 @@
 					},
 					{
 						"key": "X-User-Es",
-						"value": "7c151a22631cfcdd4517b2f44043df2d46be0e3411ff0500170ed95a64a2e27f",
+						"value": "ca4685bfcc90b9a1cb13ae92919b0e9acf751f5ce0365a87c5c64270ee8a97a3",
 						"description": ""
 					}
 				],
@@ -364,7 +504,7 @@
 			"name": "Submit the otp received by user to the server",
 			"request": {
 				"url": {
-					"raw": "http://localhost:3000/authenticate/users/verify_otp.json?resource=users&user[additional_login_param]=9850270084&user[otp]=573962&current_app_id=5a85ae25e138231aa93495e3&api_key=3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5&g-recaptcha-response",
+					"raw": "http://localhost:3000/authenticate/users/verify_otp.json?resource=users&user[additional_login_param]=9561137096&user[otp]=626192&current_app_id=5a85ae25e138231aa93495e3&api_key=3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5&g-recaptcha-response",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -384,13 +524,13 @@
 						},
 						{
 							"key": "user[additional_login_param]",
-							"value": "9850270084",
+							"value": "9561137096",
 							"equals": true,
 							"description": ""
 						},
 						{
 							"key": "user[otp]",
-							"value": "573962",
+							"value": "626192",
 							"equals": true,
 							"description": ""
 						},
@@ -426,7 +566,7 @@
 			"name": "Check if otp is correct for purpose of confirming account",
 			"request": {
 				"url": {
-					"raw": "http://localhost:3000/authenticate/users/otp_verification_result?resource=users&user[additional_login_param]=9850270084&user[otp]=969286&current_app_id=5a85ae25e138231aa93495e3&api_key=3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5",
+					"raw": "http://localhost:3000/authenticate/users/otp_verification_result?resource=users&user[additional_login_param]=9561137096&user[otp]=764211&current_app_id=5a85ae25e138231aa93495e3&api_key=3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -446,13 +586,13 @@
 						},
 						{
 							"key": "user[additional_login_param]",
-							"value": "9850270084",
+							"value": "9561137096",
 							"equals": true,
 							"description": ""
 						},
 						{
 							"key": "user[otp]",
-							"value": "969286",
+							"value": "764211",
 							"equals": true,
 							"description": ""
 						},
@@ -795,7 +935,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"9850270084\",\n\t\t\"password\":\"password\"\n\t},\n\t\"api_key\":\"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"current_app_id\":\"5a85ae25e138231aa93495e3\"\n}"
+					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"9561137096\",\n\t\t\"password\":\"password\"\n\t},\n\t\"api_key\":\"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"current_app_id\":\"5a85ae25e138231aa93495e3\"\n}"
 				},
 				"description": "request unlock account instructions"
 			},
@@ -815,7 +955,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"rotastrain@gmail.com\",\n\t\t\"password\":\"cocostan\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\"\n}"
+					"raw": "{\n\t\"user\":{\n\t\t\"login\":\"bhargav.r.raut@gmail.com\",\n\t\t\"password\":\"password\"\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\t\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\"\n}"
 				},
 				"description": "request unlock account instructions"
 			},
@@ -931,7 +1071,7 @@
 			},
 			"response": [
 				{
-					"id": "db985a70-6093-46f3-9fa0-1f3a6e0dbfde",
+					"id": "fd533186-6e92-405a-80e1-b8dc12f08ea7",
 					"name": "Create A Cash Payment (as non admin user)",
 					"originalRequest": {
 						"url": "http://localhost:3000/shopping/payments.json",
@@ -1080,7 +1220,7 @@
 			},
 			"response": [
 				{
-					"id": "de683985-a0a8-4a6b-8db9-b6b9e8a877ff",
+					"id": "1988a8f2-f721-423b-b771-d7f7b66792a4",
 					"name": "Create A Cash Payment (as non admin user)",
 					"originalRequest": {
 						"url": "http://localhost:3000/shopping/payments.json",
@@ -1229,7 +1369,7 @@
 			},
 			"response": [
 				{
-					"id": "2b203009-c578-4f8d-becd-b5175debc420",
+					"id": "d947b937-f7fb-4dc0-a9f9-7d9efd3c6543",
 					"name": "Create A Cash Payment as admin user and set it as accepted",
 					"originalRequest": {
 						"url": "http://localhost:3000/shopping/payments.json",
@@ -1444,7 +1584,7 @@
 			},
 			"response": [
 				{
-					"id": "599703dc-b79f-4583-af5d-e641ab4d9f7f",
+					"id": "4c9ea86f-cd92-488a-846d-145028ee1df2",
 					"name": "Update a cash payment as approved, using admin creds",
 					"originalRequest": {
 						"url": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json",
@@ -1571,7 +1711,7 @@
 			},
 			"response": [
 				{
-					"id": "45f60399-72d7-4fe5-825f-c124370b619c",
+					"id": "6303f891-49f8-4f1e-be67-dabe40b3bffa",
 					"name": "Update a cash payment as approved, using admin creds",
 					"originalRequest": {
 						"url": "http://localhost:3000/shopping/payments/5a5fb0b6421aa92bde82495d.json",
@@ -1781,23 +1921,58 @@
 					},
 					{
 						"key": "X-User-Token",
-						"value": "tkWsTzM51yXcKCLszLbU",
+						"value": "wYHQ_6rqxH_QUvQ3mVE6",
 						"description": ""
 					},
 					{
 						"key": "X-User-Aid",
-						"value": "5a5259cb421aa91664913ed1",
+						"value": "5a85ae25e138231aa93495e3",
 						"description": ""
 					},
 					{
 						"key": "X-User-Es",
-						"value": "a0c6dbcd31d6a3f6067e4888bc9a1811f976e2c418cff853ba8e03e537d914cb",
+						"value": "5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2",
 						"description": ""
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"user\" : {\n\t\t\"admin\" : false\n\t},\n\t\"api_key\":\"021ee7d31b9c3f813546c63c25f1219921f52484d688e1f756b0fe33359c85b6\",\n\t\"current_app_id\":\"5a5259cb421aa91664913ed1\",\n\t\"id\":\"5a5e3c9b421aa920bad70525\"\n}"
+					"raw": "{\n\t\"user\" : {\n\t\t\"admin\" : true\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"id\":\"5a87111b421aa91047c428b9\"\n}"
+				},
+				"description": "Update a user profile, as an admin, setting this user to admin:true"
+			},
+			"response": []
+		},
+		{
+			"name": "Resend the Reset Password Link to the User created by Admin",
+			"request": {
+				"url": "http://localhost:3000/profiles/users/update.json",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "X-User-Token",
+						"value": "wYHQ_6rqxH_QUvQ3mVE6",
+						"description": ""
+					},
+					{
+						"key": "X-User-Aid",
+						"value": "5a85ae25e138231aa93495e3",
+						"description": ""
+					},
+					{
+						"key": "X-User-Es",
+						"value": "5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"user\" : {\n\t\t\"created_by_admin\" : true\n\t},\n\t\"current_app_id\" : \"5a85ae25e138231aa93495e3\",\n\"api_key\" : \"3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5\",\n\t\"id\":\"5a8732dc421aa9130cd1ff47\"\n}"
 				},
 				"description": "Update a user profile, as an admin, setting this user to admin:true"
 			},
@@ -2029,7 +2204,7 @@
 			},
 			"response": [
 				{
-					"id": "08990bfb-6b06-43d4-b4af-0ad8f3ee5f27",
+					"id": "43225e0a-d434-4677-bdb4-fb4b57bd91b7",
 					"name": "Get  cart",
 					"originalRequest": {
 						"url": {
@@ -2220,7 +2395,7 @@
 			},
 			"response": [
 				{
-					"id": "2d2bb245-9bf3-4e9c-b0f0-b1ab9b0e59ad",
+					"id": "efc2e118-c7e6-4f8f-92de-b4755e088552",
 					"name": "Get  payment",
 					"originalRequest": {
 						"url": {
@@ -2447,7 +2622,7 @@
 			},
 			"response": [
 				{
-					"id": "b52c8767-6308-4bc7-bedc-027c1c3ed4ca",
+					"id": "bf1d8e30-ab60-46ad-8f59-14913905252e",
 					"name": "Get all cart items in the wishlist",
 					"originalRequest": {
 						"url": {
