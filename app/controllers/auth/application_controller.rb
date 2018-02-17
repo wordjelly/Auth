@@ -67,8 +67,19 @@ module Auth
 		not_found("please provide a cart id") if obj.new_record?
 	end
 
-
-	
+	## will call authenticate_(first_key_in_the_auth_resources) if there is no currently signed in scoep
+	## will return true, for the first auth_resource that gives a current_(user/whatever)
+	## if nothing returns true, will redirect to not_found,
+	## use this function wherever you want to protect a controller just using devise authentication.
+	## only makes sense to use in the scope of the web app.
+	def authenticate_resource!
+  		send("authenticate_#{Auth.configuration.auth_resources.keys.first.downcase}!") if (signed_in? == false)
+  		Auth.configuration.auth_resources.keys.each do |model|
+  			break if @resource_for_web_app = send("current_#{model.downcase}")
+  		end
+  		return if @resource_for_web_app
+  		not_found("Could not authenticate")
+  	end
 
 
 

@@ -19,6 +19,8 @@ module Auth
     field :resource_id, type: BSON::ObjectId, default: BSON::ObjectId.new
     field :app_ids, type: Array, default: []
     field :current_app_id, type: String
+    attr_accessor :add_app_id
+    attr_accessor :add_redirect_url
     
     
     def contains_redirect_url?(url)

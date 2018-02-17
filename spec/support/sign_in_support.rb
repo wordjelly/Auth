@@ -21,6 +21,7 @@ module ValidUserRequestHelper
   end
 
   def sign_in(resource)
+    puts "came to sign in resource."
     login_as(resource, scope: warden_scope(resource))
   end
 

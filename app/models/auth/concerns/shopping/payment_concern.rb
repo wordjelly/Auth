@@ -96,7 +96,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		validate :payment_satisfies_minimum_payment_requirement
 
-		
+		## if the payment is card or cheque and is being set as approved.
+		## it must check that the url is present.
+		validate :card_and_cheque_payment_provides_proof, if: Proc.new{|a| a.payment_status_changed? && a.payment_status == 1 && (a.is_card? || a.is_cheque?)}
+
+				
 
 		before_validation do |document|
 
@@ -552,8 +556,11 @@ module Auth::Concerns::Shopping::PaymentConcern
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
 
-
-
+	def card_and_cheque_payment_provides_proof
+		## it is not directly possible to create a card / cheque payment as successfull even as an administrator
+		## you have to first create an image resource, and it will check for that in this def, to exist
+		## so search for an image resource, that has the payment id of this payment.
+	end
 
 	def as_json(options={})
 		super(options).merge({:payment_receipt => self.payment_receipt,:cash_change => self.cash_change})

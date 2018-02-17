@@ -1,0 +1,7 @@
+<%= 
+
+products_array = @auth_shopping_products.map do |k|
+		k = k.as_json
+end
+
+products_array.to_json.html_safe %>
