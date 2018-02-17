@@ -60,6 +60,13 @@ module Auth::Concerns::OwnerConcern
 		owner_resource
 	end
 
+	## checks if the owner of the current object is the same as the owner of the other object passed in.
+	## this is currently used in payment_concern, in a before_save validation def.
+	## this is also used in the cart_item_concern, as a before_update validation , if the parent_id is changing, where we check if the cart_item owner is the same as that of the cart.
+	def owner_matches(other_object)
+		return false unless other_object.respond_to? :resource_id
+		return false if self.resource_id != other_object.resource_id
+	end
 
 	private
 

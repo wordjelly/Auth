@@ -89,10 +89,52 @@ password: password
 ### [20. Admin Resends Confirmation Otp For User](Admin_Resends_Otp)
 ### [20a. Admin Resends the Reset Password Link to the User](Resend_Reset_Password_link)
 ### [21. Searching for A String at Search Endpoint For Authenticated User](Search_Authenticated)
+
 ### [22. Creating A Product](Create_Product)
 ### [23. Viewing A Product](View_Product)
 ### [24. Updating A Product](Update_Product)
+### [25. Destroy A Product](Destroy_Product)
+### [26. View All Products](View_All_Products)
+### [27. Create A Cart Item](Create_Cart_Item)
+### [28. View A Cart Item](View_Cart_Item)
+### [29. Update A Cart Item](Update_Cart_Item)
+### [30. Destroy A Cart Item](Destroy_Cart_Item)
+### [31. View WishList](View_WishList)
+### [32. Add Item To WishList](Add_Item_to_WishList)
+### [33. Remove Item From WishList](Remove_Item_From_WishList)
 
+
+### [34. Create An Empty Cart](Create_Cart)
+### [34a. Create A Cart With Cart Items](Create_Cart_With_Items)
+### [35. Add_Items_to_Cart](Add_Items_To_Cart)
+### [36. Remove_Items_From_Cart](Remove_Items_From_Cart)
+### [37. View Cart](View_Cart)
+### [38. View All Carts](View_All_Carts)
+
+
+### [39. Make Cash Payment To Cart](Make_Cash_Payment)
+### [40. Approve Cash Payment As Admin](Approve_Cash_Payment)
+### [41. Make Card Payment To Cart](Make_Card_Payment)
+### [42. Approve Card Payment As Admin](Approve_Card_Payment)
+### [43. Make Cheque Payment To Cart](Make_Cheque_Payment)
+### [44. Approve Cheque Payment As Admin](Approve_Cheque_Payment)
+### [45. Disapprove an Approved Payment](Disapprove_Payment)
+### [46. Cancel A Cart Item As Admin, After Payment Has been Made](Cancel_Cart_item_As_Admin)
+### [47. Make Refund Request](Make_Refund_Request)
+### [48. Approve Refund Request As Admin](Approve_Refund_Request)
+### [49. Refresh Cart Item](Refresh_Cart_Item)
+### [50. Create A Gateway Payment](Create_Gateway_Payment)
+### [51. Verify Gateway Payment](Verify_Gateway_Payment)
+### [52. Create A Discount Coupon From A Cart](Create_Discont_Coupon_From_Cart)
+### [53. View A Discount Coupon](View_Discount_Coupon)
+### [54. Create Cart From Discount Coupon](Create_Cart_From Discount_Coupon)
+### [55. Make Payment Into Cart Using Discount Coupon](Make_Payment_To_Cart_Using_Discount_Coupon)
+### [56. Verify_Discount_Coupon_Request](Verify_Discount_Coupon_Request)
+### [57. Decline Discount Coupon Request](Decline_Discount_Coupon_Request)
+### [58. Use the Approved Discount Coupon](Use_Approved_Discount_Coupon)
+### [59. Create Cartless Discount Coupon](Create_Cartless_Discount_Coupon)
+### [60. Use Cartless Discount Coupon](Use_Cartless_Discount_Coupon)
+### [61. Get Payment Receipt](Get_Payment_Receipt)
 
 <a name="SignIn_Flows" /a>
 
@@ -675,3 +717,446 @@ Array Of Json Objects, each object will have for sure the key _type, you can use
     }
 ]
 
+
+--------------------------------------------------------------
+
+<a href="Create_Product" /a>
+
+### 22. Creating A Product
+
+
+N.B : Product can only be created by an admin user.
+
+1. Make A Request to  : "Create A Product"
+
+2. Expected Response Code : 201
+
+3. Expected Response : JSON Representation of Product Object
+
+```
+{
+    "_id": {
+        "$oid": "5a88618a421aa916385a3b45"
+    },
+    "brand": "Ford",
+    "category": "Cars",
+    "created_at": "2018-02-17T17:08:26.373Z",
+    "name": "Ford Ecosport",
+    "price": "120000.0",
+    "public": "yes",
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-17T17:08:26.373Z"
+}
+```
+
+4. Handle not authenticated, or validation errors as usual.
+
+
+<a href="View_Product" /a>
+
+N.B : product can be viewed by anyone including non-authenticated users.
+
+### 23. Viewing A Product
+
+1. Make the Request "Get A Particular Product"
+
+2. Expected Response Code : 200
+
+3. Expected Response : As in (22)
+
+
+<a href="Update_Product" /a>
+
+N.B : product can only be updated by admin user.
+
+### 24. Updating A Product
+
+1. Make the Request "Update A Product".
+
+2. Expected Response Code : 204
+
+3. Expected Response Body : null
+
+
+
+### [25. Destroy A Product](Destroy_Product)
+
+N.B : product can only be deleted by admin user.
+
+1. Make the request : "Delete a Product"
+
+2. Expected Response Code : 204
+
+3. Expected Response Body : null
+
+
+### [26. View All Products](View_All_Products)
+
+1. Make the Request "Get All Products"
+
+2. Expected Response Code : 200
+
+3. Expected Response : 
+
+```
+[
+    {product_as_json},
+    {product_as_json}
+]
+```
+
+
+<a href="Create_Cart_Item" /a>
+
+### 27. Create A Cart Item
+
+N.B Only signed in user can create a cart item.
+
+1. Make Request to "Create Cart Item"
+2. Expected Response Code : 201
+3. Expected Response Body :  (JSON Representation of Object)
+
+```
+{
+    "_id": {
+        "$oid": "5a8870e5421aa916385a3b49"
+    },
+    "accept_order_at_percentage_of_price": 1,
+    "accepted": null,
+    "accepted_by_payment_id": null,
+    "created_at": "2018-02-17T18:13:57.855Z",
+    "discount": null,
+    "discount_code": null,
+    "name": "Ford Ecosport",
+    "parent_id": null,
+    "price": "120000.0",
+    "product_id": "5a88618a421aa916385a3b45",
+    "public": "no",
+    "quantity": 1,
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-17T18:13:57.855Z"
+}
+```
+
+
+
+### [28. View A Cart Item](View_Cart_Item)
+
+N.B : Only user who created the cart item or admin can view the cart item.
+
+1. Make the Request : "Get A Particular Cart Item."
+2. Expected Response Code : 200
+3. Expected Response : Same as in 27
+
+
+
+### [29. Update A Cart Item](Update_Cart_Item)
+
+N.B : Only user who created the cart item or admin can update the cart item.
+
+1. Make the request : Update Cart Item.
+2. Expected Response Code 204
+3. Expected Response Body : null
+
+
+### [30. Destroy A Cart Item](Destroy_Cart_Item)
+
+N.B : Only user who created the cart item or admin can update the cart item.
+
+1. Make the Request "Delete A Cart Item"
+
+2. Expected Response Code : 204.
+
+3. Expected Response Body: null
+
+
+
+
+
+### [31. View WishList](View_WishList)
+
+N.B : WishList is all the cart_items which do not have a cart_id on them.
+
+1. Make the Request "Get all cart items in the wish list"
+2. Expected Response Code : 204
+3. Expected Response Body : 
+
+
+```
+[
+    {cart_item_as_json},
+    {cart_item_as_json}
+]
+```
+
+<a href="Add_Item_to_WishList" /a>
+
+### 32. Add Item To WishList
+
+1. Make Request 27.
+
+
+<a href="Remove_Item_From_WishList" /a>
+
+### [33. Remove Item From WishList]
+
+2. Make Request 30.
+
+
+<a href="Create_Cart" /a>
+
+### [34. Create An Empty Cart]
+
+1. Make Request "Create An Empty Cart"
+2. Expected Response : 201 Created
+3. Expected Response Body: 
+
+```
+{
+    "_id": {
+        "$oid": "5a886e15421aa916385a3b47"
+    },
+    "created_at": "2018-02-17T18:01:57.063Z",
+    "discount_id": null,
+    "name": null,
+    "notes": null,
+    "public": "no",
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-17T18:01:57.063Z",
+    "cart_items": [],
+    "cart_payments": [],
+    "cart_price": 0,
+    "cart_paid_amount": 0,
+    "cart_pending_balance": 0,
+    "cart_credit": 0,
+    "cart_minimum_payable_amount": null
+}
+```
+
+<a href="Create_Cart_With_Items" /a>
+
+### 34a. Create A Cart With Cart Items
+
+Do request (34), but pass the following into the "cart" object
+
+```
+    {
+        "cart" : {
+            "add_cart_item_ids" : [array_of_ids]
+        }
+    }
+```
+
+Response is same as for 34.
+
+
+<a href="Add_Items_To_Cart" /a>
+
+### [35. Add_Items_to_Cart]
+
+1. Make the Request "Add Cart Items to Cart"
+2. Expected Response Code : 204
+3. Expected Response Body : null
+
+
+
+<a href="Remove_Items_From_Cart" /a>
+
+### [36. Remove_Items_From_Cart]
+
+1. Make the Request "Remove Cart Items From Cart"
+2. Expected Response Code : 204
+3. Expected Response Body : null
+
+
+<a href="View_Cart" /a>
+
+### [37. View Cart]
+
+1. Make the Request "Get A Cart"
+2. Expected Response Code : 200
+3. Expected Response 
+
+```
+{
+    "_id": {
+        "$oid": "5a886e15421aa916385a3b47"
+    },
+    "created_at": "2018-02-17T18:01:57.063Z",
+    "discount_id": null,
+    "name": null,
+    "notes": null,
+    "public": "no",
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-17T18:01:57.063Z",
+    "cart_items": [
+        {
+            "_id": {
+                "$oid": "5a8870e5421aa916385a3b49"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": null,
+            "accepted_by_payment_id": null,
+            "created_at": "2018-02-17T18:13:57.855Z",
+            "discount": null,
+            "discount_code": null,
+            "name": "Ford Ecosport",
+            "parent_id": "5a886e15421aa916385a3b47",
+            "price": "120000.0",
+            "product_id": "5a88618a421aa916385a3b45",
+            "public": "no",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a870959421aa90f36a35558",
+            "updated_at": "2018-02-17T18:15:15.339Z"
+        }
+    ],
+    "cart_payments": [],
+    "cart_price": "120000.0",
+    "cart_paid_amount": 0,
+    "cart_pending_balance": "120000.0",
+    "cart_credit": 0,
+    "cart_minimum_payable_amount": "120000.0"
+}
+```
+
+<a href="View_All_Carts" /a>
+
+### [38. View All Carts]
+
+1. Make the Request : "Get All Carts"
+2. Response Code : 200
+3. Response Body : 
+
+```
+[
+    {
+        "_id": {
+            "$oid": "5a886e15421aa916385a3b47"
+        },
+        "created_at": "2018-02-17T18:01:57.063Z",
+        "discount_id": null,
+        "name": null,
+        "notes": null,
+        "public": "no",
+        "resource_class": "User",
+        "resource_id": "5a870959421aa90f36a35558",
+        "updated_at": "2018-02-17T18:01:57.063Z",
+        "cart_items": null,
+        "cart_payments": null,
+        "cart_price": null,
+        "cart_paid_amount": null,
+        "cart_pending_balance": null,
+        "cart_credit": null,
+        "cart_minimum_payable_amount": null
+    }
+]
+```
+
+N.B: the cart information of each cart like cart_price, items, etc is not returned in this request.
+
+
+<a href="Make_Cash_Payment" /a>
+
+### [39. Make Cash Payment To Cart]
+
+1. First do request 37.
+2. See the cart_pending_balance.
+3. Now make the request "Create A Cash Payment" with the amount = cart_pending_balance
+4. Expected Response code : 201
+5. Expected Response Body : 
+
+```
+{
+    "_id": {
+        "$oid": "5a8881a0421aa916385a3b4a"
+    },
+    "amount": 120000,
+    "cart_id": "5a886e15421aa916385a3b47",
+    "cash_change": 0,
+    "created_at": "2018-02-17T19:25:20.889Z",
+    "discount_id": null,
+    "gateway_callback_called": false,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "cash",
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-17T19:25:20.889Z",
+    "payment_receipt": null
+}
+```
+
+<a href="Approve_Cash_Payment" /a>
+
+### 40. Approve Cash Payment As Admin
+
+1. Make the request "Update Payment As Approved"
+2. Expected Response Code : 204.
+3. Expected Response Body : null
+
+
+N.B  : It should also be possible for an admin to directly make the cash payment on behalf of the user, by passing the payment_status as 1, in request (39), so that it is directly approved. In that case, refer to __proxy_user_settings__, because additional proxy settings have to be sent through, to allow the admin to do something on behalf of the user.
+Make a provision for this request also.
+
+
+<a href="Make_Card_Payment" /a>
+
+### [41. Make Card Payment To Cart]
+    
+1. Do same as request (39), but with payment_type == "card"
+2. Same response code, and response body is expected.
+
+
+    
+<a href="Approve_Card_Payment" /a>
+
+### [42. Approve Card Payment As Admin]
+
+1. First direct the user to create an image resource, using the payment id, using request (X)
+2. Now do request (40)
+3. Same response code and body is expected.
+
+
+<a href="Make_Cheque_Payment" /a>
+
+### [43. Make Cheque Payment To Cart]
+
+1. Do same as request (39), but with payment_type == "card"
+2. Same response code, and response body is expected.
+
+
+
+<a href="Approve_Cheque_Payment" /a>
+
+### [44. Approve Cheque Payment As Admin]
+
+1. First direct the user to create an image resource, using the payment id. 
+2. Now do request (40)
+3. Same response code and body is expected.
+
+
+
+<a href="Disapprove_Payment" /a>
+
+### 45. Disapprove an Approved Payment
+
+1. Make Request 40, but with payment status as 0.
+
+Expected Response code, and body is same.
+
+
+<a href="Cancel_Cart_item_As_Admin" /a>
+
+### [46. Cancel A Cart Item As Admin, After Payment Has been Made]
+
+
+### [47. Make Refund Request](Make_Refund_Request)
+
+### [48. Approve Refund Request As Admin](Approve_Refund_Request)

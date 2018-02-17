@@ -250,7 +250,7 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 , and fill up the tables for it.
 ----> two days.
 
-## 4. look for mailbox api.
+## 4. look for mailbox api 
 
 
 
@@ -258,4 +258,15 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 ---> two days.
 
 from 19 - 24 : put it on amazon.
+
+TODO : 
+
+1)solve issues with client visibility
+2)write shopping api json documentation
+3)write test for super params allowing.
+4)Approval of Refund - how is the money returned?
+5)Sort out issue about minimum payable amount, and where is it integrated.
+6)See about atomicity of Shopping API.(use where.().find_and_modify)
+7)what if someone who doesnt own the cart, makes a payment to it.(another user totally, not the admin)
+8)Admin should not be allowed to for eg: add cart items to a cart owned by the user, or make payments to cart made by user. need to cross check the resource_id of both items, before adding one into the other. This will ensure proxy user has to be set.
 

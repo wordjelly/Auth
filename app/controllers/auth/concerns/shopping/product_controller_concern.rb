@@ -42,6 +42,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   def show
     instantiate_shopping_classes
     @auth_shopping_product = @auth_shopping_product_class.find(params[:id])
+    ## will render show.json.erb if its a json request.
   end
 
   def destroy
