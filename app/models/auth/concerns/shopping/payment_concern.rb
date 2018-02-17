@@ -98,8 +98,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		## if the payment is card or cheque and is being set as approved.
 		## it must check that the url is present.
-		validate :card_and_cheque_payment_provides_proof, if: Proc.new{|a| a.payment_status_changed? && a.payment_status == 1 && (a.is_card? || a.is_cheque?)}
+		validate :card_and_cheque_payment_provides_proof, if: Proc.new{|a| a.payment_status_changed? && a.payment_status == 1 && (a.is_card? || a.is_cheque? || a.refund)}
 
+
+		validate :check_owner_matches
 				
 
 		before_validation do |document|
@@ -460,6 +462,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 			cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
 				cart_item.signed_in_resource = self.signed_in_resource
+				## first all the expected cart items should exist
+				## then they should all get saved
+				## none of them should be already accepted.
+				## if all these conditions are satisfied.
+				## then we can say that nothing else has happedn
+				## we do an atomic request
+				## where(item_id => whatever, accepted => false).set(accepted => true)
+				## if this fails for even one, then the payment fails.
+				## and all the remaining cart items -> can be refreshed to show that they are not accepted
+				## refresh will say -> where(:payment_id => x, and status = acceptd)
+				## so if some other payment gets in the way, either it will fail or this will fail, so it works.
 				cart_item.set_accepted(self,nil)
 			}.compact.uniq
 			self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
@@ -560,7 +573,15 @@ module Auth::Concerns::Shopping::PaymentConcern
 		## it is not directly possible to create a card / cheque payment as successfull even as an administrator
 		## you have to first create an image resource, and it will check for that in this def, to exist
 		## so search for an image resource, that has the payment id of this payment.
+		## eg , add this error.
+	
+		##self.errors.add("payment_type","you have to upload an image of the card mahine receipt/cheque, to approve this payment.")
 	end
+
+	def check_owner_matches
+		self.errors.add("cart_id","the cart id and payment are being created by different users.") if (owner_matches(self.cart) == false)
+	end
+
 
 	def as_json(options={})
 		super(options).merge({:payment_receipt => self.payment_receipt,:cash_change => self.cash_change})

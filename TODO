@@ -261,12 +261,11 @@ from 19 - 24 : put it on amazon.
 
 TODO : 
 
-1)solve issues with client visibility
+
 2)write shopping api json documentation
 3)write test for super params allowing.
-4)Approval of Refund - how is the money returned?
+4)Approval of Refund - how is the money returned - this is by cheque. (here also if the refund is approved, then a photo should be taken, validate in refund approval ? -  they write out the cheque , and then they approve it?) -- add test for refund issue, but this will affect tests, will have to be factored into all the refund tests, or the method will have to be stubbed, even refund approval, expects a photo of the cheque to have been uploaded.
 5)Sort out issue about minimum payable amount, and where is it integrated.
-6)See about atomicity of Shopping API.(use where.().find_and_modify)
-7)what if someone who doesnt own the cart, makes a payment to it.(another user totally, not the admin)
-8)Admin should not be allowed to for eg: add cart items to a cart owned by the user, or make payments to cart made by user. need to cross check the resource_id of both items, before adding one into the other. This will ensure proxy user has to be set.
-
+8)add tests for owner matches.
+9)act on comments in the set_cart_items_accepted.
+10)add a test that you cant remove items from a cart if even one payment has been made, whether accepted or not accepted.
