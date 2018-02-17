@@ -934,6 +934,29 @@ N.B : WishList is all the cart_items which do not have a cart_id on them.
     "cart_credit": 0,
     "cart_minimum_payable_amount": null
 }
+
+OR
+
+{
+    "_id": {
+        "$oid": "5a88a101421aa93e59e4addb"
+    },
+    "accept_order_at_percentage_of_price": 1,
+    "accepted": null,
+    "accepted_by_payment_id": null,
+    "created_at": "2018-02-17T21:39:13.283Z",
+    "discount": null,
+    "discount_code": null,
+    "name": "Ford Ecosport",
+    "parent_id": null,
+    "price": "120000.0",
+    "product_id": "5a88618a421aa916385a3b45",
+    "public": "no",
+    "quantity": 1,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-17T21:39:13.283Z"
+}
 ```
 
 <a href="Create_Cart_With_Items" /a>
@@ -1108,12 +1131,36 @@ Make a provision for this request also.
 
 <a href="Make_Card_Payment" /a>
 
+## let me create two cart items as the other user, then add them to a cart, and then make a card payment as him, then approve it as admin.
+
 ### [41. Make Card Payment To Cart]
     
 1. Do same as request (39), but with payment_type == "card"
 2. Same response code, and response body is expected.
 
 
+```
+{
+    "_id": {
+        "$oid": "5a88a8f1421aa93fd40ee2ff"
+    },
+    "amount": 120000,
+    "cart_id": "5a88a123421aa93e59e4addc",
+    "cash_change": 0,
+    "created_at": "2018-02-17T22:13:05.316Z",
+    "discount_id": null,
+    "gateway_callback_called": false,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "card",
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-17T22:13:05.316Z",
+    "payment_receipt": null
+}
+```
     
 <a href="Approve_Card_Payment" /a>
 
@@ -1154,9 +1201,15 @@ Expected Response code, and body is same.
 
 <a href="Cancel_Cart_item_As_Admin" /a>
 
-### [46. Cancel A Cart Item As Admin, After Payment Has been Made]
+### 46. Cancel A Cart Item As Admin, After Payment Has been Made
 
+1. Make Request (36) using Admin headers.
+2. Show the cart using request 37, and it should show a negative cart balance.
 
-### [47. Make Refund Request](Make_Refund_Request)
+<a href="Make_Refund_Request" /a>
+
+### [47. Make Refund Request]
+
+Make a refund request to the user cart as defined in the creds_for_json.
 
 ### [48. Approve Refund Request As Admin](Approve_Refund_Request)

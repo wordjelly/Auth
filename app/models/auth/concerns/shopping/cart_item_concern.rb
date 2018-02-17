@@ -247,6 +247,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## @used_in : cart_controller_concern # add_or_remove
 	def set_cart_and_resource(cart)
 		return true if self.parent_id
+		return false if (owner_matches(cart) == false)
 		self.parent_id = cart.id.to_s
 		self.save
 	end
