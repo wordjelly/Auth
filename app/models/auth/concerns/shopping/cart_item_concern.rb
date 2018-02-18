@@ -180,9 +180,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 		
 		if self.accepted_by_payment_id
 			begin
-				Auth.configuration.payment_class.constantize.find(self.accepted_by_payment_id)
-			rescue
-				
+				payment = Auth.configuration.payment_class.constantize.find(self.accepted_by_payment_id)
+				## check if this payment status is approved or not.
+				## if the payment status is approved, then dont do anything to the cart item.(we don't retro check payment to cart item.)
+				## if the payment status is not approved, then make the cart item accepted as false.
+				if (payment.payment_status.nil? || payment.payment_status == 0)
+					self.accepted = false
+				end
+			rescue => Mongoid::Errors::DocumentNotFound
 				self.accepted = false
 			end
 		end
@@ -280,8 +285,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	 			if product = Auth.configuration.product_class.constantize.find(product_id)
 	 				product_attributes_to_assign.each do |attr|
 	 					## only if the present attribute is nil, then we assign it from the product.
-	 					if self.send("#{attr}").nil?
-	 						self.send("#{attr}=",product.send("#{attr}"))
+	 					if self.respond_to? attr.to_sym
+		 					if self.send("#{attr}").nil?
+		 						self.send("#{attr}=",product.send("#{attr}"))
+		 					end
 	 					end
 	 				end
 	 			end

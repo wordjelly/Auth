@@ -1210,6 +1210,73 @@ Expected Response code, and body is same.
 
 ### [47. Make Refund Request]
 
-Make a refund request to the user cart as defined in the creds_for_json.
+1. Make A Request to "Create A Refund"
+2. The amount has to be equal to the cart pending balance.
+3. The payment_type can be anything out of "cash, card,cheque"
+4. The expected response code is 201
+5. The expected response is : 
 
-### [48. Approve Refund Request As Admin](Approve_Refund_Request)
+```
+{
+    "_id": {
+        "$oid": "5a897049421aa94f2bec9910"
+    },
+    "amount": -120000,
+    "cart_id": "5a88a123421aa93e59e4addc",
+    "cash_change": 0,
+    "created_at": "2018-02-18T12:23:37.018Z",
+    "discount_id": null,
+    "gateway_callback_called": false,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "card",
+    "public": "no",
+    "refund": true,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-18T12:23:37.018Z",
+    "payment_receipt": null
+}
+```
+
+<a href="Approve_Refund_Request" a/>
+
+### 48. Approve Refund Request As Admin
+
+1. Make a Request to "Approve Refund Request As Admin"
+
+2. Use the Admin headers
+
+3. While making the request use the payment id of the refund payment.
+
+4. Also add the "proxy_resource_class" -> as the model class "User", and the "proxy_resource_id" as the id of the user who created the refund payment.
+
+5. Before making the request, upload an image of the cheque that is being made for this purpose, using the request(X).
+
+6. That will be validated while approving the payment.
+
+7. Expected Response Code is 204.
+
+8. Expected Response Body is null.
+
+9. Check the cart_pending_balance by doing request "View Cart" and you should see a pending_balance of 0.
+
+
+<a href="Refresh_Cart_Item" \a>
+
+### 49. Refresh Cart Item
+
+1. This request is to be performed to check if the cart_item is really "accepted" or not. This is done, in cases where a payment may have set a cart item as accepted, but later its own payment status was not set as "approved."
+
+2. Make the request "Refresh Cart Item"
+
+3. While making the request, you can either use for authentication the headers of the user who has made the cart item, or use admin headers, and add proxy_user_class and proxy_user_id in the body.
+
+4. Expected Response is 204.
+
+5. Expected Response Body is null.
+
+
+### [50. Create A Gateway Payment](Create_Gateway_Payment)
+### [51. Verify Gateway Payment](Verify_Gateway_Payment)
+
