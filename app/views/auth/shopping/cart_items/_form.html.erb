@@ -14,7 +14,7 @@
     </div>
   <% end %>
   <div class="form_fields" style="<%= show_fields == "no" ? "display:none;" : "" %>">
-    <% @auth_shopping_cart_item.class.attribute_names.keep_if{|c| !@auth_shopping_cart_item.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
+    <% @auth_shopping_cart_item.class.attribute_names.keep_if{|c| !@auth_shopping_cart_item.field_names_to_skip_while_making_form.include? c.to_s}.each do |attr| %>
       <%=
           text_field_tag "cart_item[#{attr}]" ,@auth_shopping_cart_item.send("#{attr}"), :id => "#{@auth_shopping_cart_item.id.to_s}_cart_item_#{attr}" %>
 

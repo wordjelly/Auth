@@ -187,10 +187,24 @@ module Auth::Concerns::Shopping::CartItemConcern
 				if (payment.payment_status.nil? || payment.payment_status == 0)
 					self.accepted = false
 				end
-			rescue => Mongoid::Errors::DocumentNotFound
+			rescue Mongoid::Errors::DocumentNotFound
 				self.accepted = false
 			end
 		end
+
+		## if it doesnt have a cart, then it cannot be accepted.
+		self.accepted = false if self.parent_id.nil?
+
+		## we should ideally do this in the payment.
+		## so that it can actually do what it usually does.
+		## we can set say refresh_payment.
+		## but it may not pay for everything.
+		## but that is the only way through.
+		## so if the payment is accepted then the cart_items_accepted will not be triggered.
+		## but if we update the first payment, then we can do it.
+		## basically take the last payment and update it, force calling the set_cart_items_accepted
+		## and suppose they are not successfully accepted, then what about validation errors ?
+		## so that will have to be skipped in that case.
 	end
 	
 	## called from payment#update_cart_items_accepted
@@ -218,6 +232,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
 		self.skip_callbacks = {:after_validation => true}
 		res = self.save
+		puts self.errors.full_messages.to_s
 		res
 	end
 	
@@ -240,8 +255,14 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def unset_cart
 		if self.signed_in_resource.is_admin?
 			self.parent_id = nil
+			self.accepted = nil
+			self.accepted_by_payment_id = nil
 		else
-			self.parent_id = nil if (self.accepted == false || self.accepted.nil?)
+			if (self.accepted == false || self.accepted.nil?)
+				self.parent_id = nil 
+				self.accepted = nil
+				self.accepted_by_payment_id = nil
+			end
 		end
 		self.save
 	end
@@ -254,6 +275,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 		return true if self.parent_id
 		return false if (owner_matches(cart) == false)
 		self.parent_id = cart.id.to_s
+		self.accepted = nil
+		self.accepted_by_payment_id = nil
 		self.save
 	end
 
@@ -264,6 +287,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 	#######################################################
 
 	## as long as it is not the accepted_by_payment id that has gone from nil to something, if anything else in the cart_item has changed, and the user is not an admin, and there is an accepted_by_payment id, then the error will be triggered.
+	## these conditions are applicable to the gateway payment, or any other payment also.
+	## and this has happened because the same item was pushed back in.
 	def user_cannot_change_anything_if_payment_accepted
 		if !self.signed_in_resource.is_admin?
 			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record? && !(self.accepted_by_payment_id_changed? && self.accepted_by_payment_id_was.nil?)

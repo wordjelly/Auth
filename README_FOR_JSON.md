@@ -1277,6 +1277,40 @@ Expected Response code, and body is same.
 5. Expected Response Body is null.
 
 
-### [50. Create A Gateway Payment](Create_Gateway_Payment)
-### [51. Verify Gateway Payment](Verify_Gateway_Payment)
+<a href="Create_Gateway_Payment" /a>
+
+### [50. Create A Gateway Payment]
+
+1. Make a request "Create Gateway Payment"
+
+- some fields are necessary to be entered by the user:
+
+- 1. firstname (if the user name is present, then autopopulate)
+- 2. phone (if the additional login param is present , then autopopulate, otherwise tell the user to enter it.)
+- 3. email (if the email  is present, then autopopulate, otherwise tell the user to enter it.)
+- 4. productinfo : this field, is to be autopopulated as: "items_{cart_id}"
+
+
+2. Expected Response is : 201
+
+3. Expected Response Body : 
+
+4. After creating the payment, forward the user to the gateway to do their payment.
+
+5. the gateway at the end will do a callback to the website, after that is completed, proceed to the next request :
+i.e (51)
+
+
+
+```
+```
+
+
+
+
+<a href="Verify_Gateway_Payment" /a>
+
+### [51. Verify Gateway Payment]
+
+1. Make the Request "Update Gateway Payment"
 

@@ -210,9 +210,34 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 			end
 
+			it " -- creating a cart item with a user, then refreshing it with admin, does not change owner resource id. -- ", :ownership_maintained do 
+
+				cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+				cart_item.resource_id = @u.id.to_s
+				cart_item.resource_class = @u.class.name.to_s
+				cart_item.signed_in_resource = @admin
+				res = cart_item.save
+
+				## now try to update simply with admin headers.
+				a = {cart_item: {quantity: 33}, api_key: @ap_key, :current_app_id => "test_app_id"}
+	            
+	            ##have to post to the id url.
+	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@admin_headers
+
+	            expect(response.code).to eq("204")
+
+	            cart_item = Shopping::CartItem.find(cart_item.id.to_s)
+	            expect(cart_item.resource_id).to eq(@u.id.to_s)
+
+			end
+
 			it " -- auto updates the cart item as not accepted if the payment is not approved -- " do 
 
 				
+			end
+
+			it " -- auto updates the cart item as not accepted if the cart does not exist -- " do 
+
 			end
 
 
