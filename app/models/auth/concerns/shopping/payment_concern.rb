@@ -77,7 +77,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 		validates_presence_of :amount
 		validates_presence_of :payment_type
 		validates_presence_of :resource_class
-		validate :cheque_or_card_payment_not_excessive
+
+		## only applicable if not already approved.
+		## only applicalbe if we are not changing the payment_status to not approved from approved.
+		validate :cheque_or_card_payment_not_excessive, if: Proc.new{|a| a.payment_status.nil?}
+		
+
 		validates :amount, numericality: { :greater_than => 0.00 }, unless: Proc.new { |document| document.refund  }
 
 
@@ -94,7 +99,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		validate :update_cart_items_accepted
 
-		validate :payment_satisfies_minimum_payment_requirement
+
+		### only applicable if not already accepted, 
+		### also not applicable, if we are deeming this payment status as failed from approved.
+		## this basically does not do the validation if the payment status is already success or failed.
+		## and also does not do the validation if we are going from success -> failed.
+		validate :payment_satisfies_minimum_payment_requirement, if: Proc.new{|a| a.payment_status.nil?}
 
 		## if the payment is card or cheque and is being set as approved.
 		## it must check that the url is present.
@@ -105,8 +115,6 @@ module Auth::Concerns::Shopping::PaymentConcern
 				
 
 		before_validation do |document|
-
-
 
 			document.set_cart(document.cart_id)
 			
@@ -476,9 +484,17 @@ module Auth::Concerns::Shopping::PaymentConcern
 				cart_item.set_accepted(self,nil)
 			}.compact.uniq
 			self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
-			
-		end
 		
+		else
+			cart_item_update_results = self.cart.get_cart_items.map{|cart_item|
+				puts "now mapping cart item"
+				puts cart_item.id.to_s 
+				cart_item.signed_in_resource = self.signed_in_resource
+				res = cart_item.set_accepted(self,nil)
+				puts "result of setting cart item accepted is:"
+				puts res.to_s
+			}			 
+		end
 	end	
 
 	#######################################################

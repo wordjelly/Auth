@@ -169,28 +169,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
 
     end
 
-    context " -- discount code / bulk payment feature -- " do   
-        it " -- should inflate the payment amount, with fake credit, we can have a coupon credit -- " do 
-
-
-        end
-
-        it " -- discount code can refer to a bulk payment -- " do 
-
-        end
-
-        it  " -- discount code can be created, updated, deleted by admin -- " do 
-
-        end
-
-        it " -- discount code can be used only once -- " do 
-
-        end
-
-    end
-
-
-
+  
 
     context " -- cash, card, cheque payment -- " do 
 
@@ -297,6 +276,54 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
         end
 
         
+        it " -- payment update can retrospectively accept cart items -- ", :retro => true do 
+
+            ## now make a payment to the cart of the amount equal to all the cart items.
+            payment = Shopping::Payment.new
+            payment.payment_type = "cash"
+            payment.amount = 50.00
+            payment.resource_id = @u.id.to_s
+            payment.resource_class = @u.class.name.to_s
+            payment.cart_id = @cart.id.to_s
+            payment.signed_in_resource = @admin
+            payment.payment_status = 1
+            ps = payment.save
+            expect(ps).to be_truthy
+
+            ## then remove some cart items from the cart
+            cart_item_to_remove = Shopping::CartItem.first
+            cart_item_to_remove.signed_in_resource = @admin
+            k = cart_item_to_remove.unset_cart
+            expect(cart_item_to_remove.parent_id).to be_nil
+            expect(k).to be_truthy
+
+            ## now add one cart item back into the cart
+            ## what if we add back the same cart item.
+            ## it will already be accepted
+            ## so when you add a cart item to the cart, set its accepted as null by default.
+            cart_item_to_remove = Shopping::CartItem.find(cart_item_to_remove.id.to_s)
+            cart_item_to_remove.signed_in_resource = @admin
+            r = cart_item_to_remove.set_cart_and_resource(@cart)
+            
+            expect(r).to be_truthy
+
+            ## now this cart item will be accepted = null, even though the cart has enough credit in it.
+            cart_item_to_remove = Shopping::CartItem.find(cart_item_to_remove.id.to_s)
+            expect(cart_item_to_remove.accepted).to be_nil
+            expect(cart_item_to_remove.parent_id).to eq(@cart.id.to_s)
+
+            ## now call update on the payment, and the last cart item should be marked as accepted.
+            put shopping_payment_path({:id => payment.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            expect(response.code).to eq("204")
+
+            Shopping::CartItem.all.each do |citem|
+                if citem.parent_id == @cart.id.to_s
+                    expect(citem.accepted).to be_truthy
+                end
+            end
+
+        end
 
 
         it " -- sequence -- ", :sequence => true do 
@@ -987,7 +1014,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## this doesn't matter while creating refunds.
             payment.payment_type = "cheque"
             
-            ## this also doesnt matter while creating refunds.
+            
             payment.amount = -10
             payment.refund = true
             payment.resource_id = @u.id.to_s
@@ -1009,7 +1036,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             expect(payment.payment_status).to eq(1) 
             
             Shopping::CartItem.all.each do |c_item|
-                expect(c_item.accepted).to be_truthy
+                if c_item.id.to_s != last_cart_item.id.to_s
+                    expect(c_item.accepted).to be_truthy
+                end
             end           
 
         end

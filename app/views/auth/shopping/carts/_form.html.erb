@@ -2,7 +2,7 @@
 <%= form_for(@auth_shopping_cart, url: @auth_shopping_cart.new_record? ? carts_path : cart_path(@auth_shopping_cart), method: @auth_shopping_cart.new_record? ? :post : :put, namespace: @auth_shopping_cart.id.to_s) do |f| %>
   <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_shopping_cart} %>
   <div class="form_fields" style="<%= show_fields == "no" ? "display:none;" : "" %>">
-    <% @auth_shopping_cart.class.attribute_names.keep_if{|c| !@auth_shopping_cart.class::FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM.include? c.to_s}.each do |attr| %>
+    <% @auth_shopping_cart.class.attribute_names.keep_if{|c| !@auth_shopping_cart.field_names_to_skip_while_making_form.include? c.to_s}.each do |attr| %>
       <%=
           text_field_tag "cart[#{attr}]" ,@auth_shopping_cart.send("#{attr}"), :id => "#{@auth_shopping_cart.id.to_s}_cart_#{attr}" %>
 

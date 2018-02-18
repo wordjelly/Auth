@@ -30,7 +30,7 @@
             <span><%= link_to 'Destroy', product_path(auth_shopping_product), method: :delete, data: { confirm: 'Are you sure?' } %></span>
             <!-- here how to show a button, and how to change the form id's so that it uses the object id, -->
             <span>
-              <% @auth_shopping_cart_item = Auth.configuration.cart_item_class.constantize.new(auth_shopping_product.attributes.except(:_id).merge({:product_id => auth_shopping_product.id.to_s})) %>
+              <% @auth_shopping_cart_item = create_cart_item_from_product(auth_shopping_product) %>
               <%= render :partial => "auth/shopping/cart_items/form.html.erb", locals:{show_fields: "no"} %>
             </span>
           </div>

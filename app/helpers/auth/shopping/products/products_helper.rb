@@ -1,5 +1,31 @@
 module Auth::Shopping::Products::ProductsHelper
 
+
+    ## @param[Auth::Shopping::Product] product
+    ## @return[Auth::Shopping::CartItem] citem 
+    def create_cart_item_from_product(product)
+        citem = Auth.configuration.cart_item_class.constantize.new
+        product.attributes.keys.each do |p_att|
+            if citem.respond_to? p_att.to_sym
+                unless p_att == "_id"
+                    citem.send("#{p_att}=",product.send("#{p_att}"))
+                end
+            end
+        end
+        citem.product_id = product.id.to_s
+        citem
+    end
+
+
+    ##########################################################
+    ##
+    ##
+    ## PATH HELPERS.
+    ##
+    ##
+    ##########################################################
+
+
 	## get /new
 	def new_product_path
       main_app.send(Auth::OmniAuth::Path.new_path(Auth.configuration.product_class))

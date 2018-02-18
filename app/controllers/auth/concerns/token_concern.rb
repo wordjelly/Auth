@@ -156,7 +156,7 @@ module Auth::Concerns::TokenConcern
         return obj
   end
 
-
+  ## only adds the owner resource if its not already present, implying that once the owner resource is set, it should never change.
   def add_owner_resource(obj,options={})
       if (obj.respond_to? :resource_id) && (obj.respond_to? :resource_class)
         if options[:owner_is_current_resource]
