@@ -210,6 +210,11 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 			end
 
+			it " -- auto updates the cart item as not accepted if the payment is not approved -- " do 
+
+				
+			end
+
 
 			it " -- user cannot remove cart item after payment has been made -- " do 
 

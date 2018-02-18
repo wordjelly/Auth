@@ -24,6 +24,11 @@ module Auth::Concerns::ChiefModelConcern
 		field :public, type:String, default: "no"
 
 
+		def field_names_to_skip_while_making_form
+
+		end
+		
+
 		## returns a list of attributes of tis model other than those mentioned in #FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM in this concern.
 		## this is only used in the web api.
 		## @return[Array] array_of_strings : field name.

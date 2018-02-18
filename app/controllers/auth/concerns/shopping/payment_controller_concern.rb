@@ -63,7 +63,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     @auth_shopping_payment.assign_attributes(@auth_shopping_payment_params)
     
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
-    #puts "added owner"
+    
     ##note that params and not permitted_params is called, here because the gateway sends back all the params as a naked hash, and that is used directly to verify the authenticity, in the gateway functions.
     #puts "these are the attributes assigned in the update action."
     #puts @auth_shopping_payment.attributes.to_s
