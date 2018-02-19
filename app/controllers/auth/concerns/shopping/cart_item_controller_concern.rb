@@ -48,6 +48,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     @auth_shopping_cart_item.assign_attributes(@auth_shopping_cart_item_params)
     @auth_shopping_cart_item = add_owner_and_signed_in_resource(@auth_shopping_cart_item)  
     @auth_shopping_cart_item.save
+    puts @auth_shopping_cart_item.errors.full_messages.to_s
     respond_with @auth_shopping_cart_item
   end
 
@@ -69,6 +70,8 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##responds with 204, and empty response body, if all is ok.
   def destroy
     not_found if @auth_shopping_cart_item.nil?
+    puts "the accepted is:"
+    puts @auth_shopping_cart_item.accepted.to_s
     @auth_shopping_cart_item.destroy
     respond_with @auth_shopping_cart_item
   end

@@ -199,7 +199,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 				## then delete the payment.
 				l = payment.delete
-				
+					
+				puts "------------CHECK FROM HERE---------------------"
 				## now call update on the first cart item with no payment.
 				put shopping_cart_item_path({:id => @created_cart_item_ids.first}), {api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
 
@@ -271,10 +272,23 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.resource_id = @u.id.to_s
 				cart_item.resource_class = @u.class.name.to_s
 				cart_item.accepted = true
+				cart_item.parent_id = "whatever"
 				cart_item.signed_in_resource = @admin
-				cart_item.save
+				res = cart_item.save
+				puts "this is the res: #{res.to_s}"
+				puts "thse are the errors."
+				puts cart_item.errors.full_messages.to_s
+
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+
+				cit = Shopping::CartItem.find(cart_item.id.to_s)
+				puts cit.attributes.to_s
+
+
 				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+
+				puts "response code is:"
+				puts response.code.to_s
 
 				shopping_cart_item_ids = Shopping::CartItem.all.map{|c| c = c.id.to_s}
 

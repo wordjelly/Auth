@@ -192,6 +192,7 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 cart_item.parent_id = @cart.id
                 cart_item.signed_in_resource = @u
                 cart_item.save
+                puts cart_item.errors.full_messages
                 @created_cart_item_ids << cart_item.id.to_s
             end
            
@@ -281,13 +282,14 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## now make a payment to the cart of the amount equal to all the cart items.
             payment = Shopping::Payment.new
             payment.payment_type = "cash"
-            payment.amount = 50.00
+            payment.amount = 10.00
             payment.resource_id = @u.id.to_s
             payment.resource_class = @u.class.name.to_s
             payment.cart_id = @cart.id.to_s
             payment.signed_in_resource = @admin
             payment.payment_status = 1
             ps = payment.save
+            puts payment.errors.full_messages.to_s
             expect(ps).to be_truthy
 
             ## then remove some cart items from the cart
@@ -312,10 +314,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             expect(cart_item_to_remove.accepted).to be_nil
             expect(cart_item_to_remove.parent_id).to eq(@cart.id.to_s)
 
-            ## now call update on the payment, and the last cart item should be marked as accepted.
-            put shopping_payment_path({:id => payment.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
-            expect(response.code).to eq("204")
+            res = payment.save
+            expect(res).to be_truthy
 
             Shopping::CartItem.all.each do |citem|
                 if citem.parent_id == @cart.id.to_s
@@ -323,6 +324,25 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
                 end
             end
 
+            ## add another cart item.
+            cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
+            cart_item.resource_id = @u.id.to_s
+            cart_item.resource_class = @u.class.name
+            cart_item.parent_id = @cart.id
+            cart_item.signed_in_resource = @u
+            res = cart_item.save
+            #puts cart_item.errors.full_messages
+            expect(res).to be_truthy
+           
+            ## now call update on the payment, and the last cart item should be marked as accepted.
+            put shopping_payment_path({:id => payment.id}), {:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+
+            expect(response.code).to eq("204")
+
+            ## this is failing for some reason.
+            latest_added_citem = Shopping::CartItem.find(cart_item.id.to_s)
+            expect(latest_added_citem.accepted).not_to be_truthy
+            
         end
 
 

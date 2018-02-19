@@ -129,13 +129,23 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 
 		before_destroy do |document|
+			
 			if !skip_callback?("before_destroy")
-				false if document.accepted == true
+				if document.accepted == true
+					false
+				end
 			end
 		end
 
+=begin
 		after_validation do |document|
 			if !skip_callback?("after_validation")
+				document.refresh_accepted
+			end
+		end
+=end
+		before_validation do |document|
+			if !skip_callback?("before_validation")
 				document.refresh_accepted
 			end
 		end
@@ -179,6 +189,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def refresh_accepted
 		
 		if self.accepted_by_payment_id
+
 			begin
 				payment = Auth.configuration.payment_class.constantize.find(self.accepted_by_payment_id)
 				## check if this payment status is approved or not.
@@ -188,12 +199,17 @@ module Auth::Concerns::Shopping::CartItemConcern
 					self.accepted = false
 				end
 			rescue Mongoid::Errors::DocumentNotFound
+				
 				self.accepted = false
 			end
 		end
 
 		## if it doesnt have a cart, then it cannot be accepted.
-		self.accepted = false if self.parent_id.nil?
+		if self.parent_id.nil?
+			self.accepted = false 
+			self.accepted_by_payment_id = nil
+		end
+
 
 		## we should ideally do this in the payment.
 		## so that it can actually do what it usually does.
@@ -211,7 +227,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## sets accepted to true or false depending on whether the cart has enough credit for the item.
 	## does not SAVE.
 	def set_accepted(payment,override)
-
+		#puts self.id.to_s
 		#return cart_has_sufficient_credit_for_item?(payment.cart)
 		if cart_has_sufficient_credit_for_item?(payment.cart) 
 			
@@ -223,16 +239,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 			
 				self.accepted = true
 			end
-		else
-			
+		else	
 			self.accepted = false
 		end
 		
 		
 		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
-		self.skip_callbacks = {:after_validation => true}
+		## so that it doesnt do refresh_cart_item
+		self.skip_callbacks = {:before_validation => true}
 		res = self.save
-		puts self.errors.full_messages.to_s
+		#puts self.errors.full_messages.to_s
 		res
 	end
 	
@@ -240,7 +256,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## the #debit function returns the current cart credit.
 	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
 	def cart_has_sufficient_credit_for_item?(cart)
+		puts "cart credit is: #{cart.cart_credit}"
 		cart_has_credit = cart.debit((self.accept_order_at_percentage_of_price*self.price)) >= 0
+		puts "cart has credit is: #{cart_has_credit.to_s}"
 		cart_has_credit
 	end
 
@@ -258,13 +276,15 @@ module Auth::Concerns::Shopping::CartItemConcern
 			self.accepted = nil
 			self.accepted_by_payment_id = nil
 		else
-			if (self.accepted == false || self.accepted.nil?)
+			if (self.accepted.nil? || self.accepted == false)
 				self.parent_id = nil 
 				self.accepted = nil
 				self.accepted_by_payment_id = nil
 			end
 		end
-		self.save
+		rs = self.save
+		puts self.errors.full_messages
+		rs
 	end
 
 
@@ -291,7 +311,32 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## and this has happened because the same item was pushed back in.
 	def user_cannot_change_anything_if_payment_accepted
 		if !self.signed_in_resource.is_admin?
-			self.errors.add(:quantity,"you cannot change this item since payment has already been made") if self.accepted_by_payment_id && self.changed? && !self.new_record? && !(self.accepted_by_payment_id_changed? && self.accepted_by_payment_id_was.nil?)
+
+			## THE USER CAN : UPDATE A PAYMENT TO MAKE THIS CART ITEM ACCEPTED / REJECTED.
+			## if the payment status is changing, let it be, because this is an internal updated.
+
+			return if self.new_record?
+
+			puts "accepted changed? #{self.accepted_changed?.to_s}"
+
+			return if self.accepted_changed? 
+
+			## THE USER CAN REMOVE THE CART ITEM FROM A CART, AS LONG AS IT HAS NOT BEEN ACCEPTED.
+			## if the item is being removed from the cart, while it has not yet been accepted.
+			return if self.parent_id_changed? && self.parent_id.nil? && (self.accepted.nil? || self.accepted == false)
+
+
+			## THE USER CAN CHANGE ANY OTHER STUFF ALSO AS LONG AS THE ACCEPTED IS NIL OR FALSE
+			return if (self.accepted.nil? || self.accepted == false)
+
+
+			## THE LAST SITUATION IS WHEN THE ITEM WAS ACCEPTED, AND NOW WE ARE UPDATING IT AS FALSE, AND ALSO THE PAYMENT ID AS NIL, THIS IS ALLOWED, BECAUSE IT IS WHAT HAPPENS IF THE ACCEPTING PAYMENT IS NIL OR ITS STATUS IS NOT APPROVED.
+
+
+
+			## otherwise, the updated_by_payment_id, changes only when we are doing a gateway payment or any payment actually.
+			self.errors.add(:quantity,"you cannot change this item since payment has already been made")
+			# if self.accepted_by_payment_id && self.changed? && !self.new_record? && !(self.accepted_by_payment_id_changed? && self.accepted_by_payment_id_was.nil?)
 		end
 	end
 

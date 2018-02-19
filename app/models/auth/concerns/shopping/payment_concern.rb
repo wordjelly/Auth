@@ -487,12 +487,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 		
 		else
 			cart_item_update_results = self.cart.get_cart_items.map{|cart_item|
-				puts "now mapping cart item"
-				puts cart_item.id.to_s 
+				#puts "now mapping cart item"
+				#puts cart_item.id.to_s 
 				cart_item.signed_in_resource = self.signed_in_resource
 				res = cart_item.set_accepted(self,nil)
-				puts "result of setting cart item accepted is:"
-				puts res.to_s
+				#puts "result of setting cart item accepted is:"
+				#puts res.to_s
+				res
 			}			 
 		end
 	end	
