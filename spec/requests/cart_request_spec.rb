@@ -236,10 +236,13 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove],parent_notes: @notes},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
 
+				puts "response code:"
+				puts response.code.to_s
+
 				
 				cart_items = Shopping::CartItem.where(:parent_id => @cart.id)
 				##check that the cart item was successfully removed
-				##check that the notes are present on each cart item.
+				
 				cart_items_map = Hash[cart_items.map{|c| c.id.to_s}.zip(cart_items)]
 				
 				##the item to be added should be there.

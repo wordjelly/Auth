@@ -98,7 +98,7 @@ module Auth::Concerns::Shopping::CartConcern
 	## set the cart items, [Array] of cart items.
 	def find_cart_items
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
-		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'desc')
+		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'asc')
 		
 		self.cart_items
 	end
@@ -285,7 +285,13 @@ module Auth::Concerns::Shopping::CartConcern
 		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
 		      
 		      cart_item.signed_in_resource = self.signed_in_resource
+		      	
+		      puts "Add or remove is: #{add_or_remove}"
+
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
+		      	
+		      puts "unset cart is:#{resp.to_s}"
+		      
 		      
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error

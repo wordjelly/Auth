@@ -1277,6 +1277,19 @@ Expected Response code, and body is same.
 5. Expected Response Body is null.
 
 
+<a href="Refresh Payment" /a>
+
+
+### 49a. Refresh a Payment to retrospectively accept or reject cart items.
+
+1. This request can be performed on any payment of the cart.
+2. But it should always be performed on the last payment, so that that payment is considered as the one which accepts/rejects any pending cart items.
+3. Make the Request "Update A Payment, to refresh cart balance and cart item statuses"
+4. You can do it as admin(with proxy user setting), or as a user.
+5. Expected Response code : 204.
+6. Expected Response body : null.
+7. After making the request -> Do request (37), to view the cart and see the updated statuses of all the cart items.
+
 <a href="Create_Gateway_Payment" /a>
 
 ### [50. Create A Gateway Payment]
