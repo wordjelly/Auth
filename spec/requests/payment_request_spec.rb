@@ -397,6 +397,9 @@ RSpec.describe "payment request spec",:payment => true, :shopping => true, :type
             ## this is setting the payment as successfully.
             #payment.payment_status = 0
             #ps = payment.save
+
+            puts  "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+
             put shopping_payment_path({:id => payment.id}), {payment: {payment_status: 0},:api_key => @ap_key, :current_app_id => "test_app_id", :proxy_resource_class => @u.class.name.to_s, :proxy_resource_id => @u.id.to_s}.to_json, @admin_headers
 
             #expect(ps).to be_truthy
