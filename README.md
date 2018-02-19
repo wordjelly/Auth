@@ -998,6 +998,9 @@ end
 # app/models/shopping/payment.rb
 
 class Shopping::Payment < Auth::Shopping::Payment
+  
+  ## if you want to do payments in India only, then use the provided concern as follows ->
+  include Auth::Concerns::Shopping::PayUMoneyConcern
 
 end
 ```

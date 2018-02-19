@@ -56,12 +56,16 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 
 	
 	def verify_payment
-		#puts "came to verify payment."
+		
 		if self.new_record?
+		
 			return nil
 		else
+		
 			if self.is_verify_payment == "true"
 				#puts "yes is verify payment."
+				#puts the payment is not getting set as pending.
+				## that is the problem.
 				if self.payment_pending
 						
 					if self.is_gateway?

@@ -115,7 +115,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 				
 
 		before_validation do |document|
-
+			puts "came to before validation."
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
@@ -419,6 +419,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	
 	def verify_payment
+
+	
 		if self.new_record?
 			return nil
 		else

@@ -140,7 +140,7 @@ module Auth::Concerns::Shopping::DiscountConcern
 			if document.new_record?
 
 				if document.cart
-					## assign the cart ids internally.
+					## assign the products internally.
 					document.product_ids = document.cart.cart_items.map{|citem| citem = citem.product_id}
 
 					## assign count

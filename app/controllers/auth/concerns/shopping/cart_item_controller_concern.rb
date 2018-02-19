@@ -3,8 +3,11 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   extend ActiveSupport::Concern
 
   included do
-    
-    
+      
+    ## to be able to initialize a cart item from a product
+    ## inside the create_multiple def.
+    include Auth::Shopping::Products::ProductsHelper
+
   end
 
   
@@ -86,25 +89,26 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##
   ############################################################
   def create_multiple
-    puts "came to create multiple."
-    puts "params are:"
-    puts params.to_s
+    #puts "came to create multiple."
+    #puts "params are:"
+    #puts params.to_s
     @auth_shopping_cart_items = []
     @auth_shopping_cart = @auth_shopping_cart_class.new(:add_cart_item_ids => [], :remove_cart_item_ids => [])
-    puts "auth shopping discount is:"
-    puts @auth_shopping_discount.to_s
+    #puts "auth shopping discount is:"
+    #puts @auth_shopping_discount.to_s
     @auth_shopping_cart.discount_id = @auth_shopping_discount.id.to_s
     
 
-    puts "is it is a new record"
-    puts @auth_shopping_discount.new_record?
+    #puts "is it is a new record"
+    #puts @auth_shopping_discount.new_record?
     unless @auth_shopping_discount.new_record?
       @auth_shopping_discount.product_ids.each do |product_id|
         
         if product = @auth_shopping_product_class.find(product_id)
          
-          cart_item = @auth_shopping_cart_item_class.new(product.attributes.except(:_id,:_type).merge({:product_id => product_id}))
+          cart_item = create_cart_item_from_product(product)
           cart_item = add_owner_and_signed_in_resource(cart_item)  
+          
           if cart_item.save == true
             @auth_shopping_cart_items << cart_item
             @auth_shopping_cart.add_cart_item_ids << cart_item.id.to_s
@@ -119,7 +123,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
     end
     
-    #respond_with @auth_shopping_cart_items
+     
 
   end
 
