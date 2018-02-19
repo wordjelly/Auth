@@ -227,8 +227,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## sets accepted to true or false depending on whether the cart has enough credit for the item.
 	## does not SAVE.
 	def set_accepted(payment,override)
-		#puts self.id.to_s
-		#return cart_has_sufficient_credit_for_item?(payment.cart)
+		
+		#puts "the existing self accepted is:"
+		#puts self.accepted.to_s
+
 		if cart_has_sufficient_credit_for_item?(payment.cart) 
 			
 			## is it already accepted?
@@ -244,12 +246,58 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 		
 		
-		self.accepted_by_payment_id = payment.id.to_s if self.accepted == true
+
+		
+		
 		## so that it doesnt do refresh_cart_item
 		self.skip_callbacks = {:before_validation => true}
-		res = self.save
-		#puts self.errors.full_messages.to_s
-		res
+		
+		## this will first call validate 
+		self.validate
+
+		## if the accepted is being set as false, then it should be set like that, where it was true?
+		## 
+		self.accepted_by_payment_id = self.accepted ? payment.id.to_s : nil
+
+		
+		## if it hasnt changed, dont query and update anything.
+		
+		return true unless self.accepted_changed?
+		
+		if self.errors.full_messages.empty?
+			
+			doc_after_update = 
+
+			Auth.configuration.cart_item_class.constantize.
+			where({
+				"$and" => [
+					"accepted" => {
+						"$nin" => [self.accepted]
+					},
+					"_id" => BSON::ObjectId(self.id.to_s)
+				]
+			}).
+			find_one_and_update(
+				{
+					"$set" => {
+						"accepted" => self.accepted,
+						"accepted_by_payment_id" => self.accepted_by_payment_id
+					}
+				},
+				{
+					:return_document => :after
+				}
+			)
+
+			puts "the doc after update is:"
+			puts doc_after_update.attributes.to_s
+
+			return false unless doc_after_update
+			return false if doc_after_update.accepted != self.accepted
+			return true
+		else
+			return false
+		end
 	end
 	
 	## debits an amount from the cart equal to (item_price*accept_order_at_percentage_of_price)

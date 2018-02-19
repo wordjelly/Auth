@@ -310,9 +310,13 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				cart = create_cart(@u)
 				
 				add_cart_items_to_cart(cart_items,cart,@u)
-					
-				payment = create_payment(cart,1,@u)
 				
+				puts "doing create payment."
+				payment = create_payment(cart,1,@u)
+						
+				puts "at this stage all these cart items had a status of null"
+				puts "now at this stage, they should have been found."
+				puts "doing authorize payment."
 				authorize_payment_as_admin(payment,@admin)
 
 				## now should not create the discount

@@ -488,15 +488,15 @@ module Auth::Concerns::Shopping::PaymentConcern
 			self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
 		
 		else
-			cart_item_update_results = self.cart.get_cart_items.map{|cart_item|
-				#puts "now mapping cart item"
-				#puts cart_item.id.to_s 
-				cart_item.signed_in_resource = self.signed_in_resource
-				res = cart_item.set_accepted(self,nil)
-				#puts "result of setting cart item accepted is:"
-				#puts res.to_s
-				res
-			}			 
+			if (payment_status == 0 || payment_status == 1)
+				cart_item_update_results = self.cart.get_cart_items.map{|cart_item|
+					#puts "now mapping cart item"
+					#puts cart_item.id.to_s 
+					cart_item.signed_in_resource = self.signed_in_resource
+					res = cart_item.set_accepted(self,nil)
+					res
+				}			 
+			end
 		end
 	end	
 
@@ -584,6 +584,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## validation
 	def payment_satisfies_minimum_payment_requirement
 		self.cart.prepare_cart
+		puts "the minimum payment amoutn is:"
+		puts self.cart.cart_minimum_payable_amount
 		return if (self.refund == true || self.discount)  
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
