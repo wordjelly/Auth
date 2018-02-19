@@ -7,12 +7,13 @@ module Auth::Shopping::Products::ProductsHelper
         citem = Auth.configuration.cart_item_class.constantize.new
         product.attributes.keys.each do |p_att|
             if citem.respond_to? p_att.to_sym
-                unless p_att == "_id"
+                unless (p_att == "_id" || p_att == "_type" || p_att == "resource_id" || p_att == "resource_class")  
                     citem.send("#{p_att}=",product.send("#{p_att}"))
                 end
             end
         end
         citem.product_id = product.id.to_s
+       
         citem
     end
 

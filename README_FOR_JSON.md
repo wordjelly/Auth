@@ -125,6 +125,7 @@ password: password
 ### [49. Refresh Cart Item](Refresh_Cart_Item)
 ### [50. Create A Gateway Payment](Create_Gateway_Payment)
 ### [51. Verify Gateway Payment](Verify_Gateway_Payment)
+### [51a. Get Payment Receipt](Get_Payment_Receipt)
 ### [52. Create A Discount Coupon From A Cart](Create_Discont_Coupon_From_Cart)
 ### [53. View A Discount Coupon](View_Discount_Coupon)
 ### [54. Create Cart From Discount Coupon](Create_Cart_From Discount_Coupon)
@@ -134,7 +135,7 @@ password: password
 ### [58. Use the Approved Discount Coupon](Use_Approved_Discount_Coupon)
 ### [59. Create Cartless Discount Coupon](Create_Cartless_Discount_Coupon)
 ### [60. Use Cartless Discount Coupon](Use_Cartless_Discount_Coupon)
-### [61. Get Payment Receipt](Get_Payment_Receipt)
+
 
 <a name="SignIn_Flows" /a>
 
@@ -963,17 +964,11 @@ OR
 
 ### 34a. Create A Cart With Cart Items
 
-Do request (34), but pass the following into the "cart" object
+1. Make Request "Create A Cart With Cart Items."
 
-```
-    {
-        "cart" : {
-            "add_cart_item_ids" : [array_of_ids]
-        }
-    }
-```
+2. Response Code : 201
 
-Response is same as for 34.
+3. Body Same as for (34)
 
 
 <a href="Add_Items_To_Cart" /a>
@@ -1294,6 +1289,9 @@ Expected Response code, and body is same.
 
 ### [50. Create A Gateway Payment]
 
+
+
+
 1. Make a request "Create Gateway Payment"
 
 - some fields are necessary to be entered by the user:
@@ -1308,16 +1306,34 @@ Expected Response code, and body is same.
 
 3. Expected Response Body : 
 
+
+```
+{
+    "_id": {
+        "$oid": "5a8aaf96421aa903bf8ef5e3"
+    },
+    "amount": 240000,
+    "cart_id": "5a88a123421aa93e59e4addc",
+    "cash_change": 0,
+    "created_at": "2018-02-19T11:05:58.234Z",
+    "discount_id": null,
+    "gateway_callback_called": false,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "gateway",
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T11:05:58.234Z",
+    "payment_receipt": null
+}
+```
+
 4. After creating the payment, forward the user to the gateway to do their payment.
 
-5. the gateway at the end will do a callback to the website, after that is completed, proceed to the next request :
+5. the gateway at the end will ask to do a callback to the website. After that is completed, go to request (51) :
 i.e (51)
-
-
-
-```
-```
-
 
 
 
@@ -1325,5 +1341,607 @@ i.e (51)
 
 ### [51. Verify Gateway Payment]
 
-1. Make the Request "Update Gateway Payment"
+1. Make the Request "Verify Gateway Payment"
+
+2. Expected Response Code : 204
+
+3. Expected Response Body : null
+
+4. In case of validation errors, only show the first error : 
+
+
+```
+{
+    "errors": {
+        "payment_status": [
+            "status key is neither 1 not 0 : Please try to verify your payment later, or contact Support for more help."
+        ],
+        "firstname": [
+            "can't be blank"
+        ],
+        "email": [
+            "can't be blank"
+        ],
+        "phone": [
+            "can't be blank"
+        ],
+        "productinfo": [
+            "can't be blank"
+        ]
+    }
+}
+```
+
+
+<a href="Get_Payment_Receipt" a />
+
+### 51a. Get Payment Receipt
+
+1. Make Request "Get Payment"
+2. Payment Receipt is included in the response.
+3. Only show the payment receipt if the payment status is accepted(1).
+4. Expected Response Code : 200
+4. Expected Response Body :
+
+```
+{
+    "_id": {
+        "$oid": "5a8aaf96421aa903bf8ef5e3"
+    },
+    "amount": 240000,
+    "cart_id": "5a88a123421aa93e59e4addc",
+    "cash_change": 0,
+    "created_at": "2018-02-19T11:05:58.234Z",
+    "discount_id": null,
+    "gateway_callback_called": false,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "gateway",
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T11:05:58.234Z",
+    "payment_receipt": {
+        "current_payment": [],
+        "cart": {
+            "_id": {
+                "$oid": "5a88a123421aa93e59e4addc"
+            },
+            "public": "no",
+            "_type": "Shopping::Cart",
+            "resource_id": "5a88a060421aa93e59e4add7",
+            "resource_class": "User",
+            "updated_at": "2018-02-17T21:39:47.243Z",
+            "created_at": "2018-02-17T21:39:47.243Z",
+            "cart_items": [
+                "5a89c3ef421aa9614314ed99",
+                "5a89e17d421aa96e604c8b07",
+                "5a8aacc9421aa903bf8ef5e2"
+            ],
+            "cart_payments": [
+                "5a88a8f1421aa93fd40ee2ff",
+                "5a897049421aa94f2bec9910",
+                "5a89ac83421aa95973dda71d",
+                "5a8aaf96421aa903bf8ef5e3"
+            ]
+        }
+    }
+}
+``` 
+
+<a href="Create_Discont_Coupon_From_Cart" /a>
+
+### 52. Create A Discount Coupon From A Cart
+
+
+
+1. After A User has made one approved payment to a cart, he can create discount coupons. 
+2. To create a discount coupon , make the request "Create Discount Coupon."
+3. Following options have to be filled in by the user.
+
+- discount_Amount : the discount amount is normally equal to the sum of the prices of accepted items(1 each.) for.eg:
+
+Imagine that the cart has
+2 apples - USD 30
+2 bananas - USD 40
+
+In this case the max discount amount will be : USD 35 (basically it assumes that this cart has been made with two users in mind, and each will take 1 piece of each item). Whatever the case, the max discount amount is 35. 
+So you can show the user the option to set a discount amount upto 35.
+To calculate this, just take the sum of 1 piece of each item that has been ACCEPTED.
+
+- requires_verification
+
+Inform the user that he has to set this as true, if he wants to be notified, everytime someone wants to use a discount coupon, made by him.
+
+This is left false by default.
+
+4. The expected response code is 201 Created.
+
+5. The expected response body is the created discount item as follows: 
+
+```
+{
+    "_id": {
+        "$oid": "5a8b14c8421aa909d40e1c93"
+    },
+    "cart_id": "5a8af6d3421aa90c2b93fb88",
+    "count": 4,
+    "created_at": "2018-02-19T18:17:44.275Z",
+    "declined": [],
+    "discount_amount": 120000,
+    "discount_percentage": 0,
+    "pending": [],
+    "product_ids": [
+        "5a88618a421aa916385a3b45"
+    ],
+    "public": "yes",
+    "requires_verification": true,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T18:17:44.275Z",
+    "used_by_users": [],
+    "verified": []
+}
+```
+
+
+<a href="View_Discount_Coupon" /a>
+
+### 53. View A Discount Coupon
+
+N.B : unauthenticated user can view the discount coupon if he or she has the id.
+
+1. Make the request "View Discount Coupon."
+
+2. Expected Response code : 200
+
+3. Expected Response : 
+
+
+```
+{
+    "_id": {
+        "$oid": "5a8b14c8421aa909d40e1c93"
+    },
+    "cart_id": "5a8af6d3421aa90c2b93fb88",
+    "count": 4,
+    "created_at": "2018-02-19T18:17:44.275Z",
+    "declined": [],
+    "discount_amount": 120000,
+    "discount_percentage": 0,
+    "pending": [],
+    "product_ids": [
+        "5a88618a421aa916385a3b45"
+    ],
+    "public": "yes",
+    "requires_verification": true,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T18:17:44.275Z",
+    "used_by_users": [],
+    "verified": []
+}
+```
+
+
+
+<a href="Create_Cart_From Discount_Coupon" /a>
+
+### 54. Create Cart From Discount Coupon
+
+1. The user has to be authenticated to do this.
+2. Make A Request to "Create Cart Items from Discount"
+
+- the "id" to be provided in the body is the discount_object id.
+
+- the product_ids to be provided should be the same as the product ids, seen in the discount object.
+
+3. Expected Response Code: 200
+
+4. Expected Response Body: null
+
+5. The response has to contain the cart_items as json objects
+
+```
+[
+    {
+        "_id": {
+            "$oid": "5a8b49f0e13823140f39667b"
+        },
+        "accept_order_at_percentage_of_price": 1,
+        "accepted": false,
+        "accepted_by_payment_id": null,
+        "created_at": "2018-02-17T17:08:26.373Z",
+        "discount": null,
+        "discount_code": null,
+        "name": "Ford Ecosport",
+        "parent_id": null,
+        "price": "120000.0",
+        "product_id": "5a88618a421aa916385a3b45",
+        "public": "no",
+        "quantity": 1,
+        "resource_class": "User",
+        "resource_id": "5a8b176a421aa90bbcc1b58d",
+        "updated_at": "2018-02-17T17:08:26.373Z"
+    }
+]
+```
+
+
+5. Now make request (34a)
+
+Final Expected Response :
+
+```
+{
+    "_id": {
+        "$oid": "5a8b4a41e13823140f39667c"
+    },
+    "created_at": "2018-02-19T22:05:53.260Z",
+    "discount_id": null,
+    "name": null,
+    "notes": null,
+    "public": "no",
+    "resource_class": "User",
+    "resource_id": "5a8b176a421aa90bbcc1b58d",
+    "updated_at": "2018-02-19T22:05:53.260Z",
+    "cart_items": [
+        {
+            "_id": {
+                "$oid": "5a8b49f0e13823140f39667b"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": null,
+            "accepted_by_payment_id": null,
+            "created_at": "2018-02-17T17:08:26.373Z",
+            "discount": null,
+            "discount_code": null,
+            "name": "Ford Ecosport",
+            "parent_id": "5a8b4a41e13823140f39667c",
+            "price": "120000.0",
+            "product_id": "5a88618a421aa916385a3b45",
+            "public": "no",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a8b176a421aa90bbcc1b58d",
+            "updated_at": "2018-02-19T22:05:53.212Z"
+        }
+    ],
+    "cart_payments": [],
+    "cart_price": "120000.0",
+    "cart_paid_amount": 0,
+    "cart_pending_balance": "120000.0",
+    "cart_credit": 0,
+    "cart_minimum_payable_amount": "120000.0"
+}
+```
+
+
+6. Now proceed to (55)
+
+
+
+
+
+<a href="Make_Payment_To_Cart_Using_Discount_Coupon" /a>
+
+### 55. Make Payment Into Cart Using Discount Coupon]
+
+
+1. Make the request : Create Discount Payment.
+
+2. While doing this, set the amount to 0.0
+
+3. Expected Response Code : 201
+
+4. Expected Response Body : 
+
+```
+{
+    "_id": {
+        "$oid": "5a8b4b10e13823140f39667d"
+    },
+    "amount": 120000,
+    "cart_id": "5a8b4a41e13823140f39667c",
+    "cash_change": 0,
+    "created_at": "2018-02-19T22:09:21.038Z",
+    "discount_id": "5a8b14c8421aa909d40e1c93",
+    "email": null,
+    "firstname": null,
+    "furl": null,
+    "gateway_callback_called": false,
+    "hast": null,
+    "payment_ack_proof": null,
+    "payment_status": null,
+    "payment_type": "cash",
+    "phone": null,
+    "productinfo": null,
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a8b176a421aa90bbcc1b58d",
+    "surl": null,
+    "txnid": null,
+    "updated_at": "2018-02-19T22:09:21.038Z",
+    "payment_receipt": null
+}
+```
+
+*N.B : the amount is automatically set to the discount amount.
+
+After this , go back to Request 53, to view the discount and it should show the payment in the pending ids
+
+```
+{
+    "_id": {
+        "$oid": "5a8b14c8421aa909d40e1c93"
+    },
+    "cart_id": "5a8af6d3421aa90c2b93fb88",
+    "count": 4,
+    "created_at": "2018-02-19T18:17:44.275Z",
+    "declined": [],
+    "discount_amount": 120000,
+    "discount_percentage": 0,
+    "pending": [
+        "5a8b4b10e13823140f39667d"
+    ],
+    "product_ids": [
+        "5a88618a421aa916385a3b45"
+    ],
+    "public": "yes",
+    "requires_verification": true,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T18:17:44.275Z",
+    "used_by_users": [],
+    "verified": []
+}
+```
+
+
+<a href="Verify_Discount_Coupon_Request" /a>
+
+### [56. Verify_Discount_Coupon_Request]
+
+1. Make the Request "Update A Discount to Add Verified Payment Id"
+
+2. Add the headers of the owner of the discount.
+
+3. Expected Response Code : 204
+
+4. Expected Response Body : null
+
+5. Once again do request : 53, and now that payment should be seen in verified_ids.
+
+```
+{
+    "_id": {
+        "$oid": "5a8b14c8421aa909d40e1c93"
+    },
+    "cart_id": "5a8af6d3421aa90c2b93fb88",
+    "count": 4,
+    "created_at": "2018-02-19T18:17:44.275Z",
+    "declined": [],
+    "discount_amount": 120000,
+    "discount_percentage": 0,
+    "pending": [],
+    "product_ids": [
+        "5a88618a421aa916385a3b45"
+    ],
+    "public": "yes",
+    "requires_verification": true,
+    "resource_class": "User",
+    "resource_id": "5a88a060421aa93e59e4add7",
+    "updated_at": "2018-02-19T22:15:43.745Z",
+    "used_by_users": [],
+    "verified": [
+        "5a8b4b10e13823140f39667d"
+    ]
+}
+```
+
+
+### [57. Decline Discount Coupon Request](Decline_Discount_Coupon_Request)
+
+
+### [58. Use the Approved Discount Coupon](Use_Approved_Discount_Coupon)
+
+1. Make the Request 51
+2. Expected Response Code : 204.
+3. Expected Response Body : null
+4. Check the cart to see, that the discount_coupon payment has been accepted.
+
+
+```
+{
+    "_id": {
+        "$oid": "5a8b4a41e13823140f39667c"
+    },
+    "created_at": "2018-02-19T22:05:53.260Z",
+    "discount_id": null,
+    "name": null,
+    "notes": null,
+    "public": "no",
+    "resource_class": "User",
+    "resource_id": "5a8b176a421aa90bbcc1b58d",
+    "updated_at": "2018-02-19T22:05:53.260Z",
+    "cart_items": [
+        {
+            "_id": {
+                "$oid": "5a8b49f0e13823140f39667b"
+            },
+            "accept_order_at_percentage_of_price": 1,
+            "accepted": true,
+            "accepted_by_payment_id": "5a8b4b10e13823140f39667d",
+            "created_at": "2018-02-17T17:08:26.373Z",
+            "discount": null,
+            "discount_code": null,
+            "name": "Ford Ecosport",
+            "parent_id": "5a8b4a41e13823140f39667c",
+            "price": "120000.0",
+            "product_id": "5a88618a421aa916385a3b45",
+            "public": "no",
+            "quantity": 1,
+            "resource_class": "User",
+            "resource_id": "5a8b176a421aa90bbcc1b58d",
+            "updated_at": "2018-02-19T22:21:06.625Z"
+        }
+    ],
+    "cart_payments": [
+        {
+            "_id": {
+                "$oid": "5a8b4b10e13823140f39667d"
+            },
+            "amount": 120000,
+            "cart_id": "5a8b4a41e13823140f39667c",
+            "cash_change": 0,
+            "created_at": "2018-02-19T22:09:21.038Z",
+            "discount_id": "5a8b14c8421aa909d40e1c93",
+            "email": null,
+            "firstname": null,
+            "furl": null,
+            "gateway_callback_called": false,
+            "hast": null,
+            "payment_ack_proof": null,
+            "payment_status": 1,
+            "payment_type": "cash",
+            "phone": null,
+            "productinfo": null,
+            "public": "no",
+            "refund": null,
+            "resource_class": "User",
+            "resource_id": "5a8b176a421aa90bbcc1b58d",
+            "surl": null,
+            "txnid": null,
+            "updated_at": "2018-02-19T22:21:06.679Z",
+            "payment_receipt": null
+        }
+    ],
+    "cart_price": "120000.0",
+    "cart_paid_amount": 120000,
+    "cart_pending_balance": "0.0",
+    "cart_credit": 120000,
+    "cart_minimum_payable_amount": 0
+}
+```
+
+### [59. Create Cartless Discount Coupon](Create_Cartless_Discount_Coupon)
+
+1. Make the Request "Create Cartless Discount"
+2. This time , do not add a cart_id
+3. You can add both discount_amount and discount_percentage. If both provided, then discount_amount will be used.
+4. Discount percentage is calculated as the percentage of the total cart_pending_balance, at the time the discount payment is made.
+5. You must specify a count, i.e the number of times this discount can be used.
+6. Requires verification can be left blank, in which case a user can directly use that discount coupon, without the admin having to verify it.
+5. Expected Response Code : 201
+6. Expected Response Body : 
+
+N.B : This request can only be performed by admin.
+
+```
+{
+    "_id": {
+        "$oid": "5a8b524c421aa9163c04f6f5"
+    },
+    "cart_id": null,
+    "count": 5,
+    "created_at": "2018-02-19T22:40:12.519Z",
+    "declined": [],
+    "discount_amount": 0,
+    "discount_percentage": 100,
+    "pending": [],
+    "product_ids": [],
+    "public": "yes",
+    "requires_verification": false,
+    "resource_class": "User",
+    "resource_id": "5a870959421aa90f36a35558",
+    "updated_at": "2018-02-19T22:40:12.519Z",
+    "used_by_users": [],
+    "verified": []
+}
+```
+
+
+### [60. Use Cartless Discount Coupon](Use_Cartless_Discount_Coupon)
+
+
+1. Any user can use this discount coupon directly into their carts.
+2. Make the request "Create A Discount Payment".
+3. Expected Response Code is same, except that in this case, it will be directly accepted and verified, without the need for an admin verification.
+4. Expected Response Code : 201
+5. Expected Response Body :
+
+```
+{
+    "_id": {
+        "$oid": "5a8b5286421aa9163c04f6f6"
+    },
+    "amount": 120000,
+    "cart_id": "5a8b4a41e13823140f39667c",
+    "cash_change": 0,
+    "created_at": "2018-02-19T22:41:10.572Z",
+    "discount_id": "5a8b524c421aa9163c04f6f5",
+    "email": null,
+    "firstname": null,
+    "furl": null,
+    "gateway_callback_called": false,
+    "hast": null,
+    "payment_ack_proof": null,
+    "payment_status": 1,
+    "payment_type": "cash",
+    "phone": null,
+    "productinfo": null,
+    "public": "no",
+    "refund": null,
+    "resource_class": "User",
+    "resource_id": "5a8b176a421aa90bbcc1b58d",
+    "surl": null,
+    "txnid": null,
+    "updated_at": "2018-02-19T22:41:10.572Z",
+    "payment_receipt": {
+        "current_payment": [
+            {
+                "_id": {
+                    "$oid": "5a8b51da421aa9163c04f6f4"
+                },
+                "accept_order_at_percentage_of_price": 1,
+                "accepted": true,
+                "accepted_by_payment_id": "5a8b5286421aa9163c04f6f6",
+                "created_at": "2018-02-19T22:38:18.366Z",
+                "discount": null,
+                "discount_code": null,
+                "name": "Ford Ecosport",
+                "parent_id": "5a8b4a41e13823140f39667c",
+                "price": "120000.0",
+                "product_id": "5a88618a421aa916385a3b45",
+                "public": "no",
+                "quantity": 1,
+                "resource_class": "User",
+                "resource_id": "5a8b176a421aa90bbcc1b58d",
+                "updated_at": "2018-02-19T22:41:10.525Z"
+            }
+        ],
+        "cart": {
+            "_id": {
+                "$oid": "5a8b4a41e13823140f39667c"
+            },
+            "public": "no",
+            "_type": "Shopping::Cart",
+            "resource_id": "5a8b176a421aa90bbcc1b58d",
+            "resource_class": "User",
+            "updated_at": "2018-02-19T22:05:53.260Z",
+            "created_at": "2018-02-19T22:05:53.260Z",
+            "cart_items": [
+                "5a8b49f0e13823140f39667b",
+                "5a8b51da421aa9163c04f6f4"
+            ],
+            "cart_payments": [
+                "5a8b4b10e13823140f39667d"
+            ]
+        }
+    }
+}
+```
+
 

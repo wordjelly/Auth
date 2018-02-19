@@ -107,7 +107,15 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 			end
 
-			it " -- signed in user can create cart items from the coupon -- " do 
+			it " -- same user cannot create cart items using the discount -- " do 
+
+			end
+
+			it " -- calling create multiple cart items twice, what happens -- " do 
+
+			end
+
+			it " -- signed in user can create cart items from the coupon -- ", :multi_citem => true do 
 
 				cart_items = create_cart_items(@u)
 				
@@ -123,6 +131,10 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				post create_multiple_shopping_cart_items_path, {:id => discount.id.to_s, discount: { :product_ids => discount.product_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
 
 				expect(response.code).to eq("200")
+
+				json_array_of_cart_items = JSON.parse(response.body)
+				expect(json_array_of_cart_items.size).to eq(5)
+
 				expect(Shopping::CartItem.count).to eq(10)
 
 			end
