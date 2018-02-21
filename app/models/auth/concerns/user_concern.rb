@@ -52,7 +52,7 @@ module Auth::Concerns::UserConcern
 				        mappings: {
 				          "user" => {
 				          _all:  {
-					            index_analyzer: "nGram_analyzer",
+					            analyzer: "nGram_analyzer",
 					            search_analyzer: "whitespace_analyzer"
 					        },
 				            properties: {
