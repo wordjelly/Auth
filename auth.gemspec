@@ -5,7 +5,7 @@ require "auth/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "auth"
+  s.name        = "wordjelly-auth"
   s.version     = Auth::VERSION
   s.authors     = ["bhargav"]
   s.email       = ["bhargav.r.raut@gmail.com"]
@@ -44,9 +44,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'googl'
   #s.add_dependency 'premailer-rails'
   s.add_dependency 'sinatra'
-  s.add_dependency 'aws-sdk', '~> 2'
   s.add_dependency 'dotenv-rails'
-  s.add_dependency 'mongoid_versioned_atomic', '0.0.5'
+  s.add_dependency 'mongoid_versioned_atomic', '0.0.6'
   s.add_dependency 'wj-jquery-rails', '>= 4.2.2.1'
   s.add_dependency 'wj-mailgun-ruby', '>= 1.1.7'
   s.add_dependency 'wj-payuindia', '>= 0.1.1'
