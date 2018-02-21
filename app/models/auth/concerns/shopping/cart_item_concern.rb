@@ -55,7 +55,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 			        mappings: {
 			          "shopping/cart_item" => {
 			          _all:  {
-				            index_analyzer: "nGram_analyzer",
+				            analyzer: "nGram_analyzer",
 				            search_analyzer: "whitespace_analyzer"
 				        },
 			            properties: {
