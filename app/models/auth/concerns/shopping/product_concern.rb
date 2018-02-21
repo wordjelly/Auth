@@ -50,7 +50,7 @@ module Auth::Concerns::Shopping::ProductConcern
 				        mappings: {
 				          "shopping/product" => {
 				          _all:  {
-					            index_analyzer: "nGram_analyzer",
+					            analyzer: "nGram_analyzer",
 					            search_analyzer: "whitespace_analyzer"
 					        },
 				            properties: {
