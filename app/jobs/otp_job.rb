@@ -1,4 +1,4 @@
-require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
+#require "/home/bhargav/Github/auth/lib/auth/two_factor_otp"
 class OtpJob < ActiveJob::Base
   include Auth::TwoFactorOtp
   include Auth::Mailgun
