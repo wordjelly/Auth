@@ -269,3 +269,11 @@ TODO :
 8)add tests for owner matches.
 9)act on comments in the set_cart_items_accepted.
 10)add a test that you cant remove items from a cart if even one payment has been made, whether accepted or not accepted.
+
+
+THINGS TO FIX IN TOKEN AUTH:
+
+1. store the auth_token as a bcrypted hash - todo
+2. check if the user lookup is being done by es - mostly being done.
+3. then use securecompare to compare the tokens - already done.
+4. pass the changed token alongwith every request. - todo
