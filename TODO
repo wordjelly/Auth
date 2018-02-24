@@ -273,7 +273,34 @@ TODO :
 
 THINGS TO FIX IN TOKEN AUTH:
 
-1. store the auth_token as a bcrypted hash - todo
+1. store the auth_token as a bcrypted hash - 
+
+-make authentication_token an attr_accessor
+-add a field called encrypted_authentication_token
+-in ensure authentication token, on setting authentication_token, use Devise::Encryptor.digest to store the digest of the auth_token into the ecrypted auth_token
+-in as_json -> return the authentication_token
+-see what to do about regenerate_authentication_token - pipe this same function to be used in ensure_authentication_token.
+-add the authentication_token in the response headers at the application_controller level.
+-in token compare, use the devise method Devise::Encryptor.compare, using the encrypted auth token instead.
+
 2. check if the user lookup is being done by es - mostly being done.
 3. then use securecompare to compare the tokens - already done.
 4. pass the changed token alongwith every request. - todo
+
+=begin
+client = Elasticsearch::Client.new(host: ENV["AWS_ES_HOST"], port: ENV["AWS_ES_PORT"]) do |f|
+  f.request :aws_sigv4,
+    credentials: Aws::Credentials.new(ENV["AWS_KEY"],ENV["AWS_SECRET"]),
+    service: ENV["AWS_ES_SERVICE"],
+    region: ENV["AWS_ES_REGION"]
+
+  f.response :logger
+  f.adapter  Faraday.default_adapter
+end
+
+res = client.cluster.health
+puts res.to_s
+
+puts "this is the client transport"
+puts client.transport
+=end

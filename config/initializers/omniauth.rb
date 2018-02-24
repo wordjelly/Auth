@@ -362,33 +362,39 @@ module SimpleTokenAuthentication
 	    def find_record_from_identifier(entity)
 	    	## you are supposed to find the record using one of the other parameters.
 
+	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
+      		
+	    	#puts "Additional identifiers are:"
+	    	#puts additional_identifiers
+
+	    	app_id_value = additional_identifiers["X-User-Aid"]
+	    	user_es_value = additional_identifiers["X-User-Es"]
+
+	    	#puts "value are: "
+	    	#puts app_id_value	
+	    	#puts user_es_value
+      		
 	    	token = entity.get_token_from_params_or_headers(self)
-		    token && entity.model.find_for_authentication("authentication_token" => token)
+		   		
+
+		   	#puts "token is: #{token}"
+
+		    if token
+		    	records = entity.model.where("client_authentication.#{app_id_value}" => user_es_value)
+		    	if records.size > 0
+		    		#puts "found such a record."
+		    		return records.first
+		    	else
+		    		return nil
+		    	end
+		    end
+		    return nil
 	    end
 
 		def token_correct?(record, entity, token_comparator)
 			return false unless record
-
-
-
-
-			## the idea here is simple just compare the token to the one from the record.
-      		additional_identifiers = entity.get_additional_identifiers_from_headers(self)
+			token_comparator.compare(record.authentication_token,entity.get_token_from_params_or_headers(self))
       		
-      		puts "the additional identifiers are:"
-      		puts additional_identifiers.to_s
-
-      		identifier_param_value = entity.get_identifier_from_params_or_headers(self).presence
-
-      		identifier_param_value = integrate_with_devise_case_insensitive_keys(identifier_param_value, entity)
-
-      		additional_identifiers.each do |key,value|
-      			a = record.client_authentication[value]
-      			if !token_comparator.compare(a,identifier_param_value)
-      				return false
-      			end
-      		end
-      		return true
     	end
 	end
 
@@ -406,9 +412,9 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 		##will also need to add app_id, and client id specific shit here.
 		if Auth.configuration.enable_token_auth
 			SimpleTokenAuthentication.configure do |cf|
-			  q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
-			  cf.identifiers = q
-			  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,['aid']]}]
+			  #q = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,'es']}]
+			  #cf.identifiers = q
+			  q2 = Hash[Auth.configuration.auth_resources.keys.map{|c| c = [c.downcase.to_sym,['aid','es']]}]
 			  cf.additional_identifiers = q2
 			end
 		end
