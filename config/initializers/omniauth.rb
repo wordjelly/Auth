@@ -360,15 +360,24 @@ module SimpleTokenAuthentication
 	    end
 
 	    def find_record_from_identifier(entity)
-	    	
+	    	## you are supposed to find the record using one of the other parameters.
+
 	    	token = entity.get_token_from_params_or_headers(self)
 		    token && entity.model.find_for_authentication("authentication_token" => token)
 	    end
 
 		def token_correct?(record, entity, token_comparator)
 			return false unless record
+
+
+
+
+			## the idea here is simple just compare the token to the one from the record.
       		additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
+      		puts "the additional identifiers are:"
+      		puts additional_identifiers.to_s
+
       		identifier_param_value = entity.get_identifier_from_params_or_headers(self).presence
 
       		identifier_param_value = integrate_with_devise_case_insensitive_keys(identifier_param_value, entity)
