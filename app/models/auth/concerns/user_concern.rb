@@ -285,8 +285,11 @@ module Auth::Concerns::UserConcern
 	    else
 	    	
 	    	acts_as_token_authenticatable
-  			field :authentication_token, type: String
-  			##this we add to ensure that the token has an expiry.
+  			
+  			## okay so this will be modified in the simple token authentication part.
+  			attr_accessor :authentication_token
+  			field :encrypted_authentication_token, type: String
+
   			field :authentication_token_expires_at, type: Integer
 	    	field :client_authentication, type: Hash, default: {}
 	    	field :current_app_id, type: String
@@ -418,6 +421,11 @@ module Auth::Concerns::UserConcern
 		
 
 		if !self.m_client.nil?
+			#puts "the client is not nil"
+			#puts "is self client authentication nil"
+			#puts self.client_authentication[self.m_client.current_app_id].nil?
+			#puts "is self valie"
+			#puts self.valid?
 			if self.client_authentication[self.m_client.current_app_id].nil? && self.valid?
 				self.client_authentication[self.m_client.current_app_id] = SecureRandom.hex(32)
 				
@@ -574,9 +582,10 @@ module Auth::Concerns::UserConcern
 		if (!self.destroyed? && options[:otp_verification].nil?)
 			
 			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
-			 	
-			 		json = super(:only => [:authentication_token])
+			 		
+			 		json = {}
 		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
+		     		json[:authentication_token] = self.authentication_token
 		     		unless options[:show_id].nil?
 		     			json[:id] = self.id.to_s
 		     			json[:admin] = self.admin.to_s
@@ -655,6 +664,9 @@ module Auth::Concerns::UserConcern
 	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
 		#puts "calling additional login param changed"
+		puts "pending reconfirmation?"
+		puts self.pending_reconfirmation?		
+
 		if additional_login_param_changed?  && (self.pending_reconfirmation?)
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{additional_login_param_name}")
 		end
@@ -722,9 +734,8 @@ module Auth::Concerns::UserConcern
 	##
 	def token_expired?
 		if authentication_token_expires_at < Time.now.to_i
-
-			regenerate_token
-			save
+			## the before_save callback in omniauth.rb, will automatically regenerate the authentication token
+			#save
 			true
 		end
 	end

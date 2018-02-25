@@ -135,7 +135,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         expect(@user_updated.errors.full_messages).to be_empty
         expect(@user_updated.client_authentication).to eql(@user.client_authentication)
         expect(@user_updated.name).to eql(name)
-        expect(@user_updated.authentication_token).to eql(@user.authentication_token)
+        expect(@user_updated.authentication_token).not_to eql(@user.authentication_token)
 
       end
 
@@ -547,12 +547,19 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     it " -- creates a user with one client -- " do 
 
       ##now post to the user_registration_path using each of these seperately.
+       
        c1_user_attribs = attributes_for(:user_confirmed)
+       
        post user_registration_path, {user: c1_user_attribs, api_key: @ap_key1, current_app_id: @c1.app_ids[0]}
+       
        @user_created_by_first_client = User.where(:email => c1_user_attribs[:email]).first
+
        expect(@user_created_by_first_client.client_authentication).not_to be_nil
+       
        expect(@user_created_by_first_client.client_authentication).not_to be_empty
-       expect(@user_created_by_first_client.authentication_token).not_to be_nil
+       
+       expect(@user_created_by_first_client.encrypted_authentication_token).not_to be_nil
+       
        expect(@user_created_by_first_client.errors.full_messages).to be_empty
 
     end
@@ -565,7 +572,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
        @user_created_by_second_client = User.where(:email => c2_user_attribs[:email]).first
        expect(@user_created_by_second_client.client_authentication).not_to be_nil
        expect(@user_created_by_second_client.client_authentication).not_to be_empty
-       expect(@user_created_by_second_client.authentication_token).not_to be_nil
+       expect(@user_created_by_second_client.encrypted_authentication_token).not_to be_nil
        expect(@user_created_by_second_client.errors.full_messages).to be_empty
 
 
