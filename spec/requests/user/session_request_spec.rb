@@ -22,7 +22,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
-	        @c.app_ids << "test_app_id"
+	        @c.app_ids << "testappid"
 	        @c.versioned_update
 	        @ap_key = @c.api_key
 		end
@@ -181,7 +181,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
-	        @c.app_ids << "test_app_id"
+	        @c.app_ids << "testappid"
 	        @c.versioned_update
 	        @ap_key = @c.api_key
 		end
@@ -193,7 +193,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 		before(:each) do 
 			@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
-			#, "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"
+			#, "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"
 		end
 
 		context " -- no api key" do 
@@ -286,23 +286,23 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			User.delete_all
 			Auth::Client.delete_all
 			@u = User.new(attributes_for(:user_confirmed))
-	        #@u.set_client_authentication("test_app_id")
+	        #@u.set_client_authentication("testappid")
 	        @u.versioned_create
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
-	        @c.app_ids << "test_app_id"
+	        @c.app_ids << "testappid"
 	        @c.versioned_update
 	        @ap_key = @c.api_key
 
 			##create another user and associated other client.
 			@u2 = User.new(attributes_for(:user_confirmed))
-	        #@u2.set_client_authentication("test_app_id2")
+	        #@u2.set_client_authentication("testappid2")
 	        @u2.versioned_create
 			@c2 = Auth::Client.where(:resource_id => @u2.id).first
 	        @c2.api_key = "test2"
 	        @c2.redirect_urls = ["http://www.yahoo.com"]
-	        @c2.app_ids << "test_app_id2"
+	        @c2.app_ids << "testappid2"
 	        @c2.versioned_update
 	        @ap_key2 = @c2.api_key
 	        ActionController::Base.allow_forgery_protection = false
@@ -336,8 +336,8 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 	        @c = Auth::Client.where(:resource_id => @u.id).first
 	        @c.api_key = "test"
 	        @c.redirect_urls = ["http://www.google.com"]
-	        @c.app_ids << "test_app_id"
-	        @c.app_ids << "test_app_id2"
+	        @c.app_ids << "testappid"
+	        @c.app_ids << "testappid2"
 	        @c.versioned_update
 	        @ap_key = @c.api_key
 	    end

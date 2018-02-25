@@ -17,23 +17,26 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["test_app_id"] = "test_es_token"
+        @u.client_authentication["testappid"] = "testestoken"
         @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
 
 
         ### CREATE ONE ADMIN USER
 
         ### It will use the same client as the user.
-        @admin = Admin.new(attributes_for(:admin_confirmed))
-        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin = User.new(attributes_for(:admin_confirmed))
+        @admin.admin = true
+        
+        @admin.client_authentication["testappid"] = "testestoken2"
         @admin.save
-        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+        
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
     end
 
@@ -55,7 +58,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.signed_in_resource = @admin
 				res = cart_item.save
 
-    			get shopping_cart_item_path({:id => cart_item.id.to_s}),{:api_key => @ap_key, :current_app_id => "test_app_id"}, @headers
+    			get shopping_cart_item_path({:id => cart_item.id.to_s}),{:api_key => @ap_key, :current_app_id => "testappid"}, @headers
     			
     		end
 
@@ -66,7 +69,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 			it " -- creates cart item with all permitted params,and assigns user id. ",:c1 => true do 
 				cart_item = attributes_for(:cart_item)
 
-				post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				post shopping_cart_items_path,{cart_item: cart_item,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 				
 	            @cart_item_created = assigns(:auth_shopping_cart_item)
 	            #puts "cart item created is: #{@cart_item_created}"
@@ -98,7 +101,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				res = cart_item.save
 				
 				
-	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
+	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "testappid"}
 	            
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
@@ -117,7 +120,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				##we create another user and pass his auth token, es and app id, and then it should not perform the update, but throw a not found.
 				@u1 = User.new(attributes_for(:user_confirmed))
 	       	 	@u1.save
-	       	 	@u1.client_authentication["test_app_id"] = "test_es_token"
+	       	 	@u1.client_authentication["testappid"] = "testestoken"
 	        	@u1.save
 	        	##so basically we are going to use the client from @u only here as well.
 	        	cart_item = Shopping::CartItem.new(attributes_for(:cart_item))
@@ -126,8 +129,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.signed_in_resource = @admin
 				cart_item.save
 				
-	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "test_app_id"}
-	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u1.authentication_token, "X-User-Es" => @u1.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+	            a = {:cart_item => {:discount => 42, :quantity => 10, :product_id => BSON::ObjectId.new.to_s, :price => 400}, api_key: @ap_key, :current_app_id => "testappid"}
+	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u1.authentication_token, "X-User-Es" => @u1.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@headers
 	            resp = JSON.parse(response.body)
@@ -202,7 +205,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 					
 				puts "------------CHECK FROM HERE---------------------"
 				## now call update on the first cart item with no payment.
-				put shopping_cart_item_path({:id => @created_cart_item_ids.first}), {api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+				put shopping_cart_item_path({:id => @created_cart_item_ids.first}), {api_key: @ap_key, :current_app_id => "testappid"}.to_json,@headers
 
 
 				## expect the cart item to have accepted set to false.
@@ -220,7 +223,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				res = cart_item.save
 
 				## now try to update simply with admin headers.
-				a = {cart_item: {quantity: 33}, api_key: @ap_key, :current_app_id => "test_app_id"}
+				a = {cart_item: {quantity: 33}, api_key: @ap_key, :current_app_id => "testappid"}
 	            
 	            ##have to post to the id url.
 	            put shopping_cart_item_path({:id => cart_item.id.to_s}), a.to_json,@admin_headers
@@ -259,8 +262,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.resource_class = @u.class.name.to_s
 				cart_item.signed_in_resource = @admin
 				cart_item.save
-				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
-				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "testappid"}.to_json,@headers
 				expect(response.code).to eq("204")
 				expect(response.body).to be_empty
 			end
@@ -279,13 +282,13 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				puts "thse are the errors."
 				puts cart_item.errors.full_messages.to_s
 
-				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 
 				cit = Shopping::CartItem.find(cart_item.id.to_s)
 				puts cit.attributes.to_s
 
 
-				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+				delete shopping_cart_item_path({:id => cart_item.id.to_s}),{api_key: @ap_key, :current_app_id => "testappid"}.to_json,@headers
 
 				puts "response code is:"
 				puts response.code.to_s
@@ -310,8 +313,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 					cart_item.save
 					created_cart_item_ids << cart_item.id.to_s
 				end
-				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
-				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "testappid"}),nil,@headers
 				returned_objects = JSON.parse(response.body)
 				expect(returned_objects).not_to be_empty
 				expect(returned_objects.size).to eq(5)
@@ -327,8 +330,8 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 			it "returns empty response if no cart items exist for this user" do 
 				Shopping::CartItem.delete_all
-				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
-				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "testappid"}),nil,@headers
 				returned_objects = JSON.parse(response.body)
 				expect(returned_objects).to be_empty
 			end
@@ -338,7 +341,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 
 				@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
 
-				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+				get shopping_cart_items_path({api_key: @ap_key, :current_app_id => "testappid"}),nil,@headers
 
 				expect(response.code).to eq("401")
 
@@ -353,7 +356,7 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				##we create another user and pass his auth token, es and app id, and then it should not perform the update, but throw a not found.
 				@u2 = User.new(attributes_for(:user_confirmed))
 	       	 	@u2.save
-	       	 	@u2.client_authentication["test_app_id"] = "test_es_token"
+	       	 	@u2.client_authentication["testappid"] = "testestoken1"
 	        	@u2.save
 
 	        	##so basically we are going to use the client from @u only here as well.
@@ -363,8 +366,9 @@ RSpec.describe "cart item request spec",:cart_item => true,:shopping => true, :t
 				cart_item.signed_in_resource = @admin
 				cart_item.save
 				
-	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
-	            get shopping_cart_item_path({:id => cart_item.id.to_s,api_key: @ap_key, :current_app_id => "test_app_id"}),nil,@headers
+	            @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+	            
+	            get shopping_cart_item_path({:id => cart_item.id.to_s,api_key: @ap_key, :current_app_id => "testappid"}),nil,@headers
 
 	            response_hash = JSON.parse(response.body)
 

@@ -90,6 +90,15 @@ class User < Auth::User
   ##
   ###############
 
-  
+  def as_indexed_json(options={})
+         {
+            name: name,
+            email: email,
+            additional_login_param: additional_login_param,
+            additional_login_param_status: additional_login_param_status,
+            resource_id: resource_id,
+            public: public
+         }
+  end 
 
 end

@@ -327,6 +327,7 @@ module SimpleTokenAuthentication
 		## CHANGE THE AUTHENTICATION TOKEN WHENEVER THE USER IS SAVED. IT DOESNT MATTER IF THERE IS AN EXISTING AUTHENTICATION TOKEN OR NOT.
 	    def ensure_authentication_token
 	      #if authentication_token.blank?
+	      #puts "------------------CAME TO ENSURE AUTHENTICATION TOKEN--------------------"
 	      regenerate_token
 	      #end
 	    end
@@ -361,18 +362,19 @@ module SimpleTokenAuthentication
 		  ##then we should find
 		  
 	      record = find_record_from_identifier(entity)
+	      puts "record found is: #{record.to_s}"
 	      
 	      if token_correct?(record, entity, token_comparator)
 	      	#puts "token is correct." 
 	      	return false if record.token_expired?
 	      	#puts "token is not expired."
-	        puts "record is:"
-	        puts record.attributes.to_s
-	        puts "is it valid"
-	        puts record.valid?
+	        #puts "record is:"
+	        #puts record.attributes.to_s
+	        #puts "is it valid"
+	        #puts record.valid?
 	        res = perform_sign_in!(record, sign_in_handler)
-	      	puts "result of signing in :"
-	      	puts res.to_s
+	      	#puts "result of signing in :"
+	      	#puts res.to_s
 	      else
 	      	#puts "the token was not correct.-------------------------"
 	      end
@@ -392,7 +394,11 @@ module SimpleTokenAuthentication
 		    if token
 		    	
 		    	## fails if the app id or user es is nil blank or empty
-
+		    	#puts "returning nil"
+		    	#puts "app id vlue is:"
+		    	#puts app_id_value.to_s
+		    	#puts "user es value is:"
+		    	#puts user_es_value.to_s
 		    	return nil if (app_id_value.blank? || user_es_value.blank?)
 		    		
 		    	## sanitize the values incoming to leave only letters and numbers.
@@ -406,11 +412,15 @@ module SimpleTokenAuthentication
 	    		#puts "user app id id: #{app_id_value}"
 	    		return nil if(app_id_value.length == 0 || user_es_value.length == 0)
 
+	    		#puts "app id value is: #{app_id_value}"
+	    		#puts "user es value : #{user_es_value}"
+	    		#puts "entity model is :#{entity.model}"
+
 		    	records = entity.model.where("client_authentication.#{app_id_value}" => user_es_value)
 		    	if records.size > 0
 		    		puts "found such a record.!!!!!!!!!!!!"
-		    		#r = records.first
-		    		#puts r.attributes.to_s
+		    		r = records.first
+		    		puts r.attributes.to_s
 		    		return records.first
 		    	else
 		    		return nil

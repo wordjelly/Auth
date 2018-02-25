@@ -17,22 +17,23 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         @product.save
 
 
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["test_app_id"] = "test_es_token"
+        @u.client_authentication["testappid"] = "testestoken"
         @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
         
         ### CREATE ONE ADMIN USER
 
         ### It will use the same client as the user.
-        @admin = Admin.new(attributes_for(:admin_confirmed))
-        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin = User.new(attributes_for(:admin_confirmed))
+        @admin.admin = true
+        @admin.client_authentication["testappid"] = "testestoken2"
         @admin.save
-        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["testappid"], "X-Admin-Aid" => "testappid"}
         
     end
 
@@ -109,7 +110,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			it  " -- shows the cart -- ", :show_cart => true do 
 
-				get shopping_cart_path(:id => @cart.id.to_s), {:api_key => @ap_key, :current_app_id => "test_app_id"}, @headers
+				get shopping_cart_path(:id => @cart.id.to_s), {:api_key => @ap_key, :current_app_id => "testappid"}, @headers
 				cart_response = JSON.parse(response.body)
 				expect(cart_response["cart_minimum_payable_amount"]).to eq("10.0")
 				expect(response.code).to eq("200")
@@ -142,7 +143,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			it " -- creates a new cart, and simultaneously returns no cart_items on cart_item#index action -- ", :qr => true do 
 				
 
-				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 				
 
 				
@@ -162,7 +163,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			it " -- id is provided, without add_cart_items paramenter, it returns an error. -- ", issue: true do 
 
-				post shopping_carts_path, {cart: {},:api_key => @ap_key, :current_app_id => "test_app_id", :id => BSON::ObjectId.new.to_s}.to_json, @headers
+				post shopping_carts_path, {cart: {},:api_key => @ap_key, :current_app_id => "testappid", :id => BSON::ObjectId.new.to_s}.to_json, @headers
 
 				jresp = JSON.parse(response.body)
 				##it will give an error because we cannot find this id.
@@ -173,7 +174,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			it " -- some of the cart items ids provided don't exist, only updates the existing cart items with this cart's id. -- " do 
 
 				@created_cart_item_ids.pop
-				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				post shopping_carts_path, {cart: {add_cart_item_ids: @created_cart_item_ids},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 				
 				jresp = JSON.parse(response.body)
 				ct = Shopping::Cart.new(jresp)
@@ -234,7 +235,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				##notes to be added to all cart items.
 				@notes = "aies blood test when she was not well"
 
-				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove],parent_notes: @notes},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [cart_item.id.to_s], remove_cart_item_ids: [id_to_remove],parent_notes: @notes},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				puts "response code:"
 				puts response.code.to_s
@@ -307,7 +308,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 			it " -- additional cart item is not visible after adding to cart -- ", :invisible => true do 
 
-				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				put shopping_cart_path({:id => @cart.id}), {cart: {add_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				puts "response body"
 				puts response.body.to_s
@@ -322,7 +323,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 			it " -- on removing from cart , it is once again visible -- " do 
 
 
-				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 
 				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
@@ -342,7 +343,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				
 
-				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers				
+				put shopping_cart_path({:id => @cart.id}), {cart: {remove_cart_item_ids: [@additional_cart_item.id.to_s]},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers				
 
 			
 				cart_items = Shopping::CartItem.find_cart_items({:resource => @u})
@@ -406,7 +407,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 					end
 				}
 
-				delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				shopping_cart_ids = Shopping::Cart.all.map{|c| c = c.id.to_s}
 
@@ -427,7 +428,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 	            ps = payment.save
 	            expect(ps).to be_truthy
 
-	            delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+	            delete shopping_cart_path({:id => @cart.id}),{:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				shopping_cart_ids = Shopping::Cart.all.map{|c| c = c.id.to_s}
 

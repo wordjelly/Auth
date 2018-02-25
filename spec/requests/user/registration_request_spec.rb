@@ -43,7 +43,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       @c = Auth::Client.where(:resource_id => @u.id).first
       @c.api_key = "test"
       @c.redirect_urls = ["http://www.google.com"]
-      @c.app_ids << "test_app_id"
+      @c.app_ids << "testappid"
       @c.versioned_update
       @ap_key = @c.api_key
       #@headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.es}
@@ -69,13 +69,13 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         Recaptcha.configuration.skip_verify_env << "test"
       end
       it " -- requires recaptcha on create " do         
-        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}
+        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}
         expect(response.body).to eq("recaptcha validation error")
       end
 
       it " -- requires recaptcha on update " do 
         sign_in_as_a_valid_and_confirmed_user
-        put user_registration_path, :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"},:api_key => @ap_key, :current_app_id => "test_app_id"
+        put user_registration_path, :id => @user.id, :user => {:email => "dog@gmail.com", :current_password => "password"},:api_key => @ap_key, :current_app_id => "testappid"
         expect(response.body).to eq("recaptcha validation error")
       end
 
@@ -85,7 +85,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
       it " -- creates client authentication and auth token on user create -- " do
 
-        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}
+        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}
         @user = assigns(:user)
         expect(@user.client_authentication).not_to be_nil
         expect(@user.client_authentication).not_to be_empty
@@ -100,7 +100,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         ##simulate like the user was authenticated using a client.
         ##so that it will set a client authentication.
         cli = Auth::Client.new
-        cli.current_app_id = "test_app_id"
+        cli.current_app_id = "testappid"
         @user.m_client = cli
         @user.set_client_authentication
 
@@ -213,13 +213,13 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     context " -- sets client if api key and current_app_id match -- ", :current_problem => true do 
 
       it " new_user_registration_path -- " do 
-        get new_user_registration_path, {:api_key => @ap_key, :current_app_id => "test_app_id"}
+        get new_user_registration_path, {:api_key => @ap_key, :current_app_id => "testappid"}
         
         expect(session[:client]).not_to be_nil
       end
 
       it " create user -- " do 
-        post user_registration_path, {user: attributes_for(:user), api_key: @ap_key, current_app_id: "test_app_id"}
+        post user_registration_path, {user: attributes_for(:user), api_key: @ap_key, current_app_id: "testappid"}
         
         expect(session[:client]).not_to be_nil
 
@@ -228,7 +228,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
       it " update user -- " do 
          sign_in_as_a_valid_and_confirmed_user
-         put user_registration_path, :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @ap_key, :current_app_id => "test_app_id"
+         put user_registration_path, :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @ap_key, :current_app_id => "testappid"
          @updated_user = assigns(:user)
          expect(session[:client]).not_to be_nil   
       end
@@ -247,7 +247,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
           it " --(CREATE ACTION) redirects to root path, does not set client or redirect url, but successfully creates the user, only the redirect fails. -- " do 
 
-            post user_registration_path, {user: attributes_for(:user), api_key: "invalid api_key", redirect_url: "http://www.google.com", current_app_id: "test_app_id"}
+            post user_registration_path, {user: attributes_for(:user), api_key: "invalid api_key", redirect_url: "http://www.google.com", current_app_id: "testappid"}
             @user_just_created = assigns(:user)
             expect(response).to redirect_to(root_path)
 
@@ -255,7 +255,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
           it "--(UPDATE ACTION) redirects to root path, does not set client or redirect url," do 
             sign_in_as_a_valid_and_confirmed_user
-            put user_registration_path, :id => @user.id, :user => {:password => "dogisdead", :current_password => 'password'}, :api_key => "invalid api key", redirect_url: "http://www.google.com" , current_app_id: "test_app_id"
+            put user_registration_path, :id => @user.id, :user => {:password => "dogisdead", :current_password => 'password'}, :api_key => "invalid api key", redirect_url: "http://www.google.com" , current_app_id: "testappid"
             updated_user = assigns(:user)
             user1 = User.where(:email => @user.email).first 
             expect(user1.valid_password?("dogisdead")).to eq(true)
@@ -270,7 +270,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
             it "---CREATE redirects to default path --- " do 
 
-              post user_registration_path, {user: attributes_for(:user), api_key: @ap_key, redirect_url: "http://www.yahoo.com", current_app_id: "test_app_id"}
+              post user_registration_path, {user: attributes_for(:user), api_key: @ap_key, redirect_url: "http://www.yahoo.com", current_app_id: "testappid"}
                 
               @user_just_created = assigns(:user)
               expect(session[:client]).not_to be_nil
@@ -282,7 +282,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
               
               sign_in_as_a_valid_and_confirmed_user
               
-              put user_registration_path, :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @ap_key, redirect_url: "http://www.yahoo.com", current_app_id: "test_app_id"
+              put user_registration_path, :id => @user.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, :api_key => @ap_key, redirect_url: "http://www.yahoo.com", current_app_id: "testappid"
               
               @user_just_updated = assigns(:user)
               expect(session[:client]).not_to be_nil
@@ -296,12 +296,12 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
             it " -- redirects in create action -- ",:problem_noww => true do 
 
-              post user_registration_path, {user: attributes_for(:user_confirmed), api_key: @ap_key, redirect_url: "http://www.google.com", current_app_id: "test_app_id"}
+              post user_registration_path, {user: attributes_for(:user_confirmed), api_key: @ap_key, redirect_url: "http://www.google.com", current_app_id: "testappid"}
               @user_just_created = assigns(:user)
               
               
               auth_token = @user_just_created.authentication_token
-              es = @user_just_created.client_authentication["test_app_id"]
+              es = @user_just_created.client_authentication["testappid"]
               
               expect(response).to redirect_to("http://www.google.com?authentication_token=#{auth_token}&es=#{es}")
             
@@ -310,11 +310,11 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
             it "--- redirects in put action --- " do 
               
               sign_in_as_a_valid_and_confirmed_user
-              put user_registration_path, :id => @user.id, :user => {:password => "dogisdead", :current_password => 'password'}, :api_key => @ap_key, redirect_url: "http://www.google.com", current_app_id: "test_app_id"
+              put user_registration_path, :id => @user.id, :user => {:password => "dogisdead", :current_password => 'password'}, :api_key => @ap_key, redirect_url: "http://www.google.com", current_app_id: "testappid"
               @user_just_updated = assigns(:user)
               
               auth_token = @user_just_updated.authentication_token
-              es = @user_just_updated.client_authentication["test_app_id"]
+              es = @user_just_updated.client_authentication["testappid"]
               expect(response).to redirect_to("http://www.google.com?authentication_token=#{auth_token}&es=#{es}")
               
             end
@@ -342,10 +342,10 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         Auth::Client.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.versioned_create
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["test_app_id"] = "test_es_token"
+        @u.client_authentication["testappid"] = "testestoken"
         @u.versioned_update
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -353,7 +353,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         ## second user.
         @u2 = User.new(attributes_for(:user_confirmed))
         @u2.versioned_create
-        @u2.client_authentication["test_app_id"] = "test_es_token1"
+        @u2.client_authentication["testappid"] = "testestoken1"
         @u2.versioned_update
 
     end
@@ -414,7 +414,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       context " -- valid api key -- " do 
         
         it " -- CREATE UNCONFIRMED EMAIL ACCOUNT - does not return auth_token and es ", :now => true do 
-            post user_registration_path, {user: attributes_for(:user),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post user_registration_path, {user: attributes_for(:user),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
             @user_created = assigns(:user)
            
             user_json_hash = JSON.parse(response.body)
@@ -422,7 +422,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         end        
 
         it " -- CREATE CONFIRMED EMAIL ACCOUNT - returns the auth token and es -- ", :nowie => true do  
-            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
             @user_created = assigns(:user)
             
             user_json_hash = JSON.parse(response.body)
@@ -434,7 +434,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
         it " -- CREATE UNCONFIRMED MOBILE ACCOUNT - does not return auth_token and es ", :now => true do 
 
-            post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post user_registration_path, {user: attributes_for(:user_mobile),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
             @user_created = assigns(:user)
            
             user_json_hash = JSON.parse(response.body)
@@ -454,7 +454,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
           it " -- json request without android header passes, because it simply returns true from the check_recaptcha def -- " do 
 
-            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
             resp = JSON.parse(response.body)
             expect(resp.keys).to match_array(["authentication_token","es"])
 
@@ -465,7 +465,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
           it " -- json request with android header will fail, because verify recaptcha fails. "  do 
             @headers["OS-ANDROID"] = true
             
-            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+            post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
             #puts response.body.to_s
             resp = JSON.parse(response.body)
             expect(resp["errors"]).to eq("recaptcha validation error")            
@@ -477,10 +477,13 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         context " --- UPDATE REQUEST --- " do 
             
           it " -- works -- ", :email_update => true do  
-            a = {:id => @u2.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "test_app_id"}
-            
 
-            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u2.authentication_token, "X-User-Es" => "test_es_token1", "X-User-Aid" => "test_app_id"})
+            a = {:id => @u2.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
+            
+            puts "the u2 authentication token is:"
+            puts @u2.authentication_token.to_s
+
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u2.authentication_token, "X-User-Es" => "testestoken1", "X-User-Aid" => "testappid"})
             @user_updated = assigns(:user)
             
             
@@ -490,9 +493,9 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
           end
 
           it " -- doesnt respect redirects --- " do 
-            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, redirect_url: "http://www.google.com", :current_app_id => "test_app_id"}
+            a = {:id => @u.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, redirect_url: "http://www.google.com", :current_app_id => "testappid"}
           
-            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+            put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"})
             @user_updated = assigns(:user)
             
             expect(response.code).to eq("200")
@@ -507,8 +510,8 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         it " --- DESTROY REQUEST --- " do 
 
          
-          a = {:id => @u.id, :api_key => @ap_key, :current_app_id => "test_app_id"}
-          delete user_registration_path(format: :json), a.to_json, @headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"})
+          a = {:id => @u.id, :api_key => @ap_key, :current_app_id => "testappid"}
+          delete user_registration_path(format: :json), a.to_json, @headers.merge({"X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"})
           expect(response.code).to eq("200")
 
         end
@@ -529,7 +532,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       @u1.versioned_create
       @c1 = Auth::Client.new(:resource_id => @u1.id, :api_key => "test1")
       @c1.redirect_urls = ["http://www.google.com"]
-      @c1.app_ids << "test_app_id1"
+      @c1.app_ids << "testappid1"
       @c1.versioned_create
       @ap_key1 = @c1.api_key
 
@@ -538,7 +541,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       @u2.versioned_create
       @c2 = Auth::Client.new(:resource_id => @u2.id, :api_key => "test2")
       @c2.redirect_urls = ["http://www.google.com"]
-      @c2.app_ids << "test_app_id2"
+      @c2.app_ids << "testappid2"
       @c2.versioned_create
       @ap_key2 = @c2.api_key
     
@@ -593,8 +596,8 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       @u1.versioned_create
       @c1 = Auth::Client.new(:resource_id => @u1.id, :api_key => "test1")
       @c1.redirect_urls = ["http://www.google.com"]
-      @c1.app_ids << "test_app_id1"
-      @c1.app_ids << "test_app_id2"
+      @c1.app_ids << "testappid1"
+      @c1.app_ids << "testappid2"
       @c1.versioned_create
       @ap_key1 = @c1.api_key
     
@@ -606,7 +609,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       ##expect this users client_authentication to contain the first app id.
       @usr = assigns(:user)
       expect(@usr.client_authentication.keys.size).to eql(1)
-      expect(@usr.client_authentication["test_app_id1"]).not_to be_nil
+      expect(@usr.client_authentication["testappid1"]).not_to be_nil
     end
 
     it " -- creates user with another app id -- " do 
@@ -614,7 +617,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
       post user_registration_path, {user: c1_user_attribs, api_key: @ap_key1, current_app_id: @c1.app_ids[1]}
       @usr = assigns(:user)
       expect(@usr.client_authentication.keys.size).to eql(1)
-      expect(@usr.client_authentication["test_app_id2"]).not_to be_nil
+      expect(@usr.client_authentication["testappid2"]).not_to be_nil
     end
 
   end
