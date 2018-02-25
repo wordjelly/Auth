@@ -11,23 +11,24 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
 
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["test_app_id"] = "test_es_token"
+        @u.client_authentication["testappid"] = "testestoken"
         @u.save
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
 
 
         ### CREATE ONE ADMIN USER
 
         ### It will use the same client as the user.
-        @admin = Admin.new(attributes_for(:admin_confirmed))
-        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin = User.new(attributes_for(:admin_confirmed))
+        @admin.admin = true
+        @admin.client_authentication["testappid"] = "testestoken2"
         @admin.save
-        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 
         ## add this line to stub the otp api calls, while running the tests.
         Auth.configuration.stub_otp_api_calls = true
@@ -47,7 +48,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
             
             it  " -- creates user and sends otp -- " do 
 
-                post admin_create_users_path,{user: {:additional_login_param => "9561137096"},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+                post admin_create_users_path,{user: {:additional_login_param => "9561137096"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
                 
                 user_created = assigns(:auth_user)
                 
@@ -67,7 +68,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
                 user_created = create_user_with_mobile
                 initially_sent_otp = get_otp_session_id(user_created)
                 
-                get send_sms_otp_url({:resource => "users",:user => {:additional_login_param => user_created.additional_login_param},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                get send_sms_otp_url({:resource => "users",:user => {:additional_login_param => user_created.additional_login_param},:api_key => @ap_key, :current_app_id => "testappid"}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
 
                 new_otp = get_otp_session_id(user_created)
 
@@ -85,7 +86,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
                 ## we expect typhoeus to make a call to the 
 
                 # now call verify otp.
-                get verify_otp_url({:resource => "users",:user => {:additional_login_param => user_created.additional_login_param, :otp => initially_sent_otp},:api_key => @ap_key, :current_app_id => "test_app_id"}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                get verify_otp_url({:resource => "users",:user => {:additional_login_param => user_created.additional_login_param, :otp => initially_sent_otp},:api_key => @ap_key, :current_app_id => "testappid"}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
                 
                 user_json_hash = JSON.parse(response.body)
                 expect(user_json_hash.keys).to match_array(["nothing"])
@@ -103,7 +104,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
 
                 expect(Noti.count).to eq(1)
 
-                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "test_app_id"}
+                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "testappid"}
 
                 put profile_path({:id => user_created.id.to_s}),req.to_json,@admin_headers
 
@@ -121,7 +122,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
 
                 expect(Noti.count).to eq(0)
 
-                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "test_app_id"}
+                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "testappid"}
 
                 put profile_path({:id => user_created.id.to_s}),req.to_json,@admin_headers
 
@@ -173,7 +174,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
 
             it " -- creates the user and sends the confirmation email -- " do 
 
-                post admin_create_users_path,{user: {:email => "rrphotosoft@gmail.com"},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+                post admin_create_users_path,{user: {:email => "rrphotosoft@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
                 
                 user_created = assigns(:auth_user)
                 expect(user_created).not_to be_nil
@@ -194,7 +195,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
                 initial_confirmation_token = get_confirmation_token_from_email
                
                 initial_email_count = ActionMailer::Base.deliveries.size
-                post user_confirmation_path,{user:{email: user_created.email}, api_key: @ap_key,:current_app_id => "test_app_id"}.to_json,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                post user_confirmation_path,{user:{email: user_created.email}, api_key: @ap_key,:current_app_id => "testappid"}.to_json,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
                 
                 new_confirmation_token = get_confirmation_token_from_email
                 
@@ -211,7 +212,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
                 ## first get the token, then send it to the confirmations path, and expect the reset password instructions to be sent, as a notification.
                 user_created = create_user_with_email
                 confirmation_token = get_confirmation_token_from_email
-                get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "test_app_id"},{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "testappid"},{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
                
                 user_created = User.find(user_created.id.to_s)
                 ## it will send the reset password email, check the emails.
@@ -231,7 +232,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
 
                 expect(reset_password_token).not_to be_nil
 
-                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "test_app_id"}
+                req = {:id => user_created.id.to_s, :user => {:created_by_admin => true}, :resource => "users", api_key: @ap_key, :current_app_id => "testappid"}
 
                 put profile_path({:id => user_created.id.to_s}),req.to_json,@admin_headers
 
@@ -250,7 +251,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
                 user_created = create_user_with_email
                     
                 # visit the confirmation link, with a frivolous confirmation token.
-                get user_confirmation_path,{confirmation_token: "the sandman was looking for a legend for a girl", api_key: @ap_key, :current_app_id => "test_app_id"},{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+                get user_confirmation_path,{confirmation_token: "the sandman was looking for a legend for a girl", api_key: @ap_key, :current_app_id => "testappid"},{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
 
                 latter_reset_password_token = get_reset_password_token_from_email
 
@@ -290,7 +291,7 @@ RSpec.describe "cart item request spec", :admin_create_user => true, :type => :r
         context " -- validations --" do 
             it " -- admin cannot simultaneously create user with email and mobile -- " do 
 
-                post admin_create_users_path,{user: {:additional_login_param => "9561137096", :email => "doggy@gmail.com"},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+                post admin_create_users_path,{user: {:additional_login_param => "9561137096", :email => "doggy@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
 
                 expect(response.code).to eq("422")
 

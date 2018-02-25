@@ -15,27 +15,27 @@ RSpec.describe "token request spec", :type => :request, token: true do
                 @u.save
                 @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
                 @c.redirect_urls = ["http://www.google.com"]
-                @c.app_ids << "test_app_id"
+                @c.app_ids << "testappid"
                 @c.versioned_create
-                @u.client_authentication["test_app_id"] = "test_es"
+                @u.client_authentication["testappid"] = "testes"
                 @u.save
 
                
 
                 @ap_key = @c.api_key
-                @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => @c.app_ids[0]}
-=begin
-                @admin = Admin.new(attributes_for(:admin_confirmed))
-                
-                @admin.client_authentication["test_app_id"] = "test_es_token"
+                @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => @c.app_ids[0]}
+
+                @admin = User.new(attributes_for(:user_confirmed))
+                @admin.admin = true
+                @admin.client_authentication["testappid"] = "testestoken2"
                 
                 resp = @admin.save
                 #puts "Result of saving admin:"
                 #puts resp.to_s
 
 
-                @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
-=end             	
+                @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+             	
     end
 
      
@@ -60,7 +60,7 @@ RSpec.describe "token request spec", :type => :request, token: true do
 
                 it " - does not authenticate without app id", :focus => true do 
                        
-                        get new_topic_path, nil, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"]}
+                        get new_topic_path, nil, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"]}
                         expect(response.code).to eq("401")     
                 end
 

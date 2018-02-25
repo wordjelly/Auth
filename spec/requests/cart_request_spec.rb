@@ -10,6 +10,8 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         Shopping::Product.delete_all
         @u = User.new(attributes_for(:user_confirmed))
         @u.save
+        @u.client_authentication["testappid"] = "testestoken"
+        @u.save
 
         ## THIS PRODUCT IS USED IN THE CART_ITEM FACTORY, TO PROVIDE AND ID.
         @product = Shopping::Product.new(:name => "test product", :price => 400.00)
@@ -20,11 +22,9 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["testappid"] = "testestoken"
-        @u.save
-        @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
+        @ap_key = @c.api_key
+       
         
         ### CREATE ONE ADMIN USER
 
@@ -33,7 +33,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
         @admin.admin = true
         @admin.client_authentication["testappid"] = "testestoken2"
         @admin.save
-        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["testappid"], "X-Admin-Aid" => "testappid"}
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
     end
 
@@ -81,10 +81,22 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 	context " -- json requests  -- " do 
 
+		## reload user because in the web app requests, we do sign_in user, and that causes a save and causes the auth_token to change, so we need to recreate user here.
+		before(:all) do 
+			User.delete_all
+			@u = User.new(attributes_for(:user_confirmed))
+	        @u.save
+	        @u.client_authentication["testappid"] = "testestoken"
+	        @u.save
+	        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+        
+		end
 
 		context " -- show -- " do 
 
 			before(:example) do 
+				Shopping::CartItem.delete_all
+				Shopping::Cart.delete_all
 				@created_cart_item_ids = []
 				@cart = Shopping::Cart.new
 				@cart.resource_class = @u.class.to_s
@@ -112,6 +124,12 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 
 				get shopping_cart_path(:id => @cart.id.to_s), {:api_key => @ap_key, :current_app_id => "testappid"}, @headers
 				cart_response = JSON.parse(response.body)
+				puts "-----------------------------------------"
+				puts "this is the response code"
+				puts response.code.to_s
+				puts "response body"
+				puts "this is the response body."
+				puts response.body.to_s
 				expect(cart_response["cart_minimum_payable_amount"]).to eq("10.0")
 				expect(response.code).to eq("200")
 			end

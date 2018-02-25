@@ -25,32 +25,33 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
         @product.save
 
 
-        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["test_app_id"])
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
         @c.redirect_urls = ["http://www.google.com"]
         @c.versioned_create
-        @u.client_authentication["test_app_id"] = "test_es_token"
+        @u.client_authentication["testappid"] = "testestoken"
         @u.save
-        @u2.client_authentication["test_app_id"] = "test_es_token2"
+        @u2.client_authentication["testappid"] = "testestoken2"
         @u2.save
 
-        @u3.client_authentication["test_app_id"] = "test_es_token3"
+        @u3.client_authentication["testappid"] = "testestoken3"
         @u3.save
 
         @ap_key = @c.api_key
-        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
 
-        @u2_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @u2_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 
-        @u3_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u3.authentication_token, "X-User-Es" => @u3.client_authentication["test_app_id"], "X-User-Aid" => "test_app_id"}
+        @u3_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u3.authentication_token, "X-User-Es" => @u3.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
         ### CREATE ONE ADMIN USER
 
         ### It will use the same client as the user.
-        @admin = Admin.new(attributes_for(:admin_confirmed))
-        @admin.client_authentication["test_app_id"] = "test_es_token"
+        @admin = User.new(attributes_for(:user_confirmed))
+        @admin.admin = true
+        @admin.client_authentication["testappid"] = "testestoken4"
         @admin.save
-        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-Admin-Token" => @admin.authentication_token, "X-Admin-Es" => @admin.client_authentication["test_app_id"], "X-Admin-Aid" => "test_app_id"}
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
     end
 
@@ -79,7 +80,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				discount = build_discount_for_request(cart)
 				
-				post shopping_discounts_path,{discount: discount,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				post shopping_discounts_path,{discount: discount,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				expect(response.code).to eq("201")
 				expect(Shopping::Discount.count).to eq(1)
@@ -99,7 +100,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				authorize_payment_as_admin(payment,@admin)					
 				discount = create_discount(cart,@u)
 
-				get shopping_discount_path({:id => discount.id.to_s}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}					
+				get shopping_discount_path({:id => discount.id.to_s}),{:api_key => @ap_key, :current_app_id => "testappid"}.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}					
 
 				discount_obj = JSON.parse(response.body)
 
@@ -128,7 +129,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				authorize_payment_as_admin(payment,@admin)					
 				discount = create_discount(cart,@u)
 
-				post create_multiple_shopping_cart_items_path, {:id => discount.id.to_s, discount: { :product_ids => discount.product_ids},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
+				post create_multiple_shopping_cart_items_path, {:id => discount.id.to_s, discount: { :product_ids => discount.product_ids},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @u2_headers
 
 				expect(response.code).to eq("200")
 
@@ -157,7 +158,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				expect(Shopping::CartItem.count).to eq(10)
 
-				post shopping_carts_path,{cart: {add_cart_item_ids: multiple_created_cart_items.map{|c| c = c.id.to_s}},:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
+				post shopping_carts_path,{cart: {add_cart_item_ids: multiple_created_cart_items.map{|c| c = c.id.to_s}},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @u2_headers
 
 				expect(response.code).to eq("201")
 
@@ -186,7 +187,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				add_cart_items_to_cart(multiple_created_cart_items,user_two_cart,@u2)
 
 				
-				post shopping_payments_path, {cart_id: user_two_cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: discount.id.to_s, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers
+				post shopping_payments_path, {cart_id: user_two_cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: discount.id.to_s, :api_key => @ap_key, :current_app_id => "testappid"}.to_json, @u2_headers
 
 				expect(response.code).to eq("201")
 				payment_created = assigns(:auth_shopping_payment)
@@ -215,7 +216,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				
 				discount_payment = create_payment_using_discount(discount,user_two_cart,@u2)
 
-				get shopping_discount_path({:id => discount.id.to_s}),{:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}		
+				get shopping_discount_path({:id => discount.id.to_s}),{:api_key => @ap_key, :current_app_id => "testappid"}.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}		
 
 				discount_obj = JSON.parse(response.body)
 
@@ -250,7 +251,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				discount_payment = create_payment_using_discount(discount,user_two_cart,@u2)
 
 
-				put shopping_discount_path({:id => discount.id.to_s}), {:discount => {:add_verified_ids => [discount_payment.id.to_s]}, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+				put shopping_discount_path({:id => discount.id.to_s}), {:discount => {:add_verified_ids => [discount_payment.id.to_s]}, :api_key => @ap_key, :current_app_id => "testappid"}.to_json,@headers
 
 				puts response.body.to_s
 
@@ -290,7 +291,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				approve_pending_discount_request(discount,discount_payment,@u,user=nil)
 
 				##now call update on the discount payment as user u2, and it should have a payment status as passed.
-				put shopping_payment_path({:id => discount_payment.id.to_s}), {:is_verify_payment => true, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@u2_headers
+				put shopping_payment_path({:id => discount_payment.id.to_s}), {:is_verify_payment => true, :api_key => @ap_key, :current_app_id => "testappid"}.to_json,@u2_headers
 
 				expect(response.code).to eq("204")
 				discount_payment = Shopping::Payment.find(discount_payment.id.to_s)
@@ -322,7 +323,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				## now should not create the discount
 				discount = build_discount_for_request(cart)
 				
-				post shopping_discounts_path,{discount: discount,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+				post shopping_discounts_path,{discount: discount,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 				#expect(response.code).to eq("201")
 				response_body = JSON.parse(response.body)
@@ -342,12 +343,12 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 			context " -- admin -- " do 
 
-				it " -- creates a discount without a cart, or product ids -- " do
+				it " -- creates a discount without a cart, or product ids -- ", :cartless_discount => true do
 
 					
-					post shopping_discounts_path,{discount: @discount,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @admin_headers
+					post shopping_discounts_path,{discount: @discount,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
 
-					#puts response.body.to_s
+					puts response.body.to_s
 
 					#discount_created = Shopping::Discount.find(@discount.id.to_s)
 
@@ -369,7 +370,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 					discount =create_cartless_productless_discount(@admin)
 
 					## now make a payment using the discount id, provided above.
-					post shopping_payments_path, {cart_id: cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: discount.id.to_s, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+					post shopping_payments_path, {cart_id: cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: discount.id.to_s, :api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 					## expect the payment to have gone through.
 					expect(response.code).to eq("201")
@@ -388,7 +389,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				it "--  cannot create a discount -- " do 
 
-					post shopping_discounts_path,{discount: @discount,:api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @headers
+					post shopping_discounts_path,{discount: @discount,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
 
 					#puts response.body.to_s
 
@@ -461,7 +462,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
 				it " -- doesn't allow new payment request to be converted into a verified request -- ", :conv => true do 
 
-					put shopping_discount_path({:id => @discount.id.to_s}), {:discount => {:add_verified_ids => [@discount_payment_three.id.to_s]}, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json,@headers
+					put shopping_discount_path({:id => @discount.id.to_s}), {:discount => {:add_verified_ids => [@discount_payment_three.id.to_s]}, :api_key => @ap_key, :current_app_id => "testappid"}.to_json,@headers
 
 					puts response.body.to_s
 
@@ -522,7 +523,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 				it " -- doesnt allow creation of any discount payments -- ", :conv => true do 
 
 					#@discount_payment_three = create_payment_using_discount(@discount,@user_three_cart,@u3)
-					post shopping_payments_path, {cart_id: @user_three_cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: @discount.id.to_s, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u3_headers
+					post shopping_payments_path, {cart_id: @user_three_cart.id.to_s,payment_type: "cash", amount: 0.0, discount_id: @discount.id.to_s, :api_key => @ap_key, :current_app_id => "testappid"}.to_json, @u3_headers
 
 					expect(response.code).to eq("201")
 					payment_created = assigns(:auth_shopping_payment)
@@ -573,7 +574,7 @@ RSpec.describe "discount request spec",:discount => true,:shopping => true, :typ
 
             	## now make a refund request
             	## it should fail.
-            	post shopping_payments_path, {cart_id: user_two_cart.id.to_s,payment_type: "cash", refund: true, amount: -10, :api_key => @ap_key, :current_app_id => "test_app_id"}.to_json, @u2_headers   
+            	post shopping_payments_path, {cart_id: user_two_cart.id.to_s,payment_type: "cash", refund: true, amount: -10, :api_key => @ap_key, :current_app_id => "testappid"}.to_json, @u2_headers   
 
             	expect(response.code).to eq("422")
             	puts response.body.to_s
