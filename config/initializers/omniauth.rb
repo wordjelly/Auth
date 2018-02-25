@@ -316,11 +316,20 @@ module SimpleTokenAuthentication
 	end
 
 	module ActsAsTokenAuthenticatable
-		##this method is called whenever the email or the additional_login_param or the password is changed.
+
 		def regenerate_token
 			self.authentication_token = generate_authentication_token(token_generator)
-			self.authentication_token_expires_at = Time.now.to_i + Auth.configuration.token_regeneration_time
-		end	
+	      	raise "please set a field called: encrypted_authentication_token on your user model" unless self.respond_to? :encrypted_authentication_token
+	      	self.encrypted_authentication_token = Devise::Encryptor.digest(self.class,self.authentication_token)	
+	      	self.authentication_token_expires_at = Time.now.to_i + Auth.configuration.token_regeneration_time
+		end
+
+		## CHANGE THE AUTHENTICATION TOKEN WHENEVER THE USER IS SAVED. IT DOESNT MATTER IF THERE IS AN EXISTING AUTHENTICATION TOKEN OR NOT.
+	    def ensure_authentication_token
+	      #if authentication_token.blank?
+	      regenerate_token
+	      #end
+	    end
 	end
 
 	module TokenAuthenticationHandler
@@ -353,9 +362,19 @@ module SimpleTokenAuthentication
 		  
 	      record = find_record_from_identifier(entity)
 	      
-	      if token_correct?(record, entity, token_comparator) 
-	      		return false if record.token_expired?
-	        	perform_sign_in!(record, sign_in_handler)
+	      if token_correct?(record, entity, token_comparator)
+	      	#puts "token is correct." 
+	      	return false if record.token_expired?
+	      	#puts "token is not expired."
+	        puts "record is:"
+	        puts record.attributes.to_s
+	        puts "is it valid"
+	        puts record.valid?
+	        res = perform_sign_in!(record, sign_in_handler)
+	      	puts "result of signing in :"
+	      	puts res.to_s
+	      else
+	      	#puts "the token was not correct.-------------------------"
 	      end
 	    end
 
@@ -364,25 +383,34 @@ module SimpleTokenAuthentication
 
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
-	    	#puts "Additional identifiers are:"
-	    	#puts additional_identifiers
-
+	    	
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
-
-	    	#puts "value are: "
-	    	#puts app_id_value	
-	    	#puts user_es_value
-      		
 	    	token = entity.get_token_from_params_or_headers(self)
 		   		
 
-		   	#puts "token is: #{token}"
-
 		    if token
+		    	
+		    	## fails if the app id or user es is nil blank or empty
+
+		    	return nil if (app_id_value.blank? || user_es_value.blank?)
+		    		
+		    	## sanitize the values incoming to leave only letters and numbers.
+
+		    	app_id_value = app_id_value.gsub(/[^0-9a-z]/i, '')
+	    		
+	    		user_es_value = user_es_value.gsub(/[^0-9a-z]/i, '')
+	    		
+	    		## fails if there are no alphanumeric characters left in the string.
+	    		#puts "the user es vale is: #{user_es_value}"
+	    		#puts "user app id id: #{app_id_value}"
+	    		return nil if(app_id_value.length == 0 || user_es_value.length == 0)
+
 		    	records = entity.model.where("client_authentication.#{app_id_value}" => user_es_value)
 		    	if records.size > 0
-		    		#puts "found such a record."
+		    		puts "found such a record.!!!!!!!!!!!!"
+		    		#r = records.first
+		    		#puts r.attributes.to_s
 		    		return records.first
 		    	else
 		    		return nil
@@ -393,8 +421,8 @@ module SimpleTokenAuthentication
 
 		def token_correct?(record, entity, token_comparator)
 			return false unless record
-			token_comparator.compare(record.authentication_token,entity.get_token_from_params_or_headers(self))
-      		
+			token = entity.get_token_from_params_or_headers(self)
+			Devise::Encryptor.compare(record.class,record.encrypted_authentication_token,token)
     	end
 	end
 
