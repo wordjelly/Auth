@@ -362,7 +362,7 @@ module SimpleTokenAuthentication
 		  ##then we should find
 		  
 	      record = find_record_from_identifier(entity)
-	      puts "record found is: #{record.to_s}"
+	      #puts "record found is: #{record.to_s}"
 	      
 	      if token_correct?(record, entity, token_comparator)
 	      	#puts "token is correct." 
@@ -412,12 +412,19 @@ module SimpleTokenAuthentication
 	    		#puts "user app id id: #{app_id_value}"
 	    		return nil if(app_id_value.length == 0 || user_es_value.length == 0)
 
-	    		#puts "app id value is: #{app_id_value}"
-	    		#puts "user es value : #{user_es_value}"
-	    		#puts "entity model is :#{entity.model}"
+	    		puts "app id value is: #{app_id_value}"
+	    		puts "user es value : #{user_es_value}"
+	    		puts "entity model is :#{entity.model}"
 
-		    	records = entity.model.where("client_authentication.#{app_id_value}" => user_es_value)
+	    		puts "searching for:"
+	    		query = {"client_authentication.#{app_id_value}" => user_es_value}
+
+	    		puts query.to_s
+
+		    	records = entity.model.where(query)
 		    	if records.size > 0
+		    		puts "the records size is:" 
+		    		puts records.size.to_s
 		    		puts "found such a record.!!!!!!!!!!!!"
 		    		r = records.first
 		    		puts r.attributes.to_s
