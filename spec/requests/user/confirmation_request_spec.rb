@@ -15,7 +15,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
       	@c = Auth::Client.new(:resource_id => @u.id)
         @c.api_key = "test"
       	@c.redirect_urls = ["http://www.google.com"]
-      	@c.app_ids << "test_app_id"
+      	@c.app_ids << "testappid"
       	@c.versioned_create
       	@ap_key = @c.api_key	
     end
@@ -142,7 +142,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 
 
 			it "-- get request returns 406" do 
-				get new_user_confirmation_path,{api_key: @ap_key,:current_app_id => "test_app_id"}.to_json,@headers
+				get new_user_confirmation_path,{api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
         		expect(response.code).to eq("406")
 			end
 
@@ -150,7 +150,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 				prev_msg_count = ActionMailer::Base.deliveries.size
 				
 
-				post user_confirmation_path,{user:{email: @u.email}, api_key: @ap_key,:current_app_id => "test_app_id"}.to_json,@headers
+				post user_confirmation_path,{user:{email: @u.email}, api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
 				
 				message = ActionMailer::Base.deliveries[-1].to_s
     			confirmation_token = nil
@@ -176,7 +176,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
       				confirmation_token = j[:confirmation_token]
 
       			end
-    			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "test_app_id"}, @headers
+    			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "testappid"}, @headers
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
     			expect(response.code).to eq("201")

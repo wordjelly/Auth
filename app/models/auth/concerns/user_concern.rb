@@ -343,7 +343,10 @@ module Auth::Concerns::UserConcern
 				key = {key => credential}
 			}
 			conditions
-		end 		
+		end 
+
+
+				
 
 	end
 
@@ -664,8 +667,8 @@ module Auth::Concerns::UserConcern
 	##if you change the additional login param while the email is not confirmed, you will get a validation error on additional_login_param
 	def additional_login_param_changed_on_unconfirmed_email
 		#puts "calling additional login param changed"
-		puts "pending reconfirmation?"
-		puts self.pending_reconfirmation?		
+		#puts "pending reconfirmation?"
+		#puts self.pending_reconfirmation?		
 
 		if additional_login_param_changed?  && (self.pending_reconfirmation?)
 			errors.add(:additional_login_param,"Please verify your email or add an email id before changing your #{additional_login_param_name}")
@@ -785,15 +788,6 @@ module Auth::Concerns::UserConcern
 	end
 
 
-	def as_indexed_json(options={})
-       {
-          name: name,
-          email: email,
-          additional_login_param: additional_login_param,
-          additional_login_param_status: additional_login_param_status,
-          resource_id: resource_id,
-          public: public
-       }
-  	end 
+	
 	
 end

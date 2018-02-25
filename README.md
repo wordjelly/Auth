@@ -1224,17 +1224,41 @@ In models where the engine has provided the index definition, like : user, and a
 ```
 #app/models/user.rb
 
-class User < Auth::User
+class User 
   
   ## these models which inherit from the engine, already have a constant defined in their respective concerns, called INDEX_DEFINITION.
   ## so you have to use that if you want to specifiy the stock index definition
   ## otherwise you can use your own index definition.
   ## the as_indexed_json is also already defined in their concerns.
-  ## so if you want you can override that here as well.
-  create_es_index(INDEX_DEFINITION)
 
 end
 ```
+
+
+Following lines are to be placed for any model that is using elasticsearch(including the models provided by the engine)
+
+```
+  class User 
+
+  include Auth::Concerns::UserConcern
+  ## assumes you are using the INDEX_DEFINTION from the user_concern.rb
+
+  create_es_index(INDEX_DEFINITION)
+
+  ## this def must be added otherwise, elasticsearch will dynamically change the index definition to add all the fields from user into the index definition.
+  def as_indexed_json(options={})
+    {
+      name: name,
+      email: email,
+      additional_login_param: additional_login_param,
+      additional_login_param_status: additional_login_param_status,
+      resource_id: resource_id,
+      public: public
+    }
+  end
+```
+
+
 
 
 ### How user access works for search:

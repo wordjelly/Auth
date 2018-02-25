@@ -13,10 +13,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @u.save
             @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
             @c.redirect_urls = ["http://www.google.com"]
-            @c.app_ids << "test_app_id"
+            @c.app_ids << "testappid"
             @c.path = "omniauth/users/"
             @c.versioned_create
-            @u.client_authentication["test_app_id"] = "test_es"
+            @u.client_authentication["testappid"] = "testes"
             @u.save
             @ap_key = @c.api_key
             @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -127,7 +127,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                     @u1 = User.new(attributes_for(:user_confirmed))
                     @u1.email = "test@gmail.com"
                     
-                    @u1.client_authentication["test_app_id"] = "test_es"
+                    @u1.client_authentication["testappid"] = "testes"
                     access_token = "old_access_token"
                     token_expires_at = Time.now.to_i - 100000
                     @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345', :access_token => "old_access_token", :token_expires_at => token_expires_at).attributes.except("_id")]
@@ -144,8 +144,8 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
                     #puts response.body.to_s
                     json_response = JSON.parse(response.body)
-                    expect(json_response["authentication_token"]).to eql(@u1.authentication_token)
-                    expect(json_response["es"]).to eql("test_es")
+                    expect(json_response["authentication_token"]).not_to eql(@u1.authentication_token)
+                    expect(json_response["es"]).to eql("testes")
                     u = User.find(@u1.id)
                     expect(u.identities[0]["token_expires_at"]).to eql(20000)
                     expect(u.identities[0]["access_token"]).to eql("mock_token")
@@ -187,7 +187,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                     @u1 = User.new(attributes_for(:user_confirmed))
                     @u1.email = "test@gmail.com"
                     @u1.identities 
-                    @u1.client_authentication["test_app_id"] = "test_es"
+                    @u1.client_authentication["testappid"] = "testes"
                     access_token = "old_access_token"
                     token_expires_at = Time.now.to_i - 100000
                     @u1.identities = [Auth::Identity.new(:provider => 'google_oauth2', :uid => '12345', :access_token => "old_access_token", :token_expires_at => token_expires_at).attributes.except("_id")]
@@ -204,8 +204,8 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
                     #puts response.body.to_s
                     json_response = JSON.parse(response.body)
-                    expect(json_response["authentication_token"]).to eql(@u1.authentication_token)
-                    expect(json_response["es"]).to eql("test_es")
+                    expect(json_response["authentication_token"]).not_to eql(@u1.authentication_token)
+                    expect(json_response["es"]).to eql("testes")
                     u = User.find(@u1.id)
                     expect(u.identities[0]["token_expires_at"]).to eql(20000)
                     expect(u.identities[0]["access_token"]).to eql("mock_token")
@@ -298,10 +298,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @u.save
             @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
             @c.redirect_urls = ["http://www.google.com"]
-            @c.app_ids << "test_app_id"
+            @c.app_ids << "testappid"
             @c.path = "omniauth/users/"
             @c.versioned_create
-            @u.client_authentication["test_app_id"] = "test_es"
+            @u.client_authentication["testappid"] = "testes"
             @u.save
 
             Auth.configuration.prevent_oauth_merger = false
@@ -341,13 +341,20 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
             post facebook_omniauth_callback_url(:fb_exchange_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
 
+            puts "total users with rrphotosoft------------------------------------------------------------------------------------------------------------------------"
+            puts User.where(:email => "rrphotosoft@gmail.com").count
+
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
 
 
             expect(u).not_to be_nil
-            expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
-            expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
+
+            puts "u identities"
+            puts u.identities.to_s
+
+            expect(u.identities.count).to eq(2)
+            expect(u.identities.map{|c| c = c["provider"]}).to eq(["google_oauth2","facebook"])
         end
 
         it " -- can sign in subsequently with google, updating access_token and es. -- " do 
@@ -400,10 +407,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                 @u.save
                 @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
                 @c.redirect_urls = ["http://www.google.com"]
-                @c.app_ids << "test_app_id"
+                @c.app_ids << "testappid"
                 @c.path = "omniauth/users/"
                 @c.versioned_create
-                @u.client_authentication["test_app_id"] = "test_es"
+                @u.client_authentication["testappid"] = "testes"
                 @u.save
                 @ap_key = @c.api_key
                 @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -447,10 +454,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                 @u.save
                 @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
                 @c.redirect_urls = ["http://www.google.com"]
-                @c.app_ids << "test_app_id"
+                @c.app_ids << "testappid"
                 @c.path = "omniauth/users/"
                 @c.versioned_create
-                @u.client_authentication["test_app_id"] = "test_es"
+                @u.client_authentication["testappid"] = "testes"
                 @u.save
                 @ap_key = @c.api_key
                 @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -501,10 +508,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @u.save
             @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
             @c.redirect_urls = ["http://www.google.com"]
-            @c.app_ids << "test_app_id"
+            @c.app_ids << "testappid"
             @c.path = "omniauth/users/"
             @c.versioned_create
-            @u.client_authentication["test_app_id"] = "test_es"
+            @u.client_authentication["testappid"] = "testes"
             @u.save
             @ap_key = @c.api_key
             @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -551,10 +558,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                 @u.save
                 @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
                 @c.redirect_urls = ["http://www.google.com"]
-                @c.app_ids << "test_app_id"
+                @c.app_ids << "testappid"
                 @c.path = "omniauth/users/"
                 @c.versioned_create
-                @u.client_authentication["test_app_id"] = "test_es"
+                @u.client_authentication["testappid"] = "testes"
                 @u.save
                 @ap_key = @c.api_key
                 @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
@@ -590,10 +597,10 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             @u.save
             @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test")
             @c.redirect_urls = ["http://www.google.com"]
-            @c.app_ids << "test_app_id"
+            @c.app_ids << "testappid"
             @c.path = "omniauth/users/"
             @c.versioned_create
-            @u.client_authentication["test_app_id"] = "test_es"
+            @u.client_authentication["testappid"] = "testes"
             @u.save
 
             Auth.configuration.prevent_oauth_merger = true
@@ -639,7 +646,8 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
 
             expect(u).not_to be_nil
             expect(u.identities.include?({"provider"=>"facebook", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).not_to be_truthy
-            expect(u.identities.include?({"provider"=>"google_oauth2", "uid"=>"12345", "email"=>"rrphotosoft@gmail.com", "access_token" =>"mock_token", "token_expires_at" => 20000 })).to be_truthy
+            
+            expect(u.identities[0]["provider"]).to eq("google_oauth2")
         end
 
         it " -- can sign in subsequently with google, updating access_token and es. -- " do 
