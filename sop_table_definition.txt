@@ -1,0 +1,102 @@
+SOP TABLE
+it is an object, so will need controller and views
+
+SOP TABLE is an array of SOP's
+
+eg: 
+
+[
+	Stage => [
+		SOP => [
+			sample_requirements => whatever
+			applicable_product_ids => [a,b,c,d]
+			applicable_product_names => [correspond_to_the_ids]
+			prev_sop_id,
+			steps => [
+				STEP,
+				STEP,
+				STEP
+			],
+			exit_code:
+			entry_code:
+			exit_description:
+			entry_description
+			copy_of_sop : id of sop,
+			change_if_parent_changes : yes/no,
+		],
+		SOP,
+		SOP
+	]
+	Stage,
+	Stage
+]
+
+
+How to do conditional branching.
+So in a particular stage there can be more than one SOP for the same products.
+These will convey the issue of branching.
+So how to decide which SOP to choose for a product at a particular stage?
+That will depend on certain conditions -> so stage has to have a function which will allow us to figure out which sop to use for the stage for that product
+
+eg 
+if :
+
+***
+sample is not well centrifuged,
+sample not at correct temperature.
+So every SOP has to have some kind of output code -> and every SOP has to also have an input code.
+The input code has to match the output code.
+
+*** 
+Remember there is only one controller
+create -> will create the whole Assembly
+
+## so i need actions / functions for :
+
+1. add/remove stage
+2. add/remove sop's to stage
+3. add/remove steps from a sop.
+4. modify a stage
+5. modify a sop
+6. modify a step
+
+i should be able to specify a name of a test and see the entire stage and sop chain for that product.
+
+so basically first you load the entire thing into a div.
+in the data-attribute for each and every SOP, there should be the names of the product_ids.
+
+Filter mongodb aggregation side, which steps of which sops to keep, and which sops to keep depending upon what is queried.
+
+while adding a new stage -> there should be option to add from stage_id -> stage_id, for that particular product (in case we want to repeat) -> so in that case. it should store a reference to start and end of stages that it wants to follow again., because if we change those starting stages then these stages will also change.
+so the sop_output_code will search for the next stage, if there are no further stages, then it will take the earliest sop stage, and continue with that.
+
+What if a particular recursion is applicable only to a certain product and not all the products thereafter?
+so that's fine.
+what if there is a slight difference in what has to be recursed?
+in that case, add more stages
+also store in a stage what subsequent stages are dependent on it.
+if a particular stage is changed, then an argument passed in will decide if the subsequent stages are also to be changed.
+
+
+We never add a stage as such.
+We just design sop's for individual products
+
+So i would for eg:
+want a button that says -> 
+
+Options:
+
+View SOP TABLE
+
+CREATE SOP FOR -> goes to a window -> enter the name of product -> pick from dropdown -> query "index" of SOP table for that product_id -> show whatever SOP's exist.
+
+Now we can click on any SOP to go to a page, where we can edit that SOP -> so it should show a form for the SOP.
+
+Here it can show the steps as well -> but clicking on a step will take you to a page for that step.
+
+clicking on "add_step" -> will take you to new_form for step
+
+so what should be the specs ?
+
+
+-- how 

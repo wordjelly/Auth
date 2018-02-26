@@ -13,6 +13,8 @@ module ActionDispatch::Routing
 	      	end
 	      end
 
+	      resources :assemblies, :controller => "auth/assemblies"
+
 	      resources :admin_create_users, :controller => "auth/admin_create_users"
 
 	  	  resources :clients, :controller => "auth/clients"

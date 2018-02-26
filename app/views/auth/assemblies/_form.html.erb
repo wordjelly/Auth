@@ -1,0 +1,19 @@
+<%= form_for(@auth_assembly) do |f| %>
+  <% if @auth_assembly.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@auth_assembly.errors.count, "error") %> prohibited this auth_assembly from being saved:</h2>
+
+      <ul>
+      <% @auth_assembly.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="form_fields">
+  
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
