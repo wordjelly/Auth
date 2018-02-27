@@ -359,6 +359,6 @@ RSpec.configure do |config|
   config.include AdminRootPathSupport, :type => :request
   config.include DiscountSupport, :type => :request
   config.include AdminCreateUserSupport, :type => :request
-  config.include AssemblySupport, :type => :request
+  
 end
 
