@@ -1,5 +1,5 @@
-class Auth::AssembliesController < Auth::ApplicationController
-  ## only these actions need an authenticated user to be present for them to be executed.
+class Auth::Workflow::AssembliesController < Auth::Workflow::WorkflowController
+  
   CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index]
   TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
   include Auth::Concerns::DeviseConcern
@@ -8,8 +8,7 @@ class Auth::AssembliesController < Auth::ApplicationController
   before_filter :initialize_vars , TCONDITIONS
   before_filter :is_admin_user , :only => CONDITIONS_FOR_TOKEN_AUTH
 
-  ## all these should be included into the 
-
+  ## all these should be included into the shopping controllers as well, to make it easire to understand what is happening.
   before_filter(:only => [:create,:update]) {|c| @assembly =  c.add_owner_and_signed_in_resource(@assembly)}
   before_filter(:only => [:create]) {|c| c.check_for_create @assembly}
   before_filter(:only => [:update]) {|c| c.check_for_update @assembly}
