@@ -56,6 +56,7 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 				it " -- non admin user returns 422 -- " do 
 
+					
 					assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
 					assembly.stages = [Auth::Workflow::Stage.new]
 					assembly.stages[0].name = "first stage"

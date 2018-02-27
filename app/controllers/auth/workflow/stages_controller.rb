@@ -1,1 +1,5 @@
-stages_controller.rb
+class Auth::Workflow::StagesController < Auth::Workflow::WorkflowController
+  	
+	
+
+end

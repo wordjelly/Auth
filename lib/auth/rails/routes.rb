@@ -13,7 +13,8 @@ module ActionDispatch::Routing
 	      	end
 	      end
 
-	      resources :assemblies, :controller => "auth/assemblies"
+	      ## this controller may need to be changed, actually will have to be changed for every single thing.
+	      resources :assemblies, :controller => "auth/workflow/assemblies"
 
 	      resources :admin_create_users, :controller => "auth/admin_create_users"
 

@@ -412,22 +412,22 @@ module SimpleTokenAuthentication
 	    		#puts "user app id id: #{app_id_value}"
 	    		return nil if(app_id_value.length == 0 || user_es_value.length == 0)
 
-	    		puts "app id value is: #{app_id_value}"
-	    		puts "user es value : #{user_es_value}"
-	    		puts "entity model is :#{entity.model}"
+	    		#puts "app id value is: #{app_id_value}"
+	    		#puts "user es value : #{user_es_value}"
+	    		#puts "entity model is :#{entity.model}"
 
-	    		puts "searching for:"
+	    		#puts "searching for:"
 	    		query = {"client_authentication.#{app_id_value}" => user_es_value}
 
-	    		puts query.to_s
+	    		#puts query.to_s
 
 		    	records = entity.model.where(query)
 		    	if records.size > 0
-		    		puts "the records size is:" 
-		    		puts records.size.to_s
-		    		puts "found such a record.!!!!!!!!!!!!"
+		    		#puts "the records size is:" 
+		    		#puts records.size.to_s
+		    		#puts "found such a record.!!!!!!!!!!!!"
 		    		r = records.first
-		    		puts r.attributes.to_s
+		    		#puts r.attributes.to_s
 		    		return records.first
 		    	else
 		    		return nil

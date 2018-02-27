@@ -1,5 +1,29 @@
 require "faker"
 
+def create_assembly_test_data
+    Auth::Workflow::Assembly.delete_all
+    assembly = Auth::Workflow::Assembly.new
+    3.times do |st|
+      stage = Auth::Workflow::Stage.new
+      stage.name = Faker::Name.name
+      3.times do |so|
+        sop = Auth::Workflow::Sop.new
+        sop.name = Faker::Name.name
+        3.times do |st|
+          step = Auth::Workflow::Step.new
+          step.name = Faker::Name.name
+          sop.steps << step
+        end
+        stage.sops << sop
+      end
+      assembly.stages << stage
+    end
+    assembly.name = "PARENT ASSEMBLY"
+    puts JSON.pretty_generate(assembly.attributes)
+    puts "saving.."
+    puts assembly.save
+  end
+
 def create_cart_items
         Shopping::CartItem.delete_all
         json_tests = JSON.parse(IO.read("#{Rails.root}/lib/assets/files/test_names.json"))
@@ -45,4 +69,5 @@ def create_users
 end
 
 
-create_users
+#create_users
+create_assembly_test_data

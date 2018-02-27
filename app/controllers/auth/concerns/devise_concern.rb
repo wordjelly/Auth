@@ -74,10 +74,10 @@ module Auth::Concerns::DeviseConcern
 	      return true
 
 	    else
-	      puts "params are: #{params.to_s}"
-	      puts params[:state]
-          puts JSON.is_json?(params[:state])
-          puts "---- end --- "
+	      #puts "params are: #{params.to_s}"
+	      #puts params[:state]
+          #puts JSON.is_json?(params[:state])
+          #puts "---- end --- "
           state = nil
 	      api_key = nil
 	      current_app_id = nil
@@ -91,7 +91,7 @@ module Auth::Concerns::DeviseConcern
 	        current_app_id = state["current_app_id"]
 	        path = state["path"]
 	      elsif params[:api_key] && params[:current_app_id]
-            puts "the params api key and current app id are there."
+            #puts "the params api key and current app id are there."
 	        api_key = params[:api_key]
 	        current_app_id = params[:current_app_id]
 	      else
@@ -100,13 +100,13 @@ module Auth::Concerns::DeviseConcern
 	      if api_key.nil? || current_app_id.nil?
 	        
 	      else
-            puts "api key:#{api_key}"
-            puts "current app id: #{current_app_id}"
-            puts "path is: #{path}"
+            #puts "api key:#{api_key}"
+            #puts "current app id: #{current_app_id}"
+            #puts "path is: #{path}"
             
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          	    
-                puts "found valid clinet."
+                #puts "found valid clinet."
                 request.env["omniauth.model"] = path
                 
                 self.m_client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
@@ -127,7 +127,7 @@ module Auth::Concerns::DeviseConcern
 	   	##should block any put action on the user
 	   	##and should render an error saying please do this on the server.
 	    if is_json_request? 
-            puts "it is a json request."
+            #puts "it is a json request."
 	    	if action_name == "otp_verification_result"
 	    		##we let this action pass because, we make json ajax requests 
 	    		##from the web ui to this endpoint, and anyway it does
@@ -136,7 +136,7 @@ module Auth::Concerns::DeviseConcern
 	    	else
                 #puts "action name is something else."
 		    	if session[:client].nil?
-                    puts "cient is nil so rendering nothing."
+                    #puts "cient is nil so rendering nothing."
 		      		render :nothing => true , :status => :unauthorized
 		      	else
                     #puts "client is not nil"
@@ -172,7 +172,7 @@ module Auth::Concerns::DeviseConcern
 
   
     def do_before_request
-       puts "came to do before request."
+       #puts "came to do before request."
        clear_client_and_redirect_url
    
        set_client

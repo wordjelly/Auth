@@ -4,6 +4,10 @@ module Auth::Concerns::OwnerConcern
 	include Auth::Concerns::ChiefModelConcern
 	included do 
 
+		## doc_version
+		## you can use it to do find_and_update
+		field :doc_version, type: Integer, default: 0
+
 		## resource id is not essential for the creation of a cart.
 
 		## but if a resource id is present, then a resource class must be provided.
@@ -34,14 +38,14 @@ module Auth::Concerns::OwnerConcern
 		## used in cart_item_controller_concern#show
 		## if the resource is nil, will look for a cart item, which has a resource of nil, otherwise will look for a cart item, with the provided resource id.
 		## 
-		def find_self(_id,resource)
+		def find_self(_id,resource,options={})
 			conditions = {:_id => _id}
 			conditions[:resource_id] = resource.id.to_s if !resource.is_admin?
-			puts "conditions are:"
-			puts conditions.to_s
+			#puts "conditions are:"
+			#puts conditions.to_s
 			all = self.where(conditions)
-			puts "the resultant size:"
-			puts all.size.to_s
+			#puts "the resultant size:"
+			#puts all.size.to_s
 			return all.first if all.size > 0 
 			return nil
 		end
