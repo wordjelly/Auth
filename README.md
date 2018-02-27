@@ -1290,6 +1290,16 @@ Following lines are to be placed for any model that is using elasticsearch(inclu
 ### How to use the m_client
 
 
+### DocVersion vs Version vs MongoidVersionedAtomic
+
+doc_version was added into OwnerConcern.
+I didn't use the name "version" to avoid confusion.
+MongoidVersionedAtomic is used only in UserConcern.
+
+OwnerConcern is not used in UserConcern, so there would not have been any problem adding a :version field into OwnerConcern, but decided to avoid confusion and use a different name.
+
+doc_version is by default initialized to 0. It is expected to be queried, whenever the object is saved, in a find_and_modify style, but is not enforced.
+Currently it is being used only in the Workflow models in this manner.
 -------------------------------------------------------------
 ## Admin Create Users
 

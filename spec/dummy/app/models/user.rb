@@ -77,7 +77,7 @@ class User < Auth::User
           Auth::Notify.send_notification(notification)
           
       else
-        puts "no r."
+        #puts "no r."
         
       end
     end

@@ -3,6 +3,23 @@ class Auth::Workflow::Assembly
   include Mongoid::Document
   include Auth::Concerns::OwnerConcern
 
+  ## these are set from find_self
+  attr_accessor :stage_index
+  attr_accessor :sop_index
+  attr_accessor :step_index
+
+  ###########################################################
+  ##
+  ##
+  ##
+  ## CLASS METHODS
+  ##
+  ##
+  ## 
+  ###########################################################
+  def self.permitted_params
+    [{:stage => [:name,:description]},:id]
+  end
 
   ###########################################################
   ##
