@@ -74,4 +74,17 @@ FactoryGirl.define do
     confirmed_at Time.now
   end
 
+  factory :step, class: Auth::Workflow::Step do 
+    name {Faker::Name.name}
+  end
+
+  factory :sop, class: Auth::Workflow::Sop do 
+    
+  end
+
+  factory :assembly, class: Auth::Workflow::Assembly do 
+    name {Faker::Name.name}
+    description {Faker::Name.name}
+  end
+
 end

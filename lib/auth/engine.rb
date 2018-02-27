@@ -100,6 +100,27 @@ module Auth
     ## whether to use es or not.
     attr_accessor :use_es
 
+
+    ########################################################
+    ##
+    ##
+    ## workflow accessors.
+    ##
+    ##
+    ########################################################
+    attr_accessor :assembly_class
+    attr_accessor :assembly_controller
+
+    attr_accessor :stage_class
+    attr_accessor :stage_controller
+
+    attr_accessor :sop_class
+    attr_accessor :sop_controller
+
+    attr_accessor :step_class
+    attr_accessor :step_controller
+
+
     def initialize
       
 
@@ -223,6 +244,27 @@ module Auth
       ##
       ###################################################
       @use_es = true
+
+      ########################################################
+      ##
+      ##
+      ## workflow accessors.
+      ##
+      ## are set to default to the engine classes.
+      ## so if you don't set them, it doesn't matter.
+      ##
+      ########################################################
+      @assembly_class = "Auth::Workflow::Assembly"
+      @assembly_controller = "/auth/workflow/assembly"
+
+      @stage_class = "Auth::Workflow::Stage"
+      @stage_controller = "/auth/workflow/stage"
+
+      @sop_class = "Auth::Workflow::Sop"
+      @sop_controller = "/auth/workflow/sop"
+
+      @step_class = "Auth::Workflow::Step"
+      @step_controller = "/auth/workflow/step"
       
     end
   end
