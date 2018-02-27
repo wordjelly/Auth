@@ -5,100 +5,82 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 	before(:all) do 
 
+		User.delete_all
+
+		## create one non admin user
+		@u = User.new(attributes_for(:user_confirmed))
+        @u.save
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
+        @c.redirect_urls = ["http://www.google.com"]
+        @c.versioned_create
+        @u.client_authentication["testappid"] = "testestoken"
+        @u.save
+        @ap_key = @c.api_key
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+
+		## create one admin user.
+		@admin = User.new(attributes_for(:admin_confirmed))
+        @admin.admin = true
+        @admin.client_authentication["testappid"] = "testestoken2"
+        @admin.save
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+		
 	end
 
 	context " -- json requests -- " do 
+		
+		before(:example) do 
+			Auth::Workflow::Assembly.delete_all
+		end
 
 		context " -- permitted_params -- " do 
 
-			it " -- permits step -- " do 
+			it "-- does not permit stages, sops or steps -- " do 
 				
-			end
-
-			it " -- permits sop -- " do 
-
-			end
-
-			it " -- permits add_stage_ids -- " do 
-
-			end
-
-			it " -- permits remove_stage_ids -- " do 
-
-			end
+				assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+				assembly.stages = [Auth::Workflow::Stage.new]
+				assembly.stages[0].name = "first stage"
+				assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+				assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+				post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				expect(response.code).to eq("201")
+				assembly_created = Auth::Workflow::Assembly.first
+				expect(assembly_created.stages).to be_empty 
+			end			
  
 		end
 
 
 		context " -- permissions -- " do 
 
-			it " -- only admin can CRUD assemblies -- " do 
 
+				it " -- non admin user returns 422 -- " do 
 
+					assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+					assembly.stages = [Auth::Workflow::Stage.new]
+					assembly.stages[0].name = "first stage"
+					assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+					assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+					post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@headers
+					expect(response.code).to eq("422")					
 
-			end
+				end
+
 
 		end
 
-		context " -- create -- " do 
+		context " -- CRUD -- " do 
 
-			context " -- assembly -- " do 
+			## will do these later, they are not absoulutely critical.
 
-				it " -- checks if another assembly exists before creating -- " do 
-
-				end
-
+			it  " -- can update name and description -- " do 
+				
 			end
 
-			context " -- sop -- " do 
-
-				it " -- where do all the controller requests go?" do 
-
-				end
-
-				it " -- cannot create sop if more than 1 or 0 assemblies are present -- " do 
-
-
-				end
-
-				it " -- validates presence of product in database "  do 
-
-
-				end
-
-
-				it " -- if stage id not provided, adds sop to first stage that doesn't contain the product, starting from earlist stage -- " do 
-
-
-
-				end
-
-				it " -- if stage id is provided, adds sop to that stage id -- " do 
-
-				end
-
-
-				it " -- if stage id is not provided, and last stage has sop/ no stages exist, creates a new stage with the sop -- " do 
-
-
-				end
-
-				it " -- if last stage with sop has an exit code matching the input code of a preceeding sop, then throws error, requiring the stage id to be provided -- " do 
-
-
-				end
-
-				it " -- can force add a stage if requested --  " do 
-
-
-				end
-
-				it " -- atomically controls creation, by passing in existing sop ids that already contain the product -- " do 
-
-				end
+			it " -- can delete the assembly -- " do 
 
 			end
-
+			
 		end
 
 	end

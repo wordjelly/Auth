@@ -47,12 +47,75 @@ class Auth::Workflow::Assembly
   ############################################################
   include Auth::Concerns::EsConcern	
 
-  INDEX_DEFINITION = {}
+  INDEX_DEFINITION = {
+      index_options:  {
+              settings:  {
+              index: {
+                  analysis:  {
+                      filter:  {
+                          nGram_filter:  {
+                              type: "nGram",
+                              min_gram: 2,
+                              max_gram: 20,
+                              token_chars: [
+                                 "letter",
+                                 "digit",
+                                 "punctuation",
+                                 "symbol"
+                              ]
+                          }
+                      },
+                      analyzer:  {
+                          nGram_analyzer:  {
+                              type: "custom",
+                              tokenizer:  "whitespace",
+                              filter: [
+                                  "lowercase",
+                                  "asciifolding",
+                                  "nGram_filter"
+                              ]
+                          },
+                          whitespace_analyzer: {
+                              type: "custom",
+                              tokenizer: "whitespace",
+                              filter: [
+                                  "lowercase",
+                                  "asciifolding"
+                              ]
+                          }
+                      }
+                  }
+              }
+            },
+              mappings: {
+                "workflow/assembly" => {
+                _all:  {
+                    analyzer: "nGram_analyzer",
+                    search_analyzer: "whitespace_analyzer"
+                },
+                properties: {
+                      name: {
+                        type: "string",
+                        index: "not_analyzed"
+                      },
+                      description: {
+                        type: "string",
+                        index: "not_analyzed"
+                      }
+                }
+              }
+          }
+      }
+    }
 
   create_es_index(INDEX_DEFINITION)
 
   def as_indexed_json(options={})
-
-  end
+     {
+        name: name,
+        description: description,
+        public: public
+     }
+  end 
 
 end

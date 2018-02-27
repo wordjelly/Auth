@@ -351,11 +351,14 @@ module AdminCreateUserSupport
 
 end
 
+
+
 RSpec.configure do |config|
   config.include ValidUserHelper, :type => :controller
   config.include ValidUserRequestHelper, :type => :request
   config.include AdminRootPathSupport, :type => :request
   config.include DiscountSupport, :type => :request
   config.include AdminCreateUserSupport, :type => :request
+  config.include AssemblySupport, :type => :request
 end
 
