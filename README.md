@@ -1464,10 +1464,15 @@ You need to configure routes in your app, to service whatever methods you specif
 
 ## Image Concern
 
-Cloudinary Setup :
+The engine uses Cloudinary to upload images.
+
+### Configuration
 
 1. Place the cloudinary.yml file that you get from cloudinary in your config folder
 2. Optionally specify the image class and image controller in the config file (auth)
+
+### Layout
+
 3. Add the following tag in your main application layout in the head section.
 
 ```
@@ -1475,15 +1480,69 @@ Cloudinary Setup :
 <%= javascript_link_tag  "https://widget.cloudinary.com/global/all.js" %>
 ```
 
-4. Now add this to the javascript file that refers to the view of your controller handling image uploads.
+### Views
 
-You should have a div with an id called  : "upload_widget_opener", on the page where you want to do the upload.
+4. In whichever view you want to show the button to uplaod the image, add the following line :
 
 ```
-<script type="text/javascript">
+<%= render :partial => "auth/images/image_concern.html.erb" %>
+```
+
+Ensure that there is an instance variable called "@model" available in that view.
+
+Current support is to do one upload at a time.
+
+
+### Javascript
+
+Create a file called "images.js". Make sure that it is included by application.js
+
+Add the following code into it.
+
+```
+// images.js
+
+$(document).ready(function(){
+
+  if($.fn.cloudinary_fileupload !== undefined) {
+    $("input.cloudinary-fileupload[type=file]").cloudinary_fileupload();
+    console.log("cloudinary is defined");
+  }
+  else{
+    console.log("cloudinary is undefined");
+  }
+
+  
   $('#upload_widget_opener').cloudinary_upload_widget(
-    { cloud_name: cloud_name, api_key: api_key,
-      cropping: 'server', upload_signature: "your_signature"},
-      function(error, result) { console.log(error, result) });
-</script>
+  { cloud_name: "doohavoda", api_key:"779116626984783", upload_signature: generateSignature,
+  public_id: $("#image_id").text()},
+  function(error, result) { console.log(error, result) });
+    
+});
+
+var generateSignature = function(callback, params_to_sign){
+  params_to_sign["_id"] = $("#image_id").text();
+  params_to_sign["parent_id"] = $("#parent_id").text();
+  params_to_sign["parent_class"] = $("#parent_class").text();
+    $.ajax({
+      url     : "/auth/images",
+      type    : "POST",
+      dataType: "text",
+      data    : { image: params_to_sign
+            },
+      complete: function() {console.log("complete")},
+      success : function(signature, textStatus, xhr) {
+       console.log("signature returned is:");
+       console.log(signature);
+       callback(signature); },
+      error   : function(xhr, status, error) { console.log(xhr, status, error); }
+    });
+}
+
 ```
+
+1. Replace your cloudinary api_key for api_key, and your cloud_name for cloud_name.
+
+2. In the generateSignature function, add the url that points to the create_image_path for your application. In case you used the default image_controller class, you don't need to change this in any way.
+
+That's it.
