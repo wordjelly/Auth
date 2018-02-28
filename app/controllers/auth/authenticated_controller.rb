@@ -48,7 +48,7 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 
 			begin
 				instance_variable_set("@model_class",Auth.configuration.send("#{get_model_class_name}_class").constantize)
-			rescue
+			rescue 
 				not_found("could not instantiate class #{get_model_class_name}")
 			end
 
@@ -61,6 +61,9 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 
 	def build_model_from_params
       	pp = permitted_params
+      	puts "the permitted_params are:"
+      	puts permitted_params.to_s
+
       	@model_params = pp.fetch(get_model_class_name.to_sym,{})
       	@model = pp[:id] ?  @model_class.find_self(pp[:id],current_signed_in_resource) : @model_class.new(@model_params)
 	end
@@ -105,47 +108,65 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 	end
 
 	# POST /auth/assemblies
-	def create
-		puts "came to create"
+ 	def create
 	    respond_to do |format|
-	      if @model.save
-	      	puts "saved"
-	        format.json do 
-	          render json: @model.to_json, status: 201
+	        if @model.save
+	            format.json do 
+	                render json: @model.to_json, status: 201
+	            end
+	            format.html do 
+	                render :show
+	            end
+	            format.text do 
+	                render :text => @model.text_representation 
+	            end
+	            format.js do 
+	                render :partial => "show.js.erb", locals:{model: @model}
+	            end
+	        else
+		        format.json do 
+		            render json: {
+		              id: @model.id.to_s,
+		              errors: @model.errors
+		            }.to_json
+		        end
+		        format.html do 
+		            render :new
+		        end
+		        format.js do 
+		            render :partial => "show.js.erb", locals:{model: @model}
+		        end
 	        end
-	        format.html do 
-	          render :show
-	        end
-	      else
-	        format.json do 
-	          render json: {
-	            id: @model.id.to_s,
-	            errors: @model.errors
-	          }.to_json
-	        end
-	        format.html do 
-	        	render :new
-	        end
-	      end
 	    end
-	end
+  	end
 
 	# PATCH/PUT /auth/assemblies/1
   	def update
-
 	    respond_to do |format|
-	      if @model.save
-	        format.json do 
-	          render :nothing => true, :status => 204
-	        end
-	      else
-	        format.json do 
-	          render json: {
-	            id: @model.id.to_s,
-	            errors: @model.errors
-	          }.to_json
-	        end
-	      end
+	      	if @model.save
+	        	format.json do 
+	          		render :nothing => true, :status => 204
+	        	end
+	        	format.js do 
+	        		render :partial => "show.js.erb", locals: {model: @model}
+	        	end
+	        	format.html do 
+	        		render :show
+	        	end
+	      	else
+	        	format.json do 
+	          		render json: {
+	            		id: @model.id.to_s,
+	            		errors: @model.errors
+	          		}.to_json
+	        	end
+	        	format.js do 
+	        		render :partial => "show.js.erb", locals: {model: @model}
+	        	end
+	        	format.html do 
+	        		render :show
+	        	end
+	      	end
 	    end
   	end
 

@@ -42,6 +42,11 @@ module Auth::Concerns::ChiefModelConcern
 			self.publicly_visible_field_names
 		end
 
+
+		def text_representation
+			self.attributes.to_s
+		end
+
 	end
 
 	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped

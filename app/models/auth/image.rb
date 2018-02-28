@@ -16,11 +16,8 @@ class Auth::Image
   ## the parent id is the id of the object in which the image is uploaded.
   ## it need not exist. but has to be a valid bson object id.
   def self.permitted_params
-    puts "permitted params are:"
-    puts "tehse."
-    [{:image => [:parent_id,:parent_class]},:id]
+    [{:image => [:_id,:parent_id,:parent_class,:active,:timestamp,:public_id]},:id]
   end
-
 
 
   ###########################################################
@@ -34,7 +31,10 @@ class Auth::Image
   ###########################################################  
   field :parent_id, type: String
   field :parent_class, type: String
+  field :active, type: Boolean, default: true  
   attr_accessor :signed_request
+  attr_accessor :timestamp
+  attr_accessor :public_id
    
 
 
@@ -47,7 +47,8 @@ class Auth::Image
   ###########################################################
   validates :parent_id, presence: true
   validates :parent_class, presence: true
-  validate :parent_id_is_valid_bson
+  validates :timestamp, numericality: { only_integer: true, greater_than_or_equal_to: Time.now.to_i - 30 }, if: Proc.new{|c| c.new_record?}
+  validate :public_id_equals_id, if: Proc.new{|c| c.new_record?}
 
 
   ###########################################################
@@ -57,7 +58,7 @@ class Auth::Image
   ##
   ##
   ###########################################################
-  before_save do |document|
+  after_create do |document|
     document.signed_request = get_signed_request
   end
 
@@ -77,6 +78,10 @@ class Auth::Image
   	end	
   end
 
+  def public_id_equals_id
+    self.errors.add(:public_id, "the public id and object id are not equal") if (self.id.to_s != self.public_id)
+  end
+
   ############################################################
   ##
   ##
@@ -86,12 +91,13 @@ class Auth::Image
   ############################################################
   def get_signed_request
 
-    Cloudinary::Utils.sign_request({:public_id => self.id.to_s,:timestamp=>Time.now.to_i, :callback => "http://widget.cloudinary.com/cloudinary_cors.html"}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
+    Cloudinary::Utils.sign_request({:public_id => self.id.to_s,:timestamp=> self.timestamp, :callback => "http://widget.cloudinary.com/cloudinary_cors.html"}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
 
   end
 
-  def verify_signature_from_webhook
-
+  ## rendered in create, in the authenticated_controller.
+  def text_representation
+    self.signed_request[:signature].to_s
   end
 
 end
