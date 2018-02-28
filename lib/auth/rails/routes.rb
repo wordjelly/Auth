@@ -14,7 +14,11 @@ module ActionDispatch::Routing
 	      end
 
 	      ## this controller may need to be changed, actually will have to be changed for every single thing.
-	      resources :assemblies, :controller => "auth/workflow/assemblies"
+	      resources :assemblies, :controller => Auth.configuration.assembly_controller
+
+	      ## image controller is required by default.
+	      ## 
+	      #resources :images, :controller => Auth.configuration.image_controller
 
 	      resources :admin_create_users, :controller => "auth/admin_create_users"
 
@@ -38,7 +42,7 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product","discount"].each do |model|
+			["cart_item","cart","payment","product","discount","image"].each do |model|
 
 				if Auth.configuration.send("#{model}_controller")
 

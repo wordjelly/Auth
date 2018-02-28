@@ -1,0 +1,2 @@
+module Auth::ImagesHelper
+end
