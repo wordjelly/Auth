@@ -27,6 +27,7 @@ require "mailgun-ruby"
 require "googl"
 require "aws-sdk"
 require "payuindia"
+require "cloudinary"
 
 module Auth
 end

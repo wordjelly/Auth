@@ -18,7 +18,7 @@ class Auth::Workflow::Assembly
   ## 
   ###########################################################
   def self.permitted_params
-    [{:stage => [:name,:description]},:id]
+    [{:assembly => [:name,:description]},:id]
   end
 
   ###########################################################

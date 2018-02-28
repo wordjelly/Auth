@@ -4,7 +4,7 @@ module Auth
 
 			##############################################
 			##
-			## FOR BUILDING THE PATHS FOR SHOPPING CLASSES.
+			## FOR BUILDING THE PATHS FOR ALL CLASSES.
 			##
 			##############################################
 

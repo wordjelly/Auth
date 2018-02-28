@@ -1459,3 +1459,18 @@ end
 ```
 
 You need to configure routes in your app, to service whatever methods you specify in your webhooks_controller.
+
+------------------------------------------------------------
+
+## Image Concern
+
+Cloudinary Setup :
+
+1. Place the cloudinary.yml file that you get from cloudinary in your config folder
+2. Optionally specify the image class and image controller in the config file (auth)
+3. Add the following tag in your main application layout in the head section.
+4. The gem is included by default with the engine.
+
+```
+<%= cloudinary_js_config %>
+```

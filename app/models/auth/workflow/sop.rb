@@ -39,12 +39,16 @@ class Auth::Workflow::Sop
 
 		k = results.first
 		
+		## due to unwinding the sops , stages become hashes, need to be converted into arrays.
+
 		k["stages"]["sops"] = [k["stages"]["sops"]]
 		
 		k["stages"] = [k["stages"]]
 
 		assembly = Mongoid::Factory.from_db(Auth.configuration.assembly_class.constantize,k)
 		
+
+		## have to assign the stage_index and sop_index because these are projected fields, and we have them as attr_accessors, Mongoid::Factory.from_db does not set attr_accessors.
 		assembly.stage_index = k["stage_index"]
 		
 		assembly.sop_index = k["sop_index"]

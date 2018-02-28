@@ -120,6 +120,17 @@ module Auth
     attr_accessor :step_class
     attr_accessor :step_controller
 
+    ########################################################
+    ##
+    ##
+    ##
+    ## image concern accessors
+    ##
+    ##
+    #######################################################
+
+    attr_accessor :image_class
+    attr_accessor :image_controller
 
     def initialize
       
@@ -255,17 +266,37 @@ module Auth
       ##
       ########################################################
       @assembly_class = "Auth::Workflow::Assembly"
-      @assembly_controller = "/auth/workflow/assembly"
+      @assembly_controller = "auth/workflow/assemblies"
 
       @stage_class = "Auth::Workflow::Stage"
-      @stage_controller = "/auth/workflow/stage"
+      @stage_controller = "auth/workflow/stages"
 
       @sop_class = "Auth::Workflow::Sop"
-      @sop_controller = "/auth/workflow/sop"
+      @sop_controller = "auth/workflow/sops"
 
       @step_class = "Auth::Workflow::Step"
-      @step_controller = "/auth/workflow/step"
-      
+      @step_controller = "auth/workflow/steps"
+        
+
+      ########################################################
+      ##
+      ##
+      ##
+      ## IMAGE CONCERN MODEL AND CONTROLLER CLASSES
+      ##
+      ##
+      ##
+      ########################################################
+
+      @image_class = "Auth::Image"
+      @image_controller = "auth/images"
+
+
+      ########################################################
+      ##
+      ##
+      ########################################################
+
     end
   end
   
