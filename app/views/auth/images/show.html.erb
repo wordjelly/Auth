@@ -1,5 +1,6 @@
 <p id="notice"><%= notice %></p>
 
+<<<<<<< HEAD
 <% @model.attributes.keys.each do |attribute| %>
 	
 	<%= attribute %> : <%= @model.send("#{attribute}") %>	
@@ -15,3 +16,7 @@ Signed Request:
 
 <%= link_to 'Edit', edit_image_path(@model) %> |
 <%= link_to 'Back', images_path %>
+=======
+<%= link_to 'Edit', edit_auth_image_path(@auth_image) %> |
+<%= link_to 'Back', auth_images_path %>
+>>>>>>> 74e43b51642aac911f23f9989f7d008153c48507
