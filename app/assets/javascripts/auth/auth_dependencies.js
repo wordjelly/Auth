@@ -6,6 +6,7 @@
 //= require turbolinks
 //= require modernizr.custom.63321.js
 //= require cloudinary
+//= require images
 //= require data.js
 
 $(document).ready(function() {

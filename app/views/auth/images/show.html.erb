@@ -1,4 +1,17 @@
 <p id="notice"><%= notice %></p>
 
-<%= link_to 'Edit', edit_auth_image_path(@auth_image) %> |
-<%= link_to 'Back', auth_images_path %>
+<% @model.attributes.keys.each do |attribute| %>
+	
+	<%= attribute %> : <%= @model.send("#{attribute}") %>	
+
+<% end %>
+<br>
+Signed Request:
+<%= @model.signed_request %>
+
+
+
+
+
+<%= link_to 'Edit', edit_image_path(@model) %> |
+<%= link_to 'Back', images_path %>

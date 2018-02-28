@@ -1,7 +1,7 @@
 <%= form_for(@model, url: @model.new_record? ? images_path : image_path(@model), method: @model.new_record? ? :post : :put, as: :image)  do  |f| %>
   <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @model} %>
   <div class="form_fields">
-  the parent id and class
+  
   
  
   <%= f.hidden_field :parent_id, :value => @model.parent_id %>
