@@ -1,19 +1,19 @@
 ---
 development:
   cloud_name: doohavoda
-  api_key: '231138229721459'
-  api_secret: q60DjdCIUGQGItOaQlwE0tZYZk0
+  api_key: '779116626984783'
+  api_secret: cOGDGWqkPT9rQ-VtBxBb5ej1j50
   enhance_image_tag: true
   static_image_support: false
 production:
   cloud_name: doohavoda
-  api_key: '231138229721459'
-  api_secret: q60DjdCIUGQGItOaQlwE0tZYZk0
+  api_key: '779116626984783'
+  api_secret: cOGDGWqkPT9rQ-VtBxBb5ej1j50
   enhance_image_tag: true
   static_image_support: true
 test:
   cloud_name: doohavoda
-  api_key: '231138229721459'
-  api_secret: q60DjdCIUGQGItOaQlwE0tZYZk0
+  api_key: '779116626984783'
+  api_secret: cOGDGWqkPT9rQ-VtBxBb5ej1j50
   enhance_image_tag: true
   static_image_support: false

@@ -1469,8 +1469,21 @@ Cloudinary Setup :
 1. Place the cloudinary.yml file that you get from cloudinary in your config folder
 2. Optionally specify the image class and image controller in the config file (auth)
 3. Add the following tag in your main application layout in the head section.
-4. The gem is included by default with the engine.
 
 ```
 <%= cloudinary_js_config %>
+<%= javascript_link_tag  "https://widget.cloudinary.com/global/all.js" %>
+```
+
+4. Now add this to the javascript file that refers to the view of your controller handling image uploads.
+
+You should have a div with an id called  : "upload_widget_opener", on the page where you want to do the upload.
+
+```
+<script type="text/javascript">
+  $('#upload_widget_opener').cloudinary_upload_widget(
+    { cloud_name: cloud_name, api_key: api_key,
+      cropping: 'server', upload_signature: "your_signature"},
+      function(error, result) { console.log(error, result) });
+</script>
 ```

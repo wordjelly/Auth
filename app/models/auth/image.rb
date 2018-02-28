@@ -71,11 +71,7 @@ class Auth::Image
   ###########################################################
   def parent_id_is_valid_bson
   	begin
-<<<<<<< HEAD
   		BSON::ObjectId.from_string(self.parent_id)
-=======
-  		BSON::ObjectId.new(self.parent_id)
->>>>>>> 74e43b51642aac911f23f9989f7d008153c48507
   	rescue
   		self.errors.add(:parent_id, "the parent id is not valid")
   	end	
@@ -89,11 +85,9 @@ class Auth::Image
   ##
   ############################################################
   def get_signed_request
-<<<<<<< HEAD
-    Cloudinary::Utils.sign_request({:public_id=>self.id, :timestamp=>Time.now.to_i}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
-=======
-    Cloudinary::Utils.sign_request({:public_id=>@model.id, :timestamp=>Time.now.to_i}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
->>>>>>> 74e43b51642aac911f23f9989f7d008153c48507
+
+    Cloudinary::Utils.sign_request({:public_id => self.id.to_s,:timestamp=>Time.now.to_i, :callback => "http://widget.cloudinary.com/cloudinary_cors.html"}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
+
   end
 
   def verify_signature_from_webhook
@@ -101,9 +95,3 @@ class Auth::Image
   end
 
 end
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 74e43b51642aac911f23f9989f7d008153c48507
-git revert --no-commit 02be73319813619a8cd6ccd144bfa33080056f94..HEAD

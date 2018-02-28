@@ -9,8 +9,11 @@
 <br>
 Signed Request:
 <%= @model.signed_request %>
+<% @model.signed_request.keys.each do |entity| %>
+	<div id="<%= entity %>"><%= @model.signed_request[entity] %></div>
+<% end %>
 
-
+<div id="upload_widget_opener"></div>
 
 
 
