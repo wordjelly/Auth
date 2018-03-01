@@ -37,11 +37,7 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 			it "-- does not permit stages, sops or steps -- " do 
 				
-				assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
-				assembly.stages = [Auth::Workflow::Stage.new]
-				assembly.stages[0].name = "first stage"
-				assembly.stages[0].sops = [Auth::Workflow::Sop.new]
-				assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+				assembly = create_assembly_with_stages_sops_and_steps
 				post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
 				expect(response.code).to eq("201")
 				assembly_created = Auth::Workflow::Assembly.first
@@ -57,11 +53,7 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 				it " -- non admin user returns 422 -- " do 
 
 					
-					assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
-					assembly.stages = [Auth::Workflow::Stage.new]
-					assembly.stages[0].name = "first stage"
-					assembly.stages[0].sops = [Auth::Workflow::Sop.new]
-					assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+					assembly = create_assembly_with_stages_sops_and_steps
 					post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@headers
 					expect(response.code).to eq("422")					
 
@@ -72,10 +64,18 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 		context " -- CRUD -- " do 
 
-			## will do these later, they are not absoulutely critical.
-
 			it  " -- can update name and description -- " do 
-				
+				assembly = create_assembly_with_stages_sops_and_steps
+				res = assembly.save
+				#puts "result of saving:"
+				#puts res.to_s
+				## we want to update name and description.
+				a = {:assembly => {:name => "dog",:description => "cat"}, api_key: @ap_key, :current_app_id => "testappid"}
+	            ##have to post to the id url.
+	            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
+
+	            expect(response.code).to eq("204")
+	            #puts response.body.to_s
 			end
 
 			it " -- can delete the assembly -- " do 

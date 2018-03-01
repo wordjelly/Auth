@@ -351,7 +351,38 @@ module AdminCreateUserSupport
 
 end
 
+module WorkflowSupport
 
+  def create_assembly_with_stages_sops_and_steps
+    assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+    assembly.stages = [Auth::Workflow::Stage.new]
+    assembly.stages[0].name = "first stage"
+    assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+    assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+    assembly
+  end
+
+  def create_empty_assembly
+    assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+    assembly
+  end
+
+  def create_empty_stage
+    stage = Auth::Workflow::Stage.new(attributes_for(:stage))
+    stage
+  end
+
+  def create_empty_sop
+    sop = Auth::Workflow::Sop.new(attributes_for(:sop))
+    sop
+  end
+
+  def create_empty_step
+    step = Auth::Workflow::Step.new(attributes_for(:step))
+    step
+  end
+
+end
 
 RSpec.configure do |config|
   config.include ValidUserHelper, :type => :controller
@@ -359,6 +390,6 @@ RSpec.configure do |config|
   config.include AdminRootPathSupport, :type => :request
   config.include DiscountSupport, :type => :request
   config.include AdminCreateUserSupport, :type => :request
-  
+  config.include WorkflowSupport, :type => :request
 end
 

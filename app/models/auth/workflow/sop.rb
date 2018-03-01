@@ -1,8 +1,15 @@
 class Auth::Workflow::Sop
   	include Mongoid::Document
+  	include Auth::Concerns::OwnerConcern
   	embeds_many :steps, :class_name => "Auth::Workflow::Step"
   	embedded_in :stage, :class_name => "Auth::Workflow::Stage"
   	field :name, type: String
+  	attr_accessor :assembly_id
+	attr_accessor :assembly_doc_version
+	attr_accessor :stage_index
+	attr_accessor :stage_doc_version
+	attr_accessor :stage_id
+
 
   	## Auth::Workflow::Sop.find_self("5a94f4e9421aa923db33693e",nil,{:stage_id => "5a94f4e9421aa923db336935"})
   	def self.find_self(id,signed_in_resource,options={})
@@ -15,7 +22,7 @@ class Auth::Workflow::Sop
 	end
 
 	def self.permitted_params
-		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index]},:id]
+		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version]},:id]
 	end
 
 	def create_with_conditions(params,permitted_params,model)

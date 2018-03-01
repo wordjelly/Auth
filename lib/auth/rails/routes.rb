@@ -16,6 +16,8 @@ module ActionDispatch::Routing
 	      ## this controller may need to be changed, actually will have to be changed for every single thing.
 	      resources :assemblies, :controller => Auth.configuration.assembly_controller
 
+	      resources :stages, :controller => Auth.configuration.stage_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller

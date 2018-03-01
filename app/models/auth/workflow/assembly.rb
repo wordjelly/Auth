@@ -18,8 +18,18 @@ class Auth::Workflow::Assembly
   ## 
   ###########################################################
   def self.permitted_params
-    [{:assembly => [:name,:description,:doc_version]},:id,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index]
+    [{:assembly => [:name,:description,:doc_version]},:id]
   end
+
+  def self.find_self(id,signed_in_resource,options={})
+    
+    return nil unless collection =  Auth.configuration.assembly_class.constantize.where("_id" => id
+    )
+
+    collection.first
+      
+  end
+
   ###########################################################
   ##
   ##
@@ -145,9 +155,10 @@ class Auth::Workflow::Assembly
   ## find_self on stage, sop or step -> returns an assembly object
   ## so in any controller, for update, the model will always be an assembly object
   ## so we only work on update_with_conditions for assembly.
+  ## permitted params is just the result of calling the permitted params def, and fetching the model from it.
   def update_with_conditions(params,permitted_params,model)
    
-    query = [
+    query = { "$and" => [
           {
             "_id" => BSON::ObjectId(model.id.to_s)
           },
@@ -155,7 +166,7 @@ class Auth::Workflow::Assembly
 
             "doc_version" => model.doc_version
           }
-    ]
+    ]}
 
     ## if its only the assembly , then it would just be "$set" => model.attributes
     update = {
@@ -165,30 +176,37 @@ class Auth::Workflow::Assembly
       }
     }
 
-    if stage_query = build_stage_query(permitted_params)
-      query = query + stage_query
-      if sop_query = build_sop_query(permitted_params)
-        query = query + sop_query
-        if step_query = build_step_query(permitted_params)
-          query =  query + step_query 
+    if stage_query = build_stage_query(permitted_params,params)
+      puts "got a stage query"
+
+      query["$and"] = query["$and"] + stage_query
+      if sop_query = build_sop_query(permitted_params,params)
+        query["$and"] = query["$and"] + sop_query
+        if step_query = build_step_query(permitted_params,params)
+          query["$and"] = query["$and"] + step_query 
         end
       end
     end
     
-    if step_update = build_step_update(permitted_params)
+    if step_update = build_step_update(permitted_params,params)
       update = step_update
-    elsif sop_update = build_sop_update(permitted_params)
+    elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
-    elsif stage_update = build_stage_update(permitted_params)
+    elsif stage_update = build_stage_update(permitted_params,params)
       update = stage_update
     end
 
     ## now do the where.find_one_and_update
-    Auth.configuaration.assembly_class.where(query).find_one_and_update(update,{:return_document => :after})
+    puts "query is:"
+    puts query.to_s
+
+    puts "update is:"
+    puts update.to_s
+    Auth.configuration.assembly_class.constantize.where(query).find_one_and_update(update,{:return_document => :after})
 
   end 
 
-  
+
   def get_sop(stage_index,sop_index)
     returns self.stages[stage_index].sops[sop_index]
   end
@@ -201,11 +219,11 @@ class Auth::Workflow::Assembly
     return self.stages[stage_index].sops[sop_index].steps[step_index]
   end
 
-  def build_stage_query(permitted_params)
+  def build_stage_query(permitted_params,params)
     stage_index = permitted_params[:stage_index]
-    stage_id = permitted_params[:stage_id]
-    stage_doc_version = permitted_params[:stage_doc_version]
-    
+    stage_id = params[:id]
+    stage_doc_version = permitted_params[:doc_version]
+    puts "stage index: #{stage_index}, stage_id: #{stage_id}, stage_doc_version: #{stage_doc_version}"
     return unless (stage_index && stage_id && stage_doc_version)
 
     query =
@@ -225,26 +243,25 @@ class Auth::Workflow::Assembly
 
   ## will return nil if the params were not enough
   ## will otherwise return hash 
-  def build_stage_update(permitted_params)
+  ## permitted params are the stage params.
+  def build_stage_update(permitted_params,params)
     
     stage_index = permitted_params[:stage_index]
-    stage_id = permitted_params[:stage_id]
-    stage_doc_version = permitted_params[:stage_doc_version]
+    #stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:doc_version]
     
-    return unless (stage_index && stage_id && stage_doc_version)
+    return unless (stage_index && stage_doc_version)
 
     stage = get_stage(stage_index)
-      
+    
     return unless stage
 
-    stage.merge(permitted_params.fetch(:stage,{}))
-    
+    stage.assign_attributes(permitted_params)
+    stage.doc_version = stage_doc_version + 1
+
     update = {
       "$set" => {
-        "stages.#{stage_index}" => stage.attributes.except(:doc_version,:_id)
-      },
-      "$inc" => {
-        "stages.#{stage_index}.doc_version" => 1
+        "stages.#{stage_index}" => stage.attributes.except(:_id)
       }
     }
 
@@ -253,14 +270,14 @@ class Auth::Workflow::Assembly
   end
 
 
-  def build_sop_query(permitted_params)
+  def build_sop_query(permitted_params,params)
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
     sop_index = permitted_params[:sop_index]
-    sop_id = permitted_params[:sop_id]
-    sop_doc_version = permitted_params[:sop_doc_version]
+    sop_id = params[:id]
+    sop_doc_version = permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version)
 
@@ -280,14 +297,14 @@ class Auth::Workflow::Assembly
   end
 
 
-  def build_sop_update(permitted_params)
+  def build_sop_update(permitted_params,params)
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
     sop_index = permitted_params[:sop_index]
-    sop_id = permitted_params[:sop_id]
-    sop_doc_version = permitted_params[:sop_doc_version]
+    sop_id = params[:id]
+    sop_doc_version = permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version)
 
@@ -295,7 +312,8 @@ class Auth::Workflow::Assembly
       
     return unless sop
 
-    sop.merge(permitted_params.fetch(:sop,{}))
+    sop.assign_attributes(permitted_params)
+    sop.doc_version = sop_doc_version + 1
 
     update = {
       "$set" => {
@@ -310,7 +328,7 @@ class Auth::Workflow::Assembly
 
   end
 
-  def build_step_query(permitted_params)
+  def build_step_query(permitted_params,params)
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
@@ -319,8 +337,8 @@ class Auth::Workflow::Assembly
     sop_id = permitted_params[:sop_id]
     sop_doc_version = permitted_params[:sop_doc_version]
     step_index = permitted_params[:step_index]
-    step_id = permitted_params[:step_id]
-    step_doc_version = permitted_params[:step_doc_version]
+    step_id = params[:id]
+    step_doc_version = permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
 
@@ -340,7 +358,7 @@ class Auth::Workflow::Assembly
   end
 
 
-  def build_step_update(permitted_params)
+  def build_step_update(permitted_params,params)
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
@@ -349,8 +367,8 @@ class Auth::Workflow::Assembly
     sop_id = permitted_params[:sop_id]
     sop_doc_version = permitted_params[:sop_doc_version]
     step_index = permitted_params[:step_index]
-    step_id = permitted_params[:step_id]
-    step_doc_version = permitted_params[:step_doc_version]
+    step_id = params[:step_id]
+    step_doc_version = permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
 
@@ -358,7 +376,10 @@ class Auth::Workflow::Assembly
       
     return unless step
 
-    step.merge(permitted_params.fetch(:step,{}))
+
+    step.assign_attributes(permitted_params)
+    step.doc_version = step_doc_version + 1
+
 
     update = {
       "$set" => {

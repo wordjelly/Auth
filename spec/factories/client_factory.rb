@@ -76,13 +76,20 @@ FactoryGirl.define do
 
   factory :step, class: Auth::Workflow::Step do 
     name {Faker::Name.name}
+    description {Faker::Name.name}
   end
 
   factory :sop, class: Auth::Workflow::Sop do 
-    
+    name {Faker::Name.name}
+    description {Faker::Name.name}
   end
 
   factory :assembly, class: Auth::Workflow::Assembly do 
+    name {Faker::Name.name}
+    description {Faker::Name.name}
+  end
+
+  factory :stage, class: Auth::Workflow::Stage do 
     name {Faker::Name.name}
     description {Faker::Name.name}
   end

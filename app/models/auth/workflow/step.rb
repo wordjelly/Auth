@@ -1,10 +1,19 @@
 class Auth::Workflow::Step
 	include Mongoid::Document
+	include Auth::Concerns::OwnerConcern
 	embedded_in :sop, :class_name => "Auth::Workflow::Sop"
 	field :name, type: String, default: nil
+	attr_accessor :assembly_id
+	attr_accessor :assembly_doc_version
+	attr_accessor :stage_index
+	attr_accessor :stage_doc_version
+	attr_accessor :stage_id
+	attr_accessor :sop_index
+	attr_accessor :sop_doc_version
+	attr_accessor :sop_id
 
 	def self.permitted_params
-		[{:step => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index]},:id]
+		[{:step => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version]},:id]
 	end
 	
 
