@@ -307,7 +307,7 @@ module Auth::Concerns::Shopping::DiscountConcern
 			if results_as_mongoid_docs.empty?
 				## this discont object does not exist
 				## return 0
-				puts "------------------------there was no such discount object-----------------------------"
+				#puts "------------------------there was no such discount object-----------------------------"
 				0
 			elsif !results_as_mongoid_docs[0].verified.empty?
 				## it has been verified

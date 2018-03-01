@@ -109,8 +109,20 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 
 	# POST /auth/assemblies
  	def create
+
+ 		## so how to create an assemly
+ 		## there is no difference.
+
+ 		## how to create a stage
+ 		## we need to know the assembly version
+ 		## and find one and update, where id is that and its version is that.
+
+ 		## we can specify those conditions on the model.
+ 		## for example we can have a method called model_create
+ 		## and return the model from that.
+
 	    respond_to do |format|
-	        if @model.save
+	        if @model.create_with_conditions(params,@model_params,@model)
 	            format.json do 
 	                render json: @model.to_json, status: 201
 	            end
@@ -143,7 +155,7 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 	# PATCH/PUT /auth/assemblies/1
   	def update
 	    respond_to do |format|
-	      	if @model.save
+	      	if @model.update_with_conditions(params,@model_params,@model)
 	        	format.json do 
 	          		render :nothing => true, :status => 204
 	        	end

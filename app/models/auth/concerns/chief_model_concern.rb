@@ -47,6 +47,24 @@ module Auth::Concerns::ChiefModelConcern
 			self.attributes.to_s
 		end
 
+
+		## @param[Parameters] params : the params passed into the controller where this model was initialzied
+		## @param[Hash] permitted_params : the permitted_parameters for the controller
+		## @param[ActiveObject] : the model instance.
+		## @return[Boolean] : the result of saving the model.
+		def create_with_conditions(params,permitted_params,model)
+			model.save(permitted_params)
+	  	end
+
+
+	  	## @param[Parameters] params : the params passed into the controller where this model was initialzied
+		## @param[Hash] permitted_params : the permitted_parameters for the model,for eg : if the model is :assembly, then the permitted params will e everything under the :assembly key in the incoming parameters.
+		## @param[ActiveObject] : the model instance.
+		## @return[Boolean] : the result of saving the model.
+  		def update_with_conditions(params,permitted_params,model)
+    		model.save
+  		end
+
 	end
 
 	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
