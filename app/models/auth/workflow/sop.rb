@@ -4,6 +4,7 @@ class Auth::Workflow::Sop
   	embeds_many :steps, :class_name => "Auth::Workflow::Step"
   	embedded_in :stage, :class_name => "Auth::Workflow::Stage"
   	field :name, type: String
+  	field :description, type: String
   	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
 	attr_accessor :stage_index
@@ -27,17 +28,20 @@ class Auth::Workflow::Sop
 
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is a stage model.
-		return false unless Auth.configuration.assembly_class.where
-		({
+
+		return false unless model.valid?
+		
+
+		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{
-					"stages.#{model.stage_index}._id" => model.stage_id
+					"stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id)
 				},
 				{
 					"stages.#{model.stage_index}.doc_version" => model.stage_doc_version
 				},
 				{
-					"_id" => model.assembly_id
+					"_id" => BSON::ObjectId(model.assembly_id)
 				},
 				{
 					"doc_version" => model.assembly_doc_version
@@ -48,7 +52,7 @@ class Auth::Workflow::Sop
 			{
 				"$push" => 
 				{
-					"stages.#{stage_index}" => model.attributes
+					"stages.#{stage_index}.sops" => model.attributes
 				}
 			},
 			{
@@ -56,7 +60,11 @@ class Auth::Workflow::Sop
 			}
 		)
 
-		
+		puts "assembly updated is: #{assembly_updated}"
+
+		return false unless assembly_updated
+
+		return model
 		
 	end
 

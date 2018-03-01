@@ -2,7 +2,8 @@ class Auth::Workflow::Step
 	include Mongoid::Document
 	include Auth::Concerns::OwnerConcern
 	embedded_in :sop, :class_name => "Auth::Workflow::Sop"
-	field :name, type: String, default: nil
+	field :name, type: String
+	field :description, type: String
 	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
 	attr_accessor :stage_index
@@ -28,17 +29,18 @@ class Auth::Workflow::Step
 
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is a stage model.
-		return false unless Auth.configuration.assembly_class.where
-		({
+		return false unless model.valid?
+
+		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{
-					"stages.#{model.stage_index}._id" => model.stage_id
+					"stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id)
 				},
 				{
 					"stages.#{model.stage_index}.doc_version" => model.stage_doc_version
 				},
 				{
-					"_id" => model.assembly_id
+					"_id" => BSON::ObjectId(model.assembly_id)
 				},
 				{
 					"doc_version" => model.assembly_doc_version
@@ -55,13 +57,17 @@ class Auth::Workflow::Step
 			{
 				"$push" => 
 				{
-					"stages.#{stage_index}.#{sop_index}" => model.attributes
+					"stages.#{stage_index}.sops.#{sop_index}.steps" => model.attributes
 				}
 			},
 			{
 				:return_document => :after
 			}
 		)
+
+		return false unless assembly_updated
+		return model
+
 	end
 
 end
