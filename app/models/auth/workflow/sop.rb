@@ -10,12 +10,13 @@ class Auth::Workflow::Sop
 	attr_accessor :stage_index
 	attr_accessor :stage_doc_version
 	attr_accessor :stage_id
+	attr_accessor :sop_index
 
 
   	## Auth::Workflow::Sop.find_self("5a94f4e9421aa923db33693e",nil,{:stage_id => "5a94f4e9421aa923db336935"})
   	def self.find_self(id,signed_in_resource,options={})
-  		
-		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops._id" => id
+  		#puts "the id is: #{id}"
+		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops._id" => BSON::ObjectId(id)
 		)
 
 		collection.first
@@ -23,7 +24,7 @@ class Auth::Workflow::Sop
 	end
 
 	def self.permitted_params
-		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version]},:id]
+		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index]},:id]
 	end
 
 	def create_with_conditions(params,permitted_params,model)
@@ -60,7 +61,7 @@ class Auth::Workflow::Sop
 			}
 		)
 
-		puts "assembly updated is: #{assembly_updated}"
+		#puts "assembly updated is: #{assembly_updated}"
 
 		return false unless assembly_updated
 

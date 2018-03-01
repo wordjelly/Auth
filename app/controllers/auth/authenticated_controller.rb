@@ -170,7 +170,7 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 	          		render json: {
 	            		id: @model.id.to_s,
 	            		errors: @model.errors
-	          		}.to_json
+	          		}.to_json, status: 422
 	        	end
 	        	format.js do 
 	        		render :partial => "show.js.erb", locals: {model: @model}

@@ -202,13 +202,20 @@ class Auth::Workflow::Assembly
 
     puts "update is:"
     puts update.to_s
+   # Auth.configuration.assembly_class.constantize.where(query).find_one_and_update(update,{:return_document => :after})
+
+    cl = Auth.configuration.assembly_class.constantize.where(query)
+
+    puts "the results of the query are:"
+    puts cl.count.to_s
+
     Auth.configuration.assembly_class.constantize.where(query).find_one_and_update(update,{:return_document => :after})
 
   end 
 
 
   def get_sop(stage_index,sop_index)
-    returns self.stages[stage_index].sops[sop_index]
+    return self.stages[stage_index].sops[sop_index]
   end
 
   def get_stage(stage_index)
@@ -221,20 +228,26 @@ class Auth::Workflow::Assembly
 
   def build_stage_query(permitted_params,params)
     stage_index = permitted_params[:stage_index]
-    stage_id = params[:id]
-    stage_doc_version = permitted_params[:doc_version]
-    puts "stage index: #{stage_index}, stage_id: #{stage_id}, stage_doc_version: #{stage_doc_version}"
+    ## why this pipe here?
+    ## because if request was made to the stages controller to update a stage, then the stage_id would be the params[:id]
+    ## however if the request was made to the sops controller , then the stage_id would explicitly defined as the stage_id, and the :id would actually refer to the sop_id
+    ## so first preference is given to that, and params[:id] is the fallback.
+    stage_id = permitted_params[:stage_id] || params[:id]
+    stage_doc_version = permitted_params[:stage_doc_version] || permitted_params[:doc_version]
+    #puts "stage index: #{stage_index}, stage_id: #{stage_id}, stage_doc_version: #{stage_doc_version}"
     return unless (stage_index && stage_id && stage_doc_version)
 
     query =
       
       [
+
         {
           "stages.#{stage_index}._id" => BSON::ObjectId(stage_id)     
         },
         {
           "stages.#{stage_index}.doc_version" => stage_doc_version
         }
+
       ]
 
     return query
@@ -258,10 +271,10 @@ class Auth::Workflow::Assembly
 
     stage.assign_attributes(permitted_params)
     stage.doc_version = stage_doc_version + 1
-
+   
     update = {
       "$set" => {
-        "stages.#{stage_index}" => stage.attributes.except(:_id)
+        "stages.#{stage_index}" => stage.attributes
       }
     }
 
@@ -276,20 +289,23 @@ class Auth::Workflow::Assembly
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
     sop_index = permitted_params[:sop_index]
-    sop_id = params[:id]
-    sop_doc_version = permitted_params[:doc_version]
+    ## see the reasons for these pipes in the build_stage_query
+    sop_id = permitted_params[:sop_id] || params[:id]
+    sop_doc_version = permitted_params[:sop_doc_version] || permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version)
 
     query =
     
       [
+
         {
           "stages.#{stage_index}.sops.#{sop_index}._id" => BSON::ObjectId(sop_id)     
         },
         {
           "stages.#{stage_index}.sops.#{sop_index}.doc_version" => sop_doc_version
         }
+
       ]
 
     return query
@@ -312,15 +328,14 @@ class Auth::Workflow::Assembly
       
     return unless sop
 
+    
+
     sop.assign_attributes(permitted_params)
     sop.doc_version = sop_doc_version + 1
 
     update = {
       "$set" => {
-        "stages.#{stage_index}.sops.#{sop_index}" => sop.attributes.except(:doc_version,:_id)
-      },
-      "$inc" => {
-        "stages.#{stage_index}.sops.#{sop_index}.doc_version" => 1
+        "stages.#{stage_index}.sops.#{sop_index}" => sop.attributes
       }
     }
 

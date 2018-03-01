@@ -12,6 +12,7 @@ class Auth::Workflow::Step
 	attr_accessor :sop_index
 	attr_accessor :sop_doc_version
 	attr_accessor :sop_id
+	attr_accessor :step_index
 
 	def self.permitted_params
 		[{:step => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version]},:id]
@@ -20,7 +21,7 @@ class Auth::Workflow::Step
 
 	def self.find_self(id,signed_in_resource,options={})
 		
-		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops.steps._id" => id
+		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops.steps._id" => BSON::ObjectId(id)
 		)
 
 		collection.first

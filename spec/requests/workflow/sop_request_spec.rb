@@ -63,22 +63,28 @@ RSpec.describe "sop request spec",:sop => true, :type => :request do
 			assembly = Auth::Workflow::Assembly.find(assembly.id)
 			expect(assembly.stages[1].name).to eq(stage[:name])
 		end
+=end
 
-		it " -- updates a stage -- " do 
+		it " -- updates an sop -- " do 
 			assembly = create_empty_assembly
-			stage = Auth::Workflow::Stage.new(name: "old_stage_name")
+			stage = Auth::Workflow::Stage.new
+			sop = Auth::Workflow::Sop.new
+			stage.sops << sop
 			assembly.stages << stage
 			assembly.save
-			a = {:stage => {:name => "new_name",:description => "cat", :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :doc_version => stage.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
+
+			## so now we need to update it.
+			a = {:sop => {:name => "new_name",:description => "cat", :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :stage_doc_version => stage.doc_version, :stage_id => stage.id.to_s, :doc_version => stage.doc_version, :sop_index => 0}, api_key: @ap_key, :current_app_id => "testappid"}
 	            ##have to post to the id url.
-	        put stage_path({:id => stage.id.to_s}), a.to_json,@admin_headers
+	        put sop_path({:id => sop.id.to_s}), a.to_json,@admin_headers
+	        #puts response.body.to_s
 	        expect(response.code).to eq("204")
 	        ## find the assembly and the first stage
 	        assembly = Auth::Workflow::Assembly.find(assembly.id)
-			expect(assembly.stages[0].name).to eq("new_name")
-			expect(assembly.stages[0].doc_version).to eq(1)
+			expect(assembly.stages[0].sops[0].name).to eq("new_name")
+			expect(assembly.stages[0].sops[0].doc_version).to eq(1)
 		end
-=end
+
 	end
 
 end
