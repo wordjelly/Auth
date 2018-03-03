@@ -15,7 +15,7 @@ class Auth::Workflow::Step
 	attr_accessor :step_index
 
 	def self.permitted_params
-		[{:step => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version]},:id]
+		[{:step => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index]},:id]
 	end
 	
 
@@ -30,6 +30,7 @@ class Auth::Workflow::Step
 
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is a stage model.
+		
 		return false unless model.valid?
 
 		assembly_updated = Auth.configuration.assembly_class.constantize.where({
@@ -47,10 +48,10 @@ class Auth::Workflow::Step
 					"doc_version" => model.assembly_doc_version
 				},
 				{
-					"stages.#{model.stage_index}.#{model.sop_index}._id" => model.sop_id
+					"stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)
 				},
 				{
-					"stages.#{model.stage_index}.#{model.sop_index}.doc_version" => model.sop_doc_version
+					"stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
 				},
 			]
 		})
@@ -65,6 +66,8 @@ class Auth::Workflow::Step
 				:return_document => :after
 			}
 		)
+
+		
 
 		return false unless assembly_updated
 		return model

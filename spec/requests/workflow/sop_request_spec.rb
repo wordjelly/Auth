@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "sop request spec",:sop => true, :type => :request do
+RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :request do
 
 	before(:all) do 
 

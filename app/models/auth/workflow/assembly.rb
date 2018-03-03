@@ -320,15 +320,13 @@ class Auth::Workflow::Assembly
     stage_doc_version = permitted_params[:stage_doc_version]
     sop_index = permitted_params[:sop_index]
     sop_id = params[:id]
-    sop_doc_version = permitted_params[:doc_version]
+    sop_doc_version =  permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version)
 
     sop = get_sop(stage_index,sop_index)
       
     return unless sop
-
-    
 
     sop.assign_attributes(permitted_params)
     sop.doc_version = sop_doc_version + 1
@@ -361,10 +359,10 @@ class Auth::Workflow::Assembly
     
       [
         {
-          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}._id" => BSON::ObjectId(sop_id)     
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}._id" => BSON::ObjectId(step_id)     
         },
         {
-          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.doc_version" => sop_doc_version
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.doc_version" => step_doc_version
         }
       ]
 
@@ -378,17 +376,36 @@ class Auth::Workflow::Assembly
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
+    
     sop_index = permitted_params[:sop_index]
     sop_id = permitted_params[:sop_id]
     sop_doc_version = permitted_params[:sop_doc_version]
+    
     step_index = permitted_params[:step_index]
-    step_id = params[:step_id]
+    step_id = params[:id]
     step_doc_version = permitted_params[:doc_version]
 
+=begin
+    puts "stage index: #{stage_index}"
+    puts "stage id: #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop doc version: #{sop_doc_version}"
+
+    puts "step index: #{step_index}"
+    puts "step id: #{step_id}"
+    puts "step doc version: #{step_doc_version}"
+=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
+
+   #puts 'all required params are present.'
 
     step = get_step(stage_index,sop_index,step_index)
       
+    #puts "step got as : #{step}"
+
     return unless step
 
 
@@ -398,10 +415,7 @@ class Auth::Workflow::Assembly
 
     update = {
       "$set" => {
-        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}" => sop.attributes.except(:doc_version,:_id)
-      },
-      "$inc" => {
-        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.doc_version" => 1
+        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}" => step.attributes
       }
     }
 

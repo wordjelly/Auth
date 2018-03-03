@@ -20,6 +20,8 @@ module ActionDispatch::Routing
 
 	      resources :sops, :controller => Auth.configuration.sop_controller
 
+	      resources :steps, :controller => Auth.configuration.step_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller

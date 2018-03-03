@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "stage request spec",:stage => true, :type => :request do
+RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => :request do
 
 	before(:all) do 
 
