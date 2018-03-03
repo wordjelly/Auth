@@ -1,10 +1,18 @@
 assembly =>
 [
-	stage => [
-		sop => [
-			step => [
+	stages => [
+		sops => [
+			product_ids => [
+
+			],
+			steps => [
 
 			]
 		]
 	]
 ]
+
+
+Basically every sop also has an array of product ids.
+Now we want to provide an entry code and an exit code. that part is ok.
+what about the 
