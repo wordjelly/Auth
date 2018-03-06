@@ -50,41 +50,67 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 			expect(assembly.stages[0].sops[0].name).to eq(sop[:name])
 		end
 
-=begin
-		it " -- creates a stage when one stage already exists -- " do 
-			assembly = create_empty_assembly
-			assembly.stages << Auth::Workflow::Stage.new
-			assembly.save
-			stage = attributes_for(:stage)
-			stage[:assembly_id] = assembly.id.to_s
-			stage[:assembly_doc_version] = assembly.doc_version
-			post stages_path, {stage: stage,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
-			expect(response.code).to eq("201")
-			assembly = Auth::Workflow::Assembly.find(assembly.id)
-			expect(assembly.stages[1].name).to eq(stage[:name])
+		context " -- update -- " do 
+
+
+
+			it " -- updates an sop -- " do 
+				assembly = create_empty_assembly
+				stage = Auth::Workflow::Stage.new
+				sop = Auth::Workflow::Sop.new
+				stage.sops << sop
+				assembly.stages << stage
+				assembly.save
+
+				## so now we need to update it.
+				a = {:sop => {:name => "new_name",:description => "cat", :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :stage_doc_version => stage.doc_version, :stage_id => stage.id.to_s, :doc_version => stage.doc_version, :sop_index => 0}, api_key: @ap_key, :current_app_id => "testappid"}
+		            ##have to post to the id url.
+		        put sop_path({:id => sop.id.to_s}), a.to_json,@admin_headers
+		        #puts response.body.to_s
+		        expect(response.code).to eq("204")
+		        ## find the assembly and the first stage
+		        assembly = Auth::Workflow::Assembly.find(assembly.id)
+				expect(assembly.stages[0].sops[0].name).to eq("new_name")
+				expect(assembly.stages[0].sops[0].doc_version).to eq(1)
+			end
+
+
+			## this is while creating the master sop.
+			it " -- updates sop with product ids -- " do 
+
+			end
+
+			context " -- adding product to sop(actual to be performed) -- " do 
+
+				it " -- calls can_add before_update -- " do 
+
+				end
+
+			end
+
+
 		end
-=end
 
-		it " -- updates an sop -- " do 
-			assembly = create_empty_assembly
-			stage = Auth::Workflow::Stage.new
-			sop = Auth::Workflow::Sop.new
-			stage.sops << sop
-			assembly.stages << stage
-			assembly.save
+		context " -- show -- " do 
 
-			## so now we need to update it.
-			a = {:sop => {:name => "new_name",:description => "cat", :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :stage_doc_version => stage.doc_version, :stage_id => stage.id.to_s, :doc_version => stage.doc_version, :sop_index => 0}, api_key: @ap_key, :current_app_id => "testappid"}
-	            ##have to post to the id url.
-	        put sop_path({:id => sop.id.to_s}), a.to_json,@admin_headers
-	        #puts response.body.to_s
-	        expect(response.code).to eq("204")
-	        ## find the assembly and the first stage
-	        assembly = Auth::Workflow::Assembly.find(assembly.id)
-			expect(assembly.stages[0].sops[0].name).to eq("new_name")
-			expect(assembly.stages[0].sops[0].doc_version).to eq(1)
+			it  " -- calls show with product id , to see if applicable -- " do 
+
+
+			end
+
 		end
 
 	end
 
 end
+
+## ---------------------------------------------------------
+
+## basic flow of events
+## check which sop is applicable to products
+## then call update on that sop with the products
+## before_update -> call can_add
+## that calls process_step on each step -> which in turn calls the functions in requirement to see if the requirements 
+
+## if some products have already been added, then first attempt is to add the new product into the next sop to which it is applicable, and which is scheduled to be run.
+## there if it cannot be added -> then we have to go to the checkpoint steps, and try to add it there -> if it can be added, then proceed to schedule it. otherwise keep going backwards, if you reach the root, then that's it.

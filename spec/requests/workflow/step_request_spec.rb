@@ -32,7 +32,7 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 			Auth::Workflow::Assembly.delete_all
 		end
 
-		it " -- creates a step given an assembly and a stage and a sop " do 
+		it " -- creates an empty step given an assembly and a stage and a sop " do 
 			assembly = create_empty_assembly
 			stage = Auth::Workflow::Stage.new
 			sop = Auth::Workflow::Sop.new
@@ -57,7 +57,7 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 			expect(assembly.stages[0].sops[0].steps[0].name).to eq(step[:name])
 		end
 
-		it " -- updates a step given an assembly, stage, sop and step information -- " do 
+		it " -- updates step name,description given an assembly, stage, sop and step information -- " do 
 
 			assembly = create_empty_assembly
 			stage = Auth::Workflow::Stage.new
@@ -77,5 +77,36 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 	        expect(response.code).to eq("204")
 
 		end
+
+
+		context " -- update -- " do 
+
+			## so the process is that 
+			## first call process step
+			## what does this do?
+			## it will call process_step.
+
+			it " --  before_update calls process_step if the step is being marked as started -- " do 
+
+			end
+
+
+			it " -- step starts if process_step returns true -- " do 
+
+			end
+
+			it " -- process_step calls compare_input_output -- " do 
+
+			end
+
+
+
+		end
+
 	end
+
 end
+
+
+
+

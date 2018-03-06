@@ -3,16 +3,220 @@ assembly =>
 	stages => [
 		sops => [
 			product_ids => [
-
+				
+			]
+			entry_code => only one entry code, 
+			most_probable_exit_code =>  to help the scheduler decide which exit code to pick.
+			product_arrays => [
+				{
+					time_added :
+					product_ids_added : [],
+					product_ids_removed : []
+				}
 			],
 			steps => [
+				step => {
+					checked_in : {
+						time :
+						location :
+						actor :
+					},
+					started : {
+						time : 
+						location :
+						actor :
+					},
+					ended : {
+						time :
+						location :
+						actor : 
+					},
+					## or should that be called on update?
+					performable_product_ids : [],
+					exit_code : can output an exit code, if no exit code, then goes to next step, last step has to have an exit code.
+					expected_duration: in mins
+					requirements: [
+						requirement: {
+							id : assign it an id.
+							input : {
+								product_id : whatever in case , there is no prev_req_id
 
+								prev_req_id : this has to be of the generic sop, not the copied over thing.
+								
+								loading_increment : 3ml/ product,
+
+								multiplying_increment : 4 products/unit, 
+								
+								required_state : {
+									
+									free_space : should be calculated based on the loading increment, and multiplying increment.
+
+									occupied_space : 
+									
+									color :
+									
+									odour : 
+									
+									packed : 
+									
+									image_provided : yes/no
+									
+									location_id:
+									
+									amount : also based on the calculated loading increment and multiplying increment.
+								}
+							}
+							output : {
+								state : {
+									free_space :
+									occupied_space : 
+									color :
+									odour : 
+									packed :	
+									image_required : yes/no
+									(if yes, then it must be provided by the executor.)
+									location_id:
+								}
+							}  						
+						}
+					],
+					instructions: [
+						## all instructions have to be given considering multiple numbers of the 
+						{
+							pool requirement 1
+							pool requirement 2.
+							mix
+						}
+					],
+					process_step : function(args(hash with any varibles needed to do this step, or the generic hash of variables passed in.)) -> 
+
+					basically just compare states for every single requirement, vis-a-vis its previous requirement id.
+
+					what if we want to do something with some other variables?
+				}
 			]
 		]
 	]
 ]
 
 
-Basically every sop also has an array of product ids.
-Now we want to provide an entry code and an exit code. that part is ok.
-what about the 
+basically it will create a plan document from this document.
+that plan document will have only those sop's which have the product ids that we require.
+so basically projection -> filter.
+
+
+and suppose we later wanted to either add or cancel a step.
+
+on creating a step/modifying a step -> update the sop duration.
+
+how to calculate step_duration if it is a transport step?
+
+----------------------------------------------------------
+what happens if an sop has to be updated or deleted?
+what about versioning
+there is only one way, and that is to copy over the sop table, but what if more tests need to be added at a later time.
+
+------------------------------------------------------------
+
+how to add a test later on?
+	-> 
+	first put the current plan on hold
+	basically have to soft-run process on the subsequent step, whereever it has stopped, with all the products that we have.
+	there is also the possibility that it needs a totally different sop. and hence we may or may not be able to do it.
+	what if we have to use some sample from an earlier 
+	well basically it doesn't matter.
+	what is the procedure.
+	we have halted the entire flow, at the last available sop.
+
+	dont mix stuff up, it complicates things too much.
+	assemble a new plan for the additional tests.
+	the problem is that we may need serum from another plan.
+
+	first of all how to handle multiple tubes
+	instructions will look at requirement -> and say ok so this is requirement for 1 product.
+	we have 3 products
+	so how to extrapolate?
+
+	lets imagine for collection:
+	for 1 t3 test -> requirement is for 1 serum bulb.
+	now suppose there are 4 products how will you do it.
+	let us say input is 
+
+
+	free : 5ml
+	occupied : 0ml.
+
+	output is : 
+	free 2 ml. 
+	occupied : 3 ml.
+
+	now if we had 2 test what would you do?
+	so if we have more than 4 products, what do you mean by a repeat?
+
+	loading_increment : 3ml/ product
+	multiplying_increment : 4 products/unit 
+
+	use this loading increment to decide how many tubes to create.
+
+	now suppose you wanted to add more test -> how will this impact the situation?
+
+	so for example we have added a singular test.
+	now we want to know whether it can be done or not.
+
+	first build a new sop table considering all the tests needed.
+
+
+	now take the next sop to be performed.
+
+	a) next sop to be performed is applicable to this test.
+		a1) if yes check whether we have sufficient input?
+		a2) i.e run process on the entire sop, 
+		a3) it is applicable -> then just add that product id and proceed.
+		a4) it is not applicable -> then 
+	b) next sop to be performed is not applicable to this test.
+		b1) 
+
+find the last common step, that has been performed for the new test?
+we have the sop plan.
+so we have sop ids.
+we have to have predefined certain steps/processes.
+which we can call additive checkpoints.
+from here additional products can be added, so if the next sop cannot take it, then go back to the previous checkpoint and schedule additional stuff from there.
+the problem is that this will cause a fork to be generated and schedule everything again -> so how to deal with this?
+just schedule everything thereafter? but how.
+can we create additional plan documents?
+so basically schedule will have to be given an id.
+we can have a particular sop scheduled in multiple schedules. for the same test group.
+but one more thing is there, 
+
+
+suppose the sop needed is different.
+then just schedule the damn thing as usual.
+
+-----------------------------------
+
+all these are secondary pointers.
+what we need to program in the immediate period is as follows:
+
+1. structure it as per the schema above.
+2. integrate the loading_increment, and mutiple_increment, and build a system to generate instructions and the process_function.
+3. make a system to copy over the entire sop table
+4. make a compare function to compare the required input to the last step.
+5. make a provision to highlight certain steps as entry points.
+6. how to add a group of tests new.
+	-> first check if they can be added at the next sop to be done.
+	-> if this is not possible, then how to add them at the previous entry point, and then schedule them for all sop's thereafter.
+	-> how the sop should have an array of schedule ids -> for each schedule it can have a time and location.
+7. next step will be to add about : sample_checked in -> where and by whom.
+8. and providing a location type for the steps, and also for the 
+
+-----------------------------------
+how to cancel a test later on?
+	->
+how to add location to an sop?
+(for eg : start location -> end location.)	
+	->
+
+how to integrate reminders, notifications with steps/sops
+	->
+how to integrate 
