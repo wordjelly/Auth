@@ -7,6 +7,7 @@ class Auth::Workflow::Assembly
   attr_accessor :stage_index
   attr_accessor :sop_index
   attr_accessor :step_index
+  attr_accessor :clone_id
 
   ###########################################################
   ##
@@ -18,7 +19,7 @@ class Auth::Workflow::Assembly
   ## 
   ###########################################################
   def self.permitted_params
-    [{:assembly => [:name,:description,:doc_version]},:id]
+    [{:assembly => [:name,:description,:doc_version,:clone_id]},:id]
   end
 
   def self.find_self(id,signed_in_resource,options={})
@@ -30,6 +31,26 @@ class Auth::Workflow::Assembly
       
   end
 
+  ##########################################################
+  ##
+  ##
+  ##
+  ## FOR TESTING PURPOSES
+  ##
+  ##
+  ## Auth::Workflow::Assembly.prepare_nested
+  #########################################################
+  def self.prepare_nested
+    a = Auth::Workflow::Assembly.new
+    stage = Auth::Workflow::Stage.new
+    sop = Auth::Workflow::Sop.new
+    step = Auth::Workflow::Step.new
+    sop.steps << step
+    stage.sops << sop
+    a.stages << stage
+    a.save
+    a
+  end
   ###########################################################
   ##
   ##
@@ -213,6 +234,14 @@ class Auth::Workflow::Assembly
 
   end 
 
+  def create_with_conditions(params,permitted_params,model)
+    if model.clone_id
+      ## go to the root object
+      ## clone it and all of its other array friends.
+      ## calling clone will call    
+          
+    end
+  end
 
   def get_sop(stage_index,sop_index)
     return self.stages[stage_index].sops[sop_index]

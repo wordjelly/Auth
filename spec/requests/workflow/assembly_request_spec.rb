@@ -35,10 +35,7 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 		context " -- permitted_params -- " do 
 
-			it " -- can be cloned provided another assembly id -- " do 
-
-
-			end
+			
 
 
 			it "-- does not permit stages, sops or steps -- " do 

@@ -65,6 +65,21 @@ module Auth::Concerns::ChiefModelConcern
     		model.save
   		end
 
+
+  		def clone
+  			new_doc = super
+  			self.attributes.keys.each do |attr|
+  				if new_doc.send("#{attr}").respond_to? "__metadata"
+  			  		new_doc.send("#{attr}=",new_doc.send("#{attr}").map{|c| c = c.clone 
+  			  			c})
+  				end
+  			end
+  			new_doc
+  		end
+
+
+  		
+
 	end
 
 	## @param callback_name[String] : the name of the callback which you want to know if is to be skipped
@@ -91,6 +106,7 @@ module Auth::Concerns::ChiefModelConcern
 		return my_super_class
 	end
 
+	
 	
 
 end
