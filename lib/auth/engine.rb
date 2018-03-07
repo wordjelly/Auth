@@ -120,6 +120,8 @@ module Auth
     attr_accessor :step_class
     attr_accessor :step_controller
 
+    attr_accessor :order_class
+    attr_accessor :order_controller
     ########################################################
     ##
     ##
@@ -277,7 +279,9 @@ module Auth
       @step_class = "Auth::Workflow::Step"
       @step_controller = "auth/workflow/steps"
         
-
+      @order_class = "Auth::Workflow::Order"
+      @order_controller = "auth/workflow/orders"
+      
       ########################################################
       ##
       ##

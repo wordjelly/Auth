@@ -94,4 +94,9 @@ FactoryGirl.define do
     description {Faker::Name.name}
   end
 
+
+  factory :order, class: Auth::Workflow::Order do 
+    product_ids [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+  end
+
 end
