@@ -66,6 +66,9 @@ module Auth::Concerns::ChiefModelConcern
   		end
 
 
+  		## overrides mongoid default clone method
+  		## modified so that embedded objects are also cloned
+  		## @return [Mongoid::Document] with all embedded documents assigned new ids.
   		def clone
   			new_doc = super
   			self.attributes.keys.each do |attr|
@@ -77,7 +80,7 @@ module Auth::Concerns::ChiefModelConcern
   			new_doc
   		end
 
-
+  		## next thing is to assess the extent of what?
   		
 
 	end

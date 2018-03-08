@@ -1,7 +1,8 @@
 class Auth::Workflow::Order
 	include Mongoid::Document
   	include Auth::Concerns::OwnerConcern
-
+  	embedded_in :sop, :class_name => Auth.configuration.sop_class
+  	
 	field :product_ids, type: Array
 
 	## "1 => add"
@@ -42,6 +43,9 @@ class Auth::Workflow::Order
 	## read only, assigned from internal api.
 	field :schedules, type: String
 
+
+	field :combine, type: Boolean
+
 	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
 	attr_accessor :stage_index
@@ -58,6 +62,8 @@ class Auth::Workflow::Order
 	validates :action, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
 	
 	validates :status, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 4}, allow_nil: true
+
+	validates_presence_of :combine
 		
 	validate do |order|
 		order.schedules.each do |schedule_id|
@@ -73,11 +79,15 @@ class Auth::Workflow::Order
 	##
 	########################################################
 
+	## @return[Auth::Workflow::Assembly] an instance of the Assembly object that contains this order.
+	## this is used during update/show/delete
 	def self.find_self(id,signed_in_resource,options={})
-  		#puts "the id is: #{id}"
+  		
 		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops.orders._id" => BSON::ObjectId(id)
 		)
 
+		## before create order, 
+		## we want to see if the sop can do this or not.
 		collection.first
 
 	end
@@ -109,7 +119,7 @@ class Auth::Workflow::Order
 	##
 	##########################################################
 	def create_with_conditions(params,permitted_params,model)
-		## in this case the model is a stage model.
+		## in this case the model is an order model.
 		
 		return false unless model.valid?
 
@@ -159,6 +169,20 @@ class Auth::Workflow::Order
 		get_sop.can_process_order(self)
 	end
 
+	## returns true if status is "checking_requirements" or "scheduling"
+	def pending
+		self.status == 0 || self.status == 3 
+	end
+
+	def failed_to_schedule
+		self.status == 5
+	end
+
+
+	def order_is_cancellation?
+		self.action == 0
+	end
+
 	##########################################################
 	##
 	##
@@ -173,11 +197,8 @@ class Auth::Workflow::Order
 
 	def get_sop
 		begin
-			#puts "self sop id is : #{self.sop_id}"
-			#sop = Auth.configuration.sop_class.constantize.find(self.sop_id)
-			## so we want to get the sop.
-			## we get the assembly, and then return the sop
-			## using the indices.
+			assembly = Auth.configuration.assembly_class.find(self.assembly_id)
+			assembly.stages[self.stage_index].sops[self.sop_index]
 		rescue Mongoid::Errors::DocumentNotFound
 			puts "document was not found."
 			nil

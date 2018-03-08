@@ -1,8 +1,8 @@
 class Auth::Workflow::Stage
 	include Mongoid::Document
 	include Auth::Concerns::OwnerConcern
-	embeds_many :sops, :class_name => "Auth::Workflow::Sop"
-	embedded_in :assembly, :class_name => "Auth::Workflow::Assembly"
+	embeds_many :sops, :class_name => Auth.configuration.sop_class
+	embedded_in :assembly, :class_name => Auth.configuration.assembly_class
 	field :name, type: String
 	field :description, type: String
 	attr_accessor :assembly_id

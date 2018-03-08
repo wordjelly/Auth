@@ -62,7 +62,7 @@ class Auth::Workflow::Assembly
   ###########################################################  
   field :name, type: String
   field :description, type: String
-  embeds_many :stages, :class_name => "Auth::Workflow::Stage"
+  embeds_many :stages, :class_name => Auth.configuration.stage_class
 
 
   ###########################################################

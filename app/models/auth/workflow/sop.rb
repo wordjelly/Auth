@@ -1,9 +1,9 @@
 class Auth::Workflow::Sop
   	include Mongoid::Document
   	include Auth::Concerns::OwnerConcern
-  	embeds_many :steps, :class_name => "Auth::Workflow::Step"
-  	embeds_many :orders, :class_name => "Auth::Workflow::Order"
-  	embedded_in :stage, :class_name => "Auth::Workflow::Stage"
+  	embeds_many :steps, :class_name => Auth.configuration.step_class
+  	embeds_many :orders, :class_name => Auth.configuration.order_class
+  	embedded_in :stage, :class_name => Auth.configuration.stage_class
   	field :name, type: String
   	field :description, type: String
   	field :applicable_to_product_ids, type: Array
@@ -72,10 +72,23 @@ class Auth::Workflow::Sop
 		
 	end
 
+	## so it will look first if those orders are processed or processing or whatever.
+	## first we are just checking if previous order is processing.
+
 	def can_process_order(order)
-		self.orders.each do |prev_order|
+
+		## FIRST CHECK IF ANY OF THE PREVIOUS ORDERS REQUIREMENTS ARE BEING CHECKED OR IT IS BEING SCHEDULED OR IT COULD NOT BE SCHEDULED
+
+		if self.orders.keep_if{|prev_order| (prev_order.pending || prev_order.failed_to_schedule || )}.size > 0
+			## add an error saying some previous order is still being checked.
+			order.errors.add(:status, "another order is being processed, check back later")
+		end
+
+		self.steps.each do |step|
+			## now here we will call a method on step.
 			
 		end
+
 	end
 
 end

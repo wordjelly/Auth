@@ -1,7 +1,9 @@
 class Auth::Workflow::Step
 	include Mongoid::Document
 	include Auth::Concerns::OwnerConcern
-	embedded_in :sop, :class_name => "Auth::Workflow::Sop"
+	embedded_in :sop, :class_name => Auth.configuration.sop_class
+	embeds_many :requirements, :class_name => Auth.configuration.requirement_class
+	
 	field :name, type: String
 	field :description, type: String
 	attr_accessor :assembly_id
@@ -74,36 +76,30 @@ class Auth::Workflow::Step
 
 	end
 
+	## @param[Array] array of Auth::Workflow::Order or implementing class objects.
+	## @return[Boolean] true/false, depending on whether the requirements of this step can be satisfied to process the orders in the array
+	## the last order is queried to see if previous orders are to be considered in combination with it, or it is to be considered in isolation.
+	def check_requirements(product_ids)
+		## now check the requirements.
+		## for this we have to first call build_requirement
+		## then call compare on the built requirement.
+	end
+
+	## @param[Array] array of order objects
+	def get_product_ids_for_step(orders)
+		## collect orders from the first one till it reaches one where the combine was false, otherwise gather all, remove duplicats, and then 
+		orders_to_be_combined = []
+		orders.map{|c|
+			orders_to_be_combined.clear unless c.combine
+			orders_to_be_combined << c unless c.order_is_cancellation?
+		}
+		product_ids = orders_to_be_combined.map{|c| c = c,product_ids}.uniq
+	end
+
+	def set_instructions(orders)
+
+	end
+
 end
 
-
-=begin
-		results = Auth.configuration.assembly_class.constantize.collection.aggregate(
-		      [
-		          {
-		            "$match" => {
-		              "stages.sops.steps._id" => BSON::ObjectId(id)
-		            }
-		          },
-		          {
-		            "$unwind" => "$stages"
-		          },
-		          {
-		            "$unwind" => "$stages.sops"
-		          },
-		          {
-		            "$unwind" => "$stages.sops.steps"
-		          },
-		          {
-		            "$match" => {
-		              "stages.sops.steps._id" => BSON::ObjectId(id)
-		            }
-		          }
-		      ]
-		    )
-
-			return nil if (results.size == 0 || results.size > 1)
-
-			return Mongoid::Factory.from_db(Auth.configuration.assembly_class.constantize,results[0])
-=end
 
