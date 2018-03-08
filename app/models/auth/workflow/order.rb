@@ -1,4 +1,5 @@
 class Auth::Workflow::Order
+
 	include Mongoid::Document
   	include Auth::Concerns::OwnerConcern
   	embedded_in :sop, :class_name => Auth.configuration.sop_class

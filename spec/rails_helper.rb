@@ -6,6 +6,7 @@ ENGINE_RAILS_ROOT=File.join(File.dirname(__FILE__), '../')
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require "faker"
+require 'factory_girl'
 require 'factory_girl_rails'
 require 'spec_helper'
 require 'rspec/rails'

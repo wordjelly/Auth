@@ -79,10 +79,12 @@ class Auth::Workflow::Sop
 
 		## FIRST CHECK IF ANY OF THE PREVIOUS ORDERS REQUIREMENTS ARE BEING CHECKED OR IT IS BEING SCHEDULED OR IT COULD NOT BE SCHEDULED
 
-		if self.orders.keep_if{|prev_order| (prev_order.pending || prev_order.failed_to_schedule || )}.size > 0
-			## add an error saying some previous order is still being checked.
-			order.errors.add(:status, "another order is being processed, check back later")
-		end
+		non_viable_orders = self.orders.select{|c| 
+			true if (c.order_pending || c.failed_to_schedule)
+		}
+
+		order.errors.add(:status, "another order is being processed, check back later") if non_viable_orders.size > 0
+
 
 		self.steps.each do |step|
 			## now here we will call a method on step.

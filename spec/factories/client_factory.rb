@@ -1,4 +1,6 @@
+
 FactoryGirl.define do
+
 
   factory :product, class: Shopping::Product do 
     name {Faker::Food.ingredient}
@@ -74,15 +76,18 @@ FactoryGirl.define do
     confirmed_at Time.now
   end
 
+
   factory :step, class: Auth::Workflow::Step do 
     name {Faker::Name.name}
     description {Faker::Name.name}
   end
 
+
   factory :sop, class: Auth::Workflow::Sop do 
     name {Faker::Name.name}
     description {Faker::Name.name}
   end
+
 
   factory :assembly, class: Auth::Workflow::Assembly do 
     name {Faker::Name.name}
@@ -95,7 +100,7 @@ FactoryGirl.define do
   end
 
 
-  factory :order, class: Auth::Workflow::Order do 
+  factory :order_factory, class: Auth::Workflow::Order do 
     product_ids [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
   end
 

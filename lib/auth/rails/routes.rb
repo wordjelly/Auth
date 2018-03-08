@@ -24,6 +24,8 @@ module ActionDispatch::Routing
 
 	      resources :orders, :controller => Auth.configuration.order_controller
 
+	      resources :requirements, :controller => Auth.configuration.requirement_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller
