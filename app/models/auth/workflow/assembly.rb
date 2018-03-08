@@ -7,7 +7,7 @@ class Auth::Workflow::Assembly
   attr_accessor :stage_index
   attr_accessor :sop_index
   attr_accessor :step_index
-  attr_accessor :clone_id
+
 
   ###########################################################
   ##

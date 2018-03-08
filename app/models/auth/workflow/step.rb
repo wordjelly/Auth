@@ -81,10 +81,10 @@ class Auth::Workflow::Step
 	## the last order is queried to see if previous orders are to be considered in combination with it, or it is to be considered in isolation.
 	def check_requirements(orders)
 		product_ids = get_product_ids_for_step(orders)
-		## now check the requirements.
-		## for this we have to first call build_requirement
-		## then call compare on the built requirement.
-		## now run the damn shit.
+		## now we call check requirements
+		## basically we call the state function on each requirement
+		## there we get the expected state.
+		## thereafter
 		
 	end
 
