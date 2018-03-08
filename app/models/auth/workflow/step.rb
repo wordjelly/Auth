@@ -79,11 +79,16 @@ class Auth::Workflow::Step
 	## @param[Array] array of Auth::Workflow::Order or implementing class objects.
 	## @return[Boolean] true/false, depending on whether the requirements of this step can be satisfied to process the orders in the array
 	## the last order is queried to see if previous orders are to be considered in combination with it, or it is to be considered in isolation.
-	def check_requirements(product_ids)
+	def check_requirements(orders)
+		product_ids = get_product_ids_for_step(orders)
 		## now check the requirements.
 		## for this we have to first call build_requirement
 		## then call compare on the built requirement.
+		## now run the damn shit.
+		
 	end
+
+
 
 	## @param[Array] array of order objects
 	def get_product_ids_for_step(orders)

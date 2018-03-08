@@ -88,7 +88,7 @@ class Auth::Workflow::Sop
 
 		self.steps.each do |step|
 			## now here we will call a method on step.
-			
+						
 		end
 
 	end
