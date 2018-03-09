@@ -95,19 +95,37 @@ class Auth::Workflow::Sop
 
 	def get_applicable_sops_given_product_ids
 		#puts Auth.configuration.assembly_class.constantize.all.size
+		## so once you have the id of applicable sops
+		## what is the next step in this?
+		## we need to inject these orders into those sops.
+		## for that we need to get all the information about that sop
+		## like sop_index, and stage_index
+		## so that will also be stored in the aggregation below.
+		## and that should be returned.
+
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
-				"$unwind" => "$stages"
+				"$unwind" => {
+					"path" => "$stages",
+					"includeArrayIndex" => "stage_index"
+				}
 			},
 			{
-				"$unwind" => "$stages.sops"
+				"$unwind" => {
+					"path" => "$stages.sops",
+					"includeArrayIndex" => "sop_index"
+				}
 			},
 			{
 				"$project" => {
 					"common_products" => {
 						"$setIntersection" => ["$stages.sops.applicable_to_product_ids",self.applicable_to_product_ids]
-					}
+					},
+					"stages" => 1,
+					"sops" => 1,
+					"sop_index" => 1,
+					"stage_index" => 1
 				}
 			},
 			{
@@ -123,7 +141,11 @@ class Auth::Workflow::Sop
 							"then" => "$common_products",
 							"else" => "$$REMOVE"
 						}
-					}	
+					},
+					"stages" => 1,
+					"sops" => 1,
+					"sop_index" => 1,
+					"stage_index" => 1	
 				}
 			}
 		])
@@ -134,6 +156,8 @@ class Auth::Workflow::Sop
 		res.each do |result|
 			puts result.to_s
 		end
+
+
 	end
 
 end
