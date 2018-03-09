@@ -68,150 +68,46 @@ assembly =>
 ]
 
 
-basically it will create a plan document from this document.
-that plan document will have only those sop's which have the product ids that we require.
-so basically projection -> filter.
-
-
-and suppose we later wanted to either add or cancel a step.
-
-on creating a step/modifying a step -> update the sop duration.
-
-how to calculate step_duration if it is a transport step?
-
-----------------------------------------------------------
-what happens if an sop has to be updated or deleted?
-what about versioning
-there is only one way, and that is to copy over the sop table, but what if more tests need to be added at a later time.
-
-------------------------------------------------------------
-
-how to add a test later on?
-	-> 
-	first put the current plan on hold
-	basically have to soft-run process on the subsequent step, whereever it has stopped, with all the products that we have.
-	there is also the possibility that it needs a totally different sop. and hence we may or may not be able to do it.
-	what if we have to use some sample from an earlier 
-	well basically it doesn't matter.
-	what is the procedure.
-	we have halted the entire flow, at the last available sop.
-
-	dont mix stuff up, it complicates things too much.
-	assemble a new plan for the additional tests.
-	the problem is that we may need serum from another plan.
-
-	first of all how to handle multiple tubes
-	instructions will look at requirement -> and say ok so this is requirement for 1 product.
-	we have 3 products
-	so how to extrapolate?
-
-	lets imagine for collection:
-	for 1 t3 test -> requirement is for 1 serum bulb.
-	now suppose there are 4 products how will you do it.
-	let us say input is 
-
-
-	free : 5ml
-	occupied : 0ml.
-
-	output is : 
-	free 2 ml. 
-	occupied : 3 ml.
-
-	now if we had 2 test what would you do?
-	so if we have more than 4 products, what do you mean by a repeat?
-
-	loading_increment : 3ml/ product
-	multiplying_increment : 4 products/unit 
-
-	use this loading increment to decide how many tubes to create.
-
-	now suppose you wanted to add more test -> how will this impact the situation?
-
-	so for example we have added a singular test.
-	now we want to know whether it can be done or not.
-
-	first build a new sop table considering all the tests needed.
-
-
-	now take the next sop to be performed.
-
-	a) next sop to be performed is applicable to this test.
-		a1) if yes check whether we have sufficient input?
-		a2) i.e run process on the entire sop, 
-		a3) it is applicable -> then just add that product id and proceed.
-		a4) it is not applicable -> then 
-	b) next sop to be performed is not applicable to this test.
-		b1) 
-
-find the last common step, that has been performed for the new test?
-we have the sop plan.
-so we have sop ids.
-we have to have predefined certain steps/processes.
-which we can call additive checkpoints.
-from here additional products can be added, so if the next sop cannot take it, then go back to the previous checkpoint and schedule additional stuff from there.
-the problem is that this will cause a fork to be generated and schedule everything again -> so how to deal with this?
-just schedule everything thereafter? but how.
-can we create additional plan documents?
-so basically schedule will have to be given an id.
-we can have a particular sop scheduled in multiple schedules. for the same test group.
-but one more thing is there, 
-
-
-suppose the sop needed is different.
-then just schedule the damn thing as usual.
-
------------------------------------
-
-all these are secondary pointers.
-what we need to program in the immediate period is as follows:
-
-1. structure it as per the schema above.
-2. integrate the loading_increment, and mutiple_increment, and build a system to generate instructions and the process_function.
-3. make a system to copy over the entire sop table
-4. make a compare function to compare the required input to the last step.
-5. make a provision to highlight certain steps as entry points.
-6. how to add a group of tests new.
-	-> first check if they can be added at the next sop to be done.
-	-> if this is not possible, then how to add them at the previous entry point, and then schedule them for all sop's thereafter.
-	-> how the sop should have an array of schedule ids -> for each schedule it can have a time and location.
-7. next step will be to add about : sample_checked in -> where and by whom.
-8. and providing a location type for the steps, and also for the 
-
------------------------------------
-how to cancel a test later on?
-	->
-how to add location to an sop?
-(for eg : start location -> end location.)	
-	->
-
-how to integrate reminders, notifications with steps/sops
-	->
-how to integrate 
 
 ------------------------------------------------------------
 
 
-on adding cart_items 
+cart_items =>
 
-clones the assembly (if not already cloned)
+--------------------------------------------------------------
+transit_object => keeps a track of all the states
 
-query assembly to see which sop's are applicable to the product_ids being added to the order.
+1> searching for applicable_sops -> if completed, then should have the applicable sops here, otherwise will go back to that.
 
-creates an order object ->
+2> adding to applicable_sops -> after adding to each sop should note success/failure.
 
-for each product in the order ->
+3> 
+--------------------------------------------------------------
 
-	checks which sop is applicable to it ->
+clones assembly =>
 
-	checks the requirements -> 
+search for those sops which are applicable to the product_ids => 
 
-	if the requirements are satisfied -> marks the product in the order as acceptable -> and goes forward till the end of all sops.
+now build an order object =>
 
-end
+now create it into the first applicable sop => 
 
+validates that the sop can process it =>
 
+calls method process_step =>
 
+calls sufficient? => on each requirement
 
+=> returns the consumables to be created with the order, for each requirement.
 
+=> those consumables are added to the order at creation, and product stocks are derived from that.
 
+## can we know if we can add it to all the sops at the same time, i mean update all the sop's at the same time? 
+
+## but if we reach a sop where it is not sufficient, then 
+we will have to have a staged, withdrawal, where that order will not be marked for acceptance, if a sop somewhere down the line could not be handled.
+
+## so after order is added to sop -> what is its state ?
+## it will check the transit object and only then schedule it or take it for scheduling.
+
+## now how to have it layered?

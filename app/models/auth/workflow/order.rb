@@ -2,31 +2,19 @@ class Auth::Workflow::Order
 
 	include Mongoid::Document
   	include Auth::Concerns::OwnerConcern
+
   	embedded_in :sop, :class_name => Auth.configuration.sop_class
   	
+  	embeds_many :consumables, :class_name => Auth.configuration.consumable_class
+
+
 	field :product_ids, type: Array
 
 	## "1 => add"
 	## "0 => cancel"
 	field :action, type: Integer
 
-	## result, is updated depending, upon whether it was added or deleted.
 
-	#"requirement_satisfied/requirement_insufficient/scheduling/scheduled/failed_to_schedule"
-	# we can have background jobs looking for stuff where requirement is satisfied and update it to scheduling.
-	# scheduling, will take all the product ids together.
-	# and rebuild the schedule ?
-	# or modify the existing one ?
-	# no it will create a new schedule, and has to cancel the older schedule.
-	# so first issue cancellation request to all previous schedules in this sop.
-	# then schedule this one.
-	# now how are the product ids.
-	# but sometimes we have two parallel schedules running, since we may need to backtrack to a entry point to schedule an additional test.
-	# so in that case, the requirement will not be satisfied
-	# but wherever the requirement is satisfied, it will work.
-	# this will be internally set.
-	# so how to permit multiple parallel schedules?
-	# read only
 
 	## 0 => checking_requirements
 	## 1 => requirement_not_satisfied
@@ -36,12 +24,7 @@ class Auth::Workflow::Order
 	## 5 => could not schedule
 	field :status, type: String
 
-	## array of schedules.
-	## how will you calculate next step.
-	## that is to be based on the exit code
-	## there may be a need for dynamic scheduling as well.
-	## these will also be internally set.
-	## read only, assigned from internal api.
+	
 	field :schedules, type: String
 
 

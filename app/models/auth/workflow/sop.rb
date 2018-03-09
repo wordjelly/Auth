@@ -94,15 +94,9 @@ class Auth::Workflow::Sop
 	end
 
 	def get_applicable_sops_given_product_ids
-		#puts Auth.configuration.assembly_class.constantize.all.size
-		## so once you have the id of applicable sops
-		## what is the next step in this?
-		## we need to inject these orders into those sops.
-		## for that we need to get all the information about that sop
-		## like sop_index, and stage_index
-		## so that will also be stored in the aggregation below.
-		## and that should be returned.
 
+		## before creating order -> process_step
+		## that calls requirement.sufficient? 
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
@@ -151,11 +145,14 @@ class Auth::Workflow::Sop
 		])
 
 		#puts res.count.to_s
-		puts "these are the results."
+		#puts "these are the results."
 
-		res.each do |result|
-			puts result.to_s
-		end
+		#res.each do |result|
+		#	puts result.to_s
+		#end
+
+		## what you get back is not a mongo document.
+		## what you get is just some shite.
 
 
 	end

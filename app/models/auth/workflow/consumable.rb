@@ -4,7 +4,7 @@ class Auth::Workflow::Consumable
   	
   	include Auth::Concerns::OwnerConcern
 
-	embedded_in :requirement, :class_name => Auth.configuration.requirement_class	  	
+	embedded_in :order, :class_name => Auth.configuration.requirement_class	  	
 
 	field :existing_consumable_id, type: String
 

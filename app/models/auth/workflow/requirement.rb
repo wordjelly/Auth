@@ -5,9 +5,7 @@ class Auth::Workflow::Requirement
   	include Auth::Concerns::OwnerConcern
   	
   	embedded_in :step, :class_name => Auth.configuration.step_class
-
-    embeds_many :consumables, :class_name => Auth.configuration.consumable_class
-
+    
     ## the maximum allowed value, after multiplying the base value
     field :max, type: Float, default: 1.0
 
