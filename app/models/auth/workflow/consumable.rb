@@ -15,10 +15,7 @@ class Auth::Workflow::Consumable
 	field :output_state, type: Hash
 
 
-	field :product_id, type: String
-
 	
-	validates_presence_of :product_id
 
 end
 

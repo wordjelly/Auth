@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "assembly request spec",:assembly => true, :type => :request do 
+RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :type => :request do 
 
 
 	before(:all) do 
@@ -67,23 +67,24 @@ RSpec.describe "assembly request spec",:assembly => true, :type => :request do
 
 		context " -- CRUD -- " do 
 
-			it  " -- can update name and description -- " do 
-				assembly = create_assembly_with_stages_sops_and_steps
-				res = assembly.save
-				#puts "result of saving:"
-				#puts res.to_s
-				## we want to update name and description.
-				a = {:assembly => {:name => "dog",:description => "cat"}, api_key: @ap_key, :current_app_id => "testappid"}
-	            ##have to post to the id url.
-	            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
+			context " -- update -- " do 
+				it  " -- can update name and description -- " do 
+					assembly = create_assembly_with_stages_sops_and_steps
+					res = assembly.save
+					#puts "result of saving:"
+					#puts res.to_s
+					## we want to update name and description.
+					a = {:assembly => {:name => "dog",:description => "cat"}, api_key: @ap_key, :current_app_id => "testappid"}
+		            ##have to post to the id url.
+		            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
 
-	            expect(response.code).to eq("204")
-	            #puts response.body.to_s
+		            expect(response.code).to eq("204")
+		            #puts response.body.to_s
+				end
 			end
 
-			it " -- can delete the assembly -- " do 
+			
 
-			end
 			
 		end
 

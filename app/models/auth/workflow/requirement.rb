@@ -20,8 +20,10 @@ class Auth::Workflow::Requirement
     ## how much should the base be multiplied by  
     field :multiplicand, type: Float, default: 1.0
 
-    ## base is multiplied by multiplicand only if product count is  >= this count.
-    field :multiplicand_applied_at_product_count, type: Integer
+
+    ## divide the products by the multiplicand_applied_at_product_count.
+    ## so if 6 products, and add consumable is 4, then we will have 2 consumables.
+    field :products_per_consumable, type: Integer
     
     ## 0 => add validation error
     ## 1 => create a new consumable
@@ -43,20 +45,41 @@ class Auth::Workflow::Requirement
     ## this is something that cannot be modified, in the context of a users tests. 
     field :reference_requirement, type: Hash
 
-
+    ## the product id of the requirement.
     field :product_id, type: String
 
     def sufficient?(product_ids)  
      
       product_count = product_ids.size
-      
-      ## so we need a method on product, to check product stock, but it may be location dependent.
 
-      if product_count >= multiplicand_applied_at_product_count
+      consumables_count = consumables_required(product_count)
+
+      ## now do we already have a reference_requirement_id ?
+      if reference_requirement
+
+      else
 
       end
     
     end
 
+    ## @param[Integer] product_count : the number of products for which we are checking this requirement.
+    ## @return[Integer] the number of consumables required, for this requirement to service the product count incoming.
+    def consumables_required(product_count)
+      modulus = product_count % products_per_consumable
+
+      modulus+=1 if modulus > 0
+
+      modulus
+    end
+
+    ## get the reference requirement.
+    def get_reference_requirement
+      ## so we need to get the reference requirement.
+      ## and see if its consumables fit the bill.
+      ## to do this, we need the assembly id.
+      ## and that entire reference.
+      ## 
+    end
 
 end

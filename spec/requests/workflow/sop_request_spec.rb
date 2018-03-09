@@ -89,14 +89,83 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 			
 		end
 
-		context " -- show -- " do 
+		context " -- show -- ", :search_sop => true do 
 
-			it  " -- calls show with product id , to see if applicable -- " do 
+			it " -- returns an array of applicable sop_ids, given an array of product_ids -- " do 
 
+				assembly = Auth::Workflow::Assembly.new
+				
+
+				stage_one = Auth::Workflow::Stage.new
+				stage_two = Auth::Workflow::Stage.new
+
+				sop_one = Auth::Workflow::Sop.new
+				sop_two = Auth::Workflow::Sop.new
+				sop_three = Auth::Workflow::Sop.new
+				sop_four = Auth::Workflow::Sop.new
+
+				##########################################
+
+				product_one = Auth::Shopping::Product.new
+				product_one.resource_id = @u.id.to_s
+				product_one.resource_class = @u.class.name.to_s
+				product_one.signed_in_resource = @admin
+				expect(product_one.save).to be_truthy
+
+				##########################################
+
+				product_two = Auth::Shopping::Product.new
+				product_two.resource_id = @u.id.to_s
+				product_two.resource_class = @u.class.name.to_s
+				product_two.signed_in_resource = @admin
+				expect(product_two.save).to be_truthy
+
+				##########################################
+
+				product_three = Auth::Shopping::Product.new
+				product_three.resource_id = @u.id.to_s
+				product_three.resource_class = @u.class.name.to_s
+				product_three.signed_in_resource = @admin
+				expect(product_three.save).to be_truthy
+
+				##########################################
+
+				sop_one.applicable_to_product_ids = [product_two.id.to_s,product_three.id.to_s]
+
+				sop_four.applicable_to_product_ids = [product_two.id.to_s,product_three.id.to_s]
+
+				sop_two.applicable_to_product_ids = [product_three.id.to_s]
+
+				stage_one.sops << sop_four
+
+				stage_two.sops << sop_one
+
+				stage_two.sops << sop_two
+
+				assembly.stages << stage_one
+				assembly.stages << stage_two
+
+				expect(assembly.save).to be_truthy
+
+				###########################################
+
+				## now we want to search for the sop which is applicable to products product_two and product one.
+
+				## so we need a sop method.
+				## we can call index on sop.
+				## but index instantiates a sop, anyways.
+				## 
+				puts "the applicable product ids to one are:" 
+				puts sop_one.applicable_to_product_ids.to_s
+
+				puts "sop one : #{sop_one.id.to_s}"
+				puts "sop two : #{sop_two.id.to_s}"
+				puts "sop four : #{sop_four.id.to_s}"
+				#puts "assembly as json pretty is :" 
+				#puts JSON.pretty_generate(assembly.attributes)
+				sop_one.get_applicable_sops_given_product_ids
 
 			end
-
-			
 
 		end
 

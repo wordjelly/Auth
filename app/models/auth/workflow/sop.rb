@@ -93,6 +93,49 @@ class Auth::Workflow::Sop
 
 	end
 
+	def get_applicable_sops_given_product_ids
+		#puts Auth.configuration.assembly_class.constantize.all.size
+
+		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
+			{
+				"$unwind" => "$stages"
+			},
+			{
+				"$unwind" => "$stages.sops"
+			},
+			{
+				"$project" => {
+					"common_products" => {
+						"$setIntersection" => ["$stages.sops.applicable_to_product_ids",self.applicable_to_product_ids]
+					}
+				}
+			},
+			{
+				"$project" => {
+					"matches" => {
+						"$cond" => {
+							"if" => {
+								"$gt" => [
+									{"$size" => "$common_products"},
+									1
+								]
+							},
+							"then" => "$common_products",
+							"else" => "$$REMOVE"
+						}
+					}	
+				}
+			}
+		])
+
+		#puts res.count.to_s
+		puts "these are the results."
+
+		res.each do |result|
+			puts result.to_s
+		end
+	end
+
 end
 
 

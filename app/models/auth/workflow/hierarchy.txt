@@ -188,3 +188,30 @@ how to add location to an sop?
 how to integrate reminders, notifications with steps/sops
 	->
 how to integrate 
+
+------------------------------------------------------------
+
+
+on adding cart_items 
+
+clones the assembly (if not already cloned)
+
+query assembly to see which sop's are applicable to the product_ids being added to the order.
+
+creates an order object ->
+
+for each product in the order ->
+
+	checks which sop is applicable to it ->
+
+	checks the requirements -> 
+
+	if the requirements are satisfied -> marks the product in the order as acceptable -> and goes forward till the end of all sops.
+
+end
+
+
+
+
+
+
