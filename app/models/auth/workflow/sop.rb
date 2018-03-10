@@ -27,7 +27,7 @@ class Auth::Workflow::Sop
 	end
 
 	def self.permitted_params
-		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index, :applicable_to_product_ids]},:id]
+		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index, {:applicable_to_product_ids => []}]},:id]
 	end
 
 	def create_with_conditions(params,permitted_params,model)
@@ -88,11 +88,43 @@ class Auth::Workflow::Sop
 
 		self.steps.each do |step|
 			## now here we will call a method on step.
-						
+			
 		end
 
 	end
 
+	## @return[Array] array of hashes, each with the following structure:
+=begin
+{
+  "_id": {
+    "$oid": "5aa3c9b7421aa90dedf35ff9"
+  },
+  "stages": {
+    "_id": {
+      "$oid": "5aa3c9b7421aa90dedf35ffc"
+    },
+    "public": "no",
+    "doc_version": 0,
+    "sops": {
+      "_id": {
+        "$oid": "5aa3c9b7421aa90dedf35ffe"
+      },
+      "public": "no",
+      "doc_version": 0,
+      "applicable_to_product_ids": [
+        "5aa3c9b7421aa90dedf35ff8"
+      ]
+    }
+  },
+  "stage_index": 1,
+  "sop_index": 1,
+  "matches": [
+    "5aa3c9b7421aa90dedf35ff8"
+  ]
+}
+=end
+	## it basically returns the stage_index as well as the sop_index alongwith their respective ids.
+	## the matches array contains the product ids to which that sop is applicable, out of the product ids supplied.
 	def get_applicable_sops_given_product_ids
 
 		## before creating order -> process_step
@@ -129,7 +161,7 @@ class Auth::Workflow::Sop
 							"if" => {
 								"$gt" => [
 									{"$size" => "$common_products"},
-									1
+									0
 								]
 							},
 							"then" => "$common_products",
@@ -141,18 +173,20 @@ class Auth::Workflow::Sop
 					"sop_index" => 1,
 					"stage_index" => 1	
 				}
+			},
+			{
+				"$group" => {
+					"_id" => nil,
+					"sops" => { "$push" => "$stages.sops" } 
+				}
 			}
 		])
 
-		#puts res.count.to_s
-		#puts "these are the results."
+		res.each do |result|
+			puts JSON.pretty_generate(result)
+		end
 
-		#res.each do |result|
-		#	puts result.to_s
-		#end
-
-		## what you get back is not a mongo document.
-		## what you get is just some shite.
+		return res.first["sops"]
 
 
 	end

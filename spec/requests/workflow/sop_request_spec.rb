@@ -155,15 +155,22 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 				## we can call index on sop.
 				## but index instantiates a sop, anyways.
 				## 
-				puts "the applicable product ids to one are:" 
-				puts sop_one.applicable_to_product_ids.to_s
+				#puts "the applicable product ids to one are:" 
+				#puts sop_one.applicable_to_product_ids.to_s
 
-				puts "sop one : #{sop_one.id.to_s}"
-				puts "sop two : #{sop_two.id.to_s}"
-				puts "sop four : #{sop_four.id.to_s}"
+				#puts "sop one : #{sop_one.id.to_s}"
+				#puts "sop two : #{sop_two.id.to_s}"
+				#puts "sop four : #{sop_four.id.to_s}"
 				#puts "assembly as json pretty is :" 
 				#puts JSON.pretty_generate(assembly.attributes)
-				sop_one.get_applicable_sops_given_product_ids
+				#sop_one.get_applicable_sops_given_product_ids
+				get sops_path({sop: sop_one.attributes,:api_key => "test", :current_app_id => "testappid"}), nil,@admin_headers
+
+				puts "the response body is:"
+				puts response.body.to_s
+
+				puts "the response code is:"
+				puts response.code.to_s
 
 			end
 
