@@ -155,8 +155,14 @@ class Auth::Workflow::Sop
 				}
 			},
 			{
+			    "$addFields" => {
+			      "stages.sops.sop_index" => "$sop_index",
+			      "stages.sops.stage_index" => "$stage_index"
+			    }
+			},
+			{
 				"$project" => {
-					"matches" => {
+					"stages" => {
 						"$cond" => {
 							"if" => {
 								"$gt" => [
@@ -164,12 +170,10 @@ class Auth::Workflow::Sop
 									0
 								]
 							},
-							"then" => "$common_products",
+							"then" => "$stages",
 							"else" => "$$REMOVE"
 						}
 					},
-					"stages" => 1,
-					"sops" => 1,
 					"sop_index" => 1,
 					"stage_index" => 1	
 				}
@@ -182,13 +186,27 @@ class Auth::Workflow::Sop
 			}
 		])
 
+
+		## so we want to return an array of SOP objects.
+
 		res.each do |result|
 			puts JSON.pretty_generate(result)
 		end
 
-		return res.first["sops"]
+		#return res.first["sops"]
 
 
+		return [] unless res.count > 0
+
+		res.first["sops"].map{|sop_hash|
+
+			Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
+		}
+
+	end
+
+	def get_many
+		get_applicable_sops_given_product_ids
 	end
 
 end

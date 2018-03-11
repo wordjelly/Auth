@@ -134,7 +134,7 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 				sop_four.applicable_to_product_ids = [product_two.id.to_s,product_three.id.to_s]
 
-				sop_two.applicable_to_product_ids = [product_three.id.to_s]
+				sop_two.applicable_to_product_ids = [product_one.id.to_s]
 
 				stage_one.sops << sop_four
 
@@ -149,28 +149,20 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 				###########################################
 
-				## now we want to search for the sop which is applicable to products product_two and product one.
-
-				## so we need a sop method.
-				## we can call index on sop.
-				## but index instantiates a sop, anyways.
-				## 
-				#puts "the applicable product ids to one are:" 
-				#puts sop_one.applicable_to_product_ids.to_s
-
-				#puts "sop one : #{sop_one.id.to_s}"
-				#puts "sop two : #{sop_two.id.to_s}"
-				#puts "sop four : #{sop_four.id.to_s}"
-				#puts "assembly as json pretty is :" 
-				#puts JSON.pretty_generate(assembly.attributes)
-				#sop_one.get_applicable_sops_given_product_ids
+				
 				get sops_path({sop: sop_one.attributes,:api_key => "test", :current_app_id => "testappid"}), nil,@admin_headers
 
-				puts "the response body is:"
-				puts response.body.to_s
+				expect(response.code).to eq("200")
 
-				puts "the response code is:"
-				puts response.code.to_s
+				## it should return sop_one and four.
+
+				array_of_sops = JSON.parse(response.body)
+				ids = array_of_sops.map{|c|
+					c = Auth.configuration.sop_class.constantize.new(c)	
+				}.map{|c| c = c.id.to_s}
+				expect(ids.size).to eq(2)
+				expect(ids.include? sop_one.id.to_s).to be_truthy
+				expect(ids.include? sop_four.id.to_s).to be_truthy
 
 			end
 

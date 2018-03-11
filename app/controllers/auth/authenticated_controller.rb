@@ -81,10 +81,13 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 
 	# GET /auth/assemblies
 	def index
-	    @models = @model_class.all
+	    @models = @model.get_many
 	    respond_to do |format|
 	      format.json do 
 	        render json: @models.to_json
+	      end
+	      format.html do 
+	      	render :index
 	      end
 	    end
 	end

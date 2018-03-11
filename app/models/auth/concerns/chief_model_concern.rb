@@ -80,8 +80,12 @@ module Auth::Concerns::ChiefModelConcern
   			new_doc
   		end
 
-  		## next thing is to assess the extent of what?
-  		
+  		## override in your model. Is called by the #index action of the authenticated_controller.
+  		## all the search criteria should be set on the model instance passed into the index action.
+  		## @return[Array] array of self objects.
+  		def get_many
+  			[]
+  		end  		
 
 	end
 
