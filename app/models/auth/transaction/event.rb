@@ -6,7 +6,6 @@ class Auth::Transaction::Event
 	embedded_in :event_holder, :class => "Auth::Transaction::EventHolder"
 	embeds_many :statuses, :class => "Auth::Transaction::Status"
 
-	
 	## 0. ( basically will move on to the next event in the event holder.)
 	## 1. commit output_events (it will create all the output events.)
 	field :after_complete, type: Integer, default: 0
@@ -18,6 +17,11 @@ class Auth::Transaction::Event
 	## like : [{method, object_class, object_id, arguments:},{method, object_class, object_id, arguments:}]
 	## these should be committed into the event at the same t
 	field :output_events, type: Array
+
+
+	## were the output events committed ?
+	## so that we don't do it twice :)
+	field :output_events_committed, type: Boolean
 
 	## the method that has to be called on the object class
 	field :method_to_call, type: String
@@ -46,9 +50,12 @@ class Auth::Transaction::Event
 	## @return[Boolean] true if we can proceed to next event.
 	## false : otherwise.
 	def process
-		return false if defer?
-		return false unless get_object
-		get_object.send(method_to_call,arguments)
+		return [] if output_events_committed == true
+		return nil if defer?
+		return nil unless get_object
+		## it will output an array or nil in case of errors.
+		self.ouput_events = get_object.send(method_to_call,arguments)
+		self.output_events
 	end
 
 	def get_object
@@ -63,6 +70,15 @@ class Auth::Transaction::Event
 	## false : otherwise.
 	def defer?
 		self.statutes.last.allow_to_continue?
+	end
+
+
+	def commit_output_events(event_holder_id)
+		return true if self.output_events_committed
+		## do an atomic push.
+		## should return false in case the commit fails in any way.
+		## should return true otherwise.
+		## should return true if already committed.
 	end
 
 

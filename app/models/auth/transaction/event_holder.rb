@@ -19,10 +19,24 @@ class Auth::Transaction::EventHolder
 	## it will take each event, and call the method defined in that event, and then proceed based on the after_complete option in that event.
 	def process
 		
-		status = events.map{|event|
-			event = event.process
-		}.compact.uniq.keep_if{|c| c == true}.size > 0 ? 1 : 0
-		
+		## return if the damn thing is processed.
+		return if status == 1
+
+		process_results = []	
+
+		events.each do |event|
+			new_events = event.process
+			if new_events.nil?
+				process_results << false
+			else
+				process_results << event.commit_output_events(self)
+			end
+		end
+
+		## set the status to the process_results 
+		status = process_results.uniq.size == 1 ? process_results.first : false
+
+
 		Auth::Transaction::EventHolder.where({
 			"$and" => [
 				{
@@ -45,7 +59,7 @@ class Auth::Transaction::EventHolder
 				:return_document => :after
 			}
 		)
-		
+
 	end
 
 end
