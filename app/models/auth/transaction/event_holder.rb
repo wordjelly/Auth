@@ -15,26 +15,50 @@ class Auth::Transaction::EventHolder
 	field :process_count, type: Integer
 	validates :process_count, numericality: {only_integer: true}
 
-	## this method is to be called on the event_holder object
-	## it will take each event, and call the method defined in that event, and then proceed based on the after_complete option in that event.
+	## take each event
+	## if its complete , move forward
+	## if its failed , return out of the function.
+	## if its processing, return out of the function.
+	## otherwise process the event
+	## if the result is nil, 
+	## if the result is not nil, commit and mark as complete the given event.
+	## proceed, till end,now finally check event count, if not_equal, to start_count, means that many events, were added. exit out of function, without changing the status.
+	## otherwise, set status as 1, where the status was not 1.
 	def process
 		
-		## return if the damn thing is processed.
 		return if status == 1
 
-		process_results = []	
+		abort_function = false
 
-		events.each do |event|
-			new_events = event.process
-			if new_events.nil?
-				process_results << false
-			else
-				process_results << event.commit_output_events(self)
+		events = get_events
+
+		events.each_with_index {|ev,key|
+
+			abort_function = true if (ev._processing? || ev._failed?)
+
+			unless ev._completed?
+
+				if events_to_commit = ev.process
+
+					ev.event_index = key
+
+					unless commit_new_events_and_mark_existing_event_as_complete(events_to_commit,ev)
+						
+						abort_function = true unless event_marked_complete_by_other_process?(ev)
+
+					end
+				else
+					abort_function = true
+				end
 			end
-		end
+		}
 
-		## set the status to the process_results 
-		status = process_results.uniq.size == 1 ? process_results.first : false
+		return unless (events.count == get_events.count)
+
+		return if abort_function == true
+
+
+		self.status = 1
 
 
 		Auth::Transaction::EventHolder.where({
@@ -60,6 +84,81 @@ class Auth::Transaction::EventHolder
 			}
 		)
 
+	end
+
+	def commit_new_events_and_mark_existing_event_as_complete(events,ev)
+
+
+		doc_after_update = Auth::Transaction::EventHolder.where({
+			"$and" => [
+				{
+					"_id" => BSON::ObjectId(self.id.to_s)
+				},
+				{
+					"events.#{ev.event_index}._id" => BSON::ObjectId(ev)
+				},
+				{
+					"events.#{ev.event_index}.statutes.#{ev.statuses.size - 1}.condition" => "PROCESSING"
+				}
+			]
+		}).find_one_and_update(
+			{
+				## add to set all the events.
+				## set the event status as completed.
+				"$push" => {
+					"events" => {
+						"$each" => events.map{|c| c = c.attributes}
+					},
+					"events.#{ev.event_index}.statutes" => Auth::Transaction::Status.new(:condition => "COMPLETED", :created_at => Time.now, :modified_at => Time.now).attributes
+				}
+			},
+			{
+				:return_document => :after
+			}
+		)
+
+		return doc_after_update
+
+	end
+
+	def event_marked_complete_by_other_process?(ev)
+		## find a transaction event_holder with this id, where the event id is this events id, and the status of that event is completed.
+		results = Auth::Transaction::EventHolder.collection.aggregate([
+			{
+				"$match" => {
+					"_id" => BSON::ObjectId(self.id.to_s)
+				}
+			},
+			{
+				"$unwind" => {
+					"path" => "$events"
+				}
+			},
+			{
+				"$unwind" => {
+					"path" => "$events.statuses"
+				}
+			},
+			{
+				"$match" => {
+					"$and" => [
+						{
+							"events.statuses._id" => BSON::ObjectId(ev.id.to_s)
+						},
+						{
+							"events.statuses.condition" => "COMPLETED"
+						}
+					]
+				}
+			}
+		])
+
+		return true if results.count == 1
+
+	end
+
+	def get_events
+		Auth::Transaction::EventHolder.find(self.id).events
 	end
 
 end
