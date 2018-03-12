@@ -47,10 +47,16 @@ class Auth::Transaction::Event
 	## false : otherwise.
 	def process
 		return false if defer?
-		## now what.
-		## find the object
-		## call the method, with the arguments
-		## return the result.
+		return false unless get_object
+		get_object.send(method_to_call,arguments)
+	end
+
+	def get_object
+		begin
+			self.object_class.constantize.find(object_id)
+		rescue Mongoid::Errors::DocumentNotFound
+			nil
+		end
 	end
 
 	## @return[Boolean] true : if the last status is processing, and the time since then has not elapsed "ALLOW_PROCESS_TO_RUN_FOR".
@@ -58,9 +64,6 @@ class Auth::Transaction::Event
 	def defer?
 		self.statutes.last.allow_to_continue?
 	end
-
-
-
 
 
 end
