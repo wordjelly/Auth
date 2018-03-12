@@ -54,7 +54,7 @@ class Auth::Workflow::Requirement
 
       ## now do we already have a reference_requirement_id ?
       if reference_requirement
-
+        ## check if there are enough requirements, otherwise, 
       else
 
       end

@@ -111,3 +111,47 @@ we will have to have a staged, withdrawal, where that order will not be marked f
 ## it will check the transit object and only then schedule it or take it for scheduling.
 
 ## now how to have it layered?
+
+## so how to create and update the product stocks.
+## basically if the product is consumed, in one place, and 
+## created in another, then it will be difficult.
+
+so suppose we create thousands of products.
+and then we create a consumable
+
+before order is added to sop -> we have to check for each step if it can be processed, and in doing that 
+so if its applicable -> create it.
+then check if the requirements are there ->
+suppose a requirement is satisfied -> that means we will have to in one operation create all the consumables, inside the sop.
+so we can have two states -> 
+
+1. inside the status object -> for each step.
+   
+1. gather consumables
+2. decrementing product counts (here we should store the product ids that need to be decremented, and by how much.)
+3. creating consumables.
+
+this is the only way to do all this.
+
+so basically on adding an order what series of steps have to be followed?
+
+
+1.d
+2.b12
+3.thyroid
+4.axilla
+5.edema
+6.myasthenia
+7.claudication
+8.appendix - leucocytosis
+9.gall bladder - shoulder_tip pain / clinical exam -> liver functions.
+10.cholesterol - signs / symptoms / clinical tests
+11.cerebellar function ? copper ? 
+12.iron - koilonychia for spoon nails. ( can be done )
+--------------------------
+
+lft
+
+kft
+
+iron

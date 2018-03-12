@@ -89,7 +89,7 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 			
 		end
 
-		context " -- show -- ", :search_sop => true do 
+		context " -- index -- ", :search_sop => true do 
 
 			it " -- returns an array of applicable sop_ids, given an array of product_ids -- " do 
 
@@ -168,13 +168,7 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 		end
 
-		context " -- base -- " do 
-
-			it " -- defines a def which verifies if all the  requirements can be satisfied for each step -- " do 
-
-			end
-
-		end
+		
 
 	end
 

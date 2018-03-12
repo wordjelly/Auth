@@ -189,13 +189,11 @@ class Auth::Workflow::Sop
 
 		## so we want to return an array of SOP objects.
 
-		res.each do |result|
-			puts JSON.pretty_generate(result)
-		end
+		#res.each do |result|
+		#	puts JSON.pretty_generate(result)
+		#end
 
-		#return res.first["sops"]
-
-
+		
 		return [] unless res.count > 0
 
 		res.first["sops"].map{|sop_hash|
