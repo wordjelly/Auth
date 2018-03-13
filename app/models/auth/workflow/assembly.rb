@@ -414,19 +414,7 @@ class Auth::Workflow::Assembly
     step_id = params[:id]
     step_doc_version = permitted_params[:doc_version]
 
-=begin
-    puts "stage index: #{stage_index}"
-    puts "stage id: #{stage_id}"
-    puts "stage doc version: #{stage_doc_version}"
 
-    puts "sop index: #{sop_index}"
-    puts "sop id: #{sop_id}"
-    puts "sop doc version: #{sop_doc_version}"
-
-    puts "step index: #{step_index}"
-    puts "step id: #{step_id}"
-    puts "step doc version: #{step_doc_version}"
-=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
 
    #puts 'all required params are present.'
@@ -449,6 +437,33 @@ class Auth::Workflow::Assembly
     }
 
     return update
+
+  end
+
+  ###########################################################
+  ##
+  ##
+  ##
+  ## TRANSACTION BASED DEFS.
+  ##
+  ##
+  ##
+  ############################################################
+  ## @return[Array] of event objects.
+  ## @params[Hash] options : expected to contain a key called product_ids.
+  ## 
+  def clone_to_add_cart_items(options)
+    new_assembly = self.clone
+
+    if new_assembly && new_assembly.save
+      resulting_event = Auth::Transaction::Event.new
+      resulting_event.object_class = Auth.configuration.sop_class
+      resulting_event.method_to_call = "find_applicable_sops"
+      resulting_event.arguments = options.merge({:assembly_id => new_assembly.id.to_s})
+      return [resulting_event]
+    end
+
+    return nil
 
   end
 

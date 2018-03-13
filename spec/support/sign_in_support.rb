@@ -382,14 +382,34 @@ module WorkflowSupport
     step
   end
 
+  def create_products(n,user,admin)
+    products = []
+    n.times do |t|
+        product_one = Auth::Shopping::Product.new
+        product_one.resource_id = user.id.to_s
+        product_one.resource_class = user.class.name.to_s
+        product_one.signed_in_resource = admin
+        product_one.save
+        products << product_one
+    end
+    products
+  end
+
 end
 
 RSpec.configure do |config|
+  
   config.include ValidUserHelper, :type => :controller
   config.include ValidUserRequestHelper, :type => :request
   config.include AdminRootPathSupport, :type => :request
   config.include DiscountSupport, :type => :request
   config.include AdminCreateUserSupport, :type => :request
   config.include WorkflowSupport, :type => :request
+  config.include ValidUserRequestHelper, :type => :model
+  config.include AdminRootPathSupport, :type => :model
+  config.include DiscountSupport, :type => :model
+  config.include AdminCreateUserSupport, :type => :model
+  config.include WorkflowSupport, :type => :model
+
 end
 

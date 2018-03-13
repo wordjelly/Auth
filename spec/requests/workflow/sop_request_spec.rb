@@ -130,7 +130,10 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 				##########################################
 
-				sop_one.applicable_to_product_ids = [product_two.id.to_s,product_three.id.to_s]
+				sop_one.applicable_to_product_ids = [	
+					product_two.id.to_s,product_three.id.to_s]
+
+				sop_one.assembly_id = assembly.id.to_s
 
 				sop_four.applicable_to_product_ids = [product_two.id.to_s,product_three.id.to_s]
 
@@ -149,8 +152,10 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 				###########################################
 
+
+
 				
-				get sops_path({sop: sop_one.attributes,:api_key => "test", :current_app_id => "testappid"}), nil,@admin_headers
+				get sops_path({sop: sop_one.attributes.merge({:assembly_id => assembly.id.to_s}),:api_key => "test", :current_app_id => "testappid"}), nil,@admin_headers
 
 				expect(response.code).to eq("200")
 

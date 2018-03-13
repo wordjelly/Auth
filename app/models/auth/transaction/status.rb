@@ -1,7 +1,7 @@
 class Auth::Transaction::Status
 	
 	include Mongoid::Document
-	include Mongoid::TimeStamps
+	include Mongoid::Timestamps
 
 	ALLOW_TO_CONTINUE_IN_SECONDS = 300
 
@@ -9,7 +9,7 @@ class Auth::Transaction::Status
 	## "COMPLETE"
 	## "FAILED"
 	field :condition, type: String
-	embedded_in :event, :class => "Auth::Transaction::Event"
+	embedded_in :event, :class_name => "Auth::Transaction::Event"
 	
 
 	def is_complete?

@@ -1,10 +1,10 @@
 class Auth::Transaction::Event
 	
 	include Mongoid::Document
-	include Mongoid::TimeStamps
+	include Mongoid::Timestamps
 
-	embedded_in :event_holder, :class => "Auth::Transaction::EventHolder"
-	embeds_many :statuses, :class => "Auth::Transaction::Status"
+	embedded_in :event_holder, :class_name => "Auth::Transaction::EventHolder"
+	embeds_many :statuses, :class_name => "Auth::Transaction::Status"
 
 	attr_accessor :event_index
 
@@ -40,22 +40,27 @@ class Auth::Transaction::Event
 
 	validate do |event|
 		
-		errors.add(:object_id,"the object id must be a valid bson object id") unless BSON::ObjectId.legal?(event.object_id)
+		if event.object_id
+			errors.add(:object_id,"the object id must be a valid bson object id") unless BSON::ObjectId.legal?(event.object_id)
+		end
 		
 	end
 
 
 	## arguments is an array of hashes.
 	## the method has to know what to do with them.
-	field :arguments, type: Array
+	field :arguments, type: Hash
 
 	## @return[Array] array of Auth::Transaction::Event objects.
 	## or nil, in case the #object_id of this event cannot be found.
 	def process
-		nil unless get_object
-		self.output_events = get_object.send(method_to_call,arguments)
+		if self.object_id
+			nil unless get_object
+			self.output_events = get_object.send(method_to_call,arguments)
+		else
+			self.output_events = self.object_class.constantize.send(method_to_call,arguments)
+		end
 		self.output_events
-		## ideally commit these events if any, and simultaneously push the status of the current event as completed.
 	end
 
 	def get_object
