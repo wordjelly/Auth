@@ -55,8 +55,9 @@ class Auth::Transaction::EventHolder
 				
 				ev_updated.event_index = key
 
-
 				if events_to_commit = ev_updated.process
+
+					puts "came past event processing."
 
 					unless ev_updated = commit_new_events_and_mark_existing_event_as_complete(events_to_commit,ev_updated)
 						
@@ -115,7 +116,11 @@ class Auth::Transaction::EventHolder
 	## @return [Auth::Transaction::EventHolder] event_holder object after the update.
 	def commit_new_events(latest_event_holder,events,ev)
 
+		puts "came to commit new events."
+
 		events_size = latest_event_holder.events.size
+
+		puts "events size is: #{events_size}"
 
 		qr = {
 			"$and" => [
@@ -131,7 +136,11 @@ class Auth::Transaction::EventHolder
 					}
 				}
 			]
-		}
+		}	
+
+		puts "query results is:"
+
+		puts Auth::Transaction::EventHolder.where(qr).count
 
 		## if the last event is this event -> go and push all the new events, where the last event id is this.
 		doc_after_update = Auth::Transaction::EventHolder.where(qr).find_one_and_update(
@@ -150,8 +159,10 @@ class Auth::Transaction::EventHolder
 		)
 
 		if doc_after_update
+			puts "Returning doc after update."
 			return doc_after_update
 		else
+			puts "no doc after update."
 			## only in case someone else did not update it, we need to call an error and abort.
 			## so suppose someone else updated it?
 			latest_event_holder = Auth::Transaction::EventHolder.find(self.id)
@@ -168,7 +179,13 @@ class Auth::Transaction::EventHolder
 	## @return[Auth::Transaction::EventHolder] returns the doc after update.
 	def mark_existing_event_as_complete(latest_event_holder,events,ev)
 
+		puts "came to mark existing event as complete."
+
+
+
 		if latest_event_holder.events[ev.event_index].statuses.last && latest_event_holder.events[ev.event_index].statuses.last.condition == "COMPLETED"
+
+			puts "existing event is already completed."
 
 			## do nothing.
 			return latest_event_holder
@@ -196,6 +213,8 @@ class Auth::Transaction::EventHolder
 				]
 			}					
 
+			puts "query result is:"
+			puts Auth::Transaction::EventHolder.where(qr).count
 
 			doc_after_update = Auth::Transaction::EventHolder.where(qr).find_one_and_update(
 				{
@@ -210,6 +229,9 @@ class Auth::Transaction::EventHolder
 				}
 			)
 
+			puts "doc after update is:"
+			puts doc_after_update.to_s
+
 			return doc_after_update
 
 		end
@@ -219,7 +241,9 @@ class Auth::Transaction::EventHolder
 	## @return[Auth::Transaction::EventHolder] returns the event holder if the given event is not the last event in the events_array.
 	## otherwise returns nil.
 	def new_events_already_committed(latest_event_holder,ev)
+		puts "came to new events already commited."
 		return latest_event_holder if (latest_event_holder.events.last.id.to_s != ev.id.to_s)
+		puts "returning nil."
 		return nil
 	end
 
@@ -227,12 +251,19 @@ class Auth::Transaction::EventHolder
 	## nil : if there is any failure.
 	def commit_new_events_and_mark_existing_event_as_complete(events,ev)
 
+		puts "came to commit new events and mark existing event as complete."
+
 		## get the latest event_holder
 		latest_event_holder = Auth::Transaction::EventHolder.find(self.id)
+
+		puts "latest event holder"
+
+		puts latest_event_holder
 
 		if new_events_already_committed(latest_event_holder,ev)
 			return mark_existing_event_as_complete(latest_event_holder,events,ev)
 		else
+			puts "new events not already committed."
 			if latest_event_holder = commit_new_events(latest_event_holder,events,ev)
 				return mark_existing_event_as_complete(latest_event_holder,events,ev)
 			else
@@ -279,9 +310,10 @@ class Auth::Transaction::EventHolder
 	end
 
 
-	## @param[Event] 
+	## @param[Auth::Transaction::Event] 
+	## @return[Auth::Transaction:Event], the updated event.
 	def mark_event_as_processing(ev)
-		#puts "came to mark event as processing."
+		puts "came to mark event as processing."
 		
 
 		statuses_query = 
@@ -322,9 +354,6 @@ class Auth::Transaction::EventHolder
 				},
 				{
 					"events.#{ev.event_index}._id" => BSON::ObjectId(ev.id.to_s)
-				},
-				{
-					"$or" => or_query
 				}
 			]
 		}
@@ -332,19 +361,29 @@ class Auth::Transaction::EventHolder
 		qr["$and"] << statuses_query
 		qr["$and"].flatten!
 
+		query_result = Auth::Transaction::EventHolder.where(qr)
+
+		puts "the count of the query result is:"
+		puts query_result.count
+
 		
 		doc_after_update = Auth::Transaction::EventHolder.where(qr).find_one_and_update(
 			{
 					"$push" => {
-						"events.#{ev.event_index}.statuses" => Auth::Transaction::Status.new(:condition => "COMPLETED", :created_at => Time.now, :updated_at => Time.now).attributes
+						"events.#{ev.event_index}.statuses" => Auth::Transaction::Status.new(:condition => "PROCESSING", :created_at => Time.now, :updated_at => Time.now).attributes
 					}
 			},
 			{
 					:return_document => :after
 			}
 		)
+
 		return nil unless doc_after_update
+		
+		puts "returning doc after update , marked it as processing."
+
 		return doc_after_update.events[ev.event_index]
+	
 	end
 
 	def get_events
