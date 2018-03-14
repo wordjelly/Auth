@@ -213,6 +213,12 @@ class Auth::Transaction::EventHolder
 =end
 	end
 
+	def before_mark_existing_event_as_complete(latest_event_holder,events,ev)
+
+
+
+	end
+
 	## @logic
 	## will first check if the event is already marked as completed?
 	## if yes, then returns the latest_event_holder passed in.
@@ -221,18 +227,11 @@ class Auth::Transaction::EventHolder
 	## @return[Auth::Transaction::EventHolder] returns the doc after update.
 	def mark_existing_event_as_complete(latest_event_holder,events,ev)
 
-		puts "came to mark existing event as complete."
 
+		
+			before_mark_existing_event_as_complete(latest_event_holder,events,ev)
 
-
-		if latest_event_holder.events[ev.event_index].statuses.last && latest_event_holder.events[ev.event_index].statuses.last.condition == "COMPLETED"
-
-			puts "existing event is already completed."
-
-			## do nothing.
-			return latest_event_holder
-
-		else
+			puts "came to mark existing event as complete."
 
 			## otherwise mark the event at the event index as completed, where it is not completed.
 
@@ -276,7 +275,7 @@ class Auth::Transaction::EventHolder
 
 			return doc_after_update
 
-		end
+		
 
 	end
 

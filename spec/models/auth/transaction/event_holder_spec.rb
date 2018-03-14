@@ -331,7 +331,7 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 							
 							event_holder.events << events
 							event_holder.events.flatten!
-							puts "save result----------------------------------------------------------------------------:"
+							
 							res = event_holder.save
 							puts res.to_s				
 						end
@@ -342,6 +342,15 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 
 					## what we want returned is that the 
 					expect(event_holder.abort_function).to eq("could not commit new events or mark event as completed:#{event.id.to_s}")
+
+					Auth::Transaction::EventHolder.class_eval do  
+
+						def before_commit_new_events(latest_event_holder,events,ev)
+										
+						end
+
+					end
+
 				end
 
 
@@ -350,18 +359,62 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 
 			context " -- marks event as completed -- " do 
 
-				it " -- something else has already marked the event as completed -- " do 
+				it " -- something else has already marked the event as completed -- " do 	
+
+					event_holder = Auth::Transaction::EventHolder.new
+					event = Auth::Transaction::Event.new
+					event.method_to_call = "clone_to_add_cart_items"
+					event.object_class = Auth.configuration.assembly_class
+					event.object_id = @assembly.id.to_s
+					event.arguments = {:product_id => @products.map{|c| c = c.id.to_s}}
+					## first lets just test creation.
+					event_holder.events << event
+					expect(event_holder.save).to be_truthy
+
+
+					Auth::Transaction::EventHolder.class_eval do 
+
+
+
+
+						def before_mark_existing_event_as_complete(latest_event_holder,events,ev)
+
+							event_holder = Auth::Transaction::EventHolder.find(self.id.to_s)
+							
+							event_holder.events[ev.event_index].statuses << Auth::Transaction::Status.new(:condition => "COMPLETED")
+							
+							res = event_holder.save
+									
+
+						end
+
+					end
+
+					event_holder.process
+
+					expect(event_holder.abort_function).to eq("could not commit new events or mark event as completed:#{event.id.to_s}")
+
+					Auth::Transaction::EventHolder.class_eval do 
+
+
+
+
+						def before_mark_existing_event_as_complete(latest_event_holder,events,ev)
+
+							
+									
+
+						end
+
+					end
+
 
 				end
 
 			end
 
 
-			context " -- functions called in overlapping manner due to two processes. -- " do 
-
-
-			end
-
+			
 		
 		end
 
