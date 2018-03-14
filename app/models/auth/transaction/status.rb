@@ -17,7 +17,7 @@ class Auth::Transaction::Status
 	end
 
 	def is_processing?
-		self.condition == "PROCESSING" && (Time.now.to_i - self.modified_at) < ALLOW_TO_CONTINUE_IN_SECONDS
+		self.condition == "PROCESSING" && (Time.now - self.updated_at) < ALLOW_TO_CONTINUE_IN_SECONDS
 	end
 
 	def is_failed?

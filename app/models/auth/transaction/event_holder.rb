@@ -34,22 +34,18 @@ class Auth::Transaction::EventHolder
 
 		events.each_with_index {|ev,key|
 
-			puts "processing event"
-			puts ev.attributes.to_s
-
 			ev.event_index = key
 
 			if (ev._processing? || ev._failed?)
-				puts "processing or failed."
-				abort_function = true 
+				#puts "processing or failed."
+				abort_function = ev._processing? ? "processing:#{ev.id.to_s}" : "failed:#{ev.id.to_s}"  
 				break
 			end
 
 			unless ev._completed?
-				puts "not completed."
 
 				unless ev_updated = mark_event_as_processing(ev)
-					abort_function = true 
+					abort_function = "could_not_mark_as_processing:#{ev.id.to_s}"
 					break
 				end
 				
@@ -57,30 +53,28 @@ class Auth::Transaction::EventHolder
 
 				if events_to_commit = ev_updated.process
 
-					puts "came past event processing."
+					#puts "came past event processing."
 
 					unless ev_updated = commit_new_events_and_mark_existing_event_as_complete(events_to_commit,ev_updated)
 						
 						unless event_marked_complete_by_other_process?(ev_updated)
-							abort_function = true 
+							abort_function = "event_not_marked_as_commpleted_by_another_process:#{ev_updated.id.to_s}" 
 							break
 						end
 
 					end
 				else
-					abort_function = true
+					abort_function = "event_processing_returned_nil:#{ev_updated.id.to_s}"
 					break
 				end
 			end
 		}
 
-		return unless (events.count == get_events.count)
-
-		return if abort_function == true
-
+		return abort_function if abort_function
 
 		self.status = 1
-
+		
+		## as long as the number of events, has not changed, update the event_holder as completed for processing.
 
 		Auth::Transaction::EventHolder.where({
 			"$and" => [
@@ -89,6 +83,11 @@ class Auth::Transaction::EventHolder
 				},
 				{
 					"status" => self.status_was
+				},
+				{
+					"events.#{events.count}" => {
+						"$exists" => false
+					}
 				}
 			]
 		}).find_one_and_update(

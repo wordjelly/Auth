@@ -97,32 +97,72 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 				expect(event_holder.events[0].statuses[1].condition).to eq("COMPLETED")
 				expect(event_holder.events.count).to eq(2)
 				expect(event_holder.events[0].statuses.count).to eq(2)
+				expect(event_holder.status).to be_nil
+
+			end
+
+			it " -- marks event holder status as completed, if event count does not change -- " do 
+
+				## lets add an event that does not produce additional events.
+
+				## for that purpose we can create another object.
+				et = Auth::Transaction::EventTest.new
+				expect(et.save).to be_truthy
+
+				event_holder = Auth::Transaction::EventHolder.new
+				event = Auth::Transaction::Event.new
+				event.method_to_call = "does_not_return_event"
+				event.object_class = "Auth::Transaction::EventTest"
+				event.object_id = et.id.to_s
+				event.arguments = {}
+				## first lets just test creation.
+				event_holder.events << event
+				expect(event_holder.save).to be_truthy
+
+				event_holder.process
+
+				expect(event_holder.status).to eq(1)
+
+			end
+
+
+			it " -- does not process event, if it is already processing -- " do 
+
+				## so the first time should return that it returned as nil.
+				et = Auth::Transaction::EventTest.new
+				expect(et.save).to be_truthy
+
+				event_holder = Auth::Transaction::EventHolder.new
+				event = Auth::Transaction::Event.new
+				event.method_to_call = "returns_nil"
+				event.object_class = "Auth::Transaction::EventTest"
+				event.object_id = et.id.to_s
+				event.arguments = {}
+				## first lets just test creation.
+				event_holder.events << event
+				expect(event_holder.save).to be_truthy
+
+				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")
+
+
+				expect(event_holder.process).to eq("processing:#{event.id.to_s}")
+
 				
 
 			end
 
-			
 
+			it " -- processes event if , its processing has exceeded the period -- " do 
+
+				## so how to simulate this eventuality
+
+
+			end
 		
 		end
 
-		context " -- aborts if  -- " do 
 
-			it " --  any event is processing or failed -- " do 
-
-			end
-
-			it " -- an event object could not be found -- " do 
-
-			end
-
-			it " -- a commit failed to mark an event as completed, and the event was not already marked as completed -- " do 
-
-
-			end
-
-
-		end
+		
 
 	end
 	
