@@ -29,7 +29,27 @@ class Auth::Transaction::EventHolder
 	## proceed, till end,now finally check event count, if not_equal, to start_count, means that many events, were added. exit out of function, without changing the status.
 	## otherwise, set status as 1, where the status was not 1.
 	def process
-	
+		
+		return unless doc_after_process_count_increment =  Auth::Transaction::EventHolder.where(
+			{
+				"_id" => BSON::ObjectId(self.id.to_s)
+			}
+		).find_one_and_update({
+			"$inc" => {
+				"process_count" => 1
+			}
+		},{
+			:return_document => :after
+		})
+
+		
+		
+		## where the status of the last event is not completed, update as failed, if the count in the returned document is greater than permitted count
+
+		## use the returned doc for that.
+
+
+
 		#####################################################
 		##
 		##
@@ -123,9 +143,6 @@ class Auth::Transaction::EventHolder
 			{
 				"$set" => {
 					"status" => self.status
-				},
-				"$inc" => {
-					"process_count" => 1
 				}
 			},
 			{
