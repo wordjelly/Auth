@@ -46,6 +46,7 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 				@assembly.save
 
 				Auth::Transaction::EventHolder.delete_all
+				Auth::Transaction::EventTest.delete_all
 
 			end
 
@@ -152,17 +153,79 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 			end
 
 
-			it " -- processes event if , its processing has exceeded the period -- " do 
+			it " -- processes event if , its processing has exceeded the period -- ", :process_issue => true do 
 
 				## so how to simulate this eventuality
+				## so we have to manually set the last status of the last event, as more than 30 mins prior.
+				et = Auth::Transaction::EventTest.new
+				expect(et.save).to be_truthy
+
+				event_holder = Auth::Transaction::EventHolder.new
+				event = Auth::Transaction::Event.new
+				event.method_to_call = "returns_nil"
+				event.object_class = "Auth::Transaction::EventTest"
+				event.object_id = et.id.to_s
+				event.arguments = {}
+				## first lets just test creation.
+				event_holder.events << event
+				expect(event_holder.save).to be_truthy
+
+				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")				
+
+				## now set that status.
+				event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
+				puts JSON.pretty_generate(event_holder.attributes)
+				
+				event_holder.events[-1].statuses[-1].updated_at = Time.now - 1.day
+
+				## it is saying could not mark as processing here.
+
+				expect(event_holder.save).to be_truthy
+
+				## now run it again.
+
+				## and what should happen, again should come out at nil..
+				
+				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")					
 
 
 			end
+
+			it " -- skips the event if the event has completed -- " do 
+
+
+
+			end
+
+
+			context " -- mark event as processing -- " do 
+
+
+
+
+			end
+
+
+			context " -- commit new events -- " do 
+
+
+
+			end
+
+
+			context " -- marks event as completed -- " do 
+
+
+			end
+
+
+			context " -- functions called in overlapping manner due to two processes. -- " do 
+
+
+			end
+
 		
 		end
-
-
-		
 
 	end
 	

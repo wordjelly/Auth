@@ -53,15 +53,9 @@ class Auth::Transaction::EventHolder
 
 				if events_to_commit = ev_updated.process
 
-					#puts "came past event processing."
-
 					unless ev_updated = commit_new_events_and_mark_existing_event_as_complete(events_to_commit,ev_updated)
-						
-						unless event_marked_complete_by_other_process?(ev_updated)
-							abort_function = "event_not_marked_as_commpleted_by_another_process:#{ev_updated.id.to_s}" 
-							break
-						end
-
+						abort_function = "could not commit new events or mark event as completed:#{ev_updated.id.to_s}"
+						break
 					end
 				else
 					abort_function = "event_processing_returned_nil:#{ev_updated.id.to_s}"
@@ -114,6 +108,8 @@ class Auth::Transaction::EventHolder
 	## if the update fails, it will call {@new_events_already_committed}, and return its result.
 	## @return [Auth::Transaction::EventHolder] event_holder object after the update.
 	def commit_new_events(latest_event_holder,events,ev)
+
+		return latest_event_holder if events.empty?
 
 		puts "came to commit new events."
 
@@ -325,14 +321,14 @@ class Auth::Transaction::EventHolder
 					
 
 		if ev.statuses.size > 0
-			
+			puts "events statuses size was more than 0."
 			## want to make sure that the size  is nil.
 			## and the size - 1 is processing.
 			## that way you can get the last one.
 			## otherwise you fail.
 			## and its no longer an or query.
 
-			statuses_query << 
+			statuses_query =
 			[
 				{
 					"events.#{ev.event_index}.statuses.#{ev.statuses.size - 1}.condition" => "PROCESSING"
@@ -359,6 +355,9 @@ class Auth::Transaction::EventHolder
 
 		qr["$and"] << statuses_query
 		qr["$and"].flatten!
+
+		puts "the query is:"
+		puts qr.to_s
 
 		query_result = Auth::Transaction::EventHolder.where(qr)
 
