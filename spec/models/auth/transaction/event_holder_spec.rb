@@ -143,10 +143,10 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 				event_holder.events << event
 				expect(event_holder.save).to be_truthy
 
-				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")
+				expect(event_holder.process.abort_function).to eq("event_processing_returned_nil:#{event.id.to_s}")
 
 
-				expect(event_holder.process).to eq("processing:#{event.id.to_s}")
+				expect(event_holder.process.abort_function).to eq("processing:#{event.id.to_s}")
 
 				
 
@@ -170,7 +170,7 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 				event_holder.events << event
 				expect(event_holder.save).to be_truthy
 
-				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")				
+				expect(event_holder.process.abort_function).to eq("event_processing_returned_nil:#{event.id.to_s}")				
 
 				## now set that status.
 				event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
@@ -185,29 +185,164 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 				## now run it again.
 
 				## and what should happen, again should come out at nil..
-				
-				expect(event_holder.process).to eq("event_processing_returned_nil:#{event.id.to_s}")					
+
+				expect(event_holder.process.abort_function).to eq("event_processing_returned_nil:#{event.id.to_s}")					
 
 
 			end
 
 			it " -- skips the event if the event has completed -- " do 
 
+				
+				event_holder = Auth::Transaction::EventHolder.new
+				event = Auth::Transaction::Event.new
+				event.method_to_call = "clone_to_add_cart_items"
+				event.object_class = Auth.configuration.assembly_class
+				event.object_id = @assembly.id.to_s
+				event.arguments = {:product_id => @products.map{|c| c = c.id.to_s}}
+				## first lets just test creation.
+				event_holder.events << event
+				expect(event_holder.save).to be_truthy
 
+				event_holder.process
+
+				## what should happen ? it should create a 
+				## it should commit a new event.
+				## and mark this event as completed.
+				event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
+
+				expect(event_holder.events[0].statuses[1].condition).to eq("COMPLETED")
+				expect(event_holder.events.count).to eq(2)
+				expect(event_holder.events[0].statuses.count).to eq(2)
+				expect(event_holder.status).to be_nil
+
+
+
+
+				## now suppose we call proces again,
+				## we don't want it to have completed.
+				event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
+
+				## call process on it.
+				## 
+				event_holder.process
+				
+				expect(event_holder.events_ignored_since_already_completed.first.id.to_s).to eq(event.id.to_s)
 
 			end
 
 
 			context " -- mark event as processing -- " do 
+				
+				## there's no way to test the condition, wherein , a status is added just before the find_and_update call is made, and even that one is still processing.
+				## or is there a way
+				## 
+				it " -- failure to mark event as processing for any reason, will cause the whole thing to abort -- " do 
+
+					event_holder = Auth::Transaction::EventHolder.new
+					event = Auth::Transaction::Event.new
+					event.method_to_call = "clone_to_add_cart_items"
+					event.object_class = Auth.configuration.assembly_class
+					event.object_id = @assembly.id.to_s
+					event.arguments = {:product_id => @products.map{|c| c = c.id.to_s}}
+					## first lets just test creation.
+					event_holder.events << event
+					expect(event_holder.save).to be_truthy
+
+					event_holder.process
+
+					## what should happen ? it should create a 
+					## it should commit a new event.
+					## and mark this event as completed.
+					event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
+
+					expect(event_holder.events[0].statuses[1].condition).to eq("COMPLETED")
+					expect(event_holder.events.count).to eq(2)
+					expect(event_holder.events[0].statuses.count).to eq(2)
+					expect(event_holder.status).to be_nil
 
 
 
+
+					## now suppose we call proces again,
+					## we don't want it to have completed.
+					event_holder = Auth::Transaction::EventHolder.find(event_holder.id)
+
+					## now if we call process.
+					## then this should happen.
+
+					## make it so that another status is inserted, with processing, only, but then the given status count will be different.
+					Auth::Transaction::EventHolder.class_eval do  
+
+						def before_mark_event_as_processing(ev)
+							## push an additinal status.
+							event_holder = Auth::Transaction::EventHolder.find(self.id.to_s)
+							event_holder.events[ev.event_index].statuses << Auth::Transaction::Status.new(:condition => "PROCESSING")
+							puts "save result:"
+							res = event_holder.save
+							puts res.to_s						
+						end
+
+					end
+
+
+					event_holder.process
+
+					expect(event_holder.abort_function).to eq	("could_not_mark_as_processing:#{event_holder.events[-1].id.to_s}")
+
+					## reset the class eval.
+					Auth::Transaction::EventHolder.class_eval do  
+
+						def before_mark_event_as_processing(ev)
+												
+						end
+
+					end
+
+
+				end
+
+								
 
 			end
 
 
 			context " -- commit new events -- " do 
 
+				it " -- something else has already committed the new events -- " do 
+
+					event_holder = Auth::Transaction::EventHolder.new
+					event = Auth::Transaction::Event.new
+					event.method_to_call = "clone_to_add_cart_items"
+					event.object_class = Auth.configuration.assembly_class
+					event.object_id = @assembly.id.to_s
+					event.arguments = {:product_id => @products.map{|c| c = c.id.to_s}}
+					## first lets just test creation.
+					event_holder.events << event
+					expect(event_holder.save).to be_truthy
+
+					## before doing, this mutate the before_commit_new_events method, so that 
+
+					Auth::Transaction::EventHolder.class_eval do  
+
+						def before_commit_new_events(latest_event_holder,events,ev)
+							## push an additinal status.
+							event_holder = Auth::Transaction::EventHolder.find(self.id.to_s)
+							
+							event_holder.events << events
+							event_holder.events.flatten!
+							puts "save result----------------------------------------------------------------------------:"
+							res = event_holder.save
+							puts res.to_s				
+						end
+
+					end
+
+					event_holder.process
+
+					## what we want returned is that the 
+					expect(event_holder.abort_function).to eq("could not commit new events or mark event as completed:#{event.id.to_s}")
+				end
 
 
 			end
@@ -215,6 +350,9 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 
 			context " -- marks event as completed -- " do 
 
+				it " -- something else has already marked the event as completed -- " do 
+
+				end
 
 			end
 

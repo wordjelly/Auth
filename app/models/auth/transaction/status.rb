@@ -13,7 +13,7 @@ class Auth::Transaction::Status
 	
 
 	def is_complete?
-		self.condition == "COMPLETE"
+		self.condition == "COMPLETED"
 	end
 
 	def is_processing?

@@ -48,8 +48,7 @@ class Auth::Workflow::Sop
 		product_ids = options[:product_ids]
 		assembly_id = options[:assembly_id]
 
-		## before creating order -> process_step
-		## that calls requirement.sufficient? 
+		
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
@@ -115,17 +114,25 @@ class Auth::Workflow::Sop
 
 		## so we want to return an array of SOP objects.
 
+
+
 		#res.each do |result|
 		#	puts JSON.pretty_generate(result)
 		#end
 
-		
-		return [] unless res.count > 0
+		puts "res is :#{res}"
 
-		res.first["sops"].map{|sop_hash|
+		begin
+			return [] unless res
+			return [] unless res.count > 0
 
-			Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
-		}
+			res.first["sops"].map{|sop_hash|
+
+				Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
+			}
+		rescue
+			return []
+		end
 
 	end
 
