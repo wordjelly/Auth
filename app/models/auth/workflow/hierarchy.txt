@@ -77,17 +77,52 @@ cart_items =>
 --------------------------------------------------------------
 transit_object => keeps a track of all the states
 
-1> clone the assembly -> if its not already cloned -> how to decide if to clone a new assembly ? or add to another existing assembly ? -> ok for now we clone -
-before cloning assembly, we have to search -> if another assembly is ongoing, then its ok, otherwise, 
+1> clone the assembly -> if its not already cloned -> how to decide if to clone a new assembly ? create the concept of assembly validity, wherein the assembly is cloned only if validity of previous assembly has expired. A function determines the validity of the assembly.
 
--- where will we keep the cart_items.?
--- 
+
 
 2> arguments : {:product_ids => [], assembly_id => },        method_to_call : get_applicable_sops, object_class: assembly., object_id : from step(1) 
 
 for each sop, generated from step 2.
 
-3> arguments : {assembly_id => , :product_ids => []}, method_to_call : create_orders, object_class : sop, object_id : sop_id, while doing this a map will have to maintained, for every product, whether or not an sop is ever going to be hit which has this product id applicable to it?
+3> arguments : {assembly_id => , :product_ids => []}, method_to_call : create_orders, object_class : sop, object_id : sop_id, 
+
+in the on_create callback :
+1. do i have what i need ?
+	-> if this is the first order on this sop ?
+		-> check what consumables will be needed, (not dependent requirements), and send the events to mark for product.
+	-> this is not the first order on this sop ?
+		-> all schedules on this sop are either finished or failed
+			-> dont do anything.
+		-> some schedules are still to be done
+			-> dont check anything, wait for these to be executed.
+
+4> arguments {sop_id => whatever, assembly_id => whatever, }, object_class => product, object_id => consumable_id_to_be_marked_for_the_given_sop, method_to_call : mark_for_sop. 
+
+When an sop is marked as complete, then an event should be pushed to schedule it.
+
+5> arguments {assembly_id => whatever}, object_class => sop, object_id => sop_id, method_to_call : schedule
+
+
+now while executing a sop, we consider the additional orders as well, and find a) we don't have everything we need. -> create an event :
+
+6> arguments {assembly_id => whatever}, object_class => order, object_id => order which cannot be processed, method_to_call => evaluate_from_beginning.
+
+In this method -> take each sop to which this order was added from the beginning -> call "do_we_have_everything_we_need" => if yes, go to next method, otherwise go to last successfull one, and from there, till the very end -> do the same process as from 3 onwards, except in 3 don't create the order, just do the callback,and when you create the schedule events, make sure the schedule is added, but only for that order.
+
+
+
+
+** now come the eventualities of adding a product later on.
+
+so suppose a product is added later, what is different.
+the idea was that we add the order to all applicable sop's
+after_create consumables would be checked.
+** and about the map.
+
+
+while doing this a map will have to maintained, for every product, whether or not an sop is ever going to be hit which has this product id applicable to it?, in the 
+
 
 if the answer is no for any product -> then an event will have to pushed, which will do the flow step defined below.
 if the answer is yes, we can wait for that sop to be triggered to see if flow step needs to be done or not.
@@ -96,10 +131,55 @@ Flow:
 
 start from the first sop that is applicable to the product.
 are the sample requirements satisfied ?
-	- no -> the previous sop -> go there and schedule from there.
+	- no -> the previous sop -> go there and schedule from there, go there and schedule means what?
+	- we need to schedule every sop thereafter.
+	- to do this, we need to add a set of events.
+	- but when this sop is added, it has to have a scheduling mechanism which works a bit differently.
+	- sop will also have a set of schedules
+	- basically
+	- this comes down to sop sructure.
 	- yes -> go to next sop.
 
+	- sop { 
+		
+		"orders" => [
+			{},
+			{},
+			{}
+		],
+		"schedules" => [
+			{},
+			{ 
+				"just adding the order is ok.",
+				"but thereafter but then, the sample requirements will not be satisfied, so "
+			},
+			{
+				"in case a schedule has an order id, then only process that order, if it doesn;t have an order "
+			}
+		]
 
+	}
+
+- how to earmark sample for a sop even before that sop has been done? - this is am important point, and just adding the orders is not enough, we have to check if there is enough sample.
+but what if all the sop's cant be done, due to a sample constraint somewhere down the line.
+when adding order to sop -> sample has to be checked, it is a part of add order.
+what about reserving samples on adding.
+there are two reasons why it could not be done :
+1. there was a prexistent sample shortage.
+
+-after adding all the orders , we start scheduling, so before scheduling even one, we have to make sure we have the sample requirements, and segregate them at that step itself.
+
+so how will that be done, evented. -> lets say after adding order to sop -> it creates a event, that says, decrement, n samples from the product, and mark them for this particular sop.
+
+and it does that for every single sop, order pair.
+
+now that part is subsequently run, 
+
+and only after that, is the scheduling phase going to begin.
+
+so suppose we 
+
+2. the shortage happened dynamically.
 
 - so basically order has to be 
 
