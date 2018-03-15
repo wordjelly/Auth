@@ -77,11 +77,55 @@ cart_items =>
 --------------------------------------------------------------
 transit_object => keeps a track of all the states
 
-1> searching for applicable_sops -> if completed, then should have the applicable sops here, otherwise will go back to that.
+1> clone the assembly -> if its not already cloned -> how to decide if to clone a new assembly ? or add to another existing assembly ? -> ok for now we clone -
+before cloning assembly, we have to search -> if another assembly is ongoing, then its ok, otherwise, 
 
-2> adding to applicable_sops -> after adding to each sop should note success/failure.
+-- where will we keep the cart_items.?
+-- 
 
-3> 
+2> arguments : {:product_ids => [], assembly_id => },        method_to_call : get_applicable_sops, object_class: assembly., object_id : from step(1) 
+
+for each sop, generated from step 2.
+
+3> arguments : {assembly_id => , :product_ids => []}, method_to_call : create_orders, object_class : sop, object_id : sop_id, while doing this a map will have to maintained, for every product, whether or not an sop is ever going to be hit which has this product id applicable to it?
+
+if the answer is no for any product -> then an event will have to pushed, which will do the flow step defined below.
+if the answer is yes, we can wait for that sop to be triggered to see if flow step needs to be done or not.
+
+Flow:
+
+start from the first sop that is applicable to the product.
+are the sample requirements satisfied ?
+	- no -> the previous sop -> go there and schedule from there.
+	- yes -> go to next sop.
+
+
+
+- so basically order has to be 
+
+4> suppose that sop status is :
+
+   - so i have an array of applicable sop's with the product ids's to which they are applicable.
+   - now i want to know whethere i need to branch from a particular sop - which could be the very beginning or anywhere thereof.
+   - it just adds the orders
+   - now the next job is also added simultaneously
+   - the initial state of the order is just nothing.
+   - now what will it do?
+   - start from the back ? 
+   - let's say a particular sop is running.
+   - it picks up all the orders, and checks sample requirements , if they don't get satisfied, it will run upto whatever it ould do.
+   - the first time an order is picked up, and not satisifed, it should then be attempted in a branch concept.
+   - so assume an order sample requirements are not satisfied.
+   - in that case, create an event, where -> it is going to search all the applicable prior sops, for a point where the sample requirements are applicable, and schedule it from there onwards.
+   - so it will have to go over each sop, till the point where it is not applicable and consider the previous one.
+   - scheduling events are then created for making the schedules on those sop's for that order.
+   - finally, when the order is scheduled, at that time the product amounts are minused.
+   - what else remains here ? 
+   - product provisioning.
+   - how to mark sop as done, step as done,
+   - how to add images
+
+
 --------------------------------------------------------------
 
 clones assembly =>
