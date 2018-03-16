@@ -46,16 +46,47 @@ class Auth::Workflow::Requirement
     ## the product id of the requirement.
     field :product_id, type: String
 
-    def sufficient?(product_ids)  
-     
-      product_count = product_ids.size
+    ###########################################################
+    ##
+    ##
+    ## set on calling sufficient.
+    ##
+    ##########################################################
 
-      consumables_count = consumables_required(product_count)
+    ## consumables count
+    ## the required number of consumables.
+
+    attr_accessor :consumables_count
+
+
+    ## other_definitions
+    ## the required state of the requirement.
+
+
+    attr_accessor :state
+
+    def sufficient?(orders)  
+      
 
       ## now do we already have a reference_requirement_id ?
       if reference_requirement
         ## check if there are enough requirements, otherwise, 
+        ## what should be state of this requirement based on orders.
+        ## that can be calculated here.
+        ## or its going to return what here
+        ## that we need a reference requirement , but that it should have a certain state.
+        ## so it will return a state.
+        ## one thing will
+        ## return the state here.
       else
+
+        product_ids = orders.map{|c| c = c.cart_item_ids}.flatten
+
+        product_count = product_ids.size
+
+        consumables_count = consumables_required(product_count)
+
+        ##its basically going to return a consumable count.
 
       end
     

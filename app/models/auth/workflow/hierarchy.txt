@@ -80,7 +80,6 @@ transit_object => keeps a track of all the states
 1> clone the assembly -> if its not already cloned -> how to decide if to clone a new assembly ? create the concept of assembly validity, wherein the assembly is cloned only if validity of previous assembly has expired. A function determines the validity of the assembly.
 
 
-
 2> arguments : {:cart_item_ids => [], assembly_id => },        method_to_call : get_applicable_sops, object_class: assembly., object_id : from step(1) 
 
 for each sop, generated from step 2 - push the next event.

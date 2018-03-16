@@ -76,34 +76,25 @@ class Auth::Workflow::Step
 
 	end
 
-	## @param[Array] array of Auth::Workflow::Order or implementing class objects.
-	## @return[Boolean] true/false, depending on whether the requirements of this step can be satisfied to process the orders in the array
-	## the last order is queried to see if previous orders are to be considered in combination with it, or it is to be considered in isolation.
+	###########################################################
+	##
+	##
+	## requirement related functions.
+	##
+	##
+	###########################################################
+
+	def calculate_requirements(orders)
+		## whichever we have to do
+		## and how to do that, is simple
+		## just pass the orders to the 
+	end
+
 	def check_requirements(orders)
-		product_ids = get_product_ids_for_step(orders)
-		## now we call check requirements
-		## basically we call the state function on each requirement
-		## there we get the expected state.
-		## thereafter
-		
+		## will check if the requirments are adequate.
 	end
 
-
-
-	## @param[Array] array of order objects
-	def get_product_ids_for_step(orders)
-		## collect orders from the first one till it reaches one where the combine was false, otherwise gather all, remove duplicats, and then 
-		orders_to_be_combined = []
-		orders.map{|c|
-			orders_to_be_combined.clear unless c.combine
-			orders_to_be_combined << c unless c.order_is_cancellation?
-		}
-		product_ids = orders_to_be_combined.map{|c| c = c,product_ids}.uniq
-	end
-
-	def set_instructions(orders)
-
-	end
+	
 
 end
 

@@ -67,7 +67,6 @@ class Auth::Workflow::Order
 	##
 	##
 	##########################################################
-	
 
 	##########################################################
 	##
@@ -78,9 +77,7 @@ class Auth::Workflow::Order
 	##
 	##
 	##########################################################
-	## the order can be created inside an sop only if those cart_items_are not already there in it.
-	## so how to code this ?
-	## 
+	## the order is created inside the sop, only if the cart items of the order are not present in any prior order, inside the same sop.
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is an order model.
 		
@@ -133,6 +130,9 @@ class Auth::Workflow::Order
 		return model
 
 	end
+
+
+	
 
 
 =begin

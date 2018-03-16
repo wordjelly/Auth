@@ -34,7 +34,6 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 
 		context " -- creates -- " do 
 
-
 			it " -- creates an order with product_ids given an assembly and a stage and a sop " do
 
 				assembly = create_empty_assembly
@@ -98,9 +97,6 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 			
 				puts response.body.to_s
 				expect(response.code).to eq("422")
-
-
-				
 
 			end
 

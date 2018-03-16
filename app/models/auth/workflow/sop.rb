@@ -189,6 +189,7 @@ class Auth::Workflow::Sop
 		
 	end
 
+
 	## so it will look first if those orders are processed or processing or whatever.
 	## first we are just checking if previous order is processing.
 
@@ -213,6 +214,125 @@ class Auth::Workflow::Sop
 	## called from #index in authenticated_controller.
 	def get_many
 		self.class.find_applicable_sops({:product_ids => self.applicable_to_product_ids, :assembly_id => self.assembly_id})
+	end
+
+	## return[Boolean] true if the sop already has some order with any of the cart_items in this order.
+	def has_order_with_cart_items(order)
+		results =Auth.configuration.assembly_class.constantize.where({
+			"$and" => [
+				{
+					"_id" => BSON::ObjectId
+				},
+				{
+					"stages.#{order.stage_index}.sops.#{order.sop_index}.orders.cart_item_ids" => {
+						"$in" => order.cart_item_ids
+					}
+				}
+			]
+		})
+
+		return results && results.size == 1
+	end
+
+	## @return[Integer] the index in the sop's orders of the given order.
+	def get_order_index(order)
+		## unwind, and match.
+		order_els = Auth.configuration.assembly_class.constantize.collection.aggregate([
+				{
+				"$match" => {
+					"_id" => BSON::ObjectId(assembly_id) 
+				}
+				},
+				{
+					"$unwind" => {
+						"path" => "$stages",
+						"includeArrayIndex" => "stage_index"
+					}
+				},
+				{
+					"$unwind" => {
+						"path" => "$stages.sops",
+						"includeArrayIndex" => "sop_index"
+					}
+				},
+				{
+					"$unwind" => {
+						"path" => "$stages.sops.orders",
+						"includeArrayIndex" => "order_index"
+					}
+				},
+				{
+					"$match" => {
+						"_id" => BSON::ObjectId(order.id.to_s)
+					}
+				}
+			])
+
+		raise "did'nt find the order" unless order_els
+
+		return order_els.first["order_index"]
+
+
+	end	
+
+
+
+	##########################################################
+	##
+	##
+	##
+	## defs for events
+	##
+	##
+	##
+	##########################################################
+
+	def create_order(arguments={})
+		## so make an order
+		## suppose there are no arguments,
+		## it should register a failure.
+		return nil if 
+		
+		return nil if (arguments[:assembly_id].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:cart_item_ids].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_doc_version].blank?)
+
+		order = Auth.configuration.order_class.constantize.new(arguments)
+
+		if order_created = order.create_with_conditions(nil,nil,order)
+			return after_create_order(order_created)
+		else
+			return nil unless has_order_with_cart_items(order.cart_item_ids)
+			return after_create_order(order)
+		end
+
+	end
+
+
+	def after_create_order(order)
+		if get_order_index(order) == 0
+			## we want to return an array of events.
+			get_sop_requirements.map{|requirement|
+				e = Auth::Transaction::Event.new
+				e.arguments = {}
+				e.arguments[:requirement] = requirement.attributes
+				e.method_to_call = "mark_requirement"
+				requirement = e
+			}
+		else 
+			## do nothing.
+		end
+	end
+
+	## @return[Array] array of Auth::Workflow::Requirement objects. 
+	def get_sop_requirements
+		## so build_requirement/calculate requirement is on step.
+		## then check is also on step.
+		## then return requirements is also on step.
+		
+		## iterate each step -> 
+		## build requirements ->
+		## bypass step where we check if we have those requirements.
+		## return consumables needed ->
+		## and push an event, that will mark those products as being required.
 	end
 
 end
