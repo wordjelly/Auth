@@ -5,30 +5,16 @@ class Auth::Workflow::Order
 
   	embedded_in :sop, :class_name => Auth.configuration.sop_class
   	
-  	embeds_many :consumables, :class_name => Auth.configuration.consumable_class
+	field :cart_item_ids, type: Array
 
-
-	field :product_ids, type: Array
 
 	## "1 => add"
-	## "0 => cancel"
+	## "0 => remove"
 	field :action, type: Integer
 
 
-
-	## 0 => checking_requirements
-	## 1 => requirement_not_satisfied
-	## 2 => requirement_satisfied
-	## 3 => scheduling
-	## 4 => scheduled
-	## 5 => could not schedule
-	field :status, type: String
-
-	
 	field :schedules, type: String
 
-
-	field :combine, type: Boolean
 
 	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
@@ -41,19 +27,9 @@ class Auth::Workflow::Order
 	attr_accessor :order_index
 
 
-	validate :sop_can_process_order
-
 	validates :action, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
-	
-	validates :status, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 4}, allow_nil: true
-
-	validates_presence_of :combine
 		
-	validate do |order|
-		order.schedules.each do |schedule_id|
-			errors.add(:schedules,"the schedule must be a valid bson object") unless BSON::ObjectId.legal?(schedule_id)
-		end
-	end
+	
 	#########################################################
 	##
 	##
@@ -77,7 +53,7 @@ class Auth::Workflow::Order
 	end
 
 	def self.permitted_params
-		[{:order => [:action,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :order_index,{:product_ids => []}]},:id]
+		[{:order => [:action,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :order_index,{:cart_item_ids => []}]},:id]
 	end
 
 
@@ -102,10 +78,15 @@ class Auth::Workflow::Order
 	##
 	##
 	##########################################################
+	## the order can be created inside an sop only if those cart_items_are not already there in it.
+	## so how to code this ?
+	## 
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is an order model.
 		
 		return false unless model.valid?
+
+		
 
 		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
@@ -127,6 +108,11 @@ class Auth::Workflow::Order
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
 				},
+				{
+					"stages.#{model.stage_index}.sops.#{model.sop_index}.orders.cart_item_ids" => {
+						"$nin" => model.cart_item_ids
+					}
+				}
 			]
 		})
 		.find_one_and_update(
@@ -148,6 +134,8 @@ class Auth::Workflow::Order
 
 	end
 
+
+=begin
 	def sop_can_process_order
 		## the errors are added inside sop.can_process_order
 		get_sop.can_process_order(self)
@@ -188,11 +176,8 @@ class Auth::Workflow::Order
 			nil
 		end
 	end
+=end
+
 
 end
 
-## can you modify it?
-## if it has already been scheduled?
-## once order is added, it cannot be modified or deleted
-## a product id can be marked for deletion, 
-## but here only it has to call all the callbacks.

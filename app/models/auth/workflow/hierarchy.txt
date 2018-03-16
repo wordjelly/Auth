@@ -81,11 +81,17 @@ transit_object => keeps a track of all the states
 
 
 
-2> arguments : {:product_ids => [], assembly_id => },        method_to_call : get_applicable_sops, object_class: assembly., object_id : from step(1) 
+2> arguments : {:cart_item_ids => [], assembly_id => },        method_to_call : get_applicable_sops, object_class: assembly., object_id : from step(1) 
 
-for each sop, generated from step 2.
+for each sop, generated from step 2 - push the next event.
 
-3> arguments : {assembly_id => , :product_ids => []}, method_to_call : create_orders, object_class : sop, object_id : sop_id, 
+3> arguments : {assembly_id => , :cart_item_ids => []}, method_to_call : create_order, object_class : sop, object_id : sop_id. 
+
+= here ensure that the cart items combination in the order is searched for atomically while creating.
+= and the after create callback will be managed by event logic.
+= so now let me first focus on order object - its structure and creation logic.
+= schedules also should be created inside orders only.
+= or schedule references at least.
 
 in the on_create callback :
 1. do i have what i need ?

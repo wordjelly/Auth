@@ -395,6 +395,26 @@ module WorkflowSupport
     products
   end
 
+  def create_order_into_sop(assembly,stage,sop)
+
+    order = attributes_for(:add_order)
+    order[:cart_item_ids] = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+    order[:assembly_id] = assembly.id.to_s
+    order[:assembly_doc_version] = assembly.doc_version
+    order[:stage_id] = stage.id.to_s
+    order[:stage_doc_version] = stage.doc_version
+    order[:stage_index] = 0
+    order[:sop_id] = sop.id.to_s
+    order[:sop_doc_version] = sop.doc_version
+    order[:sop_index] = 0
+    order = Auth.configuration.order_class.constantize.new(order)
+    
+    assembly.stages[0].sops[0].orders << order
+
+    return order if assembly.save
+
+  end
+
 end
 
 RSpec.configure do |config|

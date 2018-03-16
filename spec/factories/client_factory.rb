@@ -100,8 +100,8 @@ FactoryGirl.define do
   end
 
 
-  factory :order_factory, class: Auth::Workflow::Order do 
-    product_ids [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+  factory :add_order, class: Auth::Workflow::Order do 
+    action 1
   end
 
 end
