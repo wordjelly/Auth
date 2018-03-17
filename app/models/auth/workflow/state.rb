@@ -1,5 +1,7 @@
 class Auth::Workflow::State
 
+	include Mongoid::Document
+
 	embedded_in :requirement, :class_name => Auth.configuration.requirement_class
 
 	## array of permitted values
@@ -20,26 +22,26 @@ class Auth::Workflow::State
 
 	field :current_value, type: String
 
-	field :required_value, type: String
+	attr_accessor :required_value
+
+	def self.setter_function_default
+		"
+			self.required_value = orders.size
+		"
+	end
 
 	field :setter_function, type: String, default: setter_function_default
 
 
-	## will multiply the incoming value
-	def setter_function_default
-		"
-			self.required_value = orders.size*self.multiplier_per_cart_item
-
-			self.required_value = self.max_value if self.required_value > self.max_value
-
-			self.required_value = self.min_value if self.required_value > self.min_value
-		"
-	end
-
 	
+	
+
+	## @param[Array] array of order objects
+	## @return[nil] just sets the required_value of this state.
 	def calculate_required_state(orders)
 		eval(setter_function)
 	end
+
 
 
 end
