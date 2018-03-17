@@ -126,8 +126,8 @@ module Auth
     attr_accessor :requirement_class
     attr_accessor :requirement_controller
 
-    attr_accessor :consumable_class
-    attr_accessor :consumable_controller
+    attr_accessor :state_class
+    attr_accessor :state_controller
     ########################################################
     ##
     ##
@@ -291,8 +291,8 @@ module Auth
       @requirement_class = "Auth::Workflow::Requirement"
       @requirement_controller = "auth/workflow/requirements"  
 
-      @requirement_class = "Auth::Workflow::Consumable"
-      @requirement_controller = "auth/workflow/consumables"
+      @state_class = "Auth::Workflow::State"
+      @state_controller = "auth/workflow/states"
       ########################################################
       ##
       ##
