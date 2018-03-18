@@ -33,9 +33,6 @@ class Auth::Workflow::State
 	field :setter_function, type: String, default: setter_function_default
 
 
-	
-	
-
 	## @param[Array] array of order objects
 	## @return[nil] just sets the required_value of this state.
 	def calculate_required_state(orders)

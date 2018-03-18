@@ -84,15 +84,8 @@ class Auth::Workflow::Step
 	##
 	###########################################################
 
-	def calculate_requirements(orders)
-		## whichever we have to do
-		## and how to do that, is simple
-		## just pass the orders to the 
-	end
-
-	def check_requirements(orders)
-		## will check if the requirments are adequate.
-	end
+	
+	
 
 	
 

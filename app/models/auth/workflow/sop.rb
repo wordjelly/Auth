@@ -324,15 +324,18 @@ class Auth::Workflow::Sop
 
 	## @return[Array] array of Auth::Workflow::Requirement objects. 
 	def get_sop_requirements
-		## so build_requirement/calculate requirement is on step.
-		## then check is also on step.
-		## then return requirements is also on step.
 		
-		## iterate each step -> 
-		## build requirements ->
-		## bypass step where we check if we have those requirements.
-		## return consumables needed ->
-		## and push an event, that will mark those products as being required.
+		requirements_with_calculated_states = []
+
+		steps.each do |step|
+			step.requirements.each do |requirement|
+				requirement.calculate_required_states(orders)
+				requirements_with_calculated_states << requirement
+			end
+		end
+
+		requirements_with_calculated_states
+
 	end
 
 end
