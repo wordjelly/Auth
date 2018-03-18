@@ -60,18 +60,4 @@ class Auth::Workflow::Stage
 	
 end
 
-=begin
-		results = Auth.configuration.assembly_class.constantize.collection.aggregate(
-		      [
-		          {
-		            "$match" => {
-		              "stages._id" => BSON::ObjectId(id)
-		            }
-		          }
-		      ]
-		    )
-
-			return nil if (results.size == 0 || results.size > 1)
-
-			return Mongoid::Factory.from_db(Auth.configuration.assembly_class.constantize,results[0])
-=end		 
+	 

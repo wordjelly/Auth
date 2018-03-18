@@ -423,9 +423,13 @@ module WorkflowSupport
   ##
   ###########################################################
 
+
   def add_assembly_info_to_object(assembly,object_attributes_hash)
+  
     object_attributes_hash[:assembly_id] = assembly.id.to_s
+  
   end
+
 
   def add_sop_info_to_object(assembly,stage,sop,object_attributes_hash)
     object_attributes_hash[:sop_id] = sop.id.to_s

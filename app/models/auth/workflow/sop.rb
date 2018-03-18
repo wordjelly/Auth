@@ -291,7 +291,7 @@ class Auth::Workflow::Sop
 		## so make an order
 		## suppose there are no arguments,
 		## it should register a failure.
-		return nil if 
+		
 		
 		return nil if (arguments[:assembly_id].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:cart_item_ids].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_doc_version].blank?)
 

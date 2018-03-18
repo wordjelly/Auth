@@ -43,14 +43,21 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 				add_assembly_info_to_object(assembly,requirement_attributes)
 
-				add_stage_info_to_object(assembly,stage,requirement_attributes)
+				add_stage_info_to_object(assembly,assembly.stages.first,requirement_attributes)
 
-				add_sop_info_to_object(assembly,stage,sop,requirement_attributes)
+				add_sop_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,requirement_attributes)
 
-				add_step_info_to_object(assembly,stage,sop,step,requirement_attributes)
+				add_step_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,requirement_attributes)
 
 				## now we should post and expect create to succeed.
 				
+				puts "requirement attributes"
+				puts requirement_attributes.to_s
+
+				post requirements_path, {requirement: requirement_attributes,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+			
+				expect(response.code).to eq("201")
+
 				
 
 

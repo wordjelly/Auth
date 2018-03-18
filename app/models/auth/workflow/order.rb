@@ -135,48 +135,8 @@ class Auth::Workflow::Order
 	
 
 
-=begin
-	def sop_can_process_order
-		## the errors are added inside sop.can_process_order
-		get_sop.can_process_order(self)
-	end
 
-	## returns true if status is "checking_requirements" or "scheduling"
-	def pending
-		self.status == 0 || self.status == 3 
-	end
-
-	def failed_to_schedule
-		self.status == 5
-	end
-
-
-	def order_is_cancellation?
-		self.action == 0
-	end
-
-	##########################################################
-	##
-	##
-	##
-	## PRIVATE DEFS
-	##
-	##
-	##
-	###########################################################
 	
-	private
-
-	def get_sop
-		begin
-			assembly = Auth.configuration.assembly_class.find(self.assembly_id)
-			assembly.stages[self.stage_index].sops[self.sop_index]
-		rescue Mongoid::Errors::DocumentNotFound
-			puts "document was not found."
-			nil
-		end
-	end
-=end
 
 
 end

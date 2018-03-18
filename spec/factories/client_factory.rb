@@ -1,4 +1,3 @@
-
 FactoryGirl.define do
 
 
@@ -103,5 +102,11 @@ FactoryGirl.define do
   factory :add_order, class: Auth::Workflow::Order do 
     action 1
   end
+
+  factory :requirement, class: Auth::Workflow::Requirement do 
+    name {Faker::Name.name}
+  end
+
+
 
 end
