@@ -415,6 +415,55 @@ module WorkflowSupport
 
   end
 
+  ###########################################################
+  ##
+  ##
+  ## common definitions.
+  ##
+  ##
+  ###########################################################
+
+  def add_assembly_info_to_object(assembly,object_attributes_hash)
+    object_attributes_hash[:assembly_id] = assembly.id.to_s
+  end
+
+  def add_sop_info_to_object(assembly,stage,sop,object_attributes_hash)
+    object_attributes_hash[:sop_id] = sop.id.to_s
+    assembly.stages.each_with_index{|stg,stage_key|
+      if stage.id.to_s == stg.id.to_s
+        stg.sops.each_with_index{|sp,sop_key|
+          if sp.id.to_s == sop.id.to_s
+            object_attributes_hash[:sop_index] = sop_key
+          end
+        }
+      end
+    }
+  end
+
+  def add_stage_info_to_object(assembly,stage,object_attributes_hash)
+    object_attributes_hash[:stage_id] = stage.id.to_s
+    assembly.stages.each_with_index{|stg,key|
+      object_attributes_hash[:stage_index] = key if stage.id.to_s == stg.id.to_s
+    }
+  end
+
+  def add_step_info_to_object(assembly,stage,sop,step,object_attributes_hash)
+    object_attributes_hash[:step_id] = step.id.to_s
+    assembly.stages.each_with_index{|stg,stage_key|
+      if stage.id.to_s == stg.id.to_s
+        stg.sops.each_with_index{|sp,sop_key|
+          if sp.id.to_s == sop.id.to_s
+            sp.steps.each_with_index{|st,step_key|
+              if st.id.to_s == step.id.to_s
+                object_attributes_hash[:step_index] = step_key
+              end
+            }
+          end
+        }
+      end
+    }
+  end
+
 end
 
 RSpec.configure do |config|

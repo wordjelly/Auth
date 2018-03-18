@@ -31,4 +31,6 @@ class Auth::Workflow::Requirement
 
     end
 
+  
+
 end

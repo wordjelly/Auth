@@ -33,38 +33,40 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 		end
 
 		context " -- create -- " do 
+			it " -- creates a requirement given assembly, stage, sop, step details -- " do 
+				
+				assembly = create_assembly_with_stages_sops_and_steps
+				
+				expect(assembly.save).to be_truthy
 
-			it " -- creates a requirement provided an assembly, stage, sop and step -- " do 
+				requirement_attributes = attributes_for(:requirement)
+
+				add_assembly_info_to_object(assembly,requirement_attributes)
+
+				add_stage_info_to_object(assembly,stage,requirement_attributes)
+
+				add_sop_info_to_object(assembly,stage,sop,requirement_attributes)
+
+				add_step_info_to_object(assembly,stage,sop,step,requirement_attributes)
+
+				## now we should post and expect create to succeed.
+				
+				
 
 
 
 			end
-
-
-
-			it " -- loading_inc and multiplying_inc are required while creating/updating a requirement -- " do 
-
-			end
-
-
-			it " -- validates product id on creating requirement -- " do 
-
-			end
-
 		end
 
 
-		context " -- show -- " do 
-
-			it " -- defines a function to respond_with required requirement_number and state if called with product ids.(A) -- " do 
-
-
-			end	
-
-			it  " -- defines a function which first calls (A) and then compares the requirement, with a pre-existing requirment if at all, otherwise then for the availability of a new requirement - and returns a boolean result --  " do 
+		context " -- update -- " do 
+			it " -- updates a requirement given assembly, stage, sop, step and requirement index details -- " do 
 
 			end
+		end
 
+
+		context " -- validations -- " do 
 
 		end
 		
