@@ -198,23 +198,30 @@ class Auth::Workflow::Assembly
     }
 
     if stage_query = build_stage_query(permitted_params,params)
-      puts "got a stage query"
+      
 
       query["$and"] = query["$and"] + stage_query
       if sop_query = build_sop_query(permitted_params,params)
         query["$and"] = query["$and"] + sop_query
         if step_query = build_step_query(permitted_params,params)
           query["$and"] = query["$and"] + step_query 
+          if requirement_query = build_requirement_query(permitted_params,params)
+            query["$and"] = query["$and"] + requirement_query
+          end
         end
       end
     end
-    
-    if step_update = build_step_update(permitted_params,params)
+
+    puts "came to check which update query applies --------------------"
+      
+    if requirement_update = build_requirement_update(permitted_params,params)
+      update = requirement_update
+    elsif step_update = build_step_update(permitted_params,params)
       update = step_update
     elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
     elsif stage_update = build_stage_update(permitted_params,params)
-      update = stage_update
+      update = stage_updatee
     end
 
     ## now do the where.find_one_and_update
@@ -243,6 +250,12 @@ class Auth::Workflow::Assembly
     end
   end
 
+  ###########################################################
+  ##
+  ## getters used in update functions.
+  ##
+  ###########################################################
+
   def get_sop(stage_index,sop_index)
     return self.stages[stage_index].sops[sop_index]
   end
@@ -254,6 +267,12 @@ class Auth::Workflow::Assembly
   def get_step(stage_index,sop_index,step_index)
     return self.stages[stage_index].sops[sop_index].steps[step_index]
   end
+
+  def get_requirement(stage_index,sop_index,step_index,requirement_index)
+    return self.stages[stage_index].sops[sop_index].steps[step_index].requirements[requirement_index]
+  end
+
+
 
   def build_stage_query(permitted_params,params)
     stage_index = permitted_params[:stage_index]
@@ -379,8 +398,8 @@ class Auth::Workflow::Assembly
     sop_id = permitted_params[:sop_id]
     sop_doc_version = permitted_params[:sop_doc_version]
     step_index = permitted_params[:step_index]
-    step_id = params[:id]
-    step_doc_version = permitted_params[:doc_version]
+    step_id = permitted_params[:step_id] || params[:id]
+    step_doc_version = permitted_params[:step_doc_version] ||permitted_params[:doc_version]
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
 
@@ -417,7 +436,7 @@ class Auth::Workflow::Assembly
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version)
 
-   #puts 'all required params are present.'
+    #puts 'all required params are present.'
 
     step = get_step(stage_index,sop_index,step_index)
       
@@ -437,6 +456,145 @@ class Auth::Workflow::Assembly
     }
 
     return update
+
+  end
+
+  ###### => requirement query and update.
+
+  def build_requirement_query(permitted_params,params)
+
+    puts "params are:"
+    puts params.to_s
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+    requirement_index = permitted_params[:requirement_index]
+    requirement_id = permitted_params[:requirement_id] || params[:id]
+    requirement_doc_version = permitted_params[:requirement_doc_version] || permitted_params[:doc_version]
+
+    puts "stage index: #{stage_index}"
+    puts "stage id: #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop doc version: #{sop_doc_version}"
+
+    puts "step index: #{step_index}"
+    puts "step id: #{step_id}"
+    puts "step doc version: #{step_doc_version}"
+
+    puts "requirement index: #{requirement_index}"
+    puts "requirement id: #{requirement_id}"
+    puts "requirement doc version: #{requirement_doc_version}"
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
+
+
+
+    query =
+    
+      [
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}._id" => BSON::ObjectId(requirement_id)     
+        },
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}.doc_version" => requirement_doc_version
+        }
+      ]
+
+
+    puts "did not return ---------------------------------"
+
+    return query
+
+  end
+
+
+  def build_requirement_update(permitted_params,params)
+
+    puts "came to build requirement update."
+    puts "the params are:"
+    puts params.to_s
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+
+
+    requirement_index = permitted_params[:requirement_index]
+    requirement_id = params[:id]
+    requirement_doc_version = permitted_params[:doc_version]  
+
+    puts "the params inside the update are-----------"
+
+    puts "stage index: #{stage_index}"
+    puts "stage id: #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop doc version: #{sop_doc_version}"
+
+    puts "step index: #{step_index}"
+    puts "step id: #{step_id}"
+    puts "step doc version: #{step_doc_version}"
+
+    puts "requirement index: #{requirement_index}"
+    puts "requirement id: #{requirement_id}"
+    puts "requirement doc version: #{requirement_doc_version}"
+
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
+
+    puts 'all required params are present.'
+
+    requirement = get_requirement(stage_index,sop_index,step_index,requirement_index)
+      
+    puts "requirement got as : #{requirement}"
+
+    return unless requirement
+
+    puts "found requirement"
+
+    requirement.assign_attributes(permitted_params)
+    requirement.doc_version = requirement_doc_version + 1
+
+
+    update = {
+      "$set" => {
+        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}" => requirement.attributes
+      }
+    }
+
+    return update
+
+
+  end
+
+  ##### => state query and update.
+
+  def build_state_query(permitted_params,params)
+
+  end
+
+
+  def build_state_update(permitted_params,params)
 
   end
 

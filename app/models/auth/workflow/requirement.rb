@@ -28,7 +28,7 @@ class Auth::Workflow::Requirement
     attr_accessor :step_doc_version
     attr_accessor :step_id
     attr_accessor :requirement_index
-    attr_accessor :requirement_id
+    
 
     ###########################################################
     ##
@@ -44,7 +44,7 @@ class Auth::Workflow::Requirement
     end
 
     def self.permitted_params
-      [{:requirement => [:name,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_doc_version, :requirement_index, :step_doc_version]},:id]
+      [{:requirement => [:name,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_index, :step_doc_version]},:id]
     end
 
     ###########################################################

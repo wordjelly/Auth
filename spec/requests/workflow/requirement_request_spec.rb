@@ -49,18 +49,10 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 				add_step_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,requirement_attributes)
 
-				## now we should post and expect create to succeed.
 				
-				#puts "requirement attributes"
-				#puts requirement_attributes.to_s
-
 				post requirements_path, {requirement: requirement_attributes,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
 			
 				expect(response.code).to eq("201")
-
-				puts response.body.to_s
-
-
 
 			end
 		end
@@ -68,6 +60,47 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 		context " -- update -- " do 
 			it " -- updates a requirement given assembly, stage, sop, step and requirement index details -- " do 
+
+				assembly = create_assembly_with_stages_sops_steps_and_requirements
+	
+				requirement = assembly.stages[0].sops[0].steps[0].requirements[0]
+
+				assembly.stages[0].sops[0].steps[0].requirements[0].name = "first requirement."
+
+				expect(assembly.save).to be_truthy
+
+				## now start adding shit into this.
+				## we want to modify this requirement.
+				## so we have to add the stage, index
+
+				requirement_attributes = requirement.attributes
+
+				add_assembly_info_to_object(assembly,requirement_attributes)
+
+				add_stage_info_to_object(assembly,assembly.stages.first,requirement_attributes)
+
+				add_sop_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,requirement_attributes)
+
+				add_step_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,requirement_attributes)
+
+				add_requirement_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first, assembly.stages.first.sops.first.steps.first.requirements.first,requirement_attributes)
+
+				## now remove the 
+				requirement_attributes.delete(:requirement_id)
+				requirement_attributes[:doc_version] = requirement_attributes.delete(:requirement_doc_version)
+
+				## now put the new name.
+				requirement_attributes[:name] = "we changed the name"
+
+				puts "the requirement attributes are:"
+				puts requirement_attributes.to_s
+
+				a = {:requirement => requirement_attributes, api_key: @ap_key, :current_app_id => "testappid"}
+	            ##have to post to the id url.
+		        put requirement_path({:id => requirement.id.to_s}), a.to_json,@admin_headers
+
+		        puts response.body.to_s
+		        expect(response.code).to eq("204")				
 
 			end
 		end
