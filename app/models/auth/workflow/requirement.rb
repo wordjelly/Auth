@@ -28,6 +28,7 @@ class Auth::Workflow::Requirement
     attr_accessor :step_doc_version
     attr_accessor :step_id
     attr_accessor :requirement_index
+   
     
 
     ###########################################################
@@ -58,6 +59,9 @@ class Auth::Workflow::Requirement
     ## in this case the model is a stage model.
       
       return false unless model.valid?
+
+      puts "these are the model attributes --------------"
+      puts model.attributes.to_s
 
       assembly_updated = Auth.configuration.assembly_class.constantize.where({
         "$and" => [

@@ -107,6 +107,8 @@ FactoryGirl.define do
     name {Faker::Name.name}
   end
 
-
+  factory :state, class: Auth::Workflow::State do 
+    name {Faker::Name.name}
+  end
 
 end

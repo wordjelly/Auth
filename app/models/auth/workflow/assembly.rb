@@ -207,14 +207,21 @@ class Auth::Workflow::Assembly
           query["$and"] = query["$and"] + step_query 
           if requirement_query = build_requirement_query(permitted_params,params)
             query["$and"] = query["$and"] + requirement_query
+            if state_query = build_state_query(permitted_params,params)
+              query["$and"] = query["$and"] + state_query
+            end
           end
         end
       end
     end
 
     puts "came to check which update query applies --------------------"
-      
-    if requirement_update = build_requirement_update(permitted_params,params)
+    puts "query is:"
+    puts query
+
+    if state_update = build_state_update(permitted_params,params)
+      update = state_update
+    elsif requirement_update = build_requirement_update(permitted_params,params)
       update = requirement_update
     elsif step_update = build_step_update(permitted_params,params)
       update = step_update
@@ -272,6 +279,10 @@ class Auth::Workflow::Assembly
     return self.stages[stage_index].sops[sop_index].steps[step_index].requirements[requirement_index]
   end
 
+
+  def get_state(stage_index,sop_index,step_index,requirement_index,state_index)
+    return self.stages[stage_index].sops[sop_index].steps[step_index].requirements[requirement_index].states[state_index]
+  end
 
 
   def build_stage_query(permitted_params,params)
@@ -463,8 +474,7 @@ class Auth::Workflow::Assembly
 
   def build_requirement_query(permitted_params,params)
 
-    puts "params are:"
-    puts params.to_s
+    
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
@@ -536,7 +546,6 @@ class Auth::Workflow::Assembly
     step_id = permitted_params[:step_id]
     step_doc_version = permitted_params[:step_doc_version]
 
-
     requirement_index = permitted_params[:requirement_index]
     requirement_id = params[:id]
     requirement_doc_version = permitted_params[:doc_version]  
@@ -591,10 +600,140 @@ class Auth::Workflow::Assembly
 
   def build_state_query(permitted_params,params)
 
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+    requirement_index = permitted_params[:requirement_index]
+    requirement_id = permitted_params[:requirement_id]
+    requirement_doc_version = permitted_params[:requirement_doc_version]
+    state_id = params[:id]
+    state_doc_version = permitted_params[:doc_version]
+    state_index = permitted_params[:state_index]
+
+    puts "stage index: #{stage_index}"
+    puts "stage id: #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop doc version: #{sop_doc_version}"
+
+    puts "step index: #{step_index}"
+    puts "step id: #{step_id}"
+    puts "step doc version: #{step_doc_version}"
+
+    puts "requirement index: #{requirement_index}"
+    puts "requirement id: #{requirement_id}"
+    puts "requirement doc version: #{requirement_doc_version}"
+
+    puts "state index: #{state_index}"
+    puts "state id: #{state_id}"
+    puts "state doc version: #{state_doc_version}"
+
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version && state_index && state_id && state_doc_version)
+
+
+
+    query =
+    
+      [
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}.states.#{state_index}._id" => BSON::ObjectId(state_id)     
+        },
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}.states.#{state_index}.doc_version" => state_doc_version
+        }
+      ]
+
+
+    puts "STATE_QUERY: ALL PARAMS PRESENt. ---------------------------------"
+
+    return query
+
   end
 
 
   def build_state_update(permitted_params,params)
+
+    puts "came to build state update."
+    puts "the params are:"
+    puts params.to_s
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+
+    requirement_index = permitted_params[:requirement_index]
+    requirement_id = params[:id]
+    requirement_doc_version = permitted_params[:doc_version]  
+
+    state_index = permitted_params[:state_index]
+    state_id = params[:id]
+    state_doc_version = permitted_params[:doc_version]  
+
+
+    puts "the params inside the update are-----------"
+
+    puts "stage index: #{stage_index}"
+    puts "stage id: #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop doc version: #{sop_doc_version}"
+
+    puts "step index: #{step_index}"
+    puts "step id: #{step_id}"
+    puts "step doc version: #{step_doc_version}"
+
+    puts "requirement index: #{requirement_index}"
+    puts "requirement id: #{requirement_id}"
+    puts "requirement doc version: #{requirement_doc_version}"
+
+
+    puts "state index: #{state_index}"
+    puts "state id: #{state_id}"
+    puts "state doc version: #{state_doc_version}"
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version && state_index && state_id && state_doc_version)
+
+    puts 'all required params are present.'
+
+    state = get_state(stage_index,sop_index,step_index,requirement_index,state_index)
+      
+    puts "state got as : #{state}"
+
+    return unless state
+
+    puts "found requirement"
+
+    state.assign_attributes(permitted_params)
+    state.doc_version = state_doc_version + 1
+
+
+    update = {
+      "$set" => {
+        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements.#{requirement_index}.states.#{state_index}" => state.attributes
+      }
+    }
+
+    return update
+
 
   end
 

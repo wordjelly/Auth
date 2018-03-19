@@ -372,6 +372,17 @@ module WorkflowSupport
     assembly
   end
 
+  def create_assembly_with_stages_sops_steps_requirements_and_states
+    assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+    assembly.stages = [Auth::Workflow::Stage.new]
+    assembly.stages[0].name = "first stage"
+    assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+    assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+    assembly.stages[0].sops[0].steps[0].requirements = [Auth::Workflow::Requirement.new]
+    assembly.stages[0].sops[0].steps[0].requirements[0].states = [Auth::Workflow::State.new]
+    assembly
+  end
+
   def create_empty_assembly
     assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
     assembly
@@ -495,8 +506,8 @@ module WorkflowSupport
 
   def add_requirement_info_to_object(assembly,stage,sop,step,requirement,object_attributes_hash)
 
-    object_attributes_hash[:requirement_id] = step.id.to_s
-    object_attributes_hash[:requirement_doc_version] = step.doc_version
+    object_attributes_hash[:requirement_id] = requirement.id.to_s
+    object_attributes_hash[:requirement_doc_version] = requirement.doc_version
     
 
     assembly.stages.each_with_index{|stg,stage_key|
@@ -508,6 +519,36 @@ module WorkflowSupport
                 st.requirements.each_with_index{|rq,rq_key|
                   if rq.id.to_s == requirement.id.to_s 
                     object_attributes_hash[:requirement_index] = rq_key
+                  end
+                }
+              end
+            }
+          end
+        }
+      end
+    }
+
+  end
+
+  def add_state_info_to_object(assembly,stage,sop,step,requirement,state,object_attributes_hash)
+
+    object_attributes_hash[:state_id] = state.id.to_s
+    object_attributes_hash[:state_doc_version] = state.doc_version
+    
+
+    assembly.stages.each_with_index{|stg,stage_key|
+      if stage.id.to_s == stg.id.to_s
+        stg.sops.each_with_index{|sp,sop_key|
+          if sp.id.to_s == sop.id.to_s
+            sp.steps.each_with_index{|st,step_key|
+              if st.id.to_s == step.id.to_s
+                st.requirements.each_with_index{|rq,rq_key|
+                  if rq.id.to_s == requirement.id.to_s 
+                    rq.states.each_with_index {|st,st_key|
+                      if st.id.to_s == state.id.to_s
+                        object_attributes_hash[:state_index] = st_key
+                      end
+                    }
                   end
                 }
               end

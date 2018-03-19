@@ -65,7 +65,11 @@ class Auth::AuthenticatedController < Auth::ApplicationController
       	puts permitted_params.to_s
 
       	@model_params = pp.fetch(get_model_class_name.to_sym,{})
+      	puts "model params are:"
+      	puts @model_params.to_s
+
       	@model = pp[:id] ?  @model_class.find_self(pp[:id],current_signed_in_resource) : @model_class.new(@model_params)
+
 	end
 
 
