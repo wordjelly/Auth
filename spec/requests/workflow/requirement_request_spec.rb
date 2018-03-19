@@ -51,14 +51,14 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 				## now we should post and expect create to succeed.
 				
-				puts "requirement attributes"
-				puts requirement_attributes.to_s
+				#puts "requirement attributes"
+				#puts requirement_attributes.to_s
 
 				post requirements_path, {requirement: requirement_attributes,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
 			
 				expect(response.code).to eq("201")
 
-				
+				puts response.body.to_s
 
 
 

@@ -427,12 +427,18 @@ module WorkflowSupport
   def add_assembly_info_to_object(assembly,object_attributes_hash)
   
     object_attributes_hash[:assembly_id] = assembly.id.to_s
-  
+    
+    object_attributes_hash[:assembly_doc_version] = assembly.doc_version
+
   end
 
 
   def add_sop_info_to_object(assembly,stage,sop,object_attributes_hash)
+    
     object_attributes_hash[:sop_id] = sop.id.to_s
+    
+    object_attributes_hash[:sop_doc_version] = sop.doc_version
+    
     assembly.stages.each_with_index{|stg,stage_key|
       if stage.id.to_s == stg.id.to_s
         stg.sops.each_with_index{|sp,sop_key|
@@ -442,17 +448,25 @@ module WorkflowSupport
         }
       end
     }
+
   end
 
   def add_stage_info_to_object(assembly,stage,object_attributes_hash)
     object_attributes_hash[:stage_id] = stage.id.to_s
+    object_attributes_hash[:stage_doc_version] = stage.doc_version
+    
     assembly.stages.each_with_index{|stg,key|
       object_attributes_hash[:stage_index] = key if stage.id.to_s == stg.id.to_s
     }
+
   end
 
   def add_step_info_to_object(assembly,stage,sop,step,object_attributes_hash)
+   
     object_attributes_hash[:step_id] = step.id.to_s
+    object_attributes_hash[:step_doc_version] = step.doc_version
+    
+
     assembly.stages.each_with_index{|stg,stage_key|
       if stage.id.to_s == stg.id.to_s
         stg.sops.each_with_index{|sp,sop_key|
@@ -466,6 +480,9 @@ module WorkflowSupport
         }
       end
     }
+
+
+
   end
 
 end

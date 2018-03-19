@@ -25,6 +25,8 @@ class Auth::Workflow::Requirement
     attr_accessor :sop_doc_version
     attr_accessor :sop_id
     attr_accessor :step_index
+    attr_accessor :step_doc_version
+    attr_accessor :step_id
     attr_accessor :requirement_index
     attr_accessor :requirement_id
 
@@ -42,14 +44,72 @@ class Auth::Workflow::Requirement
     end
 
     def self.permitted_params
-      [{:requirement => [:name,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :requirement_doc_version, :requirement_index]},:id]
+      [{:requirement => [:name,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_doc_version, :requirement_index, :step_doc_version]},:id]
     end
-
 
     ###########################################################
     ##
     ##
-    ## set on calling sufficient.
+    ## create method
+    ##
+    ##
+    ###########################################################
+    def create_with_conditions(params,permitted_params,model)
+    ## in this case the model is a stage model.
+      
+      return false unless model.valid?
+
+      assembly_updated = Auth.configuration.assembly_class.constantize.where({
+        "$and" => [
+          {
+            "stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id)
+          },
+          {
+            "stages.#{model.stage_index}.doc_version" => model.stage_doc_version
+          },
+          {
+            "_id" => BSON::ObjectId(model.assembly_id)
+          },
+          {
+            "doc_version" => model.assembly_doc_version
+          },
+          {
+            "stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)
+          },
+          {
+            "stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
+          },
+          {
+            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}._id" => BSON::ObjectId(model.step_id)
+          },
+          {
+            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.doc_version" => model.step_doc_version
+          }
+        ]
+      })
+      .find_one_and_update(
+        {
+          "$push" => 
+          {
+            "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.requirements" => model.attributes
+          }
+        },
+        {
+          :return_document => :after
+        }
+      )
+
+      
+
+      return false unless assembly_updated
+      return model
+
+    end
+
+    ###########################################################
+    ##
+    ##
+    ## EVENT BASED METHODS.
     ##
     ##########################################################
 
