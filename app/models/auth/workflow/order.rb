@@ -28,7 +28,8 @@ class Auth::Workflow::Order
 
 
 	validates :action, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }
-		
+	
+	field :name, type: String
 	
 	#########################################################
 	##
@@ -46,14 +47,13 @@ class Auth::Workflow::Order
 		return nil unless collection =  Auth.configuration.assembly_class.constantize.where("stages.sops.orders._id" => BSON::ObjectId(id)
 		)
 
-		## before create order, 
-		## we want to see if the sop can do this or not.
+		
 		collection.first
 
 	end
 
 	def self.permitted_params
-		[{:order => [:action,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :order_index,{:cart_item_ids => []}]},:id]
+		[{:order => [:action,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :order_index, :name,{:cart_item_ids => []}]},:id]
 	end
 
 

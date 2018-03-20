@@ -211,6 +211,8 @@ class Auth::Workflow::Assembly
               query["$and"] = query["$and"] + state_query
             end
           end
+        elsif order_query = build_order_query(permitted_params,params)
+          query["$and"] = query["$and"] + order_query 
         end
       end
     end
@@ -225,6 +227,8 @@ class Auth::Workflow::Assembly
       update = requirement_update
     elsif step_update = build_step_update(permitted_params,params)
       update = step_update
+    elsif order_update = build_order_update(permitted_params,params)
+      update = order_update
     elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
     elsif stage_update = build_stage_update(permitted_params,params)
@@ -273,6 +277,10 @@ class Auth::Workflow::Assembly
 
   def get_step(stage_index,sop_index,step_index)
     return self.stages[stage_index].sops[sop_index].steps[step_index]
+  end
+
+  def get_order(stage_index,sop_index,order_index)
+    return self.stages[stage_index].sops[sop_index].orders[order_index]
   end
 
   def get_requirement(stage_index,sop_index,step_index,requirement_index)
@@ -469,6 +477,103 @@ class Auth::Workflow::Assembly
     return update
 
   end
+
+  ###### => order query and update
+
+  def build_order_query(permitted_params,params)
+
+    puts "permitted params are: #{permitted_params}"
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    order_index = permitted_params[:order_index]
+    order_id = params[:id]
+    order_doc_version = permitted_params[:doc_version]
+
+    puts " ------------------ CAME TO ORDER QUERY --------------"
+    puts "stage index : #{stage_index}"
+    puts "stage id : #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop_doc_version : #{sop_doc_version}"
+    puts "order index: #{order_index}"
+    puts "order id : #{order_id}"
+    puts "order doc version: #{order_doc_version}"
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && order_index && order_id && order_doc_version)
+
+    query =
+    
+      [
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.orders.#{order_index}._id" => BSON::ObjectId(order_id)     
+        },
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.orders.#{order_index}.doc_version" => order_doc_version
+        }
+      ]
+
+    return query
+
+  end
+
+  def build_order_update(permitted_params,params)
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    
+    order_index = permitted_params[:order_index]
+    order_id = params[:id]
+    order_doc_version = permitted_params[:doc_version]
+
+    puts " ------------------ CAME TO ORDER UPDATE --------------"
+    puts "stage index : #{stage_index}"
+    puts "stage id : #{stage_id}"
+    puts "stage doc version: #{stage_doc_version}"
+    puts "sop index: #{sop_index}"
+    puts "sop id: #{sop_id}"
+    puts "sop_doc_version : #{sop_doc_version}"
+    puts "order index: #{order_index}"
+    puts "order id : #{order_id}"
+    puts "order doc version: #{order_doc_version}"
+
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && order_index && order_id && order_doc_version)
+
+    puts 'ORDER UPDATE -------------all required params are present.'
+
+    order = get_order(stage_index,sop_index,order_index)
+      
+    #puts "step got as : #{step}"
+
+    return unless order
+
+
+    order.assign_attributes(permitted_params)
+    order.doc_version = order_doc_version + 1
+
+
+    update = {
+      "$set" => {
+        "stages.#{stage_index}.sops.#{sop_index}.orders.#{order_index}" => order.attributes
+      }
+    }
+
+    return update
+
+  end
+
+
 
   ###### => requirement query and update.
 

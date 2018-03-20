@@ -146,6 +146,74 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 		end
 
 
+		context " -- update -- ", :order_update => true do 
+
+			it " -- updates the order , given assembly, stage, sop and order information -- " do 
+
+				## create an assembly with stage, sop and order
+				assembly = create_assembly_with_stage_sops_and_order
+
+				## then update it.	
+				assembly.stages[0].sops[0].orders[0].name = "initial name"
+				assembly.stages[0].sops[0].orders[0].cart_item_ids = [BSON::ObjectId.to_s, BSON::ObjectId.to_s]
+				assembly.stages[0].sops[0].orders[0].action = 1
+
+				res = assembly.save
+
+				expect(res).to be_truthy
+
+				## now we need a newer 
+				order_attributes = attributes_for(:add_order)
+
+				##############################################
+
+				add_assembly_info_to_object(assembly,order_attributes)
+
+				add_stage_info_to_object(assembly,assembly.stages.first,order_attributes)
+
+				add_sop_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,order_attributes)
+
+				add_order_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.orders.first,order_attributes)
+
+
+				## now remove the 
+				order_attributes.delete(:order_id)
+				order_attributes[:doc_version] = order_attributes.delete(:order_doc_version)
+
+				## now put the new name.
+				order_attributes[:name] = "we changed the name"
+				order_attributes[:cart_item_ids] = [BSON::ObjectId.to_s,BSON::ObjectId.to_s]
+
+				puts "the order attributes are:"
+				puts order_attributes.to_s
+
+
+				##############################################
+
+
+				a = {:order => order_attributes, api_key: @ap_key, :current_app_id => "testappid"}
+	            
+	            ##have to post to the id url.
+		        put order_path({:id => assembly.stages[0].sops[0].orders[0].id.to_s}), a.to_json,@admin_headers
+
+		        puts response.body.to_s
+		        expect(response.code).to eq("204")	
+
+
+			end
+
+
+
+			it " -- cannot update order action, for eg from process to don't process -- " do 
+
+
+			end
+
+
+
+		end
+
+
 	end
 
 end

@@ -362,6 +362,15 @@ module WorkflowSupport
     assembly
   end
 
+  def create_assembly_with_stage_sops_and_order
+    assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+    assembly.stages = [Auth::Workflow::Stage.new]
+    assembly.stages[0].name = "first stage"
+    assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+    assembly.stages[0].sops[0].orders = [Auth::Workflow::Order.new]
+    assembly
+  end
+
   def create_assembly_with_stages_sops_steps_and_requirements
     assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
     assembly.stages = [Auth::Workflow::Stage.new]
@@ -503,6 +512,29 @@ module WorkflowSupport
     }
 
   end
+
+  def add_order_info_to_object(assembly,stage,sop,order,object_attributes_hash)
+   
+    object_attributes_hash[:order_id] = order.id.to_s
+    object_attributes_hash[:order_doc_version] = order.doc_version
+    
+
+    assembly.stages.each_with_index{|stg,stage_key|
+      if stage.id.to_s == stg.id.to_s
+        stg.sops.each_with_index{|sp,sop_key|
+          if sp.id.to_s == sop.id.to_s
+            sp.orders.each_with_index{|ord,ord_key|
+              if ord.id.to_s == order.id.to_s
+                object_attributes_hash[:order_index] = ord_key
+              end
+            }
+          end
+        }
+      end
+    }
+
+  end
+
 
   def add_requirement_info_to_object(assembly,stage,sop,step,requirement,object_attributes_hash)
 
