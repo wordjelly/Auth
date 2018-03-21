@@ -80,6 +80,28 @@ module Auth::Concerns::ChiefModelConcern
   			new_doc
   		end
 
+  		## or will have to define a get_parent function.
+  		## which will all be very complicated.
+  		## if a stage is made not_applicable -> then all the children become applicable, 
+  		## if it is again made applicable -> all the children go back to what?
+  		
+  		
+  		## so you can delete a step forever only if it is not applicable.
+  		## so to mark a parent as inapplicable, find where, 
+  		## any of them is not 
+  		## so mark applicable -> can you mark something as applicable
+  		## you cannot mark a parent as inapplicable = if any of its children are inapplicable, first delete them.
+  		## now suppose you mark something as 
+  		## okay so that works.
+  		## suppose you mark somthing as applicable -> only possible if all the children are 
+
+
+  		## remember that when you mark something as applicable -> it will not make any of the children applicable.
+  		## you cannot mark something as applicable if any of the children are inapplicable
+  		## 
+
+  		
+
   		## override in your model. Is called by the #index action of the authenticated_controller.
   		## all the search criteria should be set on the model instance passed into the index action.
   		## @return[Array] array of self objects.

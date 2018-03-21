@@ -67,7 +67,40 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 		context " -- CRUD -- " do 
 
+			context " -- basic create -- " do 
+
+
+			end
+
+			context " -- clone creation -- " do 
+
+
+				it " -- creates a copy of the latest master assembly -- " do 
+
+
+				end
+
+
+				it " -- creates a copy of the latest master assembly, but doesn't copy the 'master' attribute -- " do 
+
+
+				end
+
+
+			end
+
 			context " -- update -- " do 
+				
+				it  " -- can mark an assembly as master -- " do 	
+
+				end
+
+
+				it " -- cannot mark an assembly as master if it has orders in it -- " do 
+
+
+				end
+
 				it  " -- can update name and description -- " do 
 					assembly = create_assembly_with_stages_sops_and_steps
 					res = assembly.save
@@ -81,11 +114,20 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 		            expect(response.code).to eq("204")
 		            #puts response.body.to_s
 				end
+
+				it " -- can accept an array of stages,sops,steps,requirements,states to mark as applicable or not_applicable -- " do 
+
+
+				end
+
+				it "--- applicability of anything cannot be changed after orders have been added to the assembly -- " do 
+
+
+
+				end
+
 			end
 
-			
-
-			
 		end
 
 	end

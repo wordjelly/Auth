@@ -19,7 +19,7 @@ class Auth::Workflow::Assembly
   ## 
   ###########################################################
   def self.permitted_params
-    [{:assembly => [:name,:description,:doc_version,:clone_id]},:id]
+    [{:assembly => [:name,:description,:doc_version,:clone_id, :applicable]},:id]
   end
 
   def self.find_self(id,signed_in_resource,options={})

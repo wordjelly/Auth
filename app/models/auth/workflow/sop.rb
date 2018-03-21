@@ -37,7 +37,7 @@ class Auth::Workflow::Sop
 	end
 
 	def self.permitted_params
-		[{:sop => [:name,:description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index, {:applicable_to_product_ids => []}]},:id]
+		[{:sop => [:name, :applicable, :description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index, {:applicable_to_product_ids => []}]},:id]
 	end
 
 	## @return[Array] array of hashes, each with the following structure:

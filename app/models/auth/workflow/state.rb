@@ -62,7 +62,7 @@ class Auth::Workflow::State
     end
 
     def self.permitted_params
-      [{:state => [:name,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :step_doc_version, :step_index, :step_id, :requirement_index, :requirement_doc_version, :requirement_id, :state_index, :doc_version]},:id]
+      [{:state => [:name, :applicable ,:product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :step_doc_version, :step_index, :step_id, :requirement_index, :requirement_doc_version, :requirement_id, :state_index, :doc_version]},:id]
     end
 
     ###########################################################

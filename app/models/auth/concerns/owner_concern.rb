@@ -4,6 +4,12 @@ module Auth::Concerns::OwnerConcern
 	include Auth::Concerns::ChiefModelConcern
 	included do 
 
+		## applicability of the model which implements this concern.	
+		## every model has to be explicitly set as applicable.
+		## it is NOT APPLICABLE BY DEFAULT.
+		field :applicable, type: Boolean, default: false
+
+
 		## doc_version
 		## you can use it to do find_and_update
 		field :doc_version, type: Integer, default: 0
@@ -29,7 +35,10 @@ module Auth::Concerns::OwnerConcern
 		validates_presence_of :resource_class, if: Proc.new{|c| !c.resource_id.nil?}
 
 		## you cannot change the resource_id or owner of the object once it is set.
-		validate :resource_id_not_changed
+		validate :resource_id_not_changed	
+
+
+		
 
 	end
 
@@ -71,6 +80,13 @@ module Auth::Concerns::OwnerConcern
 		return false unless other_object.respond_to? :resource_id
 		return false if self.resource_id != other_object.resource_id
 	end
+
+	def is_applicable?
+		## what if this is embedded.
+		self.applicable
+	
+	end
+
 
 	private
 

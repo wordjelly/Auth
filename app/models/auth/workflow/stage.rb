@@ -18,7 +18,7 @@ class Auth::Workflow::Stage
 	end
 
 	def self.permitted_params
-		[{:stage => [:name,:description,:assembly_id,:assembly_doc_version,:doc_version,:stage_index]},:id]
+		[{:stage => [:applicable, :name,:description,:assembly_id,:assembly_doc_version,:doc_version,:stage_index]},:id]
 	end
 
 

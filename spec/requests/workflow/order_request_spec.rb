@@ -209,10 +209,7 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 
 			end
 
-
-
 		end
-
 
 	end
 

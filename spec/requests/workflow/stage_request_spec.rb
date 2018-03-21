@@ -72,6 +72,11 @@ RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => 
 			expect(assembly.stages[0].doc_version).to eq(1)
 		end
 
+		it " -- can update multiple stages at a time ? -- " do 
+
+			
+		end
+
 	end
 
 end
