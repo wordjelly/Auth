@@ -5,7 +5,7 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 	before(:all) do 
 
 		User.delete_all
-
+		Auth::Workflow::Assembly.delete_all
 		## create one non admin user
 		@u = User.new(attributes_for(:user_confirmed))
         @u.save
@@ -29,6 +29,10 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 	context " -- json requests -- " do 
 
 		before(:example) do 
+			Auth::Workflow::Assembly.delete_all
+		end
+
+		after(:example) do 
 			Auth::Workflow::Assembly.delete_all
 		end
 
@@ -79,7 +83,12 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 				stage.sops << sop
 				assembly.stages << stage
 				res = assembly.save
+				expect(res).to be_truthy
+
+				
+
 				first_order = create_order_into_sop(assembly,stage,sop)
+
 				raise unless first_order
 				## now try to create another order in the same sop with these cart items.
 				## it should not go through.
@@ -117,6 +126,7 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 				stage.sops << sop
 				assembly.stages << stage
 				res = assembly.save
+
 				first_order =  create_order_into_sop(assembly,stage,sop)
 
 				raise unless first_order

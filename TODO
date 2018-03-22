@@ -356,3 +356,7 @@ how will
 
 
 ## ADD THE ORDER ADDED CONTEXT TO ALL THE REMAINING WORKFLOW MODELS.
+
+## blacklist what attributes cannot be changed if orders are already added.
+
+## we can create a workflow concern.

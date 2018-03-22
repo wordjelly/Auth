@@ -1,6 +1,7 @@
 class Auth::Workflow::Step
-	include Mongoid::Document
-	include Auth::Concerns::OwnerConcern
+	
+	include Auth::Concerns::WorkflowConcern
+	
 	embedded_in :sop, :class_name => Auth.configuration.sop_class
 	embeds_many :requirements, :class_name => Auth.configuration.requirement_class
 	

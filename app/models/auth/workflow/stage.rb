@@ -1,6 +1,7 @@
 class Auth::Workflow::Stage
-	include Mongoid::Document
-	include Auth::Concerns::OwnerConcern
+	
+	include Auth::Concerns::WorkflowConcern
+	
 	embeds_many :sops, :class_name => Auth.configuration.sop_class
 	embedded_in :assembly, :class_name => Auth.configuration.assembly_class
 	field :name, type: String
@@ -24,7 +25,9 @@ class Auth::Workflow::Stage
 
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is a stage model.
+		
 		return false unless model.valid? 
+		
 		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{

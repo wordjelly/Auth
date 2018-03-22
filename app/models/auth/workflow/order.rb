@@ -1,7 +1,6 @@
 class Auth::Workflow::Order
 
-	include Mongoid::Document
-  	include Auth::Concerns::OwnerConcern
+	include Auth::Concerns::WorkflowConcern
 
   	embedded_in :sop, :class_name => Auth.configuration.sop_class
   	
@@ -98,6 +97,9 @@ class Auth::Workflow::Order
 				},
 				{
 					"doc_version" => model.assembly_doc_version
+				},
+				{
+					"master" => false
 				},
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)

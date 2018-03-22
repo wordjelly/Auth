@@ -14,7 +14,8 @@ module Auth::Concerns::OwnerConcern
 		## you can use it to do find_and_update
 		field :doc_version, type: Integer, default: 0
 
-		## resource id is not essential for the creation of a cart.
+
+		
 
 		## but if a resource id is present, then a resource class must be provided.
 
@@ -86,6 +87,8 @@ module Auth::Concerns::OwnerConcern
 		self.applicable
 	
 	end
+
+	
 
 
 	private

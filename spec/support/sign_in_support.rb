@@ -441,7 +441,13 @@ module WorkflowSupport
     
     assembly.stages[0].sops[0].orders << order
 
-    return order if assembly.save
+    order.valid?
+    puts "ORDER ERRORS ALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL-----------------------------------------------"
+    puts order.errors.full_messages
+
+    res = assembly.save
+
+    return order if res
 
   end
 

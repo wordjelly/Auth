@@ -1,8 +1,6 @@
 class Auth::Workflow::State
 
-	include Mongoid::Document
-
-  include Auth::Concerns::OwnerConcern
+	include Auth::Concerns::WorkflowConcern
 
 	embedded_in :requirement, :class_name => Auth.configuration.requirement_class
 

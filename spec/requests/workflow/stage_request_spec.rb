@@ -32,10 +32,11 @@ RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => 
 			Auth::Workflow::Assembly.delete_all
 		end
 
-		it " -- creates a stage given an assembly -- " do 
+		it " -- creates a stage given an assembly -- ", :fs => true do 
 			assembly = create_empty_assembly
 			assembly.save
 			stage = attributes_for(:stage)
+			
 			stage[:assembly_id] = assembly.id.to_s
 			stage[:assembly_doc_version] = assembly.doc_version
 			post stages_path, {stage: stage,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
@@ -72,9 +73,8 @@ RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => 
 			expect(assembly.stages[0].doc_version).to eq(1)
 		end
 
-		it " -- can update multiple stages at a time ? -- " do 
+		it " -- cannot update stage attributes if any orders have been added to the assembly -- " do 
 
-			
 		end
 
 	end

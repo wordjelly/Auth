@@ -69,6 +69,16 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 			context " -- basic create -- " do 
 
+				it " -- creates an assembly with name -- " do 
+
+					assembly = attributes_for(:assembly)
+
+					post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+
+					expect(response.code).to eq("201")
+					expect(Auth.configuration.assembly_class.constantize.all.count).to eq(1)
+
+				end
 
 			end
 
@@ -77,6 +87,10 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 				it " -- creates a copy of the latest created master assembly -- " do 
 
+					## so first create an assembly
+					## then update it as master
+					## then clone it by passing in a master id.
+					
 
 				end
 

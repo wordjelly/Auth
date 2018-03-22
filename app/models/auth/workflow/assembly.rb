@@ -1,9 +1,7 @@
 class Auth::Workflow::Assembly
   
-  include Mongoid::Document
-  include Auth::Concerns::OwnerConcern
+  include Auth::Concerns::WorkflowConcern
 
-  
   ## set as true if the assembly is to be considered as the master assembly.
   ## can it be set on create ?
   ## no it cannot.
@@ -91,7 +89,7 @@ class Auth::Workflow::Assembly
   ###########################################################
   ## checks if the provided master assembly id is the latest one.
   ## will check that the existing doc-version is 0 before doing this, so that it only triggers on create!
-  validate :master_assembly_id_is_latest
+  validate :master_assembly_id_is_latest_created_master
 
 
   ###########################################################
@@ -194,13 +192,16 @@ class Auth::Workflow::Assembly
   def create_with_conditions(params,permitted_params,model)
     ## in this case the model is a stage model.
     ## we have to set everything other than anything which has an __metadata attribute, and anything else which has
-    return false unless model.valid? || model.doc_version.blank? || model.doc_version != 1
+    return false unless (model.valid?)
 
+    ## if the assembly is being created with a master assembly id, then it should 
+    if model.master_assembly_id
+      ## clone the master
+      model = Auth.configuration.assembly_class.find(master_assembly_id.to_s).clone
+    end
     
     assembly_updated = Auth.configuration.assembly_class.constantize.where({
-        {
           :_id => model._id
-        }
     })
     .find_one_and_update(
       {
@@ -229,31 +230,25 @@ class Auth::Workflow::Assembly
   ## permitted params is just the result of calling the permitted params def, and fetching the model from it.
   def update_with_conditions(params,permitted_params,model)
     
-    ## if the query conditions consist of 
-    ## if the master is being set to true, 
-    ## then it must include a search for false
-    ## if the master is being set to false, then 
-    ## it must be false to start with.
-    ## set these adequately.
-
-    ## furthermore if master is being set to true, then there must be no orders anywhere.
-
-    master_conditions = []
-
-
-    query = { "$and" => [
-          {
+    query_and_conditions = [
+      {
             "_id" => BSON::ObjectId(model.id.to_s)
-          },
-          {
+      },
+      {
 
             "doc_version" => model.doc_version
-          }
-    ]}
+      }
+    ]
+
+    if model.master == true
+      query_and_conditions << { "master" => false }
+    end
+
+    query = { "$and" => query_and_conditions}
 
     ## if its only the assembly , then it would just be "$set" => model.attributes
     update = {
-      "$set" => model.attributes.except(:doc_version,:_id, :master_assembly_id),
+      "$set" => model.attributes.except(:doc_version, :_id, :master_assembly_id),
       "$inc" => {
         "doc_version" => 1
       }
@@ -294,7 +289,7 @@ class Auth::Workflow::Assembly
     elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
     elsif stage_update = build_stage_update(permitted_params,params)
-      update = stage_updatee
+      update = stage_update
     end
 
     ## now do the where.find_one_and_update
@@ -537,7 +532,7 @@ class Auth::Workflow::Assembly
 
   def build_order_query(permitted_params,params)
 
-    puts "permitted params are: #{permitted_params}"
+    #puts "permitted params are: #{permitted_params}"
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
@@ -549,6 +544,7 @@ class Auth::Workflow::Assembly
     order_id = params[:id]
     order_doc_version = permitted_params[:doc_version]
 
+=begin
     puts " ------------------ CAME TO ORDER QUERY --------------"
     puts "stage index : #{stage_index}"
     puts "stage id : #{stage_id}"
@@ -560,6 +556,7 @@ class Auth::Workflow::Assembly
     puts "order id : #{order_id}"
     puts "order doc version: #{order_doc_version}"
 
+=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && order_index && order_id && order_doc_version)
 
     query =
@@ -591,6 +588,7 @@ class Auth::Workflow::Assembly
     order_id = params[:id]
     order_doc_version = permitted_params[:doc_version]
 
+=begin
     puts " ------------------ CAME TO ORDER UPDATE --------------"
     puts "stage index : #{stage_index}"
     puts "stage id : #{stage_id}"
@@ -601,11 +599,11 @@ class Auth::Workflow::Assembly
     puts "order index: #{order_index}"
     puts "order id : #{order_id}"
     puts "order doc version: #{order_doc_version}"
-
+=end
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && order_index && order_id && order_doc_version)
 
-    puts 'ORDER UPDATE -------------all required params are present.'
+    #puts 'ORDER UPDATE -------------all required params are present.'
 
     order = get_order(stage_index,sop_index,order_index)
       
@@ -649,6 +647,7 @@ class Auth::Workflow::Assembly
     requirement_id = permitted_params[:requirement_id] || params[:id]
     requirement_doc_version = permitted_params[:requirement_doc_version] || permitted_params[:doc_version]
 
+=begin
     puts "stage index: #{stage_index}"
     puts "stage id: #{stage_id}"
     puts "stage doc version: #{stage_doc_version}"
@@ -664,7 +663,7 @@ class Auth::Workflow::Assembly
     puts "requirement index: #{requirement_index}"
     puts "requirement id: #{requirement_id}"
     puts "requirement doc version: #{requirement_doc_version}"
-
+=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
 
 
@@ -681,7 +680,7 @@ class Auth::Workflow::Assembly
       ]
 
 
-    puts "did not return ---------------------------------"
+   # puts "did not return ---------------------------------"
 
     return query
 
@@ -690,10 +689,11 @@ class Auth::Workflow::Assembly
 
   def build_requirement_update(permitted_params,params)
 
+=begin
     puts "came to build requirement update."
     puts "the params are:"
     puts params.to_s
-
+=end
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
@@ -710,6 +710,7 @@ class Auth::Workflow::Assembly
     requirement_id = params[:id]
     requirement_doc_version = permitted_params[:doc_version]  
 
+=begin
     puts "the params inside the update are-----------"
 
     puts "stage index: #{stage_index}"
@@ -728,18 +729,18 @@ class Auth::Workflow::Assembly
     puts "requirement id: #{requirement_id}"
     puts "requirement doc version: #{requirement_doc_version}"
 
-
+=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
 
-    puts 'all required params are present.'
+   # puts 'all required params are present.'
 
     requirement = get_requirement(stage_index,sop_index,step_index,requirement_index)
       
-    puts "requirement got as : #{requirement}"
+   # puts "requirement got as : #{requirement}"
 
     return unless requirement
 
-    puts "found requirement"
+   # puts "found requirement"
 
     requirement.assign_attributes(permitted_params)
     requirement.doc_version = requirement_doc_version + 1
@@ -776,6 +777,7 @@ class Auth::Workflow::Assembly
     state_doc_version = permitted_params[:doc_version]
     state_index = permitted_params[:state_index]
 
+=begin
     puts "stage index: #{stage_index}"
     puts "stage id: #{stage_id}"
     puts "stage doc version: #{stage_doc_version}"
@@ -795,7 +797,7 @@ class Auth::Workflow::Assembly
     puts "state index: #{state_index}"
     puts "state id: #{state_id}"
     puts "state doc version: #{state_doc_version}"
-
+=end
 
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version && state_index && state_id && state_doc_version)
 
@@ -822,9 +824,9 @@ class Auth::Workflow::Assembly
 
   def build_state_update(permitted_params,params)
 
-    puts "came to build state update."
-    puts "the params are:"
-    puts params.to_s
+    #puts "came to build state update."
+    #puts "the params are:"
+    #puts params.to_s
 
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
@@ -846,7 +848,7 @@ class Auth::Workflow::Assembly
     state_id = params[:id]
     state_doc_version = permitted_params[:doc_version]  
 
-
+=begin
     puts "the params inside the update are-----------"
 
     puts "stage index: #{stage_index}"
@@ -869,19 +871,20 @@ class Auth::Workflow::Assembly
     puts "state index: #{state_index}"
     puts "state id: #{state_id}"
     puts "state doc version: #{state_doc_version}"
-
+=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version && state_index && state_id && state_doc_version)
 
-    puts 'all required params are present.'
+   # puts 'all required params are present.'
 
     state = get_state(stage_index,sop_index,step_index,requirement_index,state_index)
       
-    puts "state got as : #{state}"
+   # puts "state got as : #{state}"
 
     return unless state
 
-    puts "found requirement"
+   # puts "found requirement"
 
+    ## here we can do the redacting.
     state.assign_attributes(permitted_params)
     state.doc_version = state_doc_version + 1
 
@@ -910,7 +913,11 @@ class Auth::Workflow::Assembly
     latest_assembly = Auth.configuration.assembly_class.constantize.where({
       "master" => true 
     }).order_by(:created_at => 'desc').limit(1)
-    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.")
+
+    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly
+
+    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly.id.to_s == self.master_assembly_id.to_s    
+  
   end
 
   ###########################################################
