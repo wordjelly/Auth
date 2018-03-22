@@ -75,14 +75,31 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 			context " -- clone creation -- " do 
 
 
-				it " -- creates a copy of the latest master assembly -- " do 
+				it " -- creates a copy of the latest created master assembly -- " do 
 
 
 				end
 
 
-				it " -- creates a copy of the latest master assembly, but doesn't copy the 'master' attribute -- " do 
+				it " -- cannot set master attribute on create -- " do 
 
+
+				end
+
+			end
+
+
+			context " -- orders added -- " do 
+
+
+
+				it " -- cannot mark as master -- " do 
+
+
+				end
+
+
+				it " -- does not accept applicability changes -- " do 
 
 				end
 
@@ -90,17 +107,20 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 			end
 
 			context " -- update -- " do 
+					
+
+				it  " -- can update this assembly as master from false to true -- " do 
+
+
+				end
+
+
+				it " -- cannot update master assembly id -- " do 
+
+
+				end
+
 				
-				it  " -- can mark an assembly as master -- " do 	
-
-				end
-
-
-				it " -- cannot mark an assembly as master if it has orders in it -- " do 
-
-
-				end
-
 				it  " -- can update name and description -- " do 
 					assembly = create_assembly_with_stages_sops_and_steps
 					res = assembly.save
@@ -115,16 +135,16 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 		            #puts response.body.to_s
 				end
 
+				it " -- cannot update master from true to false -- " do 
+
+
+				end
+
 				it " -- can accept an array of stages,sops,steps,requirements,states to mark as applicable or not_applicable -- " do 
 
 
 				end
 
-				it "--- applicability of anything cannot be changed after orders have been added to the assembly -- " do 
-
-
-
-				end
 
 			end
 

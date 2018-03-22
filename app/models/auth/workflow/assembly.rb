@@ -3,11 +3,28 @@ class Auth::Workflow::Assembly
   include Mongoid::Document
   include Auth::Concerns::OwnerConcern
 
-  ## these are set from find_self
-  attr_accessor :stage_index
-  attr_accessor :sop_index
-  attr_accessor :step_index
+  
+  ## set as true if the assembly is to be considered as the master assembly.
+  ## can it be set on create ?
+  ## no it cannot.
+  ## we first clone, for that we provide a master_assembly_id.
+  ## then we update something else as the master.
+  ## so master cannot be set, on create.
+  field :master, type: Boolean, default: false
 
+  ## if the master assembly id is provided, then it will create from that.
+  ## inside the create with conditions.
+  ## it will verify that at the time of creation, if that is infact the latest master assembly, and only then it will create it.
+
+  ## should the master assembly id be a field, so suppose i entered a master assembly id for this, then it should be easy for us to know that one.
+  ## and it should never be possible to change that master id field.
+  ## so that parameter is not to be permitted for update.
+  ## master is also not be changed once it already exists.
+  ## in what sense.
+  ## once something is made a master, it cannot be unmade.
+  ## also not possible to do that for master_field
+  ## master_assembly_id once set cannot be changed, so that will have to be included in all the updates?
+  field :master_assembly_id, type: String
 
   ###########################################################
   ##
@@ -19,7 +36,7 @@ class Auth::Workflow::Assembly
   ## 
   ###########################################################
   def self.permitted_params
-    [{:assembly => [:name,:description,:doc_version,:clone_id, :applicable]},:id]
+    [{:assembly => [:name,:description,:doc_version,:applicable, :master_assembly_id, :master]},:id]
   end
 
   def self.find_self(id,signed_in_resource,options={})
@@ -72,7 +89,9 @@ class Auth::Workflow::Assembly
   ##
   ##
   ###########################################################
-  
+  ## checks if the provided master assembly id is the latest one.
+  ## will check that the existing doc-version is 0 before doing this, so that it only triggers on create!
+  validate :master_assembly_id_is_latest
 
 
   ###########################################################
@@ -172,13 +191,56 @@ class Auth::Workflow::Assembly
   ##
   ##
   #############################################################
-  
+  def create_with_conditions(params,permitted_params,model)
+    ## in this case the model is a stage model.
+    ## we have to set everything other than anything which has an __metadata attribute, and anything else which has
+    return false unless model.valid? || model.doc_version.blank? || model.doc_version != 1
+
+    
+    assembly_updated = Auth.configuration.assembly_class.constantize.where({
+        {
+          :_id => model._id
+        }
+    })
+    .find_one_and_update(
+      {
+        "$set" => model.attributes.except(:master)
+      },
+      {
+        :return_document => :after,
+        :upsert => true
+      }
+    )
+
+    #puts assembly_updated.attributes.to_s
+    #puts assembly_updated.stages.to_s
+
+    return false unless assembly_updated
+    return model
+
+
+  end
+
+
+
   ## find_self on stage, sop or step -> returns an assembly object
   ## so in any controller, for update, the model will always be an assembly object
   ## so we only work on update_with_conditions for assembly.
   ## permitted params is just the result of calling the permitted params def, and fetching the model from it.
   def update_with_conditions(params,permitted_params,model)
-   
+    
+    ## if the query conditions consist of 
+    ## if the master is being set to true, 
+    ## then it must include a search for false
+    ## if the master is being set to false, then 
+    ## it must be false to start with.
+    ## set these adequately.
+
+    ## furthermore if master is being set to true, then there must be no orders anywhere.
+
+    master_conditions = []
+
+
     query = { "$and" => [
           {
             "_id" => BSON::ObjectId(model.id.to_s)
@@ -191,7 +253,7 @@ class Auth::Workflow::Assembly
 
     ## if its only the assembly , then it would just be "$set" => model.attributes
     update = {
-      "$set" => model.attributes.except(:doc_version,:_id),
+      "$set" => model.attributes.except(:doc_version,:_id, :master_assembly_id),
       "$inc" => {
         "doc_version" => 1
       }
@@ -252,14 +314,7 @@ class Auth::Workflow::Assembly
 
   end 
 
-  def create_with_conditions(params,permitted_params,model)
-    if model.clone_id
-      ## go to the root object
-      ## clone it and all of its other array friends.
-      ## calling clone will call    
-          
-    end
-  end
+  
 
   ###########################################################
   ##
@@ -840,6 +895,22 @@ class Auth::Workflow::Assembly
     return update
 
 
+  end
+
+  ###########################################################
+  ##
+  ##
+  ## CUSTOM DEFINITIONS.
+  ##
+  ##
+  ###########################################################
+  def master_assembly_id_is_latest_created_master
+    return unless self.master_assembly_id
+    return unless self.doc_version == 0
+    latest_assembly = Auth.configuration.assembly_class.constantize.where({
+      "master" => true 
+    }).order_by(:created_at => 'desc').limit(1)
+    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.")
   end
 
   ###########################################################

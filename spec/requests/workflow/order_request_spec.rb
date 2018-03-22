@@ -34,6 +34,10 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 
 		context " -- creates -- " do 
 
+			it " -- does not create order if assembly is master -- " do 
+								
+			end
+
 			it " -- creates an order with product_ids given an assembly and a stage and a sop " do
 
 				assembly = create_empty_assembly

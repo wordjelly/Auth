@@ -28,7 +28,7 @@ class Auth::Workflow::Stage
 		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{
-					:_id => model.assembly_id
+					:_id => BSON::ObjectId(model.assembly_id)
 				},
 				{
 					:doc_version => model.assembly_doc_version
