@@ -90,13 +90,51 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 					## so first create an assembly
 					## then update it as master
 					## then clone it by passing in a master id.
-					
+					assembly = create_empty_assembly
+					assembly.master = true
+					expect(assembly.save).to be_truthy
+
+					assembly_clone = create_empty_assembly
+					assembly_clone.master_assembly_id = assembly.id.to_s
+
+					post assemblies_path, {assembly: assembly_clone,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+
+					expect(response.code).to eq("201")
+					expect(Auth.configuration.assembly_class.constantize.all.count).to eq(2)
 
 				end
 
+				it " -- does not create if the assembly provided as master is not the latest one -- " do 
+
+					assembly = create_empty_assembly
+					assembly.master = true
+					expect(assembly.save).to be_truthy
+
+					sleep(1)
+
+					assembly_two = create_empty_assembly
+					assembly_two.master = true
+					expect(assembly_two.save).to be_truthy
+
+
+					assembly_clone = create_empty_assembly
+					assembly_clone.master_assembly_id = assembly.id.to_s
+					## now try to clone from one.
+					post assemblies_path, {assembly: assembly_clone,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+
+					expect(response.code).to eq("422")
+
+				end
 
 				it " -- cannot set master attribute on create -- " do 
 
+					## try to create an assembly directly with master as true
+					assembly = attributes_for(:assembly)
+					assembly.master = true
+
+					post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+
+					expect(response.code).to eq("422")
 
 				end
 
@@ -105,10 +143,15 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 			context " -- orders added -- " do 
 
-
+				before(:example) do 
+					## create an assembly with stage and sop
+					## save
+					## add orders to sop
+					## save
+				end
 
 				it " -- cannot mark as master -- " do 
-
+					## try to update assembly with master as true.
 
 				end
 

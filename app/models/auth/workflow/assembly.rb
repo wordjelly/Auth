@@ -197,7 +197,7 @@ class Auth::Workflow::Assembly
     ## if the assembly is being created with a master assembly id, then it should 
     if model.master_assembly_id
       ## clone the master
-      model = Auth.configuration.assembly_class.find(master_assembly_id.to_s).clone
+      model = Auth.configuration.assembly_class.constantize.find(master_assembly_id.to_s).clone
     end
     
     assembly_updated = Auth.configuration.assembly_class.constantize.where({
@@ -914,9 +914,11 @@ class Auth::Workflow::Assembly
       "master" => true 
     }).order_by(:created_at => 'desc').limit(1)
 
-    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly
+    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly.first 
 
-    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly.id.to_s == self.master_assembly_id.to_s    
+    return if self.errors.full_messages.size > 0
+
+    self.errors.add(:master_assembly_id,"this is not the latest master assembly, please check for the latest master assembly, before cloning.") unless latest_assembly.first.id.to_s == self.master_assembly_id.to_s    
   
   end
 
