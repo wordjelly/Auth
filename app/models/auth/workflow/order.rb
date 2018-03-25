@@ -2,7 +2,7 @@ class Auth::Workflow::Order
 
 	include Auth::Concerns::WorkflowConcern
 
-	FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+	FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable"]
 	
   	embedded_in :sop, :class_name => Auth.configuration.sop_class
   	
@@ -85,7 +85,6 @@ class Auth::Workflow::Order
 		return false unless model.valid?
 
 		
-
 		assembly_updated = Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{
@@ -93,6 +92,9 @@ class Auth::Workflow::Order
 				},
 				{
 					"stages.#{model.stage_index}.doc_version" => model.stage_doc_version
+				},
+				{
+					"stages.#{model.stage_index}.applicable" => true
 				},
 				{
 					"_id" => BSON::ObjectId(model.assembly_id)
@@ -104,10 +106,16 @@ class Auth::Workflow::Order
 					"master" => false
 				},
 				{
+					"applicable" => true
+				},
+				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)
 				},
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
+				},
+				{
+					"stages.#{model.stage_index}.sops.#{model.sop_index}.applicable" => true
 				},
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.orders.cart_item_ids" => {
@@ -135,13 +143,8 @@ class Auth::Workflow::Order
 
 	end
 
-
+	## what about updating this?
 	
-
-
-
-	
-
 
 end
 

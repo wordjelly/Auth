@@ -2,7 +2,7 @@ class Auth::Workflow::Stage
 	
 	include Auth::Concerns::WorkflowConcern
 	
-	FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+	FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable"]
 
 	embeds_many :sops, :class_name => Auth.configuration.sop_class
 	embedded_in :assembly, :class_name => Auth.configuration.assembly_class
@@ -37,6 +37,11 @@ class Auth::Workflow::Stage
 				},
 				{
 					:doc_version => model.assembly_doc_version
+				},
+				{
+					"stages.sops.orders" => {
+			            "$exists" => false
+			        }
 				}
 			]
 		})

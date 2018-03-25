@@ -2,7 +2,7 @@ class Auth::Workflow::Assembly
   
   include Auth::Concerns::WorkflowConcern
 
-  FIELDS_LOCKED_AFTER_ORDER_ADDED = ["name","description","master"]
+  FIELDS_LOCKED_AFTER_ORDER_ADDED = ["master","applicable"]
 
   ## set as true if the assembly is to be considered as the master assembly.
   ## can it be set on create ?
@@ -253,13 +253,14 @@ class Auth::Workflow::Assembly
       {
 
             "doc_version" => doc_version
+      },
+      {
+            "master" => false
       }
     ]
 
-    ## whether you are setting the master to true (then it must be false to begin with) or you are setting it false(then also it must be false to begin with.)
-    if (permitted_params[:master] == true || permitted_params[:master] == false)
-      query_and_conditions << { "master" => false }
-    end
+    ## whatever the situation, the master has to be false, for any update to go through.
+    ##  
 
     query = { "$and" => query_and_conditions}
 
@@ -290,23 +291,23 @@ class Auth::Workflow::Assembly
         )
     elsif requirement_update = build_requirement_update(permitted_params,params)
       update = requirement_update
-      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+      ensure_no_orders =  Auth.configuration.requirement_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     elsif step_update = build_step_update(permitted_params,params)
       update = step_update
-      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+      ensure_no_orders =  Auth.configuration.step_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     elsif order_update = build_order_update(permitted_params,params)
       update = order_update
-      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+      ensure_no_orders =  Auth.configuration.order_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
-      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+      ensure_no_orders =  Auth.configuration.sop_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     elsif stage_update = build_stage_update(permitted_params,params)
       update = stage_update
-      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+      ensure_no_orders =  Auth.configuration.stage_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     else
       ## its an assembly update.

@@ -2,7 +2,7 @@ class Auth::Workflow::Step
 	
 	include Auth::Concerns::WorkflowConcern
 	
-	FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+	FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable"]
 	
 	embedded_in :sop, :class_name => Auth.configuration.sop_class
 	embeds_many :requirements, :class_name => Auth.configuration.requirement_class

@@ -58,6 +58,7 @@ RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => 
 			expect(assembly.stages[1].name).to eq(stage[:name])
 		end
 
+
 		it " -- updates a stage -- " do 
 			assembly = create_empty_assembly
 			stage = Auth::Workflow::Stage.new(name: "old_stage_name")
@@ -73,7 +74,40 @@ RSpec.describe "stage request spec",:stage => true, :workflow => true, :type => 
 			expect(assembly.stages[0].doc_version).to eq(1)
 		end
 
-		it " -- cannot update stage attributes if any orders have been added to the assembly -- " do 
+		
+		context " -- orders already added -- " do 
+
+			it " -- does not create stage if orders have already been added -- " do 
+
+				assembly = create_assembly_with_stage_sops_and_order
+				expect(assembly.save).to be_truthy
+				##now add a stage to this assembly.
+				stage = create_empty_stage
+				stage = attributes_for(:stage)
+				stage[:assembly_id] = assembly.id.to_s
+				stage[:assembly_doc_version] = assembly.doc_version
+				post stages_path, {stage: stage,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				expect(response.code).to eq("422")
+
+			end
+
+			
+
+			it " -- does not update stage locked attributes if orders added -- ", :rabid => true do 
+
+				assembly = create_assembly_with_stage_sops_and_order
+				assembly.applicable = true
+				assembly.stages[0].applicable = true
+				expect(assembly.save).to be_truthy
+
+				## now just try to update the stage as not applicable.
+				a = {:stage => {:applicable => false, :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :doc_version => assembly.stages[0].doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
+	            ##have to post to the id url.
+		        put stage_path({:id => assembly.stages[0].id.to_s}), a.to_json,@admin_headers
+		        expect(response.code).to eq("422")
+
+
+			end
 
 		end
 

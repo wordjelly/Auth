@@ -174,10 +174,6 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 				end
 
 
-				it " -- does not accept applicability changes -- " do 
-
-				end
-
 
 			end
 
@@ -186,11 +182,35 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 				it  " -- can update this assembly as master from false to true -- " do 
 
+					## create an assembly,
+					## update it as true.
+					assembly = create_assembly_with_stages_sops_and_steps
+					res = assembly.save
+					puts "result of saving:"
+					puts res.to_s
+					## we want to update name and description.
+					a = {:assembly => {:master => true, :doc_version => assembly.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
+		            ##have to post to the id url.
+		            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
+
+		            expect(response.code).to eq("204")
 
 				end
 
 
 				it " -- cannot update master assembly id -- " do 
+
+					assembly = create_assembly_with_stages_sops_and_steps
+					assembly.master_assembly_id = BSON::ObjectId.new.to_s
+					res = assembly.save
+					#puts "result of saving:"
+					#puts res.to_s
+					## we want to update name and description.
+					a = {:assembly => {:master_assembly_id => BSON::ObjectId.new.to_s, :doc_version => assembly.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
+		            ##have to post to the id url.
+		            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
+
+		            expect(response.code).to eq("422")
 
 
 				end
@@ -231,14 +251,8 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 		            puts response.body.to_s
 		            
 		            expect(response.code).to eq("422")	
-		            
-				end
-
-				it " -- can accept an array of stages,sops,steps,requirements,states to mark as applicable or not_applicable -- " do 
-
 
 				end
-
 
 			end
 

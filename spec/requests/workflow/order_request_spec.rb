@@ -39,14 +39,133 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 		context " -- creates -- " do 
 
 			it " -- does not create order if assembly is master -- " do 
-								
+				## ok
+				## create a master assembly.
+				## now try to add an order to it.
+				## it should fail.		
+				assembly = create_assembly_with_stages_sops_and_steps
+				assembly.master = true
+				assembly.applicable = true
+				expect(assembly.save).to be_truthy
+
+				## add an order.
+				order = attributes_for(:add_order)
+				order[:cart_item_ids] = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+				order[:assembly_id] = assembly.id.to_s
+				order[:assembly_doc_version] = assembly.doc_version
+				order[:stage_id] = assembly.stages[0].id.to_s
+				order[:stage_doc_version] = assembly.stages[0].doc_version
+				order[:stage_index] = 0
+				order[:sop_id] = assembly.stages[0].sops[0].id.to_s
+				order[:sop_doc_version] = assembly.stages[0].sops[0].doc_version
+				order[:sop_index] = 0
+
+				post orders_path, {order: order,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				
+				puts response.body.to_s
+				## now it should not add.
+				expect(response.code).to eq("422")
+
 			end
+
+			it " -- does not create order if assembly is not-applicable -- ", :na => true do 
+				
+				assembly = create_assembly_with_stages_sops_and_steps
+				assembly.master = true
+				expect(assembly.save).to be_truthy	
+
+				## if the assembly is not applicable order cannot be created.
+				## since it is so by default, this will fail
+
+				order = attributes_for(:add_order)
+				order[:cart_item_ids] = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+				order[:assembly_id] = assembly.id.to_s
+				order[:assembly_doc_version] = assembly.doc_version
+				order[:stage_id] = assembly.stages[0].id.to_s
+				order[:stage_doc_version] = assembly.stages[0].doc_version
+				order[:stage_index] = 0
+				order[:sop_id] = assembly.stages[0].sops[0].id.to_s
+				order[:sop_doc_version] = assembly.stages[0].sops[0].doc_version
+				order[:sop_index] = 0
+
+				post orders_path, {order: order,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				
+				puts response.body.to_s
+				## now it should not add.
+				expect(response.code).to eq("422")						
+
+			end
+
+
+			it " -- does not create order if stage is not applicable -- " do 
+
+				## here make the assembly applicable, but not the stage.
+				assembly = create_assembly_with_stages_sops_and_steps
+				assembly.applicable = true
+				expect(assembly.save).to be_truthy	
+
+				## if the assembly is not applicable order cannot be created.
+				## since it is so by default, this will fail
+
+				order = attributes_for(:add_order)
+				order[:cart_item_ids] = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+				order[:assembly_id] = assembly.id.to_s
+				order[:assembly_doc_version] = assembly.doc_version
+				order[:stage_id] = assembly.stages[0].id.to_s
+				order[:stage_doc_version] = assembly.stages[0].doc_version
+				order[:stage_index] = 0
+				order[:sop_id] = assembly.stages[0].sops[0].id.to_s
+				order[:sop_doc_version] = assembly.stages[0].sops[0].doc_version
+				order[:sop_index] = 0
+
+				post orders_path, {order: order,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				
+				puts response.body.to_s
+				## now it should not add.
+				expect(response.code).to eq("422")
+
+			end
+
+
+			it " -- does not create order if sop is not applicable -- " do 
+
+				assembly = create_assembly_with_stages_sops_and_steps
+				assembly.applicable = true
+				assembly.stages[0].applicable = true
+				## this leaves the sop as not applicable.
+				expect(assembly.save).to be_truthy	
+
+				## if the assembly is not applicable order cannot be created.
+				## since it is so by default, this will fail
+
+				order = attributes_for(:add_order)
+				order[:cart_item_ids] = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
+				order[:assembly_id] = assembly.id.to_s
+				order[:assembly_doc_version] = assembly.doc_version
+				order[:stage_id] = assembly.stages[0].id.to_s
+				order[:stage_doc_version] = assembly.stages[0].doc_version
+				order[:stage_index] = 0
+				order[:sop_id] = assembly.stages[0].sops[0].id.to_s
+				order[:sop_doc_version] = assembly.stages[0].sops[0].doc_version
+				order[:sop_index] = 0
+
+				post orders_path, {order: order,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				
+				puts response.body.to_s
+				## now it should not add.
+				expect(response.code).to eq("422")
+
+			end
+
 
 			it " -- creates an order with product_ids given an assembly and a stage and a sop " do
 
 				assembly = create_empty_assembly
+				assembly.applicable = true
 				stage = Auth::Workflow::Stage.new
+				stage.applicable = true
 				sop = Auth::Workflow::Sop.new
+				sop.applicable = true
 				stage.sops << sop
 				assembly.stages << stage
 				res = assembly.save
@@ -78,12 +197,14 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 				## then try to create another order with the same cart_item_ids.
 				## okays so lets go.
 				assembly = create_empty_assembly
+				assembly.applicable = true
 				stage = Auth::Workflow::Stage.new
+				stage.applicable = true
 				sop = Auth::Workflow::Sop.new
+				sop.applicable = true
 				stage.sops << sop
 				assembly.stages << stage
 				res = assembly.save
-				expect(res).to be_truthy
 
 				
 
@@ -121,8 +242,11 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 				## then try to create another order with the same cart_item_ids.
 				## okays so lets go.
 				assembly = create_empty_assembly
+				assembly.applicable = true
 				stage = Auth::Workflow::Stage.new
+				stage.applicable = true
 				sop = Auth::Workflow::Sop.new
+				sop.applicable = true
 				stage.sops << sop
 				assembly.stages << stage
 				res = assembly.save
@@ -169,7 +293,7 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 
 				## then update it.	
 				assembly.stages[0].sops[0].orders[0].name = "initial name"
-				assembly.stages[0].sops[0].orders[0].cart_item_ids = [BSON::ObjectId.to_s, BSON::ObjectId.to_s]
+				assembly.stages[0].sops[0].orders[0].cart_item_ids = [BSON::ObjectId.new.to_s, BSON::ObjectId.new.to_s]
 				assembly.stages[0].sops[0].orders[0].action = 1
 
 				res = assembly.save
@@ -218,10 +342,6 @@ RSpec.describe "order request spec",:orders => true, :workflow => true, :type =>
 
 
 
-			it " -- cannot update order action, for eg from process to don't process -- " do 
-
-
-			end
 
 		end
 
