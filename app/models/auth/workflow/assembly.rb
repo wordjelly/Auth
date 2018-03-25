@@ -2,6 +2,8 @@ class Auth::Workflow::Assembly
   
   include Auth::Concerns::WorkflowConcern
 
+  FIELDS_LOCKED_AFTER_ORDER_ADDED = ["name","description","master"]
+
   ## set as true if the assembly is to be considered as the master assembly.
   ## can it be set on create ?
   ## no it cannot.
@@ -199,13 +201,14 @@ class Auth::Workflow::Assembly
       ## clone the master
       model = Auth.configuration.assembly_class.constantize.find(master_assembly_id.to_s).clone
     end
+
     
     assembly_updated = Auth.configuration.assembly_class.constantize.where({
           :_id => model._id
     })
     .find_one_and_update(
       {
-        "$set" => model.attributes.except(:master)
+        "$set" => model.attributes.except("master")
       },
       {
         :return_document => :after,
@@ -230,33 +233,39 @@ class Auth::Workflow::Assembly
   ## permitted params is just the result of calling the permitted params def, and fetching the model from it.
   def update_with_conditions(params,permitted_params,model)
     
+    ensure_no_orders = false
+
+    puts "the params are:"
+    puts params.to_s
+
+    puts "permitted params are:"
+    puts permitted_params.to_s
+
+    _id = permitted_params[:assembly_id] || params[:id] 
+    doc_version = permitted_params[:assembly_doc_version] || permitted_params[:doc_version]
+
+    return unless (_id && doc_version)
+
     query_and_conditions = [
       {
-            "_id" => BSON::ObjectId(model.id.to_s)
+            "_id" => BSON::ObjectId(_id.to_s)
       },
       {
 
-            "doc_version" => model.doc_version
+            "doc_version" => doc_version
       }
     ]
 
-    if model.master == true
+    ## whether you are setting the master to true (then it must be false to begin with) or you are setting it false(then also it must be false to begin with.)
+    if (permitted_params[:master] == true || permitted_params[:master] == false)
       query_and_conditions << { "master" => false }
     end
 
     query = { "$and" => query_and_conditions}
 
-    ## if its only the assembly , then it would just be "$set" => model.attributes
-    update = {
-      "$set" => model.attributes.except(:doc_version, :_id, :master_assembly_id),
-      "$inc" => {
-        "doc_version" => 1
-      }
-    }
+    
 
     if stage_query = build_stage_query(permitted_params,params)
-      
-
       query["$and"] = query["$and"] + stage_query
       if sop_query = build_sop_query(permitted_params,params)
         query["$and"] = query["$and"] + sop_query
@@ -274,31 +283,68 @@ class Auth::Workflow::Assembly
       end
     end
 
-    puts "came to check which update query applies --------------------"
-    puts "query is:"
-    puts query
 
     if state_update = build_state_update(permitted_params,params)
       update = state_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
     elsif requirement_update = build_requirement_update(permitted_params,params)
       update = requirement_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
     elsif step_update = build_step_update(permitted_params,params)
       update = step_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
     elsif order_update = build_order_update(permitted_params,params)
       update = order_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
     elsif sop_update = build_sop_update(permitted_params,params)
       update = sop_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
     elsif stage_update = build_stage_update(permitted_params,params)
       update = stage_update
+      ensure_no_orders =  Auth.configuration.state_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
+    else
+      ## its an assembly update.
+      ## if the permitted params contain any of the assembly redacted fields, then we have to set ensure_no_orders here as well.    
+      ensure_no_orders = Auth.configuration.assembly_class.constantize.permitted_params_contain_locked_fields(permitted_params)    
+
+      model.assign_attributes(permitted_params)
+
+      ## if its only the assembly , then it would just be "$set" => model.attributes
+      ## if the master is being set to false, then ensure that it is already false.
+
+      update = {
+        "$set" => model.attributes.except("doc_version", "_id", "master_assembly_id"),
+        "$inc" => {
+          "doc_version" => 1
+        }
+      }
+
+    end
+
+   
+    
+    ## ensure that there are no orders anywhere inside assembly, in case we are trying to modify locked fields.
+    if ensure_no_orders
+        query["$and"] << {
+          "stages.sops.orders" => {
+            "$exists" => false
+          }
+        }
     end
 
     ## now do the where.find_one_and_update
     puts "query is:"
-    puts query.to_s
+    puts JSON.pretty_generate(query)
 
     puts "update is:"
-    puts update.to_s
-   # Auth.configuration.assembly_class.constantize.where(query).find_one_and_update(update,{:return_document => :after})
+    puts JSON.pretty_generate(update)
+    
 
     cl = Auth.configuration.assembly_class.constantize.where(query)
 

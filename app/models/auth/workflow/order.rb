@@ -2,6 +2,8 @@ class Auth::Workflow::Order
 
 	include Auth::Concerns::WorkflowConcern
 
+	FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+	
   	embedded_in :sop, :class_name => Auth.configuration.sop_class
   	
 	field :cart_item_ids, type: Array

@@ -126,15 +126,22 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 
 				end
 
-				it " -- cannot set master attribute on create -- " do 
+				it " -- ignores master attribute on create -- ", :rubiks => true do 
 
 					## try to create an assembly directly with master as true
 					assembly = attributes_for(:assembly)
-					assembly.master = true
+					assembly[:name] = "don juan"
+					assembly[:master] = true
 
 					post assemblies_path, {assembly: assembly,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
 
-					expect(response.code).to eq("422")
+					expect(response.code).to eq("201")
+
+					assembly_created = assigns(:model)
+					## get this assembly.
+					assembly_created = Auth.configuration.assembly_class.constantize.first
+					puts assembly_created.attributes.to_s
+					expect(assembly_created.master).not_to be_truthy
 
 				end
 
@@ -144,14 +151,25 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 			context " -- orders added -- " do 
 
 				before(:example) do 
-					## create an assembly with stage and sop
-					## save
-					## add orders to sop
-					## save
+					@assembly_with_order = create_assembly_with_stage_sops_and_order
+					#puts "is it valid."
+					#puts @assembly_with_order.valid?
+					#puts @assembly_with_order.errors.full_messages.to_s
+					save_response = @assembly_with_order.save
+					puts save_response.to_s
 				end
 
-				it " -- cannot mark as master -- " do 
-					## try to update assembly with master as true.
+				it " -- cannot mark as master -- ", :mark_as_master do 
+					 
+					a = {:assembly => {:master => true, :doc_version => @assembly_with_order.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
+		            
+		            put assembly_path({:id => @assembly_with_order.id.to_s}), a.to_json,@admin_headers
+
+		            puts "this is the response body."
+		            puts response.body.to_s
+
+		            expect(response.code).to eq("422")
+
 
 				end
 
@@ -178,23 +196,42 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 				end
 
 				
-				it  " -- can update name and description -- " do 
+				it  " -- can update name and description -- ", :normal_update => true do 
 					assembly = create_assembly_with_stages_sops_and_steps
 					res = assembly.save
-					#puts "result of saving:"
-					#puts res.to_s
+					puts "result of saving:"
+					puts res.to_s
 					## we want to update name and description.
-					a = {:assembly => {:name => "dog",:description => "cat"}, api_key: @ap_key, :current_app_id => "testappid"}
+					a = {:assembly => {:name => "dog",:description => "cat", :doc_version => assembly.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
 		            ##have to post to the id url.
 		            put assembly_path({:id => assembly.id.to_s}), a.to_json,@admin_headers
 
+		            puts response.body.to_s
 		            expect(response.code).to eq("204")
-		            #puts response.body.to_s
+		            #
 				end
 
 				it " -- cannot update master from true to false -- " do 
 
+					## create an assembly with master true.
+					## now try to change it to false.
+					
+					assembly_created = create_assembly_with_stages_sops_and_steps
+					
+					assembly_created[:master] = true
+					
+					expect(assembly_created.save).to be_truthy
+					
+					## now try to update this as false.
+					a = {:assembly => {:master => false, :doc_version => assembly_created.doc_version}, api_key: @ap_key, :current_app_id => "testappid"}
 
+		            ##have to post to the id url.
+		            put assembly_path({:id => assembly_created.id.to_s}), a.to_json,@admin_headers
+
+		            puts response.body.to_s
+		            
+		            expect(response.code).to eq("422")	
+		            
 				end
 
 				it " -- can accept an array of stages,sops,steps,requirements,states to mark as applicable or not_applicable -- " do 

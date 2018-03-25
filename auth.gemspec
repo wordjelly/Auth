@@ -51,6 +51,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'wj-payuindia', '>= 0.1.1'
   s.add_dependency 'wj-mongoid-elasticsearch', '~> 0.0.1'
   s.add_dependency 'cloudinary'
+  #s.add_dependency 'mongoid-embedded-errors'
   s.add_development_dependency 'faker'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'capybara'

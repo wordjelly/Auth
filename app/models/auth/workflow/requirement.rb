@@ -1,9 +1,9 @@
 class Auth::Workflow::Requirement
 
-	  include Mongoid::Document
-  	
-  	include Auth::Concerns::OwnerConcern
-  	
+	  include Auth::Concerns::WorkflowConcern
+  	 
+    FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+
   	embedded_in :step, :class_name => Auth.configuration.step_class
     
     embeds_many :states, :class_name => Auth.configuration.state_class 

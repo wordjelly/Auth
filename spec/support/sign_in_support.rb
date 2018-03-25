@@ -368,6 +368,13 @@ module WorkflowSupport
     assembly.stages[0].name = "first stage"
     assembly.stages[0].sops = [Auth::Workflow::Sop.new]
     assembly.stages[0].sops[0].orders = [Auth::Workflow::Order.new]
+    assembly.stages[0].sops[0].orders[0].action = 1
+    puts assembly.stages[0].sops[0].orders[0].valid?
+    puts assembly.stages[0].sops[0].orders[0].errors.full_messages
+    puts assembly.stages[0].sops[0].valid?
+    puts assembly.stages[0].sops[0].errors.full_messages
+    puts assembly.stages[0].valid?
+    puts assembly.stages[0].errors.full_messages
     assembly
   end
 

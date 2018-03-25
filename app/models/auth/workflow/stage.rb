@@ -2,6 +2,8 @@ class Auth::Workflow::Stage
 	
 	include Auth::Concerns::WorkflowConcern
 	
+	FIELDS_LOCKED_AFTER_ORDER_ADDED = []
+
 	embeds_many :sops, :class_name => Auth.configuration.sop_class
 	embedded_in :assembly, :class_name => Auth.configuration.assembly_class
 	field :name, type: String
