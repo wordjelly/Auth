@@ -73,10 +73,11 @@ class Auth::Workflow::State
     ##
     ###########################################################
     def create_with_conditions(params,permitted_params,model)
-    ## in this case the model is a stage model.
+    ## in this case the model is a state model.
       
       return false unless model.valid?
 
+=begin
       puts "these are the model attributes --------------"
       puts model.attributes.to_s
 
@@ -88,7 +89,7 @@ class Auth::Workflow::State
       puts model.step_doc_version
       puts model.requirement_id
       puts model.requirement_doc_version
-
+=end
 
 
       query = Auth.configuration.assembly_class.constantize.where({
@@ -122,46 +123,18 @@ class Auth::Workflow::State
           },
           {
             "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.requirements.#{requirement_index}.doc_version" => model.requirement_doc_version
+          },
+          {
+            "stages.sops.orders" => {
+                  "$exists" => false
+              }
           }
         ]
       })
 
       puts "the query count is: #{query.size.to_s}"
 
-      assembly_updated = Auth.configuration.assembly_class.constantize.where({
-        "$and" => [
-          {
-            "stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id)
-          },
-          {
-            "stages.#{model.stage_index}.doc_version" => model.stage_doc_version
-          },
-          {
-            "_id" => BSON::ObjectId(model.assembly_id)
-          },
-          {
-            "doc_version" => model.assembly_doc_version
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}._id" => BSON::ObjectId(model.step_id)
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.doc_version" => model.step_doc_version
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.requirements.#{requirement_index}._id" => BSON::ObjectId(model.requirement_id)
-          },
-          {
-            "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.requirements.#{requirement_index}.doc_version" => model.requirement_doc_version
-          }
-        ]
-      })
+      assembly_updated = query
       .find_one_and_update(
         {
           "$push" => 

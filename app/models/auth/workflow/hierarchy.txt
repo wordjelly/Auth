@@ -284,3 +284,8 @@ lft
 kft
 
 iron
+
+-- how to do a particular def only at a particular time.
+-- suppose you want to do a qc only on monday's?
+-- that part is done by a scheduler, to trigger the creation of orders.
+-- 

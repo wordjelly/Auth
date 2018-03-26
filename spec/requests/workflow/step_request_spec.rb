@@ -57,6 +57,31 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 			expect(assembly.stages[0].sops[0].steps[0].name).to eq(step[:name])
 		end
 
+
+		it " -- does not create step if orders have already been added -- " do 
+
+				assembly = create_assembly_with_stage_sops_and_order
+				##now add a stage to this assembly.
+				stage = assembly.stages[0]
+				sop = assembly.stages[0].sops[0]
+
+				step = attributes_for(:step)
+				step[:assembly_id] = assembly.id.to_s
+				step[:assembly_doc_version] = assembly.doc_version
+				step[:stage_id] = stage.id.to_s
+				step[:stage_doc_version] = stage.doc_version
+				step[:stage_index] = 0
+				step[:sop_id] = sop.id.to_s
+				step[:sop_doc_version] = sop.doc_version
+				step[:sop_index] = 0
+
+				post steps_path, {step: step,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+
+				expect(response.code).to eq("422")
+
+		end
+
+
 		it " -- updates step name,description given an assembly, stage, sop and step information -- " do 
 
 			assembly = create_empty_assembly
@@ -81,26 +106,28 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 
 		context " -- update -- " do 
 
-			## so the process is that 
-			## first call process step
-			## what does this do?
-			## it will call process_step.
+			it  " -- does not update step locked attributes if orders have already been added -- " do 
 
-			it " --  before_update calls process_step if the step is being marked as started -- " do 
+				assembly = create_assembly_with_stage_sops_and_order
+				assembly.applicable = true
+				assembly.stages[0].applicable = true
+				assembly.stages[0].sops[0].applicable = true
+				assembly.stages[0].sops[0].steps << Auth::Workflow::Step.new
+				assembly.stages[0].sops[0].steps[0].applicable = true
+				expect(assembly.save).to be_truthy
+				stage = assembly.stages[0]
+				sop = assembly.stages[0].sops[0]
+				step = assembly.stages[0].sops[0].steps[0]
 
-			end
+				## now just try to update the stage as not applicable.
+				a = {:step => {:applicable => false, :assembly_id => assembly.id.to_s, :assembly_doc_version => assembly.doc_version, :stage_index => 0, :stage_doc_version => stage.doc_version, :stage_id => stage.id.to_s, :doc_version => step.doc_version, :sop_index => 0, :sop_doc_version => sop.doc_version, :sop_id => sop.id.to_s, :step_index => 0}, api_key: @ap_key, :current_app_id => "testappid"}
+	            ##have to post to the id url.
+	        	put step_path({:id => step.id.to_s}), a.to_json,@admin_headers
 
+	        	expect(response.code).to eq("422")
 
-			it " -- step starts if process_step returns true -- " do 
-
-			end
-
-			it " -- process_step calls compare_input_output -- " do 
-
-			end
-
-
-
+		    end
+				
 		end
 
 	end

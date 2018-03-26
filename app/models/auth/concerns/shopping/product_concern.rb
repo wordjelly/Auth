@@ -105,9 +105,9 @@ module Auth::Concerns::Shopping::ProductConcern
 		self.stock >= required_stock
 	end	
 
-	## @param[Hash] options : an optional hash of options that can be used to modify the query for the product.
+	## @param[Auth::Workflow::Requirement] options : an optional hash of options that can be used to modify the query for the product.
 	## @return[Mongoid::Document] : atomically decrements the stock of the product, provided that enough stock exists.
-	def use_stock(options={})
+	def use_stock(requirement)
 		product_document = Auth.configuration.product_class.where({
 				"$and" => [
 					"stock" => {

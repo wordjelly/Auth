@@ -88,6 +88,11 @@ class Auth::Workflow::Requirement
           },
           {
             "stages.#{model.stage_index}.sops.#{model.sop_index}.steps.#{step_index}.doc_version" => model.step_doc_version
+          },
+          {
+            "stages.sops.orders" => {
+                  "$exists" => false
+              }
           }
         ]
       })
@@ -110,26 +115,51 @@ class Auth::Workflow::Requirement
 
     end
 
-    ###########################################################
-    ##
-    ##
-    ## EVENT BASED METHODS.
-    ##
-    ##########################################################
-
-
-
     def calculate_required_states(orders)
       states.each do |state|
         state.calculate_required_states(orders)
       end
     end
 
+    ###########################################################
+    ##
+    ##
+    ## EVENT BASED METHODS.
+    ##
+    ##########################################################
+    
 
     ## will be called in its own event.
-    def mark_requirement
-
+    ## what this does is to call mark requirement.
+    ## that will basically decrement the product count
+    ## or it will mark the product with this requirement id?
+    ## so suppose the requirement could not be marked, then 
+    ## we return nil, as an error.
+    ## if it was marked means how to do?
+    ## update the required product id, but what if that is location dependent?
+    ## we can have a search criterion.
+    ## where, product id, and where something more.
+    ## that can be passed into the mark requirement event. 
+    ## so where requirement is so and so, 
+    ## you have the requirement attributes.
+    ## you can decide how to search for the requirement.
+    ## for eg if you want to mark as , so give a search
+    ## option for mark requirement ?
+    ## its ok that can be sent based on query conditions. 
+    def mark_requirement(arguments={})
+      ## the requirement carries the requirment attributes, as a hash.
+      return nil if (arguments[:requirement].blank?)
+      product_id = argumens[:requirement][:product_id]
+      product = Auth.configuration.product_class.constantize.find(product_id.to_s)
+      ## now if the product is found, then debit it.
+      ###product.use_stock({:required_stock => self.states})
+      ## this can have many states.
+      ## how to know how to provision / use the product
+      ## sometimes the product can just be marked as 
+      ## basically the required value is an attribute accessor.
+      ## it will define how to modulate the product for booking.
+      
     end
-  
+
 
 end

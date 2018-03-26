@@ -62,6 +62,39 @@ RSpec.describe "state request spec",:state => true, :workflow => true, :type => 
 				expect(response.code).to eq("201")
 
 			end
+
+			it " -- does not create a state if orders have been added -- ", :dn => true do 
+
+				assembly = create_assembly_with_stages_sops_steps_and_requirements
+
+				assembly.stages[0].sops[0].orders << Auth::Workflow::Order.new(:action => 1)
+				
+				expect(assembly.save).to be_truthy
+
+				state_attributes = attributes_for(:state)
+
+				add_assembly_info_to_object(assembly,state_attributes)
+
+				add_stage_info_to_object(assembly,assembly.stages.first,state_attributes)
+
+				add_sop_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,state_attributes)
+
+				add_step_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,state_attributes)
+
+				add_requirement_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,assembly.stages.first.sops.first.steps.first.requirements.first,state_attributes)
+
+				puts "the state attributes are:"
+				puts state_attributes.to_s
+				
+				post states_path, {state: state_attributes,:api_key => "test", :current_app_id => "testappid"}.to_json,@admin_headers
+				
+
+				puts response.body.to_s
+
+				expect(response.code).to eq("422")
+
+			end
+
 		end
 
 
@@ -117,6 +150,65 @@ RSpec.describe "state request spec",:state => true, :workflow => true, :type => 
 
 		        puts response.body.to_s
 		        expect(response.code).to eq("204")				
+
+			end
+
+			it " -- doesnt update locked attributes if orders are added --- " do 
+
+				assembly = create_assembly_with_stages_sops_steps_requirements_and_states
+	
+				state = assembly.stages[0].sops[0].steps[0].requirements[0].states[0]
+
+				assembly.stages[0].sops[0].steps[0].requirements[0].states[0].name = "first state."
+
+				assembly.stages[0].sops[0].steps[0].requirements[0].states[0].applicable = true
+
+				assembly.stages[0].sops[0].orders << Auth::Workflow::Order.new(:action => 1)
+
+				expect(assembly.save).to be_truthy
+
+				## now start adding shit into this.
+				## we want to modify this state.
+				## so we have to add the stage, index
+
+				state_attributes = state.attributes
+
+				add_assembly_info_to_object(assembly,state_attributes)
+
+				add_stage_info_to_object(assembly,assembly.stages.first,state_attributes)
+
+				add_sop_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,state_attributes)
+
+				add_step_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first,state_attributes)
+
+
+				add_requirement_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first, assembly.stages.first.sops.first.steps.first.requirements.first,state_attributes)
+
+				add_state_info_to_object(assembly,
+					assembly.stages.first,
+					assembly.stages.first.sops.first,
+					assembly.stages.first.sops.first.steps.first,
+					 assembly.stages.first.sops.first.steps.first.requirements.first,
+					 assembly.stages.first.sops.first.steps.first.requirements.first.states.first,
+					 state_attributes)
+
+				## now remove the 
+				state_attributes.delete(:state_id)
+				state_attributes[:doc_version] = state_attributes.delete(:state_doc_version)
+
+				## now put the new name.
+				state_attributes[:name] = "we changed the name"
+				state_attributes[:applicable] = false
+				puts "the state attributes are:"
+				puts state_attributes.to_s
+
+				a = {:state => state_attributes, api_key: @ap_key, :current_app_id => "testappid"}
+	            ##have to post to the id url.
+		        put state_path({:id => state.id.to_s}), a.to_json,@admin_headers
+
+		        puts response.body.to_s
+		        expect(response.code).to eq("422")				
+
 
 			end
 		end
