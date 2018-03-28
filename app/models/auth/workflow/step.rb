@@ -5,7 +5,10 @@ class Auth::Workflow::Step
 	FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable"]
 	
 	embedded_in :sop, :class_name => Auth.configuration.sop_class
+
 	embeds_many :requirements, :class_name => Auth.configuration.requirement_class
+
+	embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
 	
 	field :name, type: String
 	field :description, type: String

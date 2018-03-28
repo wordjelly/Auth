@@ -128,6 +128,9 @@ module Auth
 
     attr_accessor :state_class
     attr_accessor :state_controller
+
+    attr_accessor :tlocation_class
+    attr_accessor :tlocation_controller
     ########################################################
     ##
     ##
@@ -293,6 +296,10 @@ module Auth
 
       @state_class = "Auth::Workflow::State"
       @state_controller = "auth/workflow/states"
+
+
+      @tlocation_class = "Auth::Workflow::Tlocation"
+      @tlocation_controller = "auth/workflow/tlocations"
       ########################################################
       ##
       ##

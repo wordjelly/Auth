@@ -367,15 +367,18 @@ how will
 
 ## modfiy mark requirement to prevent it being run twice.
 
+## 28th:
 ## add the tests for time_loc, also embed it in step.
 
+## 28th:
 ## add the logic to complete the schedule_order function in sop -> how to handle multiple products at the same time?, how to handle the location category search.
 
+## 28th
 ## add_cart_item to existing tests.
 
 ## remove cart item
 
-## machine, worker objects
+## machine, worker objects, location objects.
 
 ## image inside step
 
@@ -386,3 +389,6 @@ how will
 ## step result saving and requirement.
 
 ## guideline integration.
+
+THERE ARE 12 THINGS, AND THEY HAVE TO BE DONE IN 4 DAYS.
+SO WE CAN DO 3 PER DAY.

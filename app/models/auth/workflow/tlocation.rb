@@ -1,4 +1,4 @@
-class TimeLoc
+class Auth::Workflow::Tlocation
 
 	include Auth::Concerns::WorkflowConcern
   	
@@ -17,7 +17,7 @@ class TimeLoc
     attr_accessor :step_index
     attr_accessor :step_doc_version
     attr_accessor :step_id
-    attr_accessor :timeloc_index
+    attr_accessor :tlocation_index
    
     field :product_id, type: String
 
