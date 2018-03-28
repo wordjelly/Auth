@@ -365,10 +365,14 @@ how will
 
 ## add the permitted params of default_setter functions for state and requirement.
 
+## schedule object also exists -> it contains the ids, and times of all the schedulable objects.
+
+
 ## modfiy mark requirement to prevent it being run twice.
 
 ## 28th:
 ## add the tests for time_loc, also embed it in step.
+## add the tests for create and update.
 
 ## 28th:
 ## add the logic to complete the schedule_order function in sop -> how to handle multiple products at the same time?, how to handle the location category search.

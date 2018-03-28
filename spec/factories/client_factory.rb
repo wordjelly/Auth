@@ -111,4 +111,8 @@ FactoryGirl.define do
     name {Faker::Name.name}
   end
 
+  factory :tlocation, class: Auth::Workflow::Tlocation do 
+    name {Faker::Name.name}
+  end
+
 end

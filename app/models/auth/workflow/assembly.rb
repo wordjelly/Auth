@@ -277,6 +277,8 @@ class Auth::Workflow::Assembly
             if state_query = build_state_query(permitted_params,params)
               query["$and"] = query["$and"] + state_query
             end
+          elsif tlocation_query = build_tlocation_query(permitted_params,params)
+            query["$and"] = query["$and"] + tlocation_query
           end
         elsif order_query = build_order_query(permitted_params,params)
           query["$and"] = query["$and"] + order_query 
@@ -292,6 +294,10 @@ class Auth::Workflow::Assembly
     elsif requirement_update = build_requirement_update(permitted_params,params)
       update = requirement_update
       ensure_no_orders =  Auth.configuration.requirement_class.constantize.permitted_params_contain_locked_fields(permitted_params
+        )
+    elsif tlocation_update = build_tlocation_update(permitted_params,params)
+      update = tlocation_update
+      ensure_no_orders =  Auth.configuration.tlocation_class.constantize.permitted_params_contain_locked_fields(permitted_params
         )
     elsif step_update = build_step_update(permitted_params,params)
       update = step_update
@@ -384,6 +390,9 @@ class Auth::Workflow::Assembly
     return self.stages[stage_index].sops[sop_index].steps[step_index].requirements[requirement_index]
   end
 
+  def get_tlocation(stage_index,sop_index,step_index,tlocation_index)
+    return self.stages[stage_index].sops[sop_index].steps[step_index].tlocations[tlocation_index]
+  end
 
   def get_state(stage_index,sop_index,step_index,requirement_index,state_index)
     return self.stages[stage_index].sops[sop_index].steps[step_index].requirements[requirement_index].states[state_index]
@@ -694,23 +703,7 @@ class Auth::Workflow::Assembly
     requirement_id = permitted_params[:requirement_id] || params[:id]
     requirement_doc_version = permitted_params[:requirement_doc_version] || permitted_params[:doc_version]
 
-=begin
-    puts "stage index: #{stage_index}"
-    puts "stage id: #{stage_id}"
-    puts "stage doc version: #{stage_doc_version}"
 
-    puts "sop index: #{sop_index}"
-    puts "sop id: #{sop_id}"
-    puts "sop doc version: #{sop_doc_version}"
-
-    puts "step index: #{step_index}"
-    puts "step id: #{step_id}"
-    puts "step doc version: #{step_doc_version}"
-
-    puts "requirement index: #{requirement_index}"
-    puts "requirement id: #{requirement_id}"
-    puts "requirement doc version: #{requirement_doc_version}"
-=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
 
 
@@ -727,8 +720,7 @@ class Auth::Workflow::Assembly
       ]
 
 
-   # puts "did not return ---------------------------------"
-
+ 
     return query
 
   end
@@ -736,11 +728,7 @@ class Auth::Workflow::Assembly
 
   def build_requirement_update(permitted_params,params)
 
-=begin
-    puts "came to build requirement update."
-    puts "the params are:"
-    puts params.to_s
-=end
+
     stage_index = permitted_params[:stage_index]
     stage_id = permitted_params[:stage_id]
     stage_doc_version = permitted_params[:stage_doc_version]
@@ -757,26 +745,7 @@ class Auth::Workflow::Assembly
     requirement_id = params[:id]
     requirement_doc_version = permitted_params[:doc_version]  
 
-=begin
-    puts "the params inside the update are-----------"
 
-    puts "stage index: #{stage_index}"
-    puts "stage id: #{stage_id}"
-    puts "stage doc version: #{stage_doc_version}"
-
-    puts "sop index: #{sop_index}"
-    puts "sop id: #{sop_id}"
-    puts "sop doc version: #{sop_doc_version}"
-
-    puts "step index: #{step_index}"
-    puts "step id: #{step_id}"
-    puts "step doc version: #{step_doc_version}"
-
-    puts "requirement index: #{requirement_index}"
-    puts "requirement id: #{requirement_id}"
-    puts "requirement doc version: #{requirement_doc_version}"
-
-=end
     return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && requirement_index && requirement_id && requirement_doc_version)
 
    # puts 'all required params are present.'
@@ -803,6 +772,95 @@ class Auth::Workflow::Assembly
 
 
   end
+
+  ##### => tlocation query and update
+
+  def build_tlocation_query(permitted_params,params)
+
+    
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+    tlocation_index = permitted_params[:tlocation_index]
+    tlocation_id = permitted_params[:tlocation_id] || params[:id]
+    tlocation_doc_version = permitted_params[:tlocation_doc_version] || permitted_params[:doc_version]
+
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && tlocation_index && tlocation_id && tlocation_doc_version)
+
+
+
+    query =
+    
+      [
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.tlocations.#{tlocation_index}._id" => BSON::ObjectId(tlocation_id)     
+        },
+        {
+          "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.tlocations.#{tlocation_index}.doc_version" => tlocation_doc_version
+        }
+      ]
+
+
+ 
+    return query
+
+  end
+
+
+  def build_tlocation_update(permitted_params,params)
+
+
+    stage_index = permitted_params[:stage_index]
+    stage_id = permitted_params[:stage_id]
+    stage_doc_version = permitted_params[:stage_doc_version]
+    
+    sop_index = permitted_params[:sop_index]
+    sop_id = permitted_params[:sop_id]
+    sop_doc_version = permitted_params[:sop_doc_version]
+    
+    step_index = permitted_params[:step_index]
+    step_id = permitted_params[:step_id]
+    step_doc_version = permitted_params[:step_doc_version]
+
+    tlocation_index = permitted_params[:tlocation_index]
+    tlocation_id = params[:id]
+    tlocation_doc_version = permitted_params[:doc_version]  
+
+
+    return unless (stage_index && stage_id && stage_doc_version && sop_index && sop_id && sop_doc_version && step_index && step_id && step_doc_version && tlocation_index && tlocation_id && tlocation_doc_version)
+
+   # puts 'all required params are present.'
+
+    tlocation = get_tlocation(stage_index,sop_index,step_index,tlocation_index)
+      
+   # puts "tlocation got as : #{tlocation}"
+
+    return unless tlocation
+
+   # puts "found tlocation"
+
+    tlocation.assign_attributes(permitted_params)
+    tlocation.doc_version = tlocation_doc_version + 1
+
+
+    update = {
+      "$set" => {
+        "stages.#{stage_index}.sops.#{sop_index}.steps.#{step_index}.tlocations.#{tlocation_index}" => tlocation.attributes
+      }
+    }
+
+    return update
+
+  end
+
 
   ##### => state query and update.
 

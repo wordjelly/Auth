@@ -161,6 +161,8 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 				add_requirement_info_to_object(assembly,assembly.stages.first,assembly.stages.first.sops.first,assembly.stages.first.sops.first.steps.first, assembly.stages.first.sops.first.steps.first.requirements.first,requirement_attributes)
 
+				
+
 				## now remove the 
 				requirement_attributes.delete(:requirement_id)
 				requirement_attributes[:doc_version] = requirement_attributes.delete(:requirement_doc_version)

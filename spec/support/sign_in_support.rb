@@ -388,6 +388,16 @@ module WorkflowSupport
     assembly
   end
 
+  def create_assembly_with_stages_sops_steps_and_tlocations
+    assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
+    assembly.stages = [Auth::Workflow::Stage.new]
+    assembly.stages[0].name = "first stage"
+    assembly.stages[0].sops = [Auth::Workflow::Sop.new]
+    assembly.stages[0].sops[0].steps = [Auth::Workflow::Step.new]
+    assembly.stages[0].sops[0].steps[0].tlocations = [Auth::Workflow::Tlocation.new]
+    assembly
+  end
+
   def create_assembly_with_stages_sops_steps_requirements_and_states
     assembly = Auth::Workflow::Assembly.new(attributes_for(:assembly))
     assembly.stages = [Auth::Workflow::Stage.new]
@@ -449,9 +459,7 @@ module WorkflowSupport
     assembly.stages[0].sops[0].orders << order
 
     order.valid?
-    puts "ORDER ERRORS ALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL-----------------------------------------------"
-    puts order.errors.full_messages
-
+    
     res = assembly.save
 
     return order if res
@@ -564,6 +572,32 @@ module WorkflowSupport
                 st.requirements.each_with_index{|rq,rq_key|
                   if rq.id.to_s == requirement.id.to_s 
                     object_attributes_hash[:requirement_index] = rq_key
+                  end
+                }
+              end
+            }
+          end
+        }
+      end
+    }
+
+  end
+
+  def add_tlocation_info_to_object(assembly,stage,sop,step,tlocation,object_attributes_hash)
+
+    object_attributes_hash[:tlocation_id] = tlocation.id.to_s
+    object_attributes_hash[:tlocation_doc_version] = tlocation.doc_version
+    
+
+    assembly.stages.each_with_index{|stg,stage_key|
+      if stage.id.to_s == stg.id.to_s
+        stg.sops.each_with_index{|sp,sop_key|
+          if sp.id.to_s == sop.id.to_s
+            sp.steps.each_with_index{|st,step_key|
+              if st.id.to_s == step.id.to_s
+                st.tlocations.each_with_index{|rq,rq_key|
+                  if rq.id.to_s == tlocation.id.to_s 
+                    object_attributes_hash[:tlocation_index] = rq_key
                   end
                 }
               end
