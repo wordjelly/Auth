@@ -2,7 +2,7 @@ class Auth::Workflow::Requirement
 
 	  include Auth::Concerns::WorkflowConcern
   	 
-    FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable"]
+    FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable","schedulable"]
 
   	embedded_in :step, :class_name => Auth.configuration.step_class
     
@@ -11,6 +11,10 @@ class Auth::Workflow::Requirement
     field :reference_requirement, type: String
 
     field :name, type: String
+
+    ## set to true if this requirement needs to be scheduled.
+    ## requirements which are schedulable are skipped during the mark requirement phase.
+    field :schedulable, type: Boolean, default: false
 
     ## the product id of the requirement.
     field :product_id, type: String
@@ -45,7 +49,7 @@ class Auth::Workflow::Requirement
     end
 
     def self.permitted_params
-      [{:requirement => [:name, :applicable, :product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_index, :step_doc_version]},:id]
+      [{:requirement => [:name, :applicable, :product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_index, :step_doc_version, :schedulable]},:id]
     end
 
     ###########################################################
@@ -121,6 +125,57 @@ class Auth::Workflow::Requirement
       end
     end
 
+    ## basically we want to combine all the states required values to search for and mark the product.
+    ## we have to call eval on it.
+    ## so here what we will do is to 
+    def self.state_query_update_combiner_default
+        "
+        product_query = {
+          \"$and\" => [
+            { \"_id\" => BSON::ObjectId(arguments[:requirement][:product_id])
+            }
+          ]
+        }
+
+        product_update = {}
+
+        arguments[:requirement][:states].each do |state|
+          
+          if state[:setter_function] == Auth.configuration.state_class.constantize.setter_function_default
+
+            product_query[\"$and\"] << {
+              \"stock\" => {
+                \"$gte\" => state[:required_value].to_f
+              }
+            }
+
+            product_update[\"$inc\"][:stock] = options[:required_stock]*-1
+             
+          end
+
+        end
+
+        ## at the end it should do that query.
+        return Auth.configuration.product_class.constantize.where(product_query).find_one_and_update(product_update,{:return_document => :after})
+        "
+    end
+
+    field :state_query_update_combiner, type: String, default: state_query_update_combiner_default
+
+    ## please note that you have to provide that product as is.
+    ## @param[Hash] arguments : passed in from the mark_requirement, commit the required_value.
+    def execute_product_mark(arguments)
+      eval(state_query_update_combiner)
+    end 
+
+    ## @param[Hash] arguments : the same arguments hash that was passed into #mark_requirement function.
+    ## @return[Array] array with a single event.
+    def emit_schedule_sop_event(arguments)
+        e = Auth::Transaction::Event.new
+        e.arguments = arguments
+        e.method_to_call = "schedule_order"
+        [e]
+    end
     ###########################################################
     ##
     ##
@@ -128,38 +183,14 @@ class Auth::Workflow::Requirement
     ##
     ##########################################################
     
-
-    ## will be called in its own event.
-    ## what this does is to call mark requirement.
-    ## that will basically decrement the product count
-    ## or it will mark the product with this requirement id?
-    ## so suppose the requirement could not be marked, then 
-    ## we return nil, as an error.
-    ## if it was marked means how to do?
-    ## update the required product id, but what if that is location dependent?
-    ## we can have a search criterion.
-    ## where, product id, and where something more.
-    ## that can be passed into the mark requirement event. 
-    ## so where requirement is so and so, 
-    ## you have the requirement attributes.
-    ## you can decide how to search for the requirement.
-    ## for eg if you want to mark as , so give a search
-    ## option for mark requirement ?
-    ## its ok that can be sent based on query conditions. 
+    ## now if the product mark is successfull then and only then, 
     def mark_requirement(arguments={})
-      ## the requirement carries the requirment attributes, as a hash.
       return nil if (arguments[:requirement].blank?)
-      product_id = argumens[:requirement][:product_id]
-      product = Auth.configuration.product_class.constantize.find(product_id.to_s)
-      ## now if the product is found, then debit it.
-      ###product.use_stock({:required_stock => self.states})
-      ## this can have many states.
-      ## how to know how to provision / use the product
-      ## sometimes the product can just be marked as 
-      ## basically the required value is an attribute accessor.
-      ## it will define how to modulate the product for booking.
-      
+      execute_product_mark(arguments) unless self.schedulable 
+      return emit_schedule_sop_event(arguments) if arguments[:last_requirement] == true
+      return [] 
     end
 
+    
 
 end

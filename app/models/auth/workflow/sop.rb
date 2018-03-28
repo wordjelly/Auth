@@ -314,11 +314,16 @@ class Auth::Workflow::Sop
 	def after_create_order(order)
 		if get_order_index(order) == 0
 			## we want to return an array of events.
-			get_sop_requirements.map{|requirement|
+			sop_requirements_with_calculated_states = get_sop_requirements
+			sop_requirements_with_calculated_states.each_with_index.map{|requirement,i|
 				e = Auth::Transaction::Event.new
 				e.arguments = {}
 				e.arguments[:requirement] = requirement.attributes
-				e.method_to_call = "mark_requirement"
+				if i == (sop_requirements_with_calculated_states.size - 1)
+					e.arguments[:last_requirement] = true
+					e.arguments[:sop_id] = self.id.to_s
+				end
+				e.method_to_call = "mark_requirement"	
 				requirement = e
 			}
 		else 
@@ -341,6 +346,20 @@ class Auth::Workflow::Sop
 		requirements_with_calculated_states
 
 	end
+
+	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
+	def schedule_order(arguments={})
+		## then we want to know about the time and other requirements.
+		## so how to do that.
+		## what additional things are needed?
+		## each step should have a duration.
+		## the first step should have the coordinates for the last scheduled step
+		## each step should also have the location and product based details ?
+		## for eg : what are the schedule conditions 
+		## put all that into the first step, like time etc.
+		## so all that goes on step.
+	end
+
 
 end
 

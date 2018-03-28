@@ -126,6 +126,11 @@ RSpec.describe Auth::Transaction::EventHolder, type: :model, :events => true do
 
 			end
 
+			it " -- does not throw error if event returns an empty array on processing -- " do 
+
+
+			end
+
 
 			it " -- does not process event, if it is already processing -- " do 
 

@@ -289,3 +289,118 @@ iron
 -- suppose you want to do a qc only on monday's?
 -- that part is done by a scheduler, to trigger the creation of orders.
 -- 
+
+
+while scheduling the sop the most important points are:
+
+1. it has to have certain requirements -> like when was the previous sop for the same orders ending -> that will give the ability to know when to set this sop for scheduling.
+2. these will happen in a certain order.
+3. so how to know that schedule?
+4. we need something called get_previous_sop.
+5. that will tell us the previous sop but sometimes we have a situation where the sop's dont happen at the same time
+6. in that case how will you deal with it?
+
+eg:
+stool and blood
+
+both cart items are applicable to the delivery sop ,and pickup sop.
+but from thereafter , we are fucked.
+so inside schedule , we will have to know
+so the sop;s will have certain conditions for each and every product, which define about that.
+or will it be defined inside the product?
+no it will be inside the sop.
+so for example inside that sop we will have -
+product_id => conditions for scheduling.
+problem is that if you change somthing, the shit will fly.
+this is fine.
+so we need another embedded document ->
+
+product_id => whatever
+conditions_for_sop => {
+	time_information : {
+		days_of_week : 
+		days_of_month :
+		days_of_year :
+		dates : 
+		time_of_day : (always a range)
+		zone_of_day : (morning,afternoon,evening)
+	}
+	locations : location_ids
+	scheduled_after : sop_address (stage_index,sop_index)
+}
+
+these sop conditions have to be evaluated while scheduling it.
+they have to be evaluated independently for each order.
+so a schedule will 
+
+so we have order already
+it is inside sop.
+it has a number of cart_items.
+now we have to do schedule, so what will it do?
+so sop will have another embedded object -> 
+
+schedule_information => 
+	{
+		product_id => 
+		schedule_information => {
+			time_conditions : {
+
+			},
+			location_conditions : {
+
+			},
+			do_after_sop_conditions : {
+				applicable : true/false,
+				time_conditions : {
+
+				},
+				location_conditions : {
+
+				}
+			},
+			machines : [
+				{
+					category : xyz,
+					id : if specified, use it,
+				}
+			]
+		}
+	}
+
+so it will search for these machines, there also we can give a location id.
+if more than one location id is given, then nearest location is considered.
+for machine also can it be done like that?
+suppose you need 4 machines and 2 workers at various points in this sop.
+how will you schedule it?
+suppose you need the worker from step x -> y.
+and so on and so forth.
+so this whole thing will have to be done one step at a time.
+suppose a machine is needed in n steps.
+then we keep the machine in all those steps.
+doesn't this fit more with requirements.?
+where we go to mark requirements, these are also requirements.
+i think all this has to happen at the same time.
+for a particular step, whatever are the requirements, should only be marked, after the scheduling is done.
+we also will have to go through an unmark phase.
+for eg if the next machine is not available till a time expires, then how does this work?
+suppose you want to mark do requirement scheduling
+its like saying, schedule it, and mark the requirements.
+when the schedule is made, suppose something is not there or it fails, that goes into another league of shit.
+so we schedule one step at a time ?
+=> yes.
+what about nested scheduling ?
+so we can carry forward?
+what machine needed, needed, needed, needed, okay now schedule. you can't schdule half, you can only do pessimistic scheduling
+you iterate each step, see if its marked for a schedulable requirement, and then see if that requirement is maintained, and in that case, you collect the endpoint so you get a duration.
+and at that point, you do the scheduling, 
+now at any point if a particular schedule could not be fulfilled, then what to do, or a requirement could not be marked then what to do ?
+
+we know the schedule requirements.
+basically the schedulable requirements have to be synchronously scheduled.
+so schedule has three parts :
+1. assembly the schedulable requirements.
+2. query for all of them, and get best time slots.
+3. do a find and update for the combined schedule document.
+the or clause has that as the upsert (i.e id of the present sop.)
+
+so for this i need a schedule document, and i need to make this concept of scheduled requirements, and exclude those from mark_requirement.

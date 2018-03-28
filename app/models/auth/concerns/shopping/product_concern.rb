@@ -98,6 +98,7 @@ module Auth::Concerns::Shopping::ProductConcern
 	 }
 	end 
 
+=begin
 	## @param[Hash] options : an optional hash of options that can be used to modify the query for the product.
 	## @return[Boolean] true if there is enough stock.
 	def in_stock?(options={})
@@ -129,5 +130,5 @@ module Auth::Concerns::Shopping::ProductConcern
 			)
 		return product_document
 	end
-
+=end
 end

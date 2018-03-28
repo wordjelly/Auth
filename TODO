@@ -360,3 +360,29 @@ how will
 ## blacklist what attributes cannot be changed if orders are already added.
 
 ## we can create a workflow concern.
+
+-------------------------------------------------------------
+
+## add the permitted params of default_setter functions for state and requirement.
+
+## modfiy mark requirement to prevent it being run twice.
+
+## add the tests for time_loc, also embed it in step.
+
+## add the logic to complete the schedule_order function in sop -> how to handle multiple products at the same time?, how to handle the location category search.
+
+## add_cart_item to existing tests.
+
+## remove cart item
+
+## machine, worker objects
+
+## image inside step
+
+## status provisioning other than just number of sample.
+
+## notifications from within step.
+
+## step result saving and requirement.
+
+## guideline integration.

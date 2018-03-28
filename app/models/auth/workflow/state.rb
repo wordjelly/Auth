@@ -157,6 +157,8 @@ class Auth::Workflow::State
 	###########################################################
 
 	def self.setter_function_default
+    ## here we have to commit the required value.
+    ## it will have to be an update_with_conditions.
 		"
 			self.required_value = orders.size
 		"

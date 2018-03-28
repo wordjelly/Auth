@@ -9,6 +9,53 @@ class Auth::Workflow::Step
 	
 	field :name, type: String
 	field :description, type: String
+
+	##########################################################
+	##
+	##
+	## SCHEDULing specifications and fields.
+	##
+	##
+	##########################################################
+
+		## we need to provide time based information for scheduling this step
+		######################################################
+		##
+		##
+		## TIME BASED FIELDS
+		##
+		## ALL NUMBERING ON TIME BASED FIELDS STARTS WITH 
+		##
+		######################################################
+
+		## this will be different for different product_ids.
+		## there will have to be a switch which says it can just follow the previous step.
+
+
+		## what is the location ?
+		## a direct id or a location category.
+		## or what ?
+		## sometimes it has to be inferred, like the previous location of the product.
+		## we can have a location lookup?
+		## for the moment its category -> and that will default to searching for the nearest location based on a category
+
+		## or it can just have a switch called previous, which is the default, in which case, it just follows the earlier step.
+		
+
+
+		## we need to provide location based information for doing this step
+
+
+		## we need to provide 
+
+	##########################################################
+	##
+	##
+	##
+	##
+	##
+	##########################################################
+
 	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
 	attr_accessor :stage_index
