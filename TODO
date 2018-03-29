@@ -396,3 +396,85 @@ how will
 
 THERE ARE 12 THINGS, AND THEY HAVE TO BE DONE IN 4 DAYS.
 SO WE CAN DO 3 PER DAY.
+
+2 - 5  : scheduling code + read 5% more of book.
+5 - 6  : update bs array code
+6 - 9  : home 
+9 - 12 : scheduling code + read 5% more of book.
+1 - 4  : add_cart_item_code
+4 - 5  : update bs array code. 
+
+
+t3,t4,tsh, ssdna, stool collection.
+
+-----------------
+
+step has to define : determine requirement id immediately?
+
+requirement and location : can have previous step correlation -> where it goes to that previous step and uses 
+a)requirement id if already determined ?
+b)requirement category
+c)location id if already determined ?
+d)location category.
+
+
+--------------------------------------------
+
+t3,t4,tsh => collect on any morning, 1 hour after food, only be processed in center with immunoassay, otherwise first transport to one collection center -> then transport to center with immunoassay.
+
+ssdna => collect on any evening, 1 hour before sunset.
+
+stool_collection => collect in morning -> after fasting earlier night.
+
+
+first stage -> preparation
+second_stage -> collection
+	sop_for_t3,t4,tsh =>
+						step_one => 
+									location => nearest_collection_center
+									with worker, fridge.
+
+lets say we query for this step seperately, 
+and get 5 locations.
+we will have to check for each worker, and scooter category whether they can perform the subsequent steps.
+or else, we can consider the nearest one,and proceed.
+we can use a duration calculation function, which accepts, an output from the earlier step.
+if the worker and scooter are already chosen, now we can try to build. the query further for them.
+
+step may have to be resolved in order to proceed, or it can continue
+so if it outputs requirements ids' then the next step, will use those instead.
+
+									time => morning of date requested.
+
+									requirements => 
+											could have to be accepted from a previous step.
+											scooter_category
+
+											worker_category
+
+									instructions => depart 
+
+						step_two => 
+									location => none
+									time => after previous step
+									requirements =>
+										scooter_category => same as above
+										worker_category => 
+										same as above.
+									if the requirement category is hardcoded,to refer to a previous step, then it is possible, to directly use the determined requirement_id, instead of a category.
+									finally we have to go with the search function, with location criteria, which can also be referring to an earlier location, or not, and then these machines, 
+									instructions => travel.
+									duration_calculation_function : 
+
+						step_three => 
+									location => patient location
+									time => after previous step duration
+									requirements => 
+										same 
+									instructions =>
+										arrive.
+
+						step_four => 
+
+
+

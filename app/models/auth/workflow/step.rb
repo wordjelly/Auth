@@ -8,8 +8,15 @@ class Auth::Workflow::Step
 
 	embeds_many :requirements, :class_name => Auth.configuration.requirement_class
 
-	embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
-	
+	# this is not needed, since the the tlocation information is same for all the products/inside an sop at every step.
+	#embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
+		
+	field :time_information, type: Hash
+
+    field :location_information, type: Hash
+
+    field :follows_previous_step, type: Boolean
+
 	field :name, type: String
 	field :description, type: String
 
@@ -129,18 +136,56 @@ class Auth::Workflow::Step
 
 	end
 
-	###########################################################
-	##
-	##
-	## requirement related functions.
-	##
-	##
-	###########################################################
 
+	#########################################################
+	## 
+	## CALLED FROM:
+	## 
+	## BEFORE_SCHEDULE_ORDER  
+	##
+	##
+	########################################################
+
+	## @param[Auth::Workflow::Order] order : the latest added order which is being scheduled.
+	## @param[Integer] stage_index : the index of the stage
+	## @param[Integer] sop_index : the index of the sop
+	## @param[Integer] step_index : the index of the step.  
+	def modify_tlocation_conditions_for_each_product(order,stage_index,sop_index,step_index)
+
+		## if the current step location hash points to a previosu step, dont do anything
+		## same for time
+		## otherwise -> 
+		## get the location hash from the first cart_item. -> remember all cart items added to an sop have to have the same location hash, time hash.
+		## use the stage, sop, and step indexes to check if there are any variables in the tlocation_variables for this step.
+		## merge these
+		## store the result in the location_information and time_information objects.
+
+
+	end
+	########################################################
+	########################################################
 	 
-	
+	## now at the time of calculating, the actual schedule hash here are the series of steps.
 
-	
+
+	## take the first step
+	## resolve_requirements_immediately ?
+	## if yes
+		## do the query with the location and time information as modified in the before_schedule_order definition.
+		## execute the custom resolve_requirements by calling (eval)
+		## now proceed to calculate the duration.
+		## if calculate duration expression is provided, then give it all the arguments, from location(which was already modified before), and also the requirement_ids resolved if at all.
+
+	## else
+	## add the requirement category to a hash[A], use the start time form the time hash, and increment the duration counter inside the value of the hash[A] by duratino fo the step.
+
+	## go to the next step.
+	## do same as above.
+	## if the requirement category points to the previous step, just add it to the hash[A] under that category, as long as enforce location is false, if enforce location is new, or it doesnt point to that category, then create a new entry in Hash a, with the new location also added into the value of hash[A] for this new entry.
+
+	## finally we can call query for this whole thing.
+
+
 
 end
 

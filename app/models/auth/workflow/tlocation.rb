@@ -32,7 +32,7 @@ class Auth::Workflow::Tlocation
 
     field :name, type: String
 
-    field :follows_previous_step, type: String
+    field :follows_previous_step, type: Boolean
 
 
     ###########################################################
