@@ -2,19 +2,27 @@ class Auth::Workflow::Requirement
 
 	  include Auth::Concerns::WorkflowConcern
   	 
-    FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable","schedulable"]
+    FIELDS_LOCKED_AFTER_ORDER_ADDED = ["applicable","schedulable","resolve_requirement","location_information","time_information"]
 
   	embedded_in :step, :class_name => Auth.configuration.step_class
     
     embeds_many :states, :class_name => Auth.configuration.state_class 
-   
-    field :reference_requirement, type: String
+  
+    ## eg: stages.1.sops.2.steps.4.requirements.4
+    field :reference_requirement_address, type: String
+
+    ## if true will not create a new entry in the schedule query hash for this requirement.
+    ## otherwise will create.
+    field :follow_reference_requirement, type: Boolean, default: false
+
+    ## if this is set to true, will have to 
 
     field :name, type: String
 
     ## set to true if this requirement needs to be scheduled.
     ## requirements which are schedulable are skipped during the mark requirement phase.
     field :schedulable, type: Boolean, default: false
+
 
     ## the product id of the requirement.
     field :product_id, type: String
@@ -49,7 +57,7 @@ class Auth::Workflow::Requirement
     end
 
     def self.permitted_params
-      [{:requirement => [:name, :applicable, :product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_index, :step_doc_version, :schedulable]},:id]
+      [{:requirement => [:name, :applicable, :product_id, :reference_requirement, :assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index, :step_id, :requirement_index, :step_doc_version, :schedulable, :resolve_requirement, :location_information, :time_information]},:id]
     end
 
     ###########################################################
@@ -176,6 +184,52 @@ class Auth::Workflow::Requirement
         e.method_to_call = "schedule_order"
         [e]
     end
+
+
+    def add_to_query_hash(stage_index,sop_index,step_index,req_index,query_hash)
+      
+      if self.follow_reference_requirement
+        query_hash[self.reference_requirement_address].add_requirement(self)
+      else
+        query_hash["stages.#{self.stage_index}.sops.#{self.sop_index}.steps.#{key}.requirements.#{req_index}"] = self
+      end
+
+    end
+
+    ## a child requirement is adding itself to this requirement.
+    def add_requirement(req)
+      ## take the duration from its time_information and add it to the self duration
+      self.time_information[:duration] += req.time_information[:duration]
+    end
+
+
+    def resolve_location(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
+      
+      self.location_information = location_information if self.location_information.blank?
+      
+      
+      return unless self.resolve
+      ## given the location information, resolve the nearest location.
+
+      ## search for it, and store the location id.
+    
+    end
+
+
+    def resolve_time(location_information={},time_information={},resolved_location_id=nil,resolve_timed=nil)
+
+      self.time_information = time_information if self.time_information.blank?
+
+
+      return unless self.resolve
+      ## based on the time preferences, fix on a time.
+    end
+
+
+    def add_duration_from_step(step_duration)
+      self.time_information[:duration] = step_duration
+    end
+
     ###########################################################
     ##
     ##

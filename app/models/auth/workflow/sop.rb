@@ -347,54 +347,74 @@ class Auth::Workflow::Sop
 
 	end
 
-	## @params[Hash] arguments : passed in from the #schedule_order def.
-	## the role of this function is to modulate:
-	## a) the location of any specific step, based on user defined characteristics.
-	## b) the duration of each step, based on user defined characteristics.
-	## now how to do this?
-	## for : this has to be defined in the order.
-	## the user input , it will be a part of the order
-	## for eg : order can carry certain location attributes.
-	## it has to come on the cart_item/ product.
-	## that cart item will carry this, but how will it be keyed?
-	## eg where does it have to be delivered ?
-	## so it can set those fields on the respective steps.
-	## but how to hard code this ?
-	## it is not possible to hard code this eventuality.
-	## the location address will have to be provided.
-	## the interface will have to be provided.
-	## for eg the whole sop will have certain variable location preferences.
-	## some preferences like:
-	## location nearest to user.
-	## time defined by user, but on wednesday.
-	## such are the things that may be needed.
-	## so somehow on placing the order, first it will have to inspect the sop's and provide him with a way to input those variable details, as may be needed.
-	## that can be done, before submitting the order, and can be provided for by a hash on the product object itself.
-	## this hash will be populated with keys like ;
-	## stages.1.sops.4.steps.2.location => 
-	## stages.2.sops.5.steps.4.location =>
-	## stages.1.sops.3.steps.3.time => 
-	## a location can also be defined as the nearest location to a particular location/ user's current location.
-	## what about saying a particular location is to be inferred based on the calculated location of a previous step.
-	## finally using this, a location will be arrived at right?
-	## if the user enters a different input for the subsequent order, the time, location information may change.
-	## in that case, where will we store the resolved time_location information?
-	## obviously inside the order.
-	## but order is at sop level.
-	## the order has the cart item ids.
-	## it will have to hold an array for the 
-	## sorry why complicate it so much, the final thing is to be committed in the schedule object.
-	## and till then, it will be 
-	def before_schedule_order(arguments={})
-		## this hash is then used to calculate the 
-	end
+	
 
 	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
 	def schedule_order(arguments={})
-		before_schedule_order(arguments)
+		
 		## this is incremented after each step, by the duration of the step in seconds.
 		duration_after_start_in_seconds = 0
 
+		step_counter = 0
+
+		query_hash = {}
+
+		self.steps.each_with_index{|step,key|
+
+			if step.applicable
+				## first let us build the hash.
+				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
+
+				step.resolve_location
+
+				step.resolve_time
+
+				step.requirements.each_with_index{|req,req_key|
+
+					if req.applicable && req.schedulable
+					
+						req.resolve_location(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
+
+						req.resolve_time(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
+					
+					end
+
+				}
+					
+				step.calculate_duration
+
+				## now we have resolved the time, the location, and we have the step duration.
+
+				## now we have to build towards the query hash.
+				## so add this to the query hash.
+				## what to add ?
+				## each schedulable requirement.
+				## what about 
+
+				step.requirements.each_with_index{|req,req_key|
+
+					if req.applicable
+						
+						## we also need to add the total duratoin upto this step.
+						## total duration of all steps upto this step.
+						## so that we have something relevant to the start_duration.
+						## this won't be very difficult.
+						## if the step itself has some special location requirements/time requirements, then what => add this inside requirement.add_to_query hash, that it should make a new entry.
+						## and add the ability to inherit locations.
+
+						req.add_duration_from_step(self.calculated_duration || self.duration)
+							
+						req.add_to_query_hash(stage_index,sop_index,step_index,req_index,query_hash)
+						
+					end
+				}
+
+				step_counter += 1
+			end
+		}
+
+		## we have start_time, 
+		## 
 	end
 
 

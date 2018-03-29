@@ -10,10 +10,7 @@ class Auth::Workflow::Step
 
 	# this is not needed, since the the tlocation information is same for all the products/inside an sop at every step.
 	#embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
-		
-	field :time_information, type: Hash
 
-    field :location_information, type: Hash
 
     field :follows_previous_step, type: Boolean
 
@@ -150,21 +147,50 @@ class Auth::Workflow::Step
 	## @param[Integer] stage_index : the index of the stage
 	## @param[Integer] sop_index : the index of the sop
 	## @param[Integer] step_index : the index of the step.  
+	## what to do incase this step's location information has a reference?
+	## and same for requirement ?
+	## can a requirement reference a previous step?
+	## in that case what sense does it make to add time and location information to it?
+	## we don't enforce location.
+	## this should only be done if time and locatino are to be enforced, for a particular step.
+	## but at this stage, let the merging happen.
 	def modify_tlocation_conditions_for_each_product(order,stage_index,sop_index,step_index)
+		
+		if first_cart_item = Auth.configuration.cart_item_class.constantize.find(order.cart_item_ids.first)
 
-		## if the current step location hash points to a previosu step, dont do anything
-		## same for time
-		## otherwise -> 
-		## get the location hash from the first cart_item. -> remember all cart items added to an sop have to have the same location hash, time hash.
-		## use the stage, sop, and step indexes to check if there are any variables in the tlocation_variables for this step.
-		## merge these
-		## store the result in the location_information and time_information objects.
+			location_information = first_cart_item.location_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}"]
 
+			time_information = first_cart_item.time_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}"]
+
+			## merge the information inside it, 
+			self.location_information.merge(location_information) if !location_information.blank?
+			
+			self.time_information.merge(time_information) if !time_information.blank?
+
+			## now for each requirement of this step do the same, as long as the requirement is applicable.
+			self.requirements.each_with_index{|requirement,key|
+				if requirement.applicable
+					
+					requirement_location_information = first_cart_item.location_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}.requirements.#{key}"]
+					
+					requirement.location_information.merge(requirement_location_information) if !requirement_location_information.blank?
+
+					requirement_time_information = first_cart_item.time_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}.requirements.#{key}"]
+					
+					requirement.time_information.merge(requirement_time_information) if !requirement_time_information.blank?
+
+
+				end
+			}
+
+		end
 
 	end
 	########################################################
 	########################################################
-	 
+	 	
+	
+
 	## now at the time of calculating, the actual schedule hash here are the series of steps.
 
 
@@ -183,8 +209,47 @@ class Auth::Workflow::Step
 	## do same as above.
 	## if the requirement category points to the previous step, just add it to the hash[A] under that category, as long as enforce location is false, if enforce location is new, or it doesnt point to that category, then create a new entry in Hash a, with the new location also added into the value of hash[A] for this new entry.
 
-	## finally we can call query for this whole thing.
+	########################################################
 
+	## what should be the structure of the location hash?
+	## is it going to carry information about individual requirements.
+	## what kind of location requirements are possible?
+	##
+	##
+	## location_type : hematology_station/collection_center/biochemistry_center
+	## near_point : [lat,lon]
+	## resolve_location : true/false
+	## if there are n machines, then we have to resolve them at this stage or not ?
+	## requirement can also have something called resolve_requirement
+	## so suppose we want to resolve the requirement, then we have a category -> merge that with the location information hash, and find a requirement.
+	## now suppose we had more than one requirement, then ?
+	## does everything in a step happen at the same location information?
+	## because then we can send one query.
+	## near location => x and location_category = [z,q]
+	## so we will have to have location objects.
+	## so these location categories, okay suppose we resolve a nearest location.
+	## now we want to search for machines in the final schedule with that.
+	## there is no other way is there.
+	## so we can search for something on which those requirement categories are registered.
+	## if the requirement doesnt have its own location information, then the step location information is used.
+	## if the requirement has resolve requirement -> then resolve it.
+	## why resolve ? because it is used somewhere in the front.
+	## why resolve_requirement ?
+
+	## suppose we had additioanl requirements with this, then what could we do?
+	## so would you superimpose this on the requiremenets, for the purpose of scheduling, yes of course, would have to do that.
+	## something like machine category x, then we have to immediately resolve.
+	## we take the nearest one.
+	## suppose we have n machines.
+	## then we take which one?
+	## do we make a seperate query for each machine ?
+	## how to superimpose the location requirements?
+	## basically if any subsequent step is dependent on a requirement attribute from a previous step or set of steps, then that previous step has to be resovled first.
+	## so how does this work, exactly.
+	## i think what i'm missing here is dependency management.
+	## eg : step 4 -> requirements => machine => resolved in one.
+	## location => resolved in step 2 
+	## time => 
 
 
 end
