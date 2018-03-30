@@ -186,48 +186,88 @@ class Auth::Workflow::Requirement
     end
 
 
-    def add_to_query_hash(stage_index,sop_index,step_index,req_index,query_hash)
+    def add_to_query_hash(stage_index,sop_index,step_index,req_index,query_hash,force=false)
       
-      if self.follow_reference_requirement
-        query_hash[self.reference_requirement_address].add_requirement(self)
-      else
+      if force
+      
         query_hash["stages.#{self.stage_index}.sops.#{self.sop_index}.steps.#{key}.requirements.#{req_index}"] = self
+
+      else
+
+        if self.follow_reference_requirement
+          query_hash[self.reference_requirement_address].add_requirement(self)
+        else
+          query_hash["stages.#{self.stage_index}.sops.#{self.sop_index}.steps.#{key}.requirements.#{req_index}"] = self
+        end
+
       end
 
     end
 
-    ## a child requirement is adding itself to this requirement.
+    ## a subsequent requirement is adding itself to this requirement.
     def add_requirement(req)
       ## take the duration from its time_information and add it to the self duration
       self.time_information[:duration] += req.time_information[:duration]
     end
 
 
-    def resolve_location(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
-      
-      self.location_information = location_information if self.location_information.blank?
-      
-      
-      return unless self.resolve
-      ## given the location information, resolve the nearest location.
-
-      ## search for it, and store the location id.
     
-    end
 
-
-    def resolve_time(location_information={},time_information={},resolved_location_id=nil,resolve_timed=nil)
-
-      self.time_information = time_information if self.time_information.blank?
-
-
-      return unless self.resolve
-      ## based on the time preferences, fix on a time.
-    end
-
-
+    ## adds the duration of the step itself to this requirements time information.
+    ## also updates the end_time so that it reflects the duration of the step.
     def add_duration_from_step(step_duration)
       self.time_information[:duration] = step_duration
+      self.time_information[:end_time] = self.time_information[:end_time] + self.time_information[:duration]
+    end
+
+
+    ## modulates the end time and start time to reflect the total elapsed duration since the start of the sop.
+    def add_duration_since_first_step(duration_since_start)
+      self.time_information[:duration_since_start] = duration_since_start
+      self.time_information[:start_time] = self.time_information[:start_time] + self.time_information[:duration_since_start]
+      self.time_information[:end_time] = self.time_information[:end_time] + self.time_information[:duration_since_start]
+    end
+
+
+    def build_query(query)
+      #########################################################
+      ##
+      ## TIME INFORMATION
+      ##
+      #########################################################
+      query["$or"] << {"$and" => []} 
+
+      query["$or"].last["$and"] << generate_time_query
+
+
+      #########################################################
+      ##
+      ## LOCATION INFORMATION
+      ##
+      #########################################################
+      
+      query["$or"].last["$and"] << generate_location_query
+
+      
+      #########################################################
+      ##
+      ## REQUIREMENT INFORMATION
+      ##
+      #########################################################
+      ## add the requirement category 
+      ## if the requirement was resolved, then add resolved_id
+
+      if self.resolved_id
+        query["$or"].last["$and"] << {
+          "requirement_ids" => self.resolved_id
+        }
+      else
+        query["$or"].last["$and"] << {
+          "requirement_categories" => self.category
+        }
+      end
+
+
     end
 
     ###########################################################

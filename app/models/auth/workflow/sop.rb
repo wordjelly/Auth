@@ -357,7 +357,7 @@ class Auth::Workflow::Sop
 
 		step_counter = 0
 
-		query_hash = {}
+		requirement_hash_to_schedule = {}
 
 		self.steps.each_with_index{|step,key|
 
@@ -365,9 +365,9 @@ class Auth::Workflow::Sop
 				## first let us build the hash.
 				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
-				step.resolve_location
+				step.resolve_location(self.steps[key-1].location_information)
 
-				step.resolve_time
+				step.resolve_time(self.steps[key-1].time_information)
 
 				step.requirements.each_with_index{|req,req_key|
 
@@ -383,6 +383,7 @@ class Auth::Workflow::Sop
 					
 				step.calculate_duration
 
+				duration_after_start_in_seconds += (step.calculated_duration || step.duration)
 				## now we have resolved the time, the location, and we have the step duration.
 
 				## now we have to build towards the query hash.
@@ -393,18 +394,14 @@ class Auth::Workflow::Sop
 
 				step.requirements.each_with_index{|req,req_key|
 
-					if req.applicable
+					if req.applicable && req.schedulable
 						
-						## we also need to add the total duratoin upto this step.
-						## total duration of all steps upto this step.
-						## so that we have something relevant to the start_duration.
-						## this won't be very difficult.
-						## if the step itself has some special location requirements/time requirements, then what => add this inside requirement.add_to_query hash, that it should make a new entry.
-						## and add the ability to inherit locations.
+						## we need to have a way to have some location inheritance.
+						req.add_duration_since_first_step(duration_after_start_in_seconds)
 
 						req.add_duration_from_step(self.calculated_duration || self.duration)
-							
-						req.add_to_query_hash(stage_index,sop_index,step_index,req_index,query_hash)
+						
+						req.add_to_requirement_hash_to_schedule(stage_index,sop_index,step_index,req_index,requirement_hash_to_schedule,(self.resolve || req.resolve))
 						
 					end
 				}
@@ -413,8 +410,16 @@ class Auth::Workflow::Sop
 			end
 		}
 
-		## we have start_time, 
-		## 
+		query = {"$or" => []}
+
+		requirement_hash_to_schedule.keys.each do |requirement_address|
+
+			req = requirement_hash_to_schedule[requirement_address]
+
+			req.build_query(query)
+
+		end
+
 	end
 
 

@@ -63,6 +63,8 @@ class Auth::Transaction::Event
 		self.output_events
 	end
 
+	## here we will have a problem with nested objects.
+	## and will have to provide a better way to query this.
 	def get_object
 		begin
 			self.object_class.constantize.find(object_id)

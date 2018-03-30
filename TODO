@@ -477,4 +477,9 @@ so if it outputs requirements ids' then the next step, will use those instead.
 						step_four => 
 
 
+---------------------------------------------------------
+
+1. in event.rb, if we are doing get_object with an embedded objct it will fail. we have to provide for a way to do this.
+
+2. in sop.schedule_order, do an aggregation or find a way to get the parent index somehow. because we need stage_index and sop_index.
 
