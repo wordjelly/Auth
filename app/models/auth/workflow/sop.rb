@@ -359,6 +359,10 @@ class Auth::Workflow::Sop
 
 		requirement_hash_to_schedule = {}
 
+
+		## in order to get the stage_index, sop_index, we will have to perform an aggregation, and get those values.
+		
+
 		self.steps.each_with_index{|step,key|
 
 			if step.applicable
