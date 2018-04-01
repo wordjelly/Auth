@@ -5,7 +5,7 @@ require "auth/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "auth"
+  s.name        = "wordjelly-auth"
   s.version     = Auth::VERSION
   s.authors     = ["bhargav"]
   s.email       = ["bhargav.r.raut@gmail.com"]

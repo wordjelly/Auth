@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    auth (0.0.8)
+    wordjelly-auth (0.0.8)
       cloudinary
       devise (= 4.1.1)
       dotenv-rails
@@ -884,7 +884,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  auth!
   capybara
   capybara-webkit (= 1.14.0)
   factory_girl_rails
@@ -892,6 +891,7 @@ DEPENDENCIES
   puma
   rspec-rails
   selenium-webdriver
+  wordjelly-auth!
 
 BUNDLED WITH
    1.13.7

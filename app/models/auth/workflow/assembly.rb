@@ -155,18 +155,19 @@ class Auth::Workflow::Assembly
             },
               mappings: {
                 "workflow/assembly" => {
-                _all:  {
-                    analyzer: "nGram_analyzer",
-                    search_analyzer: "whitespace_analyzer"
-                },
                 properties: {
+                      _all_fields:  {
+                          type: "text",
+                          analyzer: "nGram_analyzer",
+                          search_analyzer: "whitespace_analyzer"
+                      },
                       name: {
-                        type: "string",
-                        index: "not_analyzed"
+                        type: "keyword",
+                        copy_to: "_all_fields"
                       },
                       description: {
-                        type: "string",
-                        index: "not_analyzed"
+                        type: "keyword",
+                        copy_to: "_all_fields"
                       }
                 }
               }
