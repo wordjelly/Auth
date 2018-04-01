@@ -55,19 +55,19 @@ module Auth::Concerns::Shopping::ProductConcern
 					        },
 				            properties: {
 				                name: {
-				                	type: "string",
+				                	type: "text",
 				                	index: "not_analyzed"
 				                },
 				                price: {
 				                	type: "double"
 				                },
 				                public: {
-				                	type: "string",
+				                	type: "text",
 				                	index: "not_analyzed",
 				                	include_in_all: false
 				                },
 				                resource_id: {
-				                	type: "string",
+				                	type: "text",
 				                	index: "not_analyzed"
 				                }
 				            }
