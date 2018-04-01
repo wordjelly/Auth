@@ -54,26 +54,26 @@ module Auth::Concerns::Shopping::CartItemConcern
 				    },
 			        mappings: {
 			          "shopping/cart_item" => {
-			          _all:  {
-				            analyzer: "nGram_analyzer",
-				            search_analyzer: "whitespace_analyzer"
-				        },
 			            properties: {
+			            	_all_fields:  {
+			            		type: "text",
+				            	analyzer: "nGram_analyzer",
+				            	search_analyzer: "whitespace_analyzer"
+				        	},
 			                name: {
-			                	type: "text",
-			                	index: "not_analyzed"
+			                	type: "keyword",
+			                	copy_to: "_all_fields"
 			                },
 			                price: {
-			                	type: "double"
+			                	type: "double",
+			                	copy_to: "_all_fields"
 			                },
 			                public: {
-			                	type: "text",
-			                	index: "not_analyzed",
-			                	include_in_all: false
+			                	type: "keyword"
 			                },
 			                resource_id: {
-			                	type: "text",
-			                	index: "not_analyzed"
+			                	type: "keyword",
+			                	copy_to: "_all_fields"
 			                }
 			            }
 			        }

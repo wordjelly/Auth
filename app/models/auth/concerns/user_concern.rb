@@ -51,29 +51,30 @@ module Auth::Concerns::UserConcern
 					    },
 				        mappings: {
 				          "user" => {
-				          _all:  {
-					            analyzer: "nGram_analyzer",
-					            search_analyzer: "whitespace_analyzer"
-					        },
 				            properties: {
+				            	_all_fields:  {
+					          		type: "text",
+						            analyzer: "nGram_analyzer",
+						            search_analyzer: "whitespace_analyzer"
+						        },
 				                name: {
-				                	type: "string"
+				                	type: "text",
+				                	copy_to: "all_fields"
 				                },
 				                email: {
-				                	type: "string",
-				                	index: "not_analyzed"
+				                	type: "keyword",
+				                	copy_to: "all_fields"
 				                },
 				                additional_login_param: {
-				                	type: "string",
-				                	index: "not_analyzed"
+				                	type: "keyword",
+				                	copy_to: "all_fields"
 				                },
 				                public: {
-				                	type: "string",
-				                	index: "not_analyzed"
+				                	type: "keyword"
 				                },
 				                resource_id: {
-				                	type: "string",
-				                	index: "not_analyzed"
+				                	type: "keyword",
+				                	copy_to: "all_fields"
 				                }
 				            }
 				        }
