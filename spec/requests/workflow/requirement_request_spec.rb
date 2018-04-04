@@ -188,11 +188,36 @@ RSpec.describe "requirement request spec",:requirement => true, :workflow => tru
 
 		end
 
+		context " -- schedule order -- " do 
 
-		context " -- validations -- " do 
+			it " -- resolves location ,if marked so -- " do 
+
+			end
+
+
+			it " -- resolves time , if marked so -- " do 
+
+			end
+
+			it " -- adds the duration since the first step -- " do 
+
+			end
+
+			it " -- adds duration from step itself -- " do 
+
+
+			end
+
+			it " -- adds the requirement to the query hash to be queried -- " do 
+
+			end
+
+			it " -- calls build query -- " do 
+
+
+			end
 
 		end
-		
 
 	end
 

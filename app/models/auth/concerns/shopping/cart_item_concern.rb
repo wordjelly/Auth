@@ -53,7 +53,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				    	}
 				    },
 			        mappings: {
-			          "shopping/cart_item" => {
+			          "auth/shopping/cart_item" => {
 			            properties: {
 			            	_all_fields:  {
 			            		type: "text",

@@ -130,6 +130,30 @@ RSpec.describe "step request spec",:step => true, :workflow => true, :type => :r
 				
 		end
 
+		context " -- schedule sop order -- " do 
+
+			it " -- modifies its own tlocation hash using the tlocation information supplied by the first cart_item -- " do 
+
+
+			end
+
+			it " -- resolves location ,if marked so -- " do 
+
+			end
+
+
+			it " -- resolves time , if marked so -- " do 
+
+			end
+
+			it " -- calculates duration , and appends duration since start -- " do 
+
+			end
+
+			
+
+		end
+
 	end
 
 end

@@ -43,8 +43,8 @@ class Auth::Workflow::Sop
 		[{:sop => [:name, :applicable, :description,:assembly_id,:assembly_doc_version,:stage_id,:stage_doc_version,:stage_index,:doc_version, :sop_index, {:applicable_to_product_ids => []}]},:id]
 	end
 
-	## @return[Array] array of hashes, each with the following structure:
 
+	## @return[Array] array of hashes, each with the following structure:
 	## it basically returns the stage_index as well as the sop_index alongwith their respective ids.
 	## the matches array contains the product ids to which that sop is applicable, out of the product ids supplied.
 	def self.find_applicable_sops(options={})
@@ -198,26 +198,7 @@ class Auth::Workflow::Sop
 	end
 
 
-	## so it will look first if those orders are processed or processing or whatever.
-	## first we are just checking if previous order is processing.
-
-	def can_process_order(order)
-
-		## FIRST CHECK IF ANY OF THE PREVIOUS ORDERS REQUIREMENTS ARE BEING CHECKED OR IT IS BEING SCHEDULED OR IT COULD NOT BE SCHEDULED
-
-		non_viable_orders = self.orders.select{|c| 
-			true if (c.order_pending || c.failed_to_schedule)
-		}
-
-		order.errors.add(:status, "another order is being processed, check back later") if non_viable_orders.size > 0
-
-
-		self.steps.each do |step|
-			## now here we will call a method on step.
-			
-		end
-
-	end
+	
 
 	## called from #index in authenticated_controller.
 	def get_many
@@ -361,8 +342,6 @@ class Auth::Workflow::Sop
 
 
 		## in order to get the stage_index, sop_index, we will have to perform an aggregation, and get those values.
-		
-
 		self.steps.each_with_index{|step,key|
 
 			if step.applicable

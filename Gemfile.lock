@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wordjelly-auth (0.0.8)
+    wordjelly-auth (1.0.2)
       cloudinary
       devise (= 4.1.1)
       dotenv-rails
@@ -753,6 +753,8 @@ GEM
       rack
     origin (2.3.1)
     orm_adapter (0.5.0)
+    picasa (0.9.1)
+      httparty
     public_suffix (3.0.2)
     puma (3.11.3)
     rack (1.6.9)
@@ -888,10 +890,11 @@ DEPENDENCIES
   capybara-webkit (= 1.14.0)
   factory_girl_rails
   faker
+  picasa
   puma
   rspec-rails
   selenium-webdriver
   wordjelly-auth!
 
 BUNDLED WITH
-   1.13.7
+   1.16.1

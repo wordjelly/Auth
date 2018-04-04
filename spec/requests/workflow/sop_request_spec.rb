@@ -209,6 +209,42 @@ RSpec.describe "sop request spec",:sop => true, :workflow => true, :type => :req
 
 			end
 
+			context " -- create order inside sop -- " do 
+
+				it " -- calls after_create_order if successfull -- " do 
+
+					
+
+				end
+
+
+
+				it " -- returns nil, if the create call fails, and at least one of the said cart items does not already eixst in some order of the sop -- " do 
+
+
+				end
+
+			end
+
+
+			context " -- after create order -- " do 
+
+				it " -- gets each requirement with its calculated state -- " do 
+
+				end
+
+				it " -- marks the requirements -- " do 
+
+				end
+
+
+				it " -- schedules the order -- " do 
+
+				end
+
+			end
+
+
 		end
 
 		

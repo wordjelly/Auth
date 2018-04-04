@@ -214,7 +214,11 @@ RSpec.describe "state request spec",:state => true, :workflow => true, :type => 
 		end
 
 
-		context " -- validations -- " do 
+		context " -- after adding order -- " do 
+
+			it " -- calls the calculate function from requirement -- " do 
+
+			end
 
 		end
 		

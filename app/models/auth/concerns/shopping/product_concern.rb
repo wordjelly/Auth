@@ -48,7 +48,7 @@ module Auth::Concerns::Shopping::ProductConcern
 					    	}
 					    },
 				        mappings: {
-				          "shopping/product" => {
+				          "auth/shopping/product" => {
 				            properties: {
 				            	_all_fields: {
 				            		type: "text",

@@ -59,22 +59,22 @@ module Auth::Concerns::UserConcern
 						        },
 				                name: {
 				                	type: "text",
-				                	copy_to: "all_fields"
+				                	copy_to: "_all_fields"
 				                },
 				                email: {
 				                	type: "keyword",
-				                	copy_to: "all_fields"
+				                	copy_to: "_all_fields"
 				                },
 				                additional_login_param: {
 				                	type: "keyword",
-				                	copy_to: "all_fields"
+				                	copy_to: "_all_fields"
 				                },
 				                public: {
 				                	type: "keyword"
 				                },
 				                resource_id: {
 				                	type: "keyword",
-				                	copy_to: "all_fields"
+				                	copy_to: "_all_fields"
 				                }
 				            }
 				        }

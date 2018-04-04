@@ -92,6 +92,11 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 					## then clone it by passing in a master id.
 					assembly = create_empty_assembly
 					assembly.master = true
+
+
+
+
+
 					expect(assembly.save).to be_truthy
 
 					assembly_clone = create_empty_assembly
@@ -251,6 +256,16 @@ RSpec.describe "assembly request spec",:assembly => true, :workflow => true, :ty
 		            puts response.body.to_s
 		            
 		            expect(response.code).to eq("422")	
+
+				end
+
+			end
+
+			context " -- order creation -- " do 
+
+				it " -- creates a clone of assembly, and adds orders -- " do 
+
+					
 
 				end
 

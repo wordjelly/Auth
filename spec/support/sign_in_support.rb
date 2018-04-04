@@ -641,6 +641,11 @@ module WorkflowSupport
 
 end
 
+module OrderCreationFlow
+
+
+end
+
 RSpec.configure do |config|
   
   config.include ValidUserHelper, :type => :controller
@@ -648,12 +653,17 @@ RSpec.configure do |config|
   config.include AdminRootPathSupport, :type => :request
   config.include DiscountSupport, :type => :request
   config.include AdminCreateUserSupport, :type => :request
-  config.include WorkflowSupport, :type => :request
+  
   config.include ValidUserRequestHelper, :type => :model
   config.include AdminRootPathSupport, :type => :model
   config.include DiscountSupport, :type => :model
   config.include AdminCreateUserSupport, :type => :model
+  
+  config.include WorkflowSupport, :type => :request
   config.include WorkflowSupport, :type => :model
+
+  config.include OrderCreationFlow, :type => :request
+  config.include OrderCreationFlow, :type => :model
 
 end
 

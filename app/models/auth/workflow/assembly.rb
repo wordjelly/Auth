@@ -154,7 +154,7 @@ class Auth::Workflow::Assembly
               }
             },
               mappings: {
-                "workflow/assembly" => {
+                "auth/workflow/assembly" => {
                 properties: {
                       _all_fields:  {
                           type: "text",
@@ -1041,6 +1041,7 @@ class Auth::Workflow::Assembly
   ## @params[Hash] options : expected to contain a key called product_ids.
   ## 
   def clone_to_add_cart_items(options)
+    return nil unless self.master
     new_assembly = self.clone
 
     if new_assembly && new_assembly.save
@@ -1056,3 +1057,17 @@ class Auth::Workflow::Assembly
   end
 
 end
+
+
+=begin
+  
+0
+1
+2
+3
+4
+5
+
+size - 1 - (pattern.length) + 1
+
+=end
