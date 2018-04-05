@@ -347,40 +347,50 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 
 		context " -- create order -- " do 
 
-			it " -- clone fails unless the current assembly is master -- " do 
-
-				assembly = Auth::Workflow::Assembly.new
-				expect(assembly.save).to be_truthy
-
-				order = Auth::Workflow::Order.new
-				options = {}
-				options[:product_ids] = [BSON::ObjectId.new.to_s]
-				expect(assembly.clone_to_add_cart_items(options)).to be_nil
-
-			end
-
-			it " -- clone launches a search_applicable_sop's event -- " do 
-
-				## create some products
-
-				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u)
-				cart_items = cart_items_and_assembly[:cart_items]
-				assembly = cart_items_and_assembly[:assembly]
-
-				## it should have created two cart items.
+			context " -- testing model functions -- " do 
 				
-				## fire the clone event, expect it to return the array of events searching for those sop's.
-				## now clone with all the product ids in the arguments.
-				options = {}
-				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+				it " -- clone fails unless the current assembly is master -- " do 
 
-				expect(assembly.clone_to_add_cart_items(options)).not_to be_nil
+					assembly = Auth::Workflow::Assembly.new
+					expect(assembly.save).to be_truthy
 
+					order = Auth::Workflow::Order.new
+					options = {}
+					options[:product_ids] = [BSON::ObjectId.new.to_s]
+					expect(assembly.clone_to_add_cart_items(options)).to be_nil
+
+				end
+
+				it " -- clone launches a search_applicable_sop's event -- " do 
+
+					## create some products
+
+					cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u)
+					cart_items = cart_items_and_assembly[:cart_items]
+					assembly = cart_items_and_assembly[:assembly]
+
+					## it should have created two cart items.
+					
+					## fire the clone event, expect it to return the array of events searching for those sop's.
+					## now clone with all the product ids in the arguments.
+					options = {}
+					options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+
+					expect(assembly.clone_to_add_cart_items(options)).not_to be_nil
+
+
+				end
 
 			end
 
+			context " -- evented -- " do 
 
-			## from here onwards thing shift to the sop model spec.
+				## here we would first need to create an event holder, and add this event to it.
+				## and let that create the create_applicable_sops event further on.
+				## and this should all still work.
+				## so we need a controller action which will 
+
+			end
 
 		end
 

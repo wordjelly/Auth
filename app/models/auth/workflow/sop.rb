@@ -85,7 +85,10 @@ class Auth::Workflow::Sop
 			{
 			    "$addFields" => {
 			      "stages.sops.sop_index" => "$sop_index",
-			      "stages.sops.stage_index" => "$stage_index"
+			      "stages.sops.stage_index" => "$stage_index",
+			      "common_products" => { 
+			      		"$ifNull" =>  [ "$common_products", []]
+			      	}
 			    }
 			},
 			{
@@ -133,8 +136,10 @@ class Auth::Workflow::Sop
 
 				Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
 			}
-		rescue
-			return []
+		rescue => e
+			puts "rescued"
+			puts e.to_s
+			return nil
 		end
 
 	end

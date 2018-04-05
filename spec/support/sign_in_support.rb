@@ -647,7 +647,7 @@ module OrderCreationFlow
   ## @return[Hash] : two keys : cart_items, and assembly, carrying the respective array of cart_items, and an assembly.
   def create_cart_items_assembly_sops_with_product_ids(user,cart_item_count=2,add_product_ids_to_sop=true)
 
-    cart_items = create_cart_items(@u,nil,2)
+    cart_items = create_cart_items(user,nil,2)
     ## create an empty assembly with stages,sops and steps.
     assembly = create_assembly_with_stages_sops_and_steps
     assembly.master = true
@@ -655,7 +655,7 @@ module OrderCreationFlow
     if add_product_ids_to_sop
       assembly.stages[0].sops[0].applicable_to_product_ids = [cart_items.map{|c| c = c.product_id}.first]
     end
-    
+
     res = assembly.save
     return nil if ((cart_items.size < cart_item_count) || res == false)
     return {:cart_items => cart_items, :assembly => assembly}
