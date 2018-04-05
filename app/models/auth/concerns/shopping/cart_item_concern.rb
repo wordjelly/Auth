@@ -12,6 +12,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	included do 
 
+
+		
+
 		INDEX_DEFINITION = {
 			index_options:  {
 			        settings:  {
@@ -53,7 +56,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				    	}
 				    },
 			        mappings: {
-			          "auth/shopping/cart_item" => {
+			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_item_class) => {
 			            properties: {
 			            	_all_fields:  {
 			            		type: "text",

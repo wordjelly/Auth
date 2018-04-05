@@ -48,7 +48,7 @@ module Auth::Concerns::Shopping::ProductConcern
 					    	}
 					    },
 				        mappings: {
-				          "auth/shopping/product" => {
+				          Auth::OmniAuth::Path.pathify(Auth.configuration.product_class) => {
 				            properties: {
 				            	_all_fields: {
 				            		type: "text",

@@ -50,7 +50,7 @@ module Auth::Concerns::UserConcern
 					    	}
 					    },
 				        mappings: {
-				          "user" => {
+				          Auth::OmniAuth::Path.pathify(Auth.configuration.auth_resources.keys.first) => {
 				            properties: {
 				            	_all_fields:  {
 					          		type: "text",

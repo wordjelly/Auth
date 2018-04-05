@@ -316,7 +316,7 @@
 ## then do all the order tests, though individually.
 require 'rails_helper'
 
-RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true do
+RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, :workflow => true do
   		
 	context " -- basic functions -- " do 
 		
@@ -361,10 +361,26 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true d
 
 			it " -- clone launches a search_applicable_sop's event -- " do 
 
+				## create some products
+
+				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u)
+				cart_items = cart_items_and_assembly[:cart_items]
+				assembly = cart_items_and_assembly[:assembly]
+
+				## it should have created two cart items.
+				
+				## fire the clone event, expect it to return the array of events searching for those sop's.
+				## now clone with all the product ids in the arguments.
+				options = {}
+				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+
+				expect(assembly.clone_to_add_cart_items(options)).not_to be_nil
 
 
 			end
 
+
+			## from here onwards thing shift to the sop model spec.
 
 		end
 

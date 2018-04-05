@@ -80,8 +80,6 @@ module DiscountSupport
         cart_item.price = Shopping::Product.first.price
         cart_item.signed_in_resource = signed_in_res
         cart_items << cart_item if cart_item.save
-        puts "cart item create errors."
-        puts cart_item.errors.full_messages.to_s
     end
     return cart_items 
   end
@@ -642,6 +640,27 @@ module WorkflowSupport
 end
 
 module OrderCreationFlow
+
+  ## will create @cart_item_count cart_items, and save them.
+  ## will also create an assembly, set it as master, and add the product_id of the first cart_item will be added to the first sop of the first stage of the assembly, as an applicable product id.
+  ## if @add_product_ids_to_sop is false, it will not add any product ids to the sop, this is used to simulate the situation where no matching sops are found for the provided cart_item_ids in #sop_model_spec.rb
+  ## @return[Hash] : two keys : cart_items, and assembly, carrying the respective array of cart_items, and an assembly.
+  def create_cart_items_assembly_sops_with_product_ids(user,cart_item_count=2,add_product_ids_to_sop=true)
+
+    cart_items = create_cart_items(@u,nil,2)
+    ## create an empty assembly with stages,sops and steps.
+    assembly = create_assembly_with_stages_sops_and_steps
+    assembly.master = true
+        ## add one cart item to each sop.
+    if add_product_ids_to_sop
+      assembly.stages[0].sops[0].applicable_to_product_ids = [cart_items.map{|c| c = c.product_id}.first]
+    end
+    
+    res = assembly.save
+    return nil if ((cart_items.size < cart_item_count) || res == false)
+    return {:cart_items => cart_items, :assembly => assembly}
+
+  end
 
 
 end

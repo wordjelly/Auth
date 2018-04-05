@@ -7,6 +7,13 @@ module Auth
 			## FOR BUILDING THE PATHS FOR ALL CLASSES.
 			##
 			##############################################
+			## given something like Auth::Shopping::CartItem , will return auth/shopping/cart_item
+			## @param[String] cls_name_as_string : the name of the class , as a string.
+			## @retunrn[String] the pathified version of the class name.
+			def self.pathify(cls_name_as_string)
+				cls_name_as_string.split("::").map{|c| c = c.underscore}.join("/")
+			end
+
 
 			def self.new_path(cls)
 				"new_" + cls.constantize.new.class.name.underscore.gsub(/\//,"_") + "_path"
