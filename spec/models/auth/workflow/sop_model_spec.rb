@@ -49,21 +49,21 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 			end
 
-			it " -- creates a series of events to mark the requirements if sops's are found -- " do 
+			it " -- creates a series of events to create the order. -- " do 
 				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2)
 				cart_items = cart_items_and_assembly[:cart_items]
 				assembly = cart_items_and_assembly[:assembly]
-				## it should have created two cart items.
-				## fire the clone event, expect it to return the array of events searching for those sop's.
-				## now clone with all the product ids in the arguments.
 				options = {}
 				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
 				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
 				search_sop_events = assembly.clone_to_add_cart_items(options)
-				
+				## there is only one such event that is created.
 				## so we want to call process on each of these events.
-				search_sop_events.each do |event|
-					expect(event.process).not_to be_empty
+				event = search_sop_events.first
+				create_order_events = event.process
+				expect(create_order_events).not_to be_empty
+				create_order_events.each do |cr_or_ev|
+					expect(cr_or_ev.object_id).not_to be_nil
 				end
 
 			end

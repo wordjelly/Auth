@@ -48,6 +48,7 @@ class Auth::Workflow::Sop
 	## it basically returns the stage_index as well as the sop_index alongwith their respective ids.
 	## the matches array contains the product ids to which that sop is applicable, out of the product ids supplied.
 	def self.find_applicable_sops(options={})
+		
 		product_ids = options[:product_ids]
 		assembly_id = options[:assembly_id]
 
@@ -103,6 +104,7 @@ class Auth::Workflow::Sop
 					"stages" => 1,
 					"sops" => 1,
 					"sop_index" => 1,
+					"stage_index" => 1,
 					"doc_version" => 1
 				}
 			},
@@ -147,10 +149,10 @@ class Auth::Workflow::Sop
 
 		## so we want to return an array of SOP objects.
 
-		puts "initial res is:"
-		res.each do |result|
-			puts JSON.pretty_generate(result)
-		end
+		#puts "initial res is:"
+		#res.each do |result|
+		#	puts JSON.pretty_generate(result)
+		#end
 
 		
 
@@ -166,10 +168,17 @@ class Auth::Workflow::Sop
 			}
 
 			## now emit create_order events.
+			events = []
 			applicable_sops.each do |sop|
-
+				options_for_next_event = options.merge(sop.attributes)
+				e = Auth::Transaction::Event.new
+				e.arguments = options_for_next_event
+				e.object_class = Auth.configuration.sop_class
+				e.method_to_call = "create_order"
+				e.object_id = sop.id.to_s
+				events << e
 			end
-
+			events
 		rescue => e
 			puts "rescued"
 			puts e.to_s
