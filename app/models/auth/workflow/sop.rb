@@ -51,6 +51,30 @@ class Auth::Workflow::Sop
 		product_ids = options[:product_ids]
 		assembly_id = options[:assembly_id]
 
+		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
+			{
+				"$match" => {
+					"_id" => BSON::ObjectId(assembly_id) 
+				}
+			},
+			{
+				"$unwind" => {
+					"path" => "$stages",
+					"includeArrayIndex" => "stage_index"
+				}
+			},
+			{
+				"$unwind" => {
+					"path" => "$stages.sops",
+					"includeArrayIndex" => "sop_index"
+				}
+			}
+		])
+
+		puts "initial res is:"
+		res.each do |result|
+			puts JSON.pretty_generate(result)
+		end
 		
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
@@ -79,13 +103,16 @@ class Auth::Workflow::Sop
 					"stages" => 1,
 					"sops" => 1,
 					"sop_index" => 1,
-					"stage_index" => 1
+					"doc_version" => 1
 				}
 			},
 			{
 			    "$addFields" => {
 			      "stages.sops.sop_index" => "$sop_index",
 			      "stages.sops.stage_index" => "$stage_index",
+			      "stages.sops.assembly_doc_version" => "$doc_version",
+			      "stages.sops.stage_doc_version" => "$stages.doc_version",
+			      "stages.sops.sop_doc_version" => "$stages.sops.doc_version",
 			      "common_products" => { 
 			      		"$ifNull" =>  [ "$common_products", []]
 			      	}
@@ -120,22 +147,29 @@ class Auth::Workflow::Sop
 
 		## so we want to return an array of SOP objects.
 
+		puts "initial res is:"
+		res.each do |result|
+			puts JSON.pretty_generate(result)
+		end
 
+		
 
-		#res.each do |result|
-		#	puts JSON.pretty_generate(result)
-		#end
-
-		puts "res is :#{res}"
+		#puts "res is :#{res}"
 
 		begin
 			return [] unless res
 			return [] unless res.count > 0
 
-			res.first["sops"].map{|sop_hash|
+			applicable_sops = res.first["sops"].map{|sop_hash|
 
 				Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
 			}
+
+			## now emit create_order events.
+			applicable_sops.each do |sop|
+
+			end
+
 		rescue => e
 			puts "rescued"
 			puts e.to_s

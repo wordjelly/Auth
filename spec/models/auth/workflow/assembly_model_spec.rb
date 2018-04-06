@@ -356,7 +356,8 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 
 					order = Auth::Workflow::Order.new
 					options = {}
-					options[:product_ids] = [BSON::ObjectId.new.to_s]
+					options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+					options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
 					expect(assembly.clone_to_add_cart_items(options)).to be_nil
 
 				end
@@ -375,6 +376,7 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 					## now clone with all the product ids in the arguments.
 					options = {}
 					options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+					options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
 
 					expect(assembly.clone_to_add_cart_items(options)).not_to be_nil
 

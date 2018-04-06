@@ -1038,10 +1038,13 @@ class Auth::Workflow::Assembly
   ##
   ############################################################
   ## @return[Array] of event objects.
-  ## @params[Hash] options : expected to contain a key called product_ids.
+  ## @params[Hash] options : 
+  ## expected to contain a key called product_ids.
+  ## expected to contain another key called cart_item_ids.
   ## 
   def clone_to_add_cart_items(options)
     return nil unless self.master
+    return nil if (options[:cart_item_ids].blank? || options[:product_ids].blank?)
     new_assembly = self.clone
 
     if new_assembly && new_assembly.save

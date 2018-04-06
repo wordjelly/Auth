@@ -1,5 +1,4 @@
 require 'rails_helper'
-
 RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 	context " -- wrapper -- " do 
@@ -40,6 +39,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				## now clone with all the product ids in the arguments.
 				options = {}
 				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
 				events = assembly.clone_to_add_cart_items(options)
 				
 				## so we want to call process on each of these events.
@@ -58,15 +58,37 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				## now clone with all the product ids in the arguments.
 				options = {}
 				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-				events = assembly.clone_to_add_cart_items(options)
+				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+				search_sop_events = assembly.clone_to_add_cart_items(options)
 				
 				## so we want to call process on each of these events.
-				events.each do |event|
+				search_sop_events.each do |event|
 					expect(event.process).not_to be_empty
 				end
 
 			end
 
+			it " -- clone -> find_applicable_sop's event -> returns an array of applicable_sops -> which should then launch the events for create_order_in sop. -- ", :latest => true do 
+
+				## setup is 
+				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2)
+				cart_items = cart_items_and_assembly[:cart_items]
+				assembly = cart_items_and_assembly[:assembly]
+				## it should have created two cart items.
+				## fire the clone event, expect it to return the array of events searching for those sop's.
+				## now clone with all the product ids in the arguments.
+				options = {}
+				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+				search_sop_events = assembly.clone_to_add_cart_items(options)
+				
+				## so we want to call process on each of these events.
+				search_sop_events.each do |event|
+					event.process
+				end
+
+			end
+ 
 		end
 
 	end
