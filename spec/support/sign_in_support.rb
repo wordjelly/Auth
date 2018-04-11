@@ -650,8 +650,11 @@ module OrderCreationFlow
     cart_items = create_cart_items(user,nil,2)
     ## create an empty assembly with stages,sops and steps.
     assembly = create_assembly_with_stages_sops_and_steps
+    assembly.stages[0].applicable = true
+    assembly.stages[0].sops[0].applicable = true
     assembly.master = true
-        ## add one cart item to each sop.
+    assembly.applicable = true
+    ## add one cart item to each sop.
     if add_product_ids_to_sop
       assembly.stages[0].sops[0].applicable_to_product_ids = [cart_items.map{|c| c = c.product_id}.first]
     end
@@ -662,6 +665,155 @@ module OrderCreationFlow
 
   end
 
+  ## the step is added to the first sop.
+  ## adds one step, with two requirements, and adds one state to each requirement 
+  def add_steps_requirements_states_to_assembly(assembly,products)
+    
+    ##########################################################
+    ##
+    ## STATES
+    ##
+    ##########################################################    
+    state_for_requirement_one = Auth.configuration.state_class.constantize.new
+    state_for_requirement_one.applicable = true
+   
+    state_for_requirement_one.setter_function = "
+      cart_items = order.cart_item_ids.map{|c_id|
+        c_id = Auth.configuration.cart_item_class.constantize.find(c_id.to_s)
+      }
+      self.required_value = 0
+      cart_items.map{|citem|
+        if citem.class.method_defined?(:heatable) 
+          if citem.heatable == true
+            self.required_value+=30
+          end
+        end
+      }
+    "
+
+    state_for_requirement_two = Auth.configuration.state_class.constantize.new
+    state_for_requirement_two.applicable = true
+
+    #########################################################
+    ##
+    ## REQUIREMENTS
+    ##
+    ## the requirements have to have their own product ids.
+    ## basicallyt these products have to exist.
+    #########################################################
+    ## for that here we have to also pass in some products, and we choose randomly from them.
+
+    requirement_one = Auth.configuration.requirement_class.constantize.new
+    requirement_one.applicable = true
+    requirement_one.product_id = products.first.id.to_s
+    requirement_one.states << state_for_requirement_one
+    
+    requirement_two = Auth.configuration.requirement_class.constantize.new
+    requirement_two.product_id =products.last.id.to_s
+    requirement_two.applicable = true
+    requirement_two.states << state_for_requirement_two
+
+    #########################################################
+    ##
+    ## STEPS
+    ##
+    #########################################################
+
+    step = Auth.configuration.step_class.constantize.new
+    step.applicable = true
+    step.duration = 300
+    step.requirements = [requirement_one,requirement_two]
+
+
+    assembly.stages[0].sops[0].steps << step
+    assembly
+
+  end
+
+  ## options supported :
+  ## :products => {"product_id" => "applicable_to_sop_address"}, required, will throw error if not provided.
+  ## :sops => number of sops to be created, in each stage, defaults to 1
+  ## :stages => number of stages to be created, defaults to 1
+  ## :steps => number of steps to be created in each sop, defaults to 1
+  ## :requirements => number of requirements to be created in each step, defaults to 1
+  ## :requirement_products => {"product_id" => "applicable_to_requirement_address"}, required, will throw error if not provided.
+  ## :step_duration => will be defaulted to 500 for all steps, otherwise whatever is provided, but is applied to all steps the same.
+  ## return [Hash] : :assembly => the assembly, and :errors => if either the options[:products] or options[:requirement_products] could not be added at the defined address.
+  def create_assembly_with_options(options={})
+    return {:errors => ["products key is missing"]} if options[:products].blank?
+    products = options[:products]
+    
+    return {:errors => ["requirements_products key is missing"]} if options[:requirements_products].blank?
+    requirement_products = options[:requirements_products]
+
+    sops = options[:sops] || 1
+    stages =  options[:stages] || 1
+    steps = options[:steps] || 1
+    requirements = options[:requirements] || 1
+    step_duration = options[:step_duration] || 400
+
+
+    errors = []
+
+    ## now create the assembly.
+    assembly = Auth::Workflow::Assembly.new
+    assembly.applicable = true
+    stages.times do |n|
+      s = Auth::Workflow::Stage.new
+      s.applicable = true
+      sops.times do |n_sop|
+        sop = Auth::Workflow::Sop.new
+        sop.applicable = true
+          steps.times do |n_steps|
+            step = Auth::Workflow::Step.new
+            step.duration = step_duration
+            step.applicable = true
+              requirements.times do |n_req|
+                req = Auth::Workflow::Requirement.new
+                req.applicable = true
+                step.requirements << req
+              end
+            sop.steps << step
+          end
+        s.sops << sop
+      end
+      puts "Adding stage: #{s}"
+      assembly.stages << s
+    end
+
+    puts assembly.stages.to_s
+
+
+    products.each do |product_id, addresses|
+      addresses.each do |address|
+        add = address.split(".").map{|c| c = c.to_i}
+        begin
+         
+          assembly.stages[add[0]].sops[add[1]].applicable_to_product_ids << product_id
+        rescue => e
+          
+          errors << "address: #{address} does not exist for product id : #{product_id}"
+        end
+      end
+    end
+
+    requirement_products.each do |product_id, addresses|
+       addresses.each do |address|
+        add = address.split(".").map{|c| c = c.to_i}
+        break if add.size < 3
+        errors << "the address does not have enough compnoents" if add.size < 3
+        begin
+          assembly.stages[add[0]].sops[add[1]].steps[add[2]].requirements[add[3]].product_id = product_id
+        rescue
+          puts "REQUIREMENT ERROR."
+          errors << "address: #{address} does not exist for product id : #{product_id}"
+        end
+      end
+    end
+
+    return {:errors => errors, :assembly => assembly}
+
+  end
 
 end
 

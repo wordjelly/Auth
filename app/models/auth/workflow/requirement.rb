@@ -27,6 +27,8 @@ class Auth::Workflow::Requirement
     ## the product id of the requirement.
     field :product_id, type: String
 
+    #validates_presence_of :product_id
+
 
     attr_accessor :assembly_id
     attr_accessor :assembly_doc_version
@@ -127,9 +129,9 @@ class Auth::Workflow::Requirement
 
     end
 
-    def calculate_required_states(orders)
+    def calculate_required_states(order)
       states.each do |state|
-        state.calculate_required_states(orders)
+        state.calculate_required_state(order)
       end
     end
 
@@ -137,8 +139,26 @@ class Auth::Workflow::Requirement
     ## we have to call eval on it.
     ## so here what we will do is to 
     def self.state_query_update_combiner_default
+        ## we can find the relevant product.
+        ## but thereafter, if we have to do it again
+        ## then what ?
+        ## it will have to be an upsert of some kind.
+        ## for a particular requirement has the thing already been booked, for a particular order?
+        ## how to do that?
+        ## the product has a huge bunch of orders
+        ## see the requirements hard code the product ids.
+        ## or should they hardcode product categories?
+        ## then they will have a product category.
+        ## suppose you want a product nearby?
+        ## then how does it work?
+        ## it is like a large number of things with a product code.
+        ## and we search where, order.requirement_address does not exist, and product code is as per other requirements -> there we update.
+        ## so if that query changes, then this will also change.
+        ## so what is different form ths 
+
+
         "
-        product_query = {
+        product_query = { 
           \"$and\" => [
             { \"_id\" => BSON::ObjectId(arguments[:requirement][:product_id])
             }
@@ -173,7 +193,8 @@ class Auth::Workflow::Requirement
     ## please note that you have to provide that product as is.
     ## @param[Hash] arguments : passed in from the mark_requirement, commit the required_value.
     def execute_product_mark(arguments)
-      eval(state_query_update_combiner)
+      result_of_marking_product = eval(state_query_update_combiner)
+      puts "result of marking product is: #{result_of_marking_product}"
     end 
 
     ## @param[Hash] arguments : the same arguments hash that was passed into #mark_requirement function.
@@ -204,6 +225,7 @@ class Auth::Workflow::Requirement
 
     end
 
+
     ## a subsequent requirement is adding itself to this requirement.
     def add_requirement(req)
       ## take the duration from its time_information and add it to the self duration
@@ -219,6 +241,7 @@ class Auth::Workflow::Requirement
       self.time_information[:duration] = step_duration
       self.time_information[:end_time] = self.time_information[:end_time] + self.time_information[:duration]
     end
+    
 
 
     ## modulates the end time and start time to reflect the total elapsed duration since the start of the sop.

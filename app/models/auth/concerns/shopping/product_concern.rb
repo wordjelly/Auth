@@ -80,6 +80,10 @@ module Auth::Concerns::Shopping::ProductConcern
 		field :name, type: String
 		field :stock, type: Float, default: 0.0
 
+		## for WORKFLOW
+		field :location_information, type: Hash, default: {}
+		field :time_information, type: Hash, default: {}
+		
 		## all products are public to be searched.
 		before_save do |document|
 			self.public = "yes"
@@ -98,37 +102,5 @@ module Auth::Concerns::Shopping::ProductConcern
 	 }
 	end 
 
-=begin
-	## @param[Hash] options : an optional hash of options that can be used to modify the query for the product.
-	## @return[Boolean] true if there is enough stock.
-	def in_stock?(options={})
-		required_stock = options[:required_stock] || 0.0
-		self.stock >= required_stock
-	end	
 
-	## @param[Auth::Workflow::Requirement] options : an optional hash of options that can be used to modify the query for the product.
-	## @return[Mongoid::Document] : atomically decrements the stock of the product, provided that enough stock exists.
-	def use_stock(requirement)
-		product_document = Auth.configuration.product_class.where({
-				"$and" => [
-					"stock" => {
-						"$gte" => options[:required_stock]
-					},
-					"_id" => {
-						"$eq" => BSON::ObjectId(self.id.to_s)
-					}
-				]
-			}).find_one_and_update(
-				{
-					"$inc" => {
-						:stock => options[:required_stock]*-1
-					}
-				},
-				{
-					:return_document => :after	
-				}
-			)
-		return product_document
-	end
-=end
 end

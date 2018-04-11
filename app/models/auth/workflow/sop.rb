@@ -9,7 +9,7 @@ class Auth::Workflow::Sop
   	embedded_in :stage, :class_name => Auth.configuration.stage_class
   	field :name, type: String
   	field :description, type: String
-  	field :applicable_to_product_ids, type: Array
+  	field :applicable_to_product_ids, type: Array, default: []
 
   	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
@@ -52,31 +52,6 @@ class Auth::Workflow::Sop
 		product_ids = options[:product_ids]
 		assembly_id = options[:assembly_id]
 
-		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
-			{
-				"$match" => {
-					"_id" => BSON::ObjectId(assembly_id) 
-				}
-			},
-			{
-				"$unwind" => {
-					"path" => "$stages",
-					"includeArrayIndex" => "stage_index"
-				}
-			},
-			{
-				"$unwind" => {
-					"path" => "$stages.sops",
-					"includeArrayIndex" => "sop_index"
-				}
-			}
-		])
-
-		puts "initial res is:"
-		res.each do |result|
-			puts JSON.pretty_generate(result)
-		end
-		
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
@@ -105,7 +80,8 @@ class Auth::Workflow::Sop
 					"sops" => 1,
 					"sop_index" => 1,
 					"stage_index" => 1,
-					"doc_version" => 1
+					"doc_version" => 1,
+					"_id" => 1
 				}
 			},
 			{
@@ -114,7 +90,10 @@ class Auth::Workflow::Sop
 			      "stages.sops.stage_index" => "$stage_index",
 			      "stages.sops.assembly_doc_version" => "$doc_version",
 			      "stages.sops.stage_doc_version" => "$stages.doc_version",
+			      "stages.sops.stage_id" => "$stages._id",
 			      "stages.sops.sop_doc_version" => "$stages.sops.doc_version",
+			      "stages.sops.assembly_id" => "$_id",
+			      "stages.sops.sop_id" => "$stages.sops._id",
 			      "common_products" => { 
 			      		"$ifNull" =>  [ "$common_products", []]
 			      	}
@@ -171,11 +150,12 @@ class Auth::Workflow::Sop
 			events = []
 			applicable_sops.each do |sop|
 				options_for_next_event = options.merge(sop.attributes)
+				options_for_next_event.deep_symbolize_keys!
 				e = Auth::Transaction::Event.new
 				e.arguments = options_for_next_event
-				e.object_class = Auth.configuration.sop_class
-				e.method_to_call = "create_order"
-				e.object_id = sop.id.to_s
+				e.object_class = Auth.configuration.assembly_class
+				e.method_to_call = "create_order_in_sop"
+				e.object_id = sop["assembly_id"].to_s
 				events << e
 			end
 			events
@@ -258,7 +238,7 @@ class Auth::Workflow::Sop
 		results =Auth.configuration.assembly_class.constantize.where({
 			"$and" => [
 				{
-					"_id" => BSON::ObjectId
+					"_id" => BSON::ObjectId(order.assembly_id.to_s)
 				},
 				{
 					"stages.#{order.stage_index}.sops.#{order.sop_index}.orders.cart_item_ids" => {
@@ -276,10 +256,11 @@ class Auth::Workflow::Sop
 		## unwind, and match.
 		order_els = Auth.configuration.assembly_class.constantize.collection.aggregate([
 				{
-				"$match" => {
-					"_id" => BSON::ObjectId(assembly_id) 
-				}
+					"$match" => {
+						"_id" => BSON::ObjectId(order.assembly_id.to_s) 
+					}
 				},
+
 				{
 					"$unwind" => {
 						"path" => "$stages",
@@ -298,14 +279,17 @@ class Auth::Workflow::Sop
 						"includeArrayIndex" => "order_index"
 					}
 				},
+
 				{
 					"$match" => {
-						"_id" => BSON::ObjectId(order.id.to_s)
+						"stages.sops.orders._id" => BSON::ObjectId(order.id.to_s)
 					}
 				}
+
 			])
 
 		raise "did'nt find the order" unless order_els
+
 
 		return order_els.first["order_index"]
 
@@ -326,51 +310,88 @@ class Auth::Workflow::Sop
 
 	def create_order(arguments={})
 		
-		return nil if (arguments[:assembly_id].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:cart_item_ids].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_doc_version].blank?)
+		#puts "came to create order"
+		#puts JSON.pretty_generate(arguments)
+		
+		return nil if (arguments[:assembly_id].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_id].blank? || arguments[:sop_index].blank? || arguments[:sop_doc_version].blank?)
 
-		order = Auth.configuration.order_class.constantize.new(arguments)
+		## okay, wtf is this?
+		order = Auth.configuration.order_class.constantize.new(:cart_item_ids => arguments[:cart_item_ids],:stage_index => arguments[:stage_index],:stage_id => arguments[:stage_id], :sop_index => arguments[:sop_index], :sop_id => arguments[:sop_id], :assembly_id => arguments[:assembly_id], :assembly_doc_version => arguments[:assembly_doc_version],:sop_doc_version => arguments[:sop_doc_version], :stage_doc_version => arguments[:stage_doc_version], :action => 1)
 
 		if order_created = order.create_with_conditions(nil,nil,order)
 			return after_create_order(order_created)
 		else
-			return nil unless has_order_with_cart_items(order.cart_item_ids)
+			puts "order was not created and checking if any past order already has these cart items?"
+			return nil unless has_order_with_cart_items(order)
+			puts "it seems it does, so now doing after_create_order."
 			return after_create_order(order)
 		end
 
 	end
 
-
+	## @return[Array] : array of Auth::Transaction::Event Objects.
+	## the event points to the schedule order function.
+	## is called from assembly.
 	def after_create_order(order)
+		puts "came to after_create order."
+		e = Auth::Transaction::Event.new
+		e.arguments = {}
+		e.arguments[:sop_index] = order.sop_index
+		e.arguments[:stage_index] = order.stage_index
+		e.method_to_call = "sop_schedule_order"
+		e.object_class = Auth.configuration.assembly_class
+		e.object_id = order.assembly_id.to_s	
+		[e]
+	end
+
+
+	## this was previously in after_create_order.
+	def generate_mark_requirement_events(order)
+		
 		if get_order_index(order) == 0
 			## we want to return an array of events.
-			sop_requirements_with_calculated_states = get_sop_requirements
+			sop_requirements_with_calculated_states = get_sop_requirements(order)
 			sop_requirements_with_calculated_states.each_with_index.map{|requirement,i|
 				e = Auth::Transaction::Event.new
 				e.arguments = {}
+
+				e.arguments[:sop_index] = order.sop_index
+				e.arguments[:stage_index] = order.stage_index
+				e.arguments[:requirement_index] = i
+				e.arguments[:step_index] = requirement.step_index
+
 				e.arguments[:requirement] = requirement.attributes
 				if i == (sop_requirements_with_calculated_states.size - 1)
 					e.arguments[:last_requirement] = true
 					e.arguments[:sop_id] = self.id.to_s
 				end
-				e.method_to_call = "mark_requirement"	
+				e.method_to_call = "mark_sop_requirements"
+				e.object_class = Auth.configuration.assembly_class
+				
+				e.object_id = order.assembly_id.to_s	
 				requirement = e
 			}
 		else 
 			## do nothing.
 		end
+
 	end
 
 	## @return[Array] array of Auth::Workflow::Requirement objects. 
-	def get_sop_requirements
+	def get_sop_requirements(order)
 		
 		requirements_with_calculated_states = []
 
-		steps.each do |step|
+		steps.each_with_index {|step,step_index|
 			step.requirements.each do |requirement|
-				requirement.calculate_required_states(orders)
+				requirement.step_index = step_index
+				requirement.calculate_required_states(order)
 				requirements_with_calculated_states << requirement
 			end
-		end
+		}
+
+		#puts "these are the requirements with calculated states."
+		#puts requirements_with_calculated_states.to_s
 
 		requirements_with_calculated_states
 
@@ -393,9 +414,12 @@ class Auth::Workflow::Sop
 		self.steps.each_with_index{|step,key|
 
 			if step.applicable
-				## first let us build the hash.
+			
+
+				## first it uses the variables sent in with the cart items to modify the location and time requirements of the step itself and also the requirements of the step.
 				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
+				## resolves the step location and time.
 				step.resolve_location(self.steps[key-1].location_information)
 
 				step.resolve_time(self.steps[key-1].time_information)
@@ -403,36 +427,39 @@ class Auth::Workflow::Sop
 				step.requirements.each_with_index{|req,req_key|
 
 					if req.applicable && req.schedulable
-					
+						
+						## will first assign the steps location information to the requirement, and then resolve the requirement_location.
 						req.resolve_location(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
 
+						## will first assign the steps time information to the requirement, and then resolve the requirement_time.
 						req.resolve_time(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
 					
 					end
 
 				}
-					
+				
+				## now calculates the steps duration.
+
 				step.calculate_duration
 
+				## will add this duration to the duration_after_start.
 				duration_after_start_in_seconds += (step.calculated_duration || step.duration)
-				## now we have resolved the time, the location, and we have the step duration.
-
-				## now we have to build towards the query hash.
-				## so add this to the query hash.
-				## what to add ?
-				## each schedulable requirement.
-				## what about 
+				
 
 				step.requirements.each_with_index{|req,req_key|
 
 					if req.applicable && req.schedulable
 						
-						## we need to have a way to have some location inheritance.
+						## adds the duration since the first step to the start_time and end_time of the requirement.
 						req.add_duration_since_first_step(duration_after_start_in_seconds)
 
+						## adds the step duration to the end_time.
 						req.add_duration_from_step(self.calculated_duration || self.duration)
-						
-						req.add_to_requirement_hash_to_schedule(stage_index,sop_index,step_index,req_index,requirement_hash_to_schedule,(self.resolve || req.resolve))
+							
+						## will create a new entry in the query hash for this requirement, or will add this requirement to a reference requirement, if the parameter :follow_reference_requirement is true.
+						## basically it means that this requirmenet is continuing across multiple steps.
+						## so we just add to the duration of the previous step from where it was required.
+						req.add_to_query_hash(stage_index,sop_index,step_index,req_index,requirement_hash_to_schedule,(self.resolve || req.resolve))
 						
 					end
 				}
@@ -440,6 +467,8 @@ class Auth::Workflow::Sop
 				step_counter += 1
 			end
 		}
+
+		## now builds the query.
 
 		query = {"$or" => []}
 

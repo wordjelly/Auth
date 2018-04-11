@@ -81,49 +81,59 @@ class Auth::Workflow::Order
 	## the order is created inside the sop, only if the cart items of the order are not present in any prior order, inside the same sop.
 	def create_with_conditions(params,permitted_params,model)
 		## in this case the model is an order model.
-		
+
 		return false unless model.valid?
 
-		
-		assembly_updated = Auth.configuration.assembly_class.constantize.where({
+
+		query = {
 			"$and" => [
 				{
-					"stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id)
+					"stages.#{model.stage_index}._id" => BSON::ObjectId(model.stage_id.to_s)
 				},
 				{
 					"stages.#{model.stage_index}.doc_version" => model.stage_doc_version
 				},
+
 				{
 					"stages.#{model.stage_index}.applicable" => true
 				},
 				{
-					"_id" => BSON::ObjectId(model.assembly_id)
+					"_id" => BSON::ObjectId(model.assembly_id.to_s)
 				},
 				{
 					"doc_version" => model.assembly_doc_version
 				},
+
 				{
 					"master" => false
 				},
+
 				{
 					"applicable" => true
 				},
+
 				{
-					"stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id)
+					"stages.#{model.stage_index}.sops.#{model.sop_index}._id" => BSON::ObjectId(model.sop_id.to_s)
 				},
+
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.doc_version" => model.sop_doc_version
 				},
+
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.applicable" => true
 				},
+
 				{
 					"stages.#{model.stage_index}.sops.#{model.sop_index}.orders.cart_item_ids" => {
 						"$nin" => model.cart_item_ids
 					}
 				}
+
 			]
-		})
+		}
+		
+		assembly_updated = Auth.configuration.assembly_class.constantize.where(query)
 		.find_one_and_update(
 			{
 				"$push" => 
@@ -139,6 +149,7 @@ class Auth::Workflow::Order
 		
 
 		return false unless assembly_updated
+		puts "was able to create the order."
 		return model
 
 	end

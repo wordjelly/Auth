@@ -1041,12 +1041,12 @@ class Auth::Workflow::Assembly
   ## @params[Hash] options : 
   ## expected to contain a key called product_ids.
   ## expected to contain another key called cart_item_ids.
-  ## 
+  ## (arguments[:assembly_id].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:cart_item_ids].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_doc_version].blank?)
   def clone_to_add_cart_items(options)
     return nil unless self.master
     return nil if (options[:cart_item_ids].blank? || options[:product_ids].blank?)
     new_assembly = self.clone
-
+    new_assembly.master = false
     if new_assembly && new_assembly.save
       resulting_event = Auth::Transaction::Event.new
       resulting_event.object_class = Auth.configuration.sop_class
@@ -1056,6 +1056,41 @@ class Auth::Workflow::Assembly
     end
 
     return nil
+
+  end
+
+  ## wrapper method, to call the create_order on the sop.
+  def create_order_in_sop(arguments)
+    ## the arguments will contain all the details about which sop we have to create the order in.
+  
+    return nil if (arguments[:stage_index].blank? || arguments[:sop_index].blank?)
+
+  
+
+    sop = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]]
+
+    sop.create_order(arguments)
+
+  end
+
+  def sop_schedule_order(arguments={})
+
+    return nil if(arguments[:stage_index].blank? || arguments[:sop_index].blank? )
+
+    sop = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]]
+
+    sop.schedule_order(arguments)
+
+  end
+
+  def mark_sop_requirements(arguments={})
+    #puts "arguments in mark sop requirements."
+    #puts JSON.pretty_generate(arguments)
+    return nil if(arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:requirement_index].blank? )
+
+    requirement = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]].steps[arguments[:step_index]].requirements[arguments[:requirement_index]]
+
+    requirement.mark_requirement(arguments)
 
   end
 

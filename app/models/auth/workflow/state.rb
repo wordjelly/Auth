@@ -160,7 +160,7 @@ class Auth::Workflow::State
     ## here we have to commit the required value.
     ## it will have to be an update_with_conditions.
 		"
-			self.required_value = orders.size
+			self.required_value = order.cart_item_ids.size
 		"
 	end
 
@@ -169,7 +169,7 @@ class Auth::Workflow::State
 
 	## @param[Array] array of order objects
 	## @return[nil] just sets the required_value of this state.
-	def calculate_required_state(orders)
+	def calculate_required_state(order)
 		eval(setter_function)
 	end
 

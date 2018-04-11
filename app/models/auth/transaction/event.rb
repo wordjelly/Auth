@@ -55,7 +55,9 @@ class Auth::Transaction::Event
 	## or nil, in case the #object_id of this event cannot be found.
 	def process
 		if self.object_id
-			nil unless get_object
+			return nil unless get_object
+			puts "the get object is:"
+			puts get_object.to_s
 			self.output_events = get_object.send(method_to_call,arguments)
 		else
 			self.output_events = self.object_class.constantize.send(method_to_call,arguments)
@@ -69,6 +71,7 @@ class Auth::Transaction::Event
 		begin
 			self.object_class.constantize.find(object_id)
 		rescue Mongoid::Errors::DocumentNotFound
+			puts "could not find the document."
 			nil
 		end
 	end
