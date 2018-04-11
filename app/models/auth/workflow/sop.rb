@@ -431,8 +431,7 @@ class Auth::Workflow::Sop
 				if key > 0
 					step.resolve_location(self.steps[key-1].location_information)
 					step.resolve_time(self.steps[key-1].time_information)
-					puts "after resolving"
-					puts step.location_information.to_s
+					
 				end
 
 				step.requirements.each_with_index{|req,req_key|

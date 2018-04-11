@@ -482,7 +482,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 
 				context " -- resolve --  " do 
-
+					
 				end
 
 
