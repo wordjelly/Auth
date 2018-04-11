@@ -777,11 +777,11 @@ module OrderCreationFlow
           end
         s.sops << sop
       end
-      puts "Adding stage: #{s}"
+      #puts "Adding stage: #{s}"
       assembly.stages << s
     end
 
-    puts assembly.stages.to_s
+    #puts assembly.stages.to_s
 
 
     products.each do |product_id, addresses|
@@ -805,7 +805,7 @@ module OrderCreationFlow
         begin
           assembly.stages[add[0]].sops[add[1]].steps[add[2]].requirements[add[3]].product_id = product_id
         rescue
-          puts "REQUIREMENT ERROR."
+          #puts "REQUIREMENT ERROR."
           errors << "address: #{address} does not exist for product id : #{product_id}"
         end
       end

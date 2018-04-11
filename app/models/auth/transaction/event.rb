@@ -56,8 +56,8 @@ class Auth::Transaction::Event
 	def process
 		if self.object_id
 			return nil unless get_object
-			puts "the get object is:"
-			puts get_object.to_s
+			#puts "the get object is:"
+			#puts get_object.to_s
 			self.output_events = get_object.send(method_to_call,arguments)
 		else
 			self.output_events = self.object_class.constantize.send(method_to_call,arguments)

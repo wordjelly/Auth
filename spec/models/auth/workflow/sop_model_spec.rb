@@ -137,7 +137,15 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						options[:steps] = 3
 						options[:requirements] = 3
 						
-						options[:products] = {products.first.id.to_s.to_sym => ["0.1","1.2","2.0"], products.last.id.to_s.to_sym => ["0.1","1.2","2.1"]}
+
+						first_product_applicable_to_sops = ["0.1","1.2","2.0"]
+
+						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
+
+
+						expected_sop_addresses_for_creating_orders = (first_product_applicable_to_sops + second_product_applicable_to_sops).uniq
+
+						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
 
 						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
 
@@ -152,10 +160,126 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						cart_items = products.map{|p|
 							c = Auth.configuration.cart_item_class.constantize.new
 							c.product_id = p.id.to_s
+
+							## suppose that we want to modify location information for 
+							## 0.1.1
+							## 2.0.2
+							
+							c.resource_id = @u.id.to_s
+							c.resource_class = @u.class.to_s
+							c.signed_in_resource = @u
 							c.location_information = {
-								:within_radius => 20,
-								:location_point_coordinates => [10,20]
+								"stages:0:sops:1:steps:1" => {
+									:within_radius => 20,
+									:location_point_coordinates => [10,20]
+								},
+								"stages:2:sops:0:steps:2" => {
+									:within_radius => 20,
+									:location_point_coordinates => [10,20]	
+								}
 							}
+							expect(c.save).to be_truthy
+							c
+						}
+
+						options = {}
+						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+						search_sop_event = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_event).not_to be_blank
+						create_order_events = search_sop_event.first.process
+						expect(create_order_events.size).to eq(4)
+						
+						
+						create_order_events.each do |crod|
+
+							crod_address = crod.arguments[:stage_index].to_s + "." + crod.arguments[:sop_index].to_s
+
+							expected_sop_addresses_for_creating_orders.delete(crod_address)
+
+
+							schedule_order_events = crod.process
+							
+							schedule_order_events.each do |sch|
+								
+								next_event = sch.process.first
+								
+								next_event.arguments[:steps].each do |step|
+									
+									## these are only going to be for applicable sops.
+									first_cart_item_location_information = cart_items.first.location_information
+
+									address = "stages:#{step.stage_index}:sops:#{step.sop_index}:steps:#{step.step_index}"
+
+
+									if first_cart_item_location_information[address]
+
+										puts "the address is:#{address}"
+
+										expect(step.location_information[:within_radius]).to eq(first_cart_item_location_information[address][:within_radius])
+										expect(step.location_information[:location_point_coordinates]).to eq(first_cart_item_location_information[address][:location_point_coordinates])
+									end
+
+								end	
+							end
+						
+
+						end		
+
+						## we delete the addresses that are found, and so this should finally be 0.
+						expect(expected_sop_addresses_for_creating_orders.size).to eq(0)		
+
+					end
+
+					it "-- passes on location information from a previous step if the step does not have its own location information -- " do 
+
+						options = {}
+
+						products = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
+
+						products.map{|c|
+							c.resource_id = @admin.id.to_s
+							c.resource_class = @admin.class.to_s
+							c.price = 30
+							expect(c.save).to be_truthy
+						}
+
+						products_for_requirements = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
+
+						products_for_requirements.map{|c|
+							c.resource_id = @admin.id.to_s
+							c.resource_class = @admin.class.to_s
+							c.price = 30
+							expect(c.save).to be_truthy
+						}
+
+						options[:stages] = 3
+						options[:sops] = 3
+						options[:steps] = 3
+						options[:requirements] = 3
+						
+
+						first_product_applicable_to_sops = ["0.1","1.2","2.0"]
+
+						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
+
+						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
+
+						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
+
+						response = create_assembly_with_options(options)
+
+						expect(response[:errors]).to be_blank
+
+						assembly = response[:assembly]
+						expect(assembly.save).to be_truthy
+						assembly.master = true
+
+						## add some location information to the first step in every sop.
+
+						cart_items = products.map{|p|
+							c = Auth.configuration.cart_item_class.constantize.new
+							c.product_id = p.id.to_s
 							c.resource_id = @u.id.to_s
 							c.resource_class = @u.class.to_s
 							c.signed_in_resource = @u
@@ -163,39 +287,194 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 							c
 						}
 
+						assembly.stages.each_with_index {|stage,key|
+							stage.sops.each_with_index {|sop,sop_key|
+								assembly.stages[key].sops[sop_key].steps.first.location_information = {
+									:within_radius => 20,
+									:location_point_coordinates => [10,20]	
+								}
+							}
+						}
+
+						expect(assembly.save).to be_truthy
+
+						## so now what.
+
 						options = {}
-
 						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						
 						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-
 						search_sop_event = assembly.clone_to_add_cart_items(options)
-
 						expect(search_sop_event).not_to be_blank
-
 						create_order_events = search_sop_event.first.process
-
-						## now the create_order events, will create the order
-						## and then will generate the schedule_order event
+						expect(create_order_events.size).to eq(4)
+						
+						## now get the steps and check that all of them have the damn location information set on them.
 
 						create_order_events.each do |crod|
+
+							
 							schedule_order_events = crod.process
+							
 							schedule_order_events.each do |sch|
-								expect(sch.process).not_to be_nil
+								
+								next_event = sch.process.first
+								
+								next_event.arguments[:steps].each_with_index {|step,index|
+									
+									if index > 0
+
+										expect(step.location_information[:within_radius]).to eq(20)
+
+										expect(step.location_information[:location_point_coordinates]).to eq([10,20])
+
+									end	
+
+								}
 							end
-						end				
+						end
+
 
 					end
 
-					it "-- passes on step information from a previous step if the step does not have its own location information -- " do 
+					it " -- passes step location information to requirement if the requirement doesnt have its own location information -- ", :step_to_req => true do 
 
-					end
+						## how to simulate this one?
+						## the first requirement, let us give its own location information
+						## the second one onwards should have it from the step.
+						options = {}
 
-					it " -- passes step location information to requirement if the requirement doesnt have its own location information -- " do 
+						products = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
+
+						products.map{|c|
+							c.resource_id = @admin.id.to_s
+							c.resource_class = @admin.class.to_s
+							c.price = 30
+							expect(c.save).to be_truthy
+						}
+
+						products_for_requirements = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
+
+						products_for_requirements.map{|c|
+							c.resource_id = @admin.id.to_s
+							c.resource_class = @admin.class.to_s
+							c.price = 30
+							expect(c.save).to be_truthy
+						}
+
+						options[:stages] = 3
+						options[:sops] = 3
+						options[:steps] = 3
+						options[:requirements] = 3
+						
+
+						first_product_applicable_to_sops = ["0.1","1.2","2.0"]
+
+						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
+
+						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
+
+						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
+
+						response = create_assembly_with_options(options)
+
+						expect(response[:errors]).to be_blank
+
+						assembly = response[:assembly]
+						expect(assembly.save).to be_truthy
+						assembly.master = true
+
+						## add some location information to the first step in every sop.
+
+						cart_items = products.map{|p|
+							c = Auth.configuration.cart_item_class.constantize.new
+							c.product_id = p.id.to_s
+							c.resource_id = @u.id.to_s
+							c.resource_class = @u.class.to_s
+							c.signed_in_resource = @u
+							expect(c.save).to be_truthy
+							c
+						}
+
+						assembly.stages.each_with_index {|stage,key|
+
+							stage.sops.each_with_index {|sop,sop_key|
+								assembly.stages[key].sops[sop_key].steps.first.location_information = {
+								:within_radius => 20,
+								:location_point_coordinates => [10,20]	
+								}
+
+								sop.steps.each_with_index{|step,step_key|
+
+									assembly.stages[key].sops[sop_key].steps[step_key].requirements.first.location_information = {
+										:within_radius => 400,
+										:location_point_coordinates => [40,450]
+									}
+
+									assembly.stages[key].sops[sop_key].steps[step_key].requirements.each_with_index{|rq,rq_key|
+
+										assembly.stages[key].sops[sop_key].steps[step_key].requirements[rq_key].schedulable = true
+
+									}
+
+								}
+
+							}
+						}
+						
+
+						expect(assembly.save).to be_truthy
+
+						## so now what.
+
+						options = {}
+						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
+						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+						search_sop_event = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_event).not_to be_blank
+						create_order_events = search_sop_event.first.process
+						expect(create_order_events.size).to eq(4)
+						
+						## now get the steps and check that all of them have the damn location information set on them.
+
+						create_order_events.each do |crod|
+
+							
+							schedule_order_events = crod.process
+							
+							schedule_order_events.each do |sch|
+								
+								next_event = sch.process.first
+								
+								next_event.arguments[:steps].each_with_index {|step,index|
+									
+									step.requirements.each_with_index{|rq,rq_index|
+
+										if rq_index == 0
+
+											expect(rq.location_information[:within_radius]).to eq(400)
+
+											expect(rq.location_information[:location_point_coordinates]).to eq([40,450])
+
+
+										else
+
+											expect(rq.location_information[:within_radius]).to eq(20)
+
+											expect(rq.location_information[:location_point_coordinates]).to eq([10,20])
+
+										end	
+
+									}
+
+								}
+							end
+						end
+
 
 					end
 
 				end
+
 
 				context " -- transferring time information -- " do 
 
@@ -216,6 +495,17 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 
 				end	
+
+
+				context " -- build query -- " do 
+
+				end
+
+
+				context " -- do schedule update -- " do 
+
+				end
+
 
 				context " -- case scenarios -- " do 
 

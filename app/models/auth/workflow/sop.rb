@@ -148,6 +148,10 @@ class Auth::Workflow::Sop
 
 			## now emit create_order events.
 			events = []
+
+			puts "the APPLICABLE SOPS ARE:"
+			puts applicable_sops.size
+
 			applicable_sops.each do |sop|
 				options_for_next_event = options.merge(sop.attributes)
 				options_for_next_event.deep_symbolize_keys!
@@ -321,9 +325,9 @@ class Auth::Workflow::Sop
 		if order_created = order.create_with_conditions(nil,nil,order)
 			return after_create_order(order_created)
 		else
-			puts "order was not created and checking if any past order already has these cart items?"
+			#puts "order was not created and checking if any past order already has these cart items?"
 			return nil unless has_order_with_cart_items(order)
-			puts "it seems it does, so now doing after_create_order."
+			#puts "it seems it does, so now doing after_create_order."
 			return after_create_order(order)
 		end
 
@@ -333,7 +337,7 @@ class Auth::Workflow::Sop
 	## the event points to the schedule order function.
 	## is called from assembly.
 	def after_create_order(order)
-		puts "came to after_create order."
+		#puts "came to after_create order."
 		e = Auth::Transaction::Event.new
 		e.arguments = {}
 		e.arguments[:sop_index] = order.sop_index
@@ -401,7 +405,8 @@ class Auth::Workflow::Sop
 
 	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
 	def schedule_order(arguments={})
-		
+		self.stage_index = arguments[:stage_index]
+		self.sop_index = arguments[:sop_index]
 		## this is incremented after each step, by the duration of the step in seconds.
 		duration_after_start_in_seconds = 0
 
@@ -414,26 +419,35 @@ class Auth::Workflow::Sop
 		self.steps.each_with_index{|step,key|
 
 			if step.applicable
-			
-
+				
+				step.step_index = key
+				step.stage_index = self.stage_index
+				step.sop_index = self.sop_index
+				
 				## first it uses the variables sent in with the cart items to modify the location and time requirements of the step itself and also the requirements of the step.
 				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
-				## resolves the step location and time.
-				step.resolve_location(self.steps[key-1].location_information)
-
-				step.resolve_time(self.steps[key-1].time_information)
+				
+				if key > 0
+					step.resolve_location(self.steps[key-1].location_information)
+					step.resolve_time(self.steps[key-1].time_information)
+					puts "after resolving"
+					puts step.location_information.to_s
+				end
 
 				step.requirements.each_with_index{|req,req_key|
 
 					if req.applicable && req.schedulable
 						
 						## will first assign the steps location information to the requirement, and then resolve the requirement_location.
-						req.resolve_location(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
+						
+						
+						req.resolve_location(self.steps[key].location_information,self.steps[key].time_information,self.steps[key].resolved_location_id,self.steps[key].resolved_time)
 
 						## will first assign the steps time information to the requirement, and then resolve the requirement_time.
-						req.resolve_time(self.location_information,self.time_information,self.resolved_location_id,self.resolved_time)
-					
+						req.resolve_time(self.steps[key].location_information,self.steps[key].time_information,self.steps[key].resolved_location_id,self.steps[key].resolved_time)
+						
+
 					end
 
 				}
@@ -449,18 +463,22 @@ class Auth::Workflow::Sop
 				step.requirements.each_with_index{|req,req_key|
 
 					if req.applicable && req.schedulable
-						
+				
+=begin		
 						## adds the duration since the first step to the start_time and end_time of the requirement.
+						
 						req.add_duration_since_first_step(duration_after_start_in_seconds)
 
 						## adds the step duration to the end_time.
+						
 						req.add_duration_from_step(self.calculated_duration || self.duration)
 							
 						## will create a new entry in the query hash for this requirement, or will add this requirement to a reference requirement, if the parameter :follow_reference_requirement is true.
 						## basically it means that this requirmenet is continuing across multiple steps.
 						## so we just add to the duration of the previous step from where it was required.
+
 						req.add_to_query_hash(stage_index,sop_index,step_index,req_index,requirement_hash_to_schedule,(self.resolve || req.resolve))
-						
+=end						
 					end
 				}
 
@@ -480,6 +498,14 @@ class Auth::Workflow::Sop
 
 		end
 
+		## here we want have this emit another event ?
+		## or not ?
+		## for the moment to test, we will have it emit.
+		## the entire sop.
+		e = Auth::Transaction::Event.new
+		e.arguments = {}
+		e.arguments[:steps] = self.steps
+		[e]
 	end
 
 

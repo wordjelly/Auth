@@ -155,29 +155,43 @@ class Auth::Workflow::Step
 	## this should only be done if time and locatino are to be enforced, for a particular step.
 	## but at this stage, let the merging happen.
 	def modify_tlocation_conditions_for_each_product(order,stage_index,sop_index,step_index)
-		
+			
+		#puts "stage index :#{stage_index}"
+		#puts "sop index : #{sop_index}"
+		#puts "step index: #{step_index}"
+
 		if first_cart_item = Auth.configuration.cart_item_class.constantize.find(order.cart_item_ids.first)
 
-			location_information = first_cart_item.location_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}"]
+			
+			location_information = first_cart_item.location_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}"]
 
-			time_information = first_cart_item.time_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}"]
+			time_information = first_cart_item.time_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}"]
+
 
 			## merge the information inside it, 
-			self.location_information.merge(location_information) if !location_information.blank?
+			if !location_information.blank?
+				puts "merging location information."
+				self.location_information = self.location_information.merge(location_information)
+			end
 			
-			self.time_information.merge(time_information) if !time_information.blank?
+			if !time_information.blank?
+				self.time_information = self.time_information.merge(time_information) 
+			end
+			
+			puts self.location_information if !self.location_information.blank?
 
+			puts self.time_information if !self.time_information.blank?
 			## now for each requirement of this step do the same, as long as the requirement is applicable.
 			self.requirements.each_with_index{|requirement,key|
 				if requirement.applicable
 					
-					requirement_location_information = first_cart_item.location_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}.requirements.#{key}"]
-					
-					requirement.location_information.merge(requirement_location_information) if !requirement_location_information.blank?
+					requirement_location_information = first_cart_item.location_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}:requirements:#{key}"]
+						
+					requirement.location_information = requirement.location_information.merge(requirement_location_information) if !requirement_location_information.blank?
 
-					requirement_time_information = first_cart_item.time_information["stages.#{stage_index}.sops.#{sop_index}.step_index.#{step_index}.requirements.#{key}"]
+					requirement_time_information = first_cart_item.time_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}:requirements:#{key}"]
 					
-					requirement.time_information.merge(requirement_time_information) if !requirement_time_information.blank?
+					requirement.time_information = requirement.time_information.merge(requirement_time_information) if !requirement_time_information.blank?
 
 
 				end
