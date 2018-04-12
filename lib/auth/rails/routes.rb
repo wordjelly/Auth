@@ -28,7 +28,7 @@ module ActionDispatch::Routing
 
 	      resources :states, :controller =>  Auth.configuration.state_controller
 
-	      resources :tlocations, :controller =>  Auth.configuration.tlocation_controller
+	      resources :locations, :controller =>  Auth.configuration.location_controller
 
 	      ## image controller is required by default.
 	      ## 

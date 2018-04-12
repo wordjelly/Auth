@@ -129,8 +129,12 @@ module Auth
     attr_accessor :state_class
     attr_accessor :state_controller
 
+    ## this tlocation thing is no longer used.
     attr_accessor :tlocation_class
     attr_accessor :tlocation_controller
+
+    attr_accessor :location_class
+    attr_accessor :location_controller
     ########################################################
     ##
     ##
@@ -297,9 +301,13 @@ module Auth
       @state_class = "Auth::Workflow::State"
       @state_controller = "auth/workflow/states"
 
-
+      ## tlocation is not used anywhere, either the model or controller
       @tlocation_class = "Auth::Workflow::Tlocation"
       @tlocation_controller = "auth/workflow/tlocations"
+
+      
+      @location_class = "Auth::Workflow::Location"
+      @location_controller = "auth/workflow/locations"
       ########################################################
       ##
       ##

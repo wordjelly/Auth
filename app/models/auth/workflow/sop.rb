@@ -52,7 +52,6 @@ class Auth::Workflow::Sop
 		product_ids = options[:product_ids]
 		assembly_id = options[:assembly_id]
 
-
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
 				"$match" => {
@@ -424,14 +423,21 @@ class Auth::Workflow::Sop
 				step.stage_index = self.stage_index
 				step.sop_index = self.sop_index
 				
-				## first it uses the variables sent in with the cart items to modify the location and time requirements of the step itself and also the requirements of the step.
+				## transfer the location requirements from the product to the step.
 				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
 				
 				if key > 0
+					## transfer the location informatino from the previous step if it does not exist. then resolve the step location to a location id if :resolve is true for the step.
 					step.resolve_location(self.steps[key-1].location_information)
 					step.resolve_time(self.steps[key-1].time_information)
-					
+				else
+					## for the first step we can still resolve the location information.
+					## with either the stuff from the previous sop being passed in or what?
+					## this is a big question.
+					## 
+					step.resolve_location
+					step.resolve_time
 				end
 
 				step.requirements.each_with_index{|req,req_key|

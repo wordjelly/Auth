@@ -35,34 +35,32 @@ module Auth::Concerns::WorkflowConcern
 
     field :resolved_id, type: String
 
-    def generate_location_query
-
-      query_clause = {}
-
-      if resolved_location_id
-        
-        query_clause = {
-          "location_id" => resolved_location_id
-        }
+    def generate_location_query(location_coordinates,within_radius,location_categories=nil)
       
-      elsif self.location_information[:location_point_coordinates] && self.location_information[:within_radius]
-      
-        query_clause = {
-          "location" => {
-            "$nearSphere" => {
-              "$geometry" => {
-                "type" => "Point",
-                "coordinates" => self.location_information[:location_point_coordinates]
-              },
-              "$maxDistance" => self.location_information[:within_radius] * 1609.34
-             }
+      query_clause = {
+        "$and" => [
+          {
+            "location" => {
+              "$nearSphere" => {
+                "$geometry" => {
+                    "type" => "Point",
+                    "coordinates" => location_coordinates
+                },
+                "$maxDistance" => within_radius * 1609.34
+              }
+            }
           }
+        ]
       }
 
-      end
+      query_clause["$and"] << {
+        "location_categories" => {
+          "$in" => location_categories
+        }
+      } if location_categories
 
-      return query_clause
-
+      query_clause
+      
     end
 
 
@@ -102,35 +100,42 @@ module Auth::Concerns::WorkflowConcern
     ## the time_information and resolved_time params are not used.!
     def resolve_location(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
 
-      ## merge in the location information in case we don't have any location information.
+      self.location_information[:location_id] ||= location_information[:location_id]
 
-      unless self.location_information[:location_id]
+      self.location_information[:within_radius] ||= location_information[:within_radius]
 
-        self.location_information[:location_id] = location_information[:location_id] if location_information[:location_id]
+      self.location_information[:location_point_coordinates] ||= location_information[:location_point_coordinates]
+
+      self.location_information[:location_categories] ||= location_information[:location_categories]
+
       
-      end
-
-      unless (self.location_information[:within_radius] || self.location_information[:location_point_coordinates])
-
-        if (location_information[:within_radius] && location_information[:location_point_coordinates])
-
-            self.location_information[:within_radius] = location_information[:within_radius]
-
-            self.location_information[:location_point_coordinates] = location_information[:location_point_coordinates]
-
-        end
-
-      end
-
       return unless self.resolve
+    
+      puts "came to resolve step:"
+      puts "its location information is:" 
+      puts self.location_information.to_s
+        
+      if self.location_information[:location_id]
+        ## the result is to just find
+        self.resolved_location_id = Auth.configuration.location_class.constantize.find(self.location_information[:location_id]).id.to_s
+        puts "the resolved location id is:"
+        puts self.resolved_location_id.to_s
+      
+      elsif (self.location_information[:location_point_coordinates] && self.location_information[:within_radius])
   
-      location_query = generate_location_query
+          ## what if it is just a location category?
+          ## we cannot query just on a location category.
+          ## so if there is a category, then add it to 
+          ## so here we can do the query.
+          query = generate_location_query(self.location_information[:location_point_coordinates],self.location_information[:within_radius],self.location_information[:location_categories]) 
+          results = Auth.configuration.location_class.constantize.where(query)
 
-      if results = Auth.configuration.location_class.constantize.where(location_query)
-
-        self.resolved_location_id = results.first.id.to_s
-
+          
+          self.resolved_location_id = results.first.id.to_s if results.size > 0
+          
       end
+        
+
 
     end
 

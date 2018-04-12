@@ -170,7 +170,6 @@ class Auth::Workflow::Step
 
 			## merge the information inside it, 
 			if !location_information.blank?
-				puts "merging location information."
 				self.location_information = self.location_information.merge(location_information)
 			end
 			
