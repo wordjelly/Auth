@@ -35,8 +35,14 @@ module Auth::Concerns::WorkflowConcern
 
     field :resolved_id, type: String
 
+    ## @param[Hash] location_coordinates : expected of the format {:lat => float, :lng => float}
+    ## @param[Array] within_radius : integer
+    ## @param[Array] location_categories : 
     def generate_location_query(location_coordinates,within_radius,location_categories=nil)
       
+
+      point = Mongoid::Geospatial::Point.new(location_coordinates[:lng],location_coordinates[:lat])
+
       query_clause = {
         "$and" => [
           {
@@ -44,7 +50,7 @@ module Auth::Concerns::WorkflowConcern
               "$nearSphere" => {
                 "$geometry" => {
                     "type" => "Point",
-                    "coordinates" => location_coordinates
+                    "coordinates" => point
                 },
                 "$maxDistance" => within_radius * 1609.34
               }
@@ -111,9 +117,7 @@ module Auth::Concerns::WorkflowConcern
       
       return unless self.resolve
     
-      puts "came to resolve step:"
-      puts "its location information is:" 
-      puts self.location_information.to_s
+      
         
       if self.location_information[:location_id]
         ## the result is to just find
@@ -128,8 +132,12 @@ module Auth::Concerns::WorkflowConcern
           ## so if there is a category, then add it to 
           ## so here we can do the query.
           query = generate_location_query(self.location_information[:location_point_coordinates],self.location_information[:within_radius],self.location_information[:location_categories]) 
-          results = Auth.configuration.location_class.constantize.where(query)
 
+          puts "the query is:"
+          puts query.to_s
+          results = Auth.configuration.location_class.constantize.where(query)
+          puts "the results size is:"
+          puts results.size.to_s
           
           self.resolved_location_id = results.first.id.to_s if results.size > 0
           

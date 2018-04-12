@@ -9,6 +9,8 @@ class Auth::Workflow::Location
 	## make this a location point.
 	field :location, type: Point
 
+
+
 	## create a geoindex by doing the following command in the mongodb shell
 
 =begin
