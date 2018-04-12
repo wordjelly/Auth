@@ -30,6 +30,8 @@ module ActionDispatch::Routing
 
 	      resources :locations, :controller =>  Auth.configuration.location_controller
 
+	      resources :schedules, :controller =>  Auth.configuration.schedule_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller

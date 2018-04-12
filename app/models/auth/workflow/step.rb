@@ -177,10 +177,12 @@ class Auth::Workflow::Step
 				self.time_information = self.time_information.merge(time_information) 
 			end
 			
-			puts self.location_information if !self.location_information.blank?
+			#puts self.location_information if !self.location_information.blank?
 
-			puts self.time_information if !self.time_information.blank?
+			#puts self.time_information if !self.time_information.blank?
+			
 			## now for each requirement of this step do the same, as long as the requirement is applicable.
+			
 			self.requirements.each_with_index{|requirement,key|
 				if requirement.applicable
 					

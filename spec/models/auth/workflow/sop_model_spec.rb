@@ -716,6 +716,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 										assembly.stages[key].sops[sop_key].steps[st_key].resolve = true	
 										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:location_point_coordinates] = {:lat => 10.11, :lng => 14.99}
 										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:within_radius] = 10
+										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:location_categories] = ["biochemistry_station"]
 									end
 								end 
 							}
@@ -760,16 +761,6 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 					end
 
 
-					it " -- resolves location provided location coordinates, radius and categories -- " do 
-
-
-						## in this case we will make 5 locations.
-						## and only give two of them the location coordinates.
-
-
-					end
-
-
 					it " -- resolves step location where location information is provided in the step itself -- " do 
 
 					end
@@ -787,6 +778,28 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 
 				context " -- duration -- " do 
+
+					it " -- calculates the duration using the function provided if there is no fixed duration -- " do 
+
+					end
+
+					context " -- single sop -- " do 
+
+						it " -- a duration is defined on each step, and start time and end time is defined only on the first step  -- " do 
+
+							## now how does it set the start_time and end_time of each step?
+							## but usually you won't define a start time and an end_time
+							## it will define a start_time range.
+							## and a duration.
+							## or that duration will have to be calculated.
+							## what about the end_time.
+							## that is not necessary to provide at all actually.
+							## we just need a duration calculation function, and a start_time_range.
+							## 
+
+						end
+
+					end
 
 				end
 

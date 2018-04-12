@@ -155,13 +155,13 @@ module Auth::Concerns::WorkflowConcern
     ## will then set the resolved_time as the one that was provided in the incoming time information.
     def resolve_time(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
 
-      self.time_information.merge(time_information) if ((self.time_information[:start_time].blank? || self.time_information[:end_time].blank?) && self.resolved_time.blank?) 
+      self.time_information.merge(time_information) if (self.time_information[:start_time].blank? || self.time_information[:resolved_time].blank?) 
 
 
       return unless self.resolve
       
-      ## resolved time is basically just set if it is passed into the time information.
-      self.resolved_time = self.time_information[:resolved_time] if self.time_information[:resolved_time]
+      
+      self.resolved_time = self.time_information[:resolved_time] || resolved_time
 
     end
 

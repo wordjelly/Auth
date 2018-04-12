@@ -400,13 +400,36 @@ class Auth::Workflow::Sop
 
 	end
 
+	## finds the latests schedule that has been created, which contains at least one cart item from the order.
+	## returns either nil or the latest schedule.
+	def find_latest_schedule_for_order	
+		
+		schedules = Auth.configuration.schedule_class.constantize.where({
+			"$and" => [		
+				{
+					"cart_item_ids" => {
+						"$in" => self.orders.last.cart_item_ids
+					}
+				}
+			]
+		}).order_by(:sop_end_time => 'desc')
+		
+		return schedules.first if schedules.size > 0 
+		return nil
+	end
 	
 
 	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
 	def schedule_order(arguments={})
 		self.stage_index = arguments[:stage_index]
 		self.sop_index = arguments[:sop_index]
-		## this is incremented after each step, by the duration of the step in seconds.
+		
+		
+		## will first need to search the schedules to find out what is the latest time for each cart item.
+		## since the schedules will hold that information.
+		## 
+
+		## the duration till the last step of the previous_sop.
 		duration_after_start_in_seconds = 0
 
 		step_counter = 0
@@ -462,6 +485,10 @@ class Auth::Workflow::Sop
 				step.calculate_duration
 
 				## will add this duration to the duration_after_start.
+				## the problem here is that we need to know at what time the previous sop ends.
+				## the last step of the previous sop
+				## and that needs to be transferred to this schedule order.
+
 				duration_after_start_in_seconds += (step.calculated_duration || step.duration)
 				
 

@@ -135,6 +135,9 @@ module Auth
 
     attr_accessor :location_class
     attr_accessor :location_controller
+
+    attr_accessor :schedule_class
+    attr_accessor :schedule_controller
     ########################################################
     ##
     ##
@@ -308,6 +311,9 @@ module Auth
       
       @location_class = "Auth::Workflow::Location"
       @location_controller = "auth/workflow/locations"
+
+      @schedule_class = "Auth::Workflow::Schedule"
+      @schedule_controller = "auth/workflow/schedules"
       ########################################################
       ##
       ##
