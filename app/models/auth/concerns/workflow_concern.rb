@@ -106,6 +106,8 @@ module Auth::Concerns::WorkflowConcern
     ## the time_information and resolved_time params are not used.!
     def resolve_location(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
 
+      self.location_information.deep_symbolize_keys!
+
       self.location_information[:location_id] ||= location_information[:location_id]
 
       self.location_information[:within_radius] ||= location_information[:within_radius]
@@ -122,8 +124,7 @@ module Auth::Concerns::WorkflowConcern
       if self.location_information[:location_id]
         ## the result is to just find
         self.resolved_location_id = Auth.configuration.location_class.constantize.find(self.location_information[:location_id]).id.to_s
-        puts "the resolved location id is:"
-        puts self.resolved_location_id.to_s
+        
       
       elsif (self.location_information[:location_point_coordinates] && self.location_information[:within_radius])
   
@@ -133,11 +134,11 @@ module Auth::Concerns::WorkflowConcern
           ## so here we can do the query.
           query = generate_location_query(self.location_information[:location_point_coordinates],self.location_information[:within_radius],self.location_information[:location_categories]) 
 
-          puts "the query is:"
-          puts query.to_s
+         # puts "the query is:"
+         # puts query.to_s
           results = Auth.configuration.location_class.constantize.where(query)
-          puts "the results size is:"
-          puts results.size.to_s
+         # puts "the results size is:"
+         # puts results.size.to_s
           
           self.resolved_location_id = results.first.id.to_s if results.size > 0
           

@@ -351,14 +351,17 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 				
 				it " -- clone fails unless the current assembly is master -- " do 
 
-					assembly = Auth::Workflow::Assembly.new
+					cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u)
+					cart_items = cart_items_and_assembly[:cart_items]
+					assembly = cart_items_and_assembly[:assembly]
+					assembly.master = false
 					expect(assembly.save).to be_truthy
 
-					order = Auth::Workflow::Order.new
 					options = {}
-					options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-					options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+					options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).attributes
+					
 					expect(assembly.clone_to_add_cart_items(options)).to be_nil
+
 
 				end
 
@@ -375,9 +378,8 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 					## fire the clone event, expect it to return the array of events searching for those sop's.
 					## now clone with all the product ids in the arguments.
 					options = {}
-					options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-					options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-
+					options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).attributes
+					
 					expect(assembly.clone_to_add_cart_items(options)).not_to be_nil
 
 
@@ -385,14 +387,6 @@ RSpec.describe Auth::Workflow::Assembly, type: :model, :assembly_model => true, 
 
 			end
 
-			context " -- evented -- " do 
-
-				## here we would first need to create an event holder, and add this event to it.
-				## and let that create the create_applicable_sops event further on.
-				## and this should all still work.
-				## so we need a controller action which will 
-
-			end
 
 		end
 

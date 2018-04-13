@@ -34,7 +34,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				Auth::Workflow::Location.delete_all
 			end
 
-			it " -- returns empty response if no sop's are found -- " do 
+			it " -- returns empty response if no sop's are found -- ", :refac => true do 
 				
 				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2,false)
 				cart_items = cart_items_and_assembly[:cart_items]
@@ -43,8 +43,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				## fire the clone event, expect it to return the array of events searching for those sop's.
 				## now clone with all the product ids in the arguments.
 				options = {}
-				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+				options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
 				events = assembly.clone_to_add_cart_items(options)
 				
 				## so we want to call process on each of these events.
@@ -54,26 +53,21 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 			end
 
-			it " -- creates a series of events to create the order. -- " do 
+			it " -- finds applicable sops, and creates an event that will create the order in all those sops. -- ", :refac => true do 
 				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2)
 				cart_items = cart_items_and_assembly[:cart_items]
 				assembly = cart_items_and_assembly[:assembly]
 				options = {}
-				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
+				options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
 				search_sop_events = assembly.clone_to_add_cart_items(options)
-				## there is only one such event that is created.
-				## so we want to call process on each of these events.
-				event = search_sop_events.first
-				create_order_events = event.process
-				expect(create_order_events).not_to be_empty
-				create_order_events.each do |cr_or_ev|
-					expect(cr_or_ev.object_id).not_to be_nil
-				end
+				expect(search_sop_events.size).to eq(1)
+				create_order_events = search_sop_events.first.process
+				expect(create_order_events.size).to eq(1)
+				
 
 			end
 
-			it " -- clone -> find_applicable_sop's event -> returns an array of applicable_sops -> which should then launch the events for create_order_in sop -> should generate mark requirement events. -- ", :latest => true do 
+			it " -- clone -> find applicable sops -> create the order in all those sops. -- ", :refac => true do 
 
 				## setup is 
 				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2)
@@ -92,30 +86,62 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				expect(assembly.save).to be_truthy
 
 				options = {}
-				options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-				options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-				search_sop_event = assembly.clone_to_add_cart_items(options).first
+				options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+				search_sop_events = assembly.clone_to_add_cart_items(options)
+				expect(search_sop_events.size).to eq(1)
+				create_order_events = search_sop_events.first.process
+				expect(create_order_events.size).to eq(1)
+				schedule_sop_events = create_order_events.first.process
+				expect(schedule_sop_events.size).to eq(1)
+
+			end
+
+			it " -- clone -> find applicable sops -> create the order in all those sops -> returns event to schedule all those orders -> returns empty event, with the modified sop's in the arguments. -- ", :refaca => true do 
+
+				## setup is 
+				cart_items_and_assembly = create_cart_items_assembly_sops_with_product_ids(@u,2)
+				cart_items = cart_items_and_assembly[:cart_items]
+				assembly = cart_items_and_assembly[:assembly]
 				
-				create_order_events = search_sop_event.process
+				products = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
+				products.map{|c|
+					c.resource_id = @admin.id.to_s
+					c.resource_class = @admin.class.to_s
+					c.price = 30
+					expect(c.save).to be_truthy
+				}
+				assembly = add_steps_requirements_states_to_assembly(assembly,products)
 
-				## now the create_order events, will create the order
-				## and then will generate the schedule_order event
+				expect(assembly.save).to be_truthy
 
-				create_order_events.each do |crod|
-					schedule_order_events = crod.process
-					schedule_order_events.each do |sch|
-						expect(sch.process).not_to be_nil
-					end
+				options = {}
+				options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+				search_sop_events = assembly.clone_to_add_cart_items(options)
+				expect(search_sop_events.size).to eq(1)
+				create_order_events = search_sop_events.first.process
+				expect(create_order_events.size).to eq(1)
+				schedule_sop_events = create_order_events.first.process
+				expect(schedule_sop_events.size).to eq(1)
+				## here we have the sops.
+				JSON.parse(schedule_sop_events.first.arguments[:sops]).each do |sop_hash|
+					sop = Auth.configuration.sop_class.constantize.new(sop_hash)
+					expect(sop.orders).not_to be_empty
 				end
 
+				after_schedule_sop = schedule_sop_events.first.process
+				expect(after_schedule_sop.size).to eq(1)
+				after_schedule_sop = after_schedule_sop.first
+				sops = JSON.parse(after_schedule_sop.arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+				expect(sops.size).to eq(1)
+				
 			end
 
 
 			context " -- schedule order --  " do 
 
-				context " -- transferring location information -- ", :transfer_time_location => true do 
+				context " -- transferring location information -- ", :transfer_location => true do 
 
-					it " -- assigns the location information from the first cart item to the step if the step location information is blank -- " do 
+					it " -- assigns the location information from the first cart item to the step if the step location information is blank -- ", :refact => true do 
 
 						options = {}
 
@@ -188,55 +214,35 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						}
 
 						options = {}
-						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-						search_sop_event = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_event).not_to be_blank
-						create_order_events = search_sop_event.first.process
-						expect(create_order_events.size).to eq(4)
-						
-						
-						create_order_events.each do |crod|
+						options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+						search_sop_events = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_events.size).to eq(1)
+						create_order_events = search_sop_events.first.process
+						expect(create_order_events.size).to eq(1)
+						schedule_sop_events = create_order_events.first.process
+						expect(schedule_sop_events.size).to eq(1)
+						after_schedule_sop = schedule_sop_events.first.process
+						expect(after_schedule_sop.size).to eq(1)
+						after_schedule_sop = after_schedule_sop.first
+						sops = JSON.parse(after_schedule_sop.arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+						## each of these sop's should have the order in them.
+						first_cart_item_location_information = cart_items.first.location_information
+						sops.each do |sop|
+							expect(sop.orders).not_to be_empty
+							sop.steps.each_with_index {|step,step_key|
+								address = "stages:#{sop.stage_index}:sops:#{sop.sop_index}:steps:#{step_key}"
+								if first_cart_item_location_information[address]
 
-							crod_address = crod.arguments[:stage_index].to_s + "." + crod.arguments[:sop_index].to_s
+									expect(step.location_information[:within_radius]).to eq(first_cart_item_location_information[address][:within_radius])
+									expect(step.location_information[:location_point_coordinates]).to eq(first_cart_item_location_information[address][:location_point_coordinates])
+								end
 
-							expected_sop_addresses_for_creating_orders.delete(crod_address)
-
-
-							schedule_order_events = crod.process
-							
-							schedule_order_events.each do |sch|
-								
-								next_event = sch.process.first
-								
-								next_event.arguments[:steps].each do |step|
-									
-									## these are only going to be for applicable sops.
-									first_cart_item_location_information = cart_items.first.location_information
-
-									address = "stages:#{step.stage_index}:sops:#{step.sop_index}:steps:#{step.step_index}"
-
-
-									if first_cart_item_location_information[address]
-
-										puts "the address is:#{address}"
-
-										expect(step.location_information[:within_radius]).to eq(first_cart_item_location_information[address][:within_radius])
-										expect(step.location_information[:location_point_coordinates]).to eq(first_cart_item_location_information[address][:location_point_coordinates])
-									end
-
-								end	
-							end
-						
-
-						end		
-
-						## we delete the addresses that are found, and so this should finally be 0.
-						expect(expected_sop_addresses_for_creating_orders.size).to eq(0)		
-
+							}
+						end
+					
 					end
 
-					it "-- passes on location information from a previous step if the step does not have its own location information -- " do 
+					it "-- passes on location information from a previous step if the step does not have its own location information -- ", :step_pass => true do 
 
 						options = {}
 
@@ -268,6 +274,9 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
 
+
+						expected_sop_addresses_for_creating_orders = (first_product_applicable_to_sops + second_product_applicable_to_sops).uniq
+
 						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
 
 						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
@@ -280,135 +289,27 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						expect(assembly.save).to be_truthy
 						assembly.master = true
 
-						## add some location information to the first step in every sop.
-
 						cart_items = products.map{|p|
 							c = Auth.configuration.cart_item_class.constantize.new
 							c.product_id = p.id.to_s
+							
 							c.resource_id = @u.id.to_s
 							c.resource_class = @u.class.to_s
 							c.signed_in_resource = @u
+							
 							expect(c.save).to be_truthy
 							c
 						}
 
+
 						assembly.stages.each_with_index {|stage,key|
 							stage.sops.each_with_index {|sop,sop_key|
-
 
 								assembly.stages[key].sops[sop_key].steps.first.location_information = {
 									:within_radius => 20,
 									:location_point_coordinates => [10,20]	
 								}
-							}
-						}
 
-						expect(assembly.save).to be_truthy
-
-						## so now what.
-
-						options = {}
-						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-						search_sop_event = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_event).not_to be_blank
-						create_order_events = search_sop_event.first.process
-						expect(create_order_events.size).to eq(4)
-						
-						## now get the steps and check that all of them have the damn location information set on them.
-
-						create_order_events.each do |crod|
-
-							
-							schedule_order_events = crod.process
-							
-							schedule_order_events.each do |sch|
-								
-								next_event = sch.process.first
-								
-								next_event.arguments[:steps].each_with_index {|step,index|
-									
-									if index > 0
-
-										expect(step.location_information[:within_radius]).to eq(20)
-
-										expect(step.location_information[:location_point_coordinates]).to eq([10,20])
-
-									end	
-
-								}
-							end
-						end
-
-
-					end
-
-					it " -- passes step location information to requirement if the requirement doesnt have its own location information -- ", :step_to_req => true do 
-
-						## how to simulate this one?
-						## the first requirement, let us give its own location information
-						## the second one onwards should have it from the step.
-						options = {}
-
-						products = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
-
-						products.map{|c|
-							c.resource_id = @admin.id.to_s
-							c.resource_class = @admin.class.to_s
-							c.price = 30
-							expect(c.save).to be_truthy
-						}
-
-						products_for_requirements = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
-
-						products_for_requirements.map{|c|
-							c.resource_id = @admin.id.to_s
-							c.resource_class = @admin.class.to_s
-							c.price = 30
-							expect(c.save).to be_truthy
-						}
-
-						options[:stages] = 3
-						options[:sops] = 3
-						options[:steps] = 3
-						options[:requirements] = 3
-						
-
-						first_product_applicable_to_sops = ["0.1","1.2","2.0"]
-
-						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
-
-						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
-
-						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
-
-						response = create_assembly_with_options(options)
-
-						expect(response[:errors]).to be_blank
-
-						assembly = response[:assembly]
-						expect(assembly.save).to be_truthy
-						assembly.master = true
-
-						## add some location information to the first step in every sop.
-
-						cart_items = products.map{|p|
-							c = Auth.configuration.cart_item_class.constantize.new
-							c.product_id = p.id.to_s
-							c.resource_id = @u.id.to_s
-							c.resource_class = @u.class.to_s
-							c.signed_in_resource = @u
-							expect(c.save).to be_truthy
-							c
-						}
-
-						assembly.stages.each_with_index {|stage,key|
-
-							stage.sops.each_with_index {|sop,sop_key|
-								assembly.stages[key].sops[sop_key].steps.first.location_information = {
-								:within_radius => 20,
-								:location_point_coordinates => [10,20]	
-								}
 
 								sop.steps.each_with_index{|step,step_key|
 
@@ -427,80 +328,55 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							}
 						}
-						
 
 						expect(assembly.save).to be_truthy
 
-						## so now what.
-
 						options = {}
-						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-						search_sop_event = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_event).not_to be_blank
-						create_order_events = search_sop_event.first.process
-						expect(create_order_events.size).to eq(4)
-						
-						## now get the steps and check that all of them have the damn location information set on them.
+						options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+						search_sop_events = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_events.size).to eq(1)
+						create_order_events = search_sop_events.first.process
+						expect(create_order_events.size).to eq(1)
+						schedule_sop_events = create_order_events.first.process
+						expect(schedule_sop_events.size).to eq(1)
+						after_schedule_sop = schedule_sop_events.first.process
+						expect(after_schedule_sop.size).to eq(1)
+						after_schedule_sop = after_schedule_sop.first
+						sops = JSON.parse(after_schedule_sop.arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+						## each of these sop's should have the order in them.
+						first_cart_item_location_information = cart_items.first.location_information
 
-						create_order_events.each do |crod|
+						sops.each do |sop|
+							expect(sop.orders).not_to be_empty
+							sop.steps.each_with_index {|step,step_key|
+								## if the key > 0
+								## then we expect the location information to be 
+								if step_key > 0
+									expect(step.location_information["within_radius"]).to eq(20)
+									expect(step.location_information["location_point_coordinates"]).to eq([10,20])
+								end
 
-							
-							schedule_order_events = crod.process
-							
-							schedule_order_events.each do |sch|
-								
-								next_event = sch.process.first
-								
-								next_event.arguments[:steps].each_with_index {|step,index|
-									
-									step.requirements.each_with_index{|rq,rq_index|
+								step.requirements.each_with_index{|rq,rq_index|
 
-										if rq_index == 0
+									if rq_index == 0
 
-											expect(rq.location_information[:within_radius]).to eq(400)
+										expect(rq.location_information["within_radius"]).to eq(400)
 
-											expect(rq.location_information[:location_point_coordinates]).to eq([40,450])
+										expect(rq.location_information["location_point_coordinates"]).to eq([40,450])
 
 
-										else
+									else
 
-											expect(rq.location_information[:within_radius]).to eq(20)
+										expect(rq.location_information["within_radius"]).to eq(20)
 
-											expect(rq.location_information[:location_point_coordinates]).to eq([10,20])
+										expect(rq.location_information["location_point_coordinates"]).to eq([10,20])
 
-										end	
+									end	
 
-									}
+								} 
 
-								}
-							end
+							}
 						end
-
-
-					end
-
-				end
-
-
-				context " -- transferring time information -- " do 
-
-				end	
-
-
-				context " -- location information transfer overrides -- " do 
-
-					it " -- cart item information overrides native step information -- " do 
-
-
-					end
-
-					it " -- prev step, overrides present step information -- " do 
-
-					end
-
-					it " -- first step, picks up information from last step of previous sop ?  --  " do 
-
 					end
 
 				end
@@ -603,33 +479,24 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						expect(assembly.save).to be_truthy
 
 						## so now what.
-
 						options = {}
-						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-						search_sop_event = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_event).not_to be_blank
-						create_order_events = search_sop_event.first.process
-						expect(create_order_events.size).to eq(4)
-						
-						## now get the steps and check that all of them have the damn location information set on them.
-
-						create_order_events.each do |crod|
-
-							schedule_order_events = crod.process
-							
-							schedule_order_events.each do |sch|
-								
-								next_event = sch.process.first
-								
-								next_event.arguments[:steps].each_with_index {|step,index|
-									
-									expect(step.resolved_location_id).not_to be_nil
-
-								}
+						options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+						search_sop_events = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_events.size).to eq(1)
+						create_order_events = search_sop_events.first.process
+						expect(create_order_events.size).to eq(1)
+						schedule_sop_events = create_order_events.first.process
+						expect(schedule_sop_events.size).to eq(1)
+						after_schedule_sop = schedule_sop_events.first.process
+						expect(after_schedule_sop.size).to eq(1)
+						after_schedule_sop = after_schedule_sop.first
+						sops = JSON.parse(after_schedule_sop.arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+						sops.each do |sop|
+							sop.steps.each do |step|
+								expect(step.resolved_location_id).not_to be_blank
 							end
 						end
-
+	
 					end
 
 					it " -- resolves location provieded location coordinates and within radius -- ", :resolve_coords do 
@@ -732,31 +599,22 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						## so now what.
 
 						options = {}
-						options[:product_ids] = cart_items.map{|c| c = c.product_id.to_s}
-						options[:cart_item_ids] = cart_items.map{|c| c = c.id.to_s}
-						search_sop_event = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_event).not_to be_blank
-						create_order_events = search_sop_event.first.process
-						expect(create_order_events.size).to eq(4)
-						
-						## now get the steps and check that all of them have the damn location information set on them.
-
-						create_order_events.each do |crod|
-
-							schedule_order_events = crod.process
-							
-							schedule_order_events.each do |sch|
-								
-								next_event = sch.process.first
-								
-								next_event.arguments[:steps].each_with_index {|step,index|
-									
-									expect(step.resolved_location_id).not_to be_nil
-
-								}
+						options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+						search_sop_events = assembly.clone_to_add_cart_items(options)
+						expect(search_sop_events.size).to eq(1)
+						create_order_events = search_sop_events.first.process
+						expect(create_order_events.size).to eq(1)
+						schedule_sop_events = create_order_events.first.process
+						expect(schedule_sop_events.size).to eq(1)
+						after_schedule_sop = schedule_sop_events.first.process
+						expect(after_schedule_sop.size).to eq(1)
+						after_schedule_sop = after_schedule_sop.first
+						sops = JSON.parse(after_schedule_sop.arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+						sops.each do |sop|
+							sop.steps.each do |step|
+								expect(step.resolved_location_id).not_to be_blank
 							end
 						end
-
 
 					end
 
@@ -842,47 +700,6 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 					end
 
 				end	
-
-				context " -- after one step is resolved, can use that in the next step -- " do 
-
-				end
-
-
-				context " -- build query -- " do 
-
-				end
-
-
-				context " -- do schedule update -- " do 
-
-				end
-
-
-				context " -- case scenarios -- " do 
-
-					context " -- stool collection scenario -- " do 
-
-					end
-
-					context " -- t3,t4,tsh scenario -- " do 
-
-					end
-
-					context " -- dsdNa to metropolis scenario -- " do 
-
-					end
-
-
-					context " -- 24 hr urine for protein scenario -- " do 
-
-					end
-
-
-					context " -- stool + 24 hr urine scenario -- " do 
-
-					end
-
-				end
 
 		 	end
 			

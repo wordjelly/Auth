@@ -155,7 +155,9 @@ class Auth::Workflow::Step
 	## this should only be done if time and locatino are to be enforced, for a particular step.
 	## but at this stage, let the merging happen.
 	def modify_tlocation_conditions_for_each_product(order,stage_index,sop_index,step_index)
-			
+		
+		self.location_information.deep_symbolize_keys!
+		self.time_information.deep_symbolize_keys!
 		#puts "stage index :#{stage_index}"
 		#puts "sop index : #{sop_index}"
 		#puts "step index: #{step_index}"
@@ -188,11 +190,11 @@ class Auth::Workflow::Step
 					
 					requirement_location_information = first_cart_item.location_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}:requirements:#{key}"]
 						
-					requirement.location_information = requirement.location_information.merge(requirement_location_information) if !requirement_location_information.blank?
+					requirement.location_information = requirement.location_information.deep_symbolize_keys.merge(requirement_location_information) if !requirement_location_information.blank?
 
 					requirement_time_information = first_cart_item.time_information["stages:#{stage_index}:sops:#{sop_index}:steps:#{step_index}:requirements:#{key}"]
 					
-					requirement.time_information = requirement.time_information.merge(requirement_time_information) if !requirement_time_information.blank?
+					requirement.time_information = requirement.time_information.deep_symbolize_keys.merge(requirement_time_information) if !requirement_time_information.blank?
 
 
 				end

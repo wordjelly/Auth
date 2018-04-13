@@ -1039,19 +1039,21 @@ class Auth::Workflow::Assembly
   ############################################################
   ## @return[Array] of event objects.
   ## @params[Hash] options : 
-  ## expected to contain a key called product_ids.
-  ## expected to contain another key called cart_item_ids.
-  ## (arguments[:assembly_id].blank? || arguments[:stage_id].blank? || arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:cart_item_ids].blank? || arguments[:assembly_doc_version].blank? || arguments[:stage_doc_version].blank? || arguments[:sop_doc_version].blank?)
+  ## one key is expected : 'order' => this will be the order object serialized.
   def clone_to_add_cart_items(options)
+   
     return nil unless self.master
-    return nil if (options[:cart_item_ids].blank? || options[:product_ids].blank?)
+    return nil if (options[:order].blank?)
     new_assembly = self.clone
     new_assembly.master = false
     if new_assembly && new_assembly.save
       resulting_event = Auth::Transaction::Event.new
       resulting_event.object_class = Auth.configuration.sop_class
       resulting_event.method_to_call = "find_applicable_sops"
-      resulting_event.arguments = options.merge({:assembly_id => new_assembly.id.to_s})
+      order = Auth.configuration.order_class.constantize.new(JSON.parse(options[:order]))
+      order.assembly_id = new_assembly.id.to_s
+      order.assembly_doc_version = new_assembly.doc_version
+      resulting_event.arguments = {:order => order.to_json(:methods => [:assembly_id,:assembly_doc_version])}
       return [resulting_event]
     end
 
@@ -1059,40 +1061,67 @@ class Auth::Workflow::Assembly
 
   end
 
-  ## wrapper method, to call the create_order on the sop.
-  def create_order_in_sop(arguments)
-    ## the arguments will contain all the details about which sop we have to create the order in.
-  
-    return nil if (arguments[:stage_index].blank? || arguments[:sop_index].blank?)
+  ###############################################################
+  ##
+  ##
+  ## there is no wrapper method for find_applicable_sops, because that event calls a class method on sop, so it can be called directly.
+  ##
+  ##
+  ###############################################################
 
-  
 
-    sop = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]]
+  def create_order_in_multiple_sops(arguments)  
+    ## the arguments are the sops, and order.
+    return nil if(arguments[:sops].blank? || arguments[:order].blank?)
 
-    sop.create_order(arguments)
+    sops = JSON.parse(arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+    order = Auth.configuration.order_class.constantize.new(JSON.parse(arguments[:order]))
+    
+    assembly_updated = order.create_order_into_all_applicable_sops(sops)
+    return false unless assembly_updated
+    
+    ## get the updated sops only.
+    ## from the assembly.
+    sops.map!{|c| 
+      c = assembly_updated.stages[c.stage_index].sops[c.sop_index]
+    }
+
+
+    e = Auth::Transaction::Event.new
+    e.arguments = {:sops => sops.to_json, :order => order.to_json}
+    e.object_class = Auth.configuration.assembly_class
+    e.method_to_call = "schedule_order"
+    e.object_id = order.assembly_id.to_s
+    return [e]
 
   end
 
-  def sop_schedule_order(arguments={})
+  def schedule_order(arguments={})
 
-    return nil if(arguments[:stage_index].blank? || arguments[:sop_index].blank? )
+    return nil if(arguments[:sops].blank? || arguments[:order].blank?)
+    sops = JSON.parse(arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
+    order = Auth.configuration.order_class.constantize.new(JSON.parse(arguments[:order]))
 
-    sop = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]]
+    sops.each do |sop|
+      sop.schedule_order
+    end
+    
+    e = Auth::Transaction::Event.new
 
-    sop.schedule_order(arguments)
+    
+    e.arguments = {:sops => sops.to_json}
+    e.object_class = Auth.configuration.assembly_class
+    e.method_to_call = "after_schedule_order"
+    e.object_id = order.assembly_id.to_s
+    return [e]
 
   end
 
-  def mark_sop_requirements(arguments={})
-    #puts "arguments in mark sop requirements."
-    #puts JSON.pretty_generate(arguments)
-    return nil if(arguments[:stage_index].blank? || arguments[:sop_index].blank? || arguments[:requirement_index].blank? )
 
-    requirement = self.stages[arguments[:stage_index]].sops[arguments[:sop_index]].steps[arguments[:step_index]].requirements[arguments[:requirement_index]]
-
-    requirement.mark_requirement(arguments)
+  def after_schedule_order(arguments={})
 
   end
+ 
 
 end
 

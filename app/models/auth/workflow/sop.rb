@@ -49,8 +49,17 @@ class Auth::Workflow::Sop
 	## the matches array contains the product ids to which that sop is applicable, out of the product ids supplied.
 	def self.find_applicable_sops(options={})
 		
-		product_ids = options[:product_ids]
-		assembly_id = options[:assembly_id]
+		## instantiate the order object from the serialized hash passed in.
+
+		order = Auth.configuration.order_class.constantize.new(JSON.parse(options[:order]))
+		
+		## we need to get the product ids , given the cart item ids.
+		product_ids = order.cart_item_ids.map{|c|
+			cart_item = Auth.configuration.cart_item_class.constantize.find(c)
+			c = cart_item.product_id
+		}.uniq
+
+		assembly_id = order.assembly_id
 
 		res = Auth.configuration.assembly_class.constantize.collection.aggregate([
 			{
@@ -90,9 +99,9 @@ class Auth::Workflow::Sop
 			      "stages.sops.assembly_doc_version" => "$doc_version",
 			      "stages.sops.stage_doc_version" => "$stages.doc_version",
 			      "stages.sops.stage_id" => "$stages._id",
-			      "stages.sops.sop_doc_version" => "$stages.sops.doc_version",
+			      "stages.sops.doc_version" => "$stages.sops.doc_version",
 			      "stages.sops.assembly_id" => "$_id",
-			      "stages.sops.sop_id" => "$stages.sops._id",
+			      "stages.sops._id" => "$stages.sops._id",
 			      "common_products" => { 
 			      		"$ifNull" =>  [ "$common_products", []]
 			      	}
@@ -142,26 +151,27 @@ class Auth::Workflow::Sop
 
 			applicable_sops = res.first["sops"].map{|sop_hash|
 
+				#puts "sop hash is:"
+				#puts JSON.pretty_generate(sop_hash)
+
 				Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
 			}
 
 			## now emit create_order events.
 			events = []
 
-			puts "the APPLICABLE SOPS ARE:"
-			puts applicable_sops.size
-
-			applicable_sops.each do |sop|
-				options_for_next_event = options.merge(sop.attributes)
-				options_for_next_event.deep_symbolize_keys!
+			## the important thing at this stage will be to add the relevant information on the order.
+			if applicable_sops.size > 0
 				e = Auth::Transaction::Event.new
-				e.arguments = options_for_next_event
+				e.arguments = options.merge({:sops => applicable_sops.to_json})
 				e.object_class = Auth.configuration.assembly_class
-				e.method_to_call = "create_order_in_sop"
-				e.object_id = sop["assembly_id"].to_s
+				e.method_to_call = "create_order_in_multiple_sops"
+				e.object_id = order.assembly_id.to_s
 				events << e
 			end
+
 			events
+
 		rescue => e
 			puts "rescued"
 			puts e.to_s
@@ -421,13 +431,6 @@ class Auth::Workflow::Sop
 
 	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
 	def schedule_order(arguments={})
-		self.stage_index = arguments[:stage_index]
-		self.sop_index = arguments[:sop_index]
-		
-		
-		## will first need to search the schedules to find out what is the latest time for each cart item.
-		## since the schedules will hold that information.
-		## 
 
 		## the duration till the last step of the previous_sop.
 		duration_after_start_in_seconds = 0
@@ -454,6 +457,10 @@ class Auth::Workflow::Sop
 					## transfer the location informatino from the previous step if it does not exist. then resolve the step location to a location id if :resolve is true for the step.
 					step.resolve_location(self.steps[key-1].location_information)
 					step.resolve_time(self.steps[key-1].time_information)
+					#puts "previous step location information:"
+					#puts self.steps[key-1].location_information
+					#puts "did resolve location: and now location information becomes:"
+					#puts step.location_information.to_s
 				else
 					## for the first step we can still resolve the location information.
 					## with either the stuff from the previous sop being passed in or what?
@@ -534,10 +541,10 @@ class Auth::Workflow::Sop
 		## or not ?
 		## for the moment to test, we will have it emit.
 		## the entire sop.
-		e = Auth::Transaction::Event.new
-		e.arguments = {}
-		e.arguments[:steps] = self.steps
-		[e]
+		#e = Auth::Transaction::Event.new
+		#e.arguments = {}
+		#e.arguments[:steps] = self.steps
+		#[e]
 	end
 
 
