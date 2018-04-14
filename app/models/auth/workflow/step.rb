@@ -17,6 +17,8 @@ class Auth::Workflow::Step
 	field :name, type: String
 	field :description, type: String
 
+	validate :duration_or_duration_calculation_function_exists
+
 	##########################################################
 	##
 	##
@@ -203,70 +205,15 @@ class Auth::Workflow::Step
 		end
 
 	end
-	########################################################
-	########################################################
-	 	
-	
+		
+	## if this step is made applicable, it must have either a duration or a duration calculation function.
+	def duration_or_duration_calculation_function_exists
 
-	## now at the time of calculating, the actual schedule hash here are the series of steps.
+		if self.applicable_changed? && self.applicable == true
+			self.errors.add(:duration,"please specify a duration or a duration calculation function") if (self.duration.blank? && self.duration_calculation_function.blank?)
+		end
 
-
-	## take the first step
-	## resolve_requirements_immediately ?
-	## if yes
-		## do the query with the location and time information as modified in the before_schedule_order definition.
-		## execute the custom resolve_requirements by calling (eval)
-		## now proceed to calculate the duration.
-		## if calculate duration expression is provided, then give it all the arguments, from location(which was already modified before), and also the requirement_ids resolved if at all.
-
-	## else
-	## add the requirement category to a hash[A], use the start time form the time hash, and increment the duration counter inside the value of the hash[A] by duratino fo the step.
-
-	## go to the next step.
-	## do same as above.
-	## if the requirement category points to the previous step, just add it to the hash[A] under that category, as long as enforce location is false, if enforce location is new, or it doesnt point to that category, then create a new entry in Hash a, with the new location also added into the value of hash[A] for this new entry.
-
-	########################################################
-
-	## what should be the structure of the location hash?
-	## is it going to carry information about individual requirements.
-	## what kind of location requirements are possible?
-	##
-	##
-	## location_type : hematology_station/collection_center/biochemistry_center
-	## near_point : [lat,lon]
-	## resolve_location : true/false
-	## if there are n machines, then we have to resolve them at this stage or not ?
-	## requirement can also have something called resolve_requirement
-	## so suppose we want to resolve the requirement, then we have a category -> merge that with the location information hash, and find a requirement.
-	## now suppose we had more than one requirement, then ?
-	## does everything in a step happen at the same location information?
-	## because then we can send one query.
-	## near location => x and location_category = [z,q]
-	## so we will have to have location objects.
-	## so these location categories, okay suppose we resolve a nearest location.
-	## now we want to search for machines in the final schedule with that.
-	## there is no other way is there.
-	## so we can search for something on which those requirement categories are registered.
-	## if the requirement doesnt have its own location information, then the step location information is used.
-	## if the requirement has resolve requirement -> then resolve it.
-	## why resolve ? because it is used somewhere in the front.
-	## why resolve_requirement ?
-
-	## suppose we had additioanl requirements with this, then what could we do?
-	## so would you superimpose this on the requiremenets, for the purpose of scheduling, yes of course, would have to do that.
-	## something like machine category x, then we have to immediately resolve.
-	## we take the nearest one.
-	## suppose we have n machines.
-	## then we take which one?
-	## do we make a seperate query for each machine ?
-	## how to superimpose the location requirements?
-	## basically if any subsequent step is dependent on a requirement attribute from a previous step or set of steps, then that previous step has to be resovled first.
-	## so how does this work, exactly.
-	## i think what i'm missing here is dependency management.
-	## eg : step 4 -> requirements => machine => resolved in one.
-	## location => resolved in step 2 
-	## time => 
+	end
 
 
 end

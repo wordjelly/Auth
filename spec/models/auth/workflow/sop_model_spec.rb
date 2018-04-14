@@ -499,7 +499,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 	
 					end
 
-					it " -- resolves location provieded location coordinates and within radius -- ", :resolve_coords do 
+					it " -- resolves location provieded location coordinates and within radius and categories -- ", :resolve_coords do 
 
 						locations = []
 
@@ -634,34 +634,79 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 	
 				end
 
+				context " -- duration and time -- " do 
 
-				context " -- duration -- " do 
+					
+					it " -- either a duration or a duration_calculation_function has to be specified on the step -- ", :step_requires_duration do 
 
-					it " -- calculates the duration using the function provided if there is no fixed duration -- " do 
+						step = Auth::Workflow::Step.new
+						step.applicable = true
+						sop = Auth::Workflow::Sop.new
+						sop.steps << step
+						stage = Auth::Workflow::Stage.new
+						stage.sops << sop
+						a = Auth::Workflow::Assembly.new
+						a.stages << stage
+						expect(a.save).not_to be_truthy
+						expect(a.stages.first.sops.first.steps.first.valid?).not_to be_truthy
+					end
+
+					it " -- while starting the sop, it gathers the last known start-end time range for every cart item -- " do 
 
 					end
 
-					context " -- single sop -- " do 
+					it " -- DURING RESOLVE STEP -- first its duration is calculated, then -> if a step has a start time range, then it is left untouched, if not, then its duration is added to the start_time range of either the previous step or the from the sop info hash -- " do 
 
-						it " -- a duration is defined on each step, and start time and end time is defined only on the first step  -- " do 
 
-							## now how does it set the start_time and end_time of each step?
-							## but usually you won't define a start time and an end_time
-							## it will define a start_time range.
-							## and a duration.
-							## or that duration will have to be calculated.
-							## what about the end_time.
-							## that is not necessary to provide at all actually.
-							## we just need a duration calculation function, and a start_time_range.
-							## 
+					end
+
+	
+					context " -- requirement -- " do 
+
+
+						it " -- requirement just directly takes the steps time information and duration -- " do 
+
 
 						end
+
+						context " -- requirement has a reference requirement address " do 
+
+							it " -- the start time and end time are added to that requirement's time information, if they are continuous, otherwise, as an array of arrays -- " do 
+
+
+							end
+
+
+
+						end
+
+
+
 
 					end
 
 				end
 
+				context " -- hash of end time for each cart item -- " do 
 
+				end
+
+
+				context " -- query builder -- " do 
+
+
+
+				end
+
+
+				context " -- updater -- " do 
+
+					it " -- iterates the results in ascending order of their start time ranges -- " do 
+
+					end
+
+				end
+				
 				context " -- location queries -- ", :location_queries => true do 
 
 					it " -- given 20 location objects, finds the nearest one given a spherical distance -- " do 
