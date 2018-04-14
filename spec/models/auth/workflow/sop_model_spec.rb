@@ -651,9 +651,19 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						expect(a.stages.first.sops.first.steps.first.valid?).not_to be_truthy
 					end
 
-					it " -- while starting the sop, it gathers the last known start-end time range for every cart item -- " do 
+					it " -- assembly schedule sop function, has a hash with the latest time range for every cart item,and that is updated after every step --  " do 
+
+
 
 					end
+
+					it " -- while starting the sop, it gathers the last known start-end time range for every cart item -- " do 
+
+
+
+					end
+
+					
 
 					it " -- DURING RESOLVE STEP -- first its duration is calculated, then -> if a step has a start time range, then it is left untouched, if not, then its duration is added to the start_time range of either the previous step or the from the sop info hash -- " do 
 

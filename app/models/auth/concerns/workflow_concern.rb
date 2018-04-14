@@ -11,11 +11,14 @@ module Auth::Concerns::WorkflowConcern
     field :resolve, type: Boolean, default: false
 
 
-    ## must have a start_time and an end_time
-    ## or these will have to be calculated.
-    ## start_time is the 
-    ## dont specify these in the time information, if you want it to just continue relative to the first step.
-    ## this should be added to the requirement during the resolve phse.
+    ## three keys are possible
+    ## :duration -> time in seconds of this thing.
+    ## :start_time_range -> the absolute time in epoch when this thing can start ([from,to])
+    ## :end_time_range -> the absolute time in epoch when this thing can end ([from,to])
+    ## :start_time_specification -> 
+    ## eg : [[year,month,day,range_beginning,range_ending]..]
+    ## eg : [[*,2,*,seconds_since_12_am,seconds_since_12_am],[]] : star means all values are permitted for that unit. and 2.30 -> 4.30 is the allowed time for this thing.  
+    ## :minimum_time_after_previous_step -> number of seconds after previous step's end_time that this thing can start. These many seconds have to elapse.
     field :time_information, type: Hash, default: {}
 
     field :location_information, type: Hash, default: {}
@@ -148,22 +151,54 @@ module Auth::Concerns::WorkflowConcern
 
     end
 
-    ### @param[Hash] location_information : provided location_information to merge in case the present location information is deemed to be insufficient.
-    ## @param[Hash] time_information : provided time_information to merge in case the present time information is deemed to be insufficient.
-    ## @param[String] resolved_location_id : the resolved_location_id of the present step.
-    ## @param[Integer] resolved_time : the resolved_time of the present_step
-    ## will merge the time information for start time and end time from the previous step in case these are not defined on the present step.
-    ## will then set the resolved_time as the one that was provided in the incoming time information.
-    def resolve_time(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
+    ## should set a start_time_range and an end_time_range on the time_information hash.
+    ## this will be passed on to all the requirements in the step,that are schedulable.
+    ## what can be passed into this?
+    ## suppose this step has defined only a duration.
+    ## suppose it has a start_time_range and a duration.
+    ## suppose it has a start_time_range + time since previous step + duration
+    ## first of all -> if it has a start time range, then it has to define the time since previous step.
+    ## otherwise it is meaningless.
+    ## if it does not have a start time range it can still mention the time since the previous step.
+    ## and the duration.
+    ## and both these things can so incoming in that case will be the start_time from a previous step.
+    ## so what it will do is check against that.
+    ## so won't all this be an absolute (like in terms, yes.)
+    def resolve_time(previous_step_time_information)
 
-      self.time_information.merge(time_information) if (self.time_information[:start_time].blank? || self.time_information[:resolved_time].blank?) 
+    
+      if self.time_information[:start_time_specification]
+        
+        return unless self.time_information[:minimum_time_since_previous_step]        
+        
+        if previous_step_time_information
 
+          time_range_based_on_previous_step = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
+            
+          st_time = Time.at(time_range_based_on_previous_step[0])
+          en_time = Time.at(time_range_based_on_previous_step[1])
 
-      return unless self.resolve
-      
-      
-      self.resolved_time = self.time_information[:resolved_time] || resolved_time
+          st_time_format = st_time.strftime('%Y %B %A %H %M').split(" ")
+          en_time_format = en_time.strftime('%Y %B %A %H %M').split(" ")
 
+          ## now check if this time, is  
+
+        else
+
+          ## what is the closest moment to the current time to the time specification ?
+          ## for eg if specification si any thursday in any year, but in november 
+          ## the basically plug in the variables of the current year, whereever there is star and convert the rest into epoch and you will get the start_time and end_time. for the start.
+          ## to that add the current step duration to get the end_time_range.
+
+        end
+        
+      else
+        ## if it has a time since previous step.
+        ## just add the time since previous step to the previous step end_time -> to get the current step start_time.
+        ## and then add the step duration to the current_step start_time to get its end_time.
+      end  
+
+  
     end
 
 

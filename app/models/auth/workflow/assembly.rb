@@ -1102,8 +1102,10 @@ class Auth::Workflow::Assembly
     sops = JSON.parse(arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
     order = Auth.configuration.order_class.constantize.new(JSON.parse(arguments[:order]))
 
+    cart_item_latest_start_time = {}
+
     sops.each do |sop|
-      sop.schedule_order
+      cart_item_latest_start_time = sop.schedule_order(cart_item_latest_start_time)
     end
     
     e = Auth::Transaction::Event.new

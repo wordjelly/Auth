@@ -410,27 +410,35 @@ class Auth::Workflow::Sop
 
 	end
 
-	## finds the latests schedule that has been created, which contains at least one cart item from the order.
-	## returns either nil or the latest schedule.
-	def find_latest_schedule_for_order	
-		
-		schedules = Auth.configuration.schedule_class.constantize.where({
-			"$and" => [		
-				{
-					"cart_item_ids" => {
-						"$in" => self.orders.last.cart_item_ids
-					}
-				}
-			]
-		}).order_by(:sop_end_time => 'desc')
-		
-		return schedules.first if schedules.size > 0 
-		return nil
+	## iterates the cart_items in the last order of this sop, and sees which of them has the latest start time from the provided hash.
+	## @param[Hash] cart_item_latest_time : 
+	## structure : cart_item_id => [start_time_range_beginning,start_time_range_end]
+	## returns the latest start time of all the cart_items
+	## @return[Array] : the maximum time range out of all the cart items.
+	## @example : 
+	## {"aba412sfda" => [10,20], "abc12312klak" => [5,40], "arrt223jlka" => [20,30]}
+	## will rerturn [20,30]
+	def last_time_slot_applicable_to_present_cart_items(cart_item_latest_time)
+
+		latest_start = nil
+		cart_item_latest_time.keys.each do |c_id|
+			if self.orders.last.cart_item_ids.include? c_id
+				latest_start = cart_item_latest_time[c_id] if (latest_start.blank? || latest_start[0] < cart_item_latest_time[c_id][0])
+			end
+		end
+
+		return latest_start
 	end
 	
 
-	## @params[Hash] arguments : this event is triggered from the mark_requirement when the last requirement for this sop is marked.
-	def schedule_order(arguments={})
+	## 
+	def schedule_order(cart_item_latest_time)
+
+		latest_time_slot = last_time_slot_applicable_to_present_cart_items(cart_item_latest_time)
+
+		## it may be returned as nil , and in that case, we cannot use it to modulate the latest time.
+
+		## similarly this cart_item_latest_time has to be updated, for all the cart items, one step at a time.
 
 		## the duration till the last step of the previous_sop.
 		duration_after_start_in_seconds = 0
@@ -454,19 +462,16 @@ class Auth::Workflow::Sop
 
 				
 				if key > 0
-					## transfer the location informatino from the previous step if it does not exist. then resolve the step location to a location id if :resolve is true for the step.
 					step.resolve_location(self.steps[key-1].location_information)
 					step.resolve_time(self.steps[key-1].time_information)
-					#puts "previous step location information:"
-					#puts self.steps[key-1].location_information
-					#puts "did resolve location: and now location information becomes:"
-					#puts step.location_information.to_s
-				else
-					## for the first step we can still resolve the location information.
-					## with either the stuff from the previous sop being passed in or what?
-					## this is a big question.
-					## 
+				else 
 					step.resolve_location
+					
+					## now if we have to resolve this
+					## there are three possibilties
+					## when we resolve time, what do we want to get as the output?
+					## a start time range, and an end time range.
+					## so let me write that in the def.
 					step.resolve_time
 				end
 
