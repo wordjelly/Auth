@@ -16,8 +16,8 @@ module Auth::Concerns::WorkflowConcern
     ## :start_time_range -> the absolute time in epoch when this thing can start ([from,to])
     ## :end_time_range -> the absolute time in epoch when this thing can end ([from,to])
     ## :start_time_specification -> 
-    ## eg : [[year,month,day,range_beginning,range_ending]..]
-    ## eg : [[*,2,*,seconds_since_12_am,seconds_since_12_am],[]] : star means all values are permitted for that unit. and 2.30 -> 4.30 is the allowed time for this thing.  
+    ## eg : [[year,month,weekday,range_beginning,range_ending]..]
+    ## eg : [[*,2,*,seconds_since_12_am,seconds_since_start]] : star means all values are permitted for that unit. and 2.30 -> 4.30 is the allowed time for this thing.  
     ## :minimum_time_after_previous_step -> number of seconds after previous step's end_time that this thing can start. These many seconds have to elapse.
     field :time_information, type: Hash, default: {}
 
@@ -174,28 +174,80 @@ module Auth::Concerns::WorkflowConcern
         if previous_step_time_information
 
           time_range_based_on_previous_step = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
+          
+          range_size_in_seconds = time_range_based_on_previous_step[1] - time_range_based_on_previous_step[0]
+          
+          start_time = Time.at(time_range_based_on_previous_step[0])
+          
+          start_time_day_beginning = start_time.beginning_of_day 
+
+          start_time_as_strftime = start_time.strftime('%Y %-m %w').split("\s")
+
+          start_time_as_strftime << start_time -start_time_day_beginning
+
+          start_time_as_strftime << range_size_in_seconds
             
-          st_time = Time.at(time_range_based_on_previous_step[0])
-          en_time = Time.at(time_range_based_on_previous_step[1])
+          ## now which condition does it satisfy.
+          
+          self.time_information[:start_time_specification].each_with_index {|spec,key|
+            matched = true
+            spec[0..2].each_with_index{|unit,u_key|
+              if unit=~/\*/
 
-          st_time_format = st_time.strftime('%Y %B %A %H %M').split(" ")
-          en_time_format = en_time.strftime('%Y %B %A %H %M').split(" ")
+              else
+                matched = false if unit != start_time_as_strftime[u_key]
+              end
+            }
+            break if matched == true
+          }
 
-          ## now check if this time, is  
+          self.time_information[:start_time_range] = time_range_based_on_previous_step
+
+          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
 
         else
+          
+          final_specificatin = self.time_information[:start_time_specification].map do |specification|
 
-          ## what is the closest moment to the current time to the time specification ?
-          ## for eg if specification si any thursday in any year, but in november 
-          ## the basically plug in the variables of the current year, whereever there is star and convert the rest into epoch and you will get the start_time and end_time. for the start.
-          ## to that add the current step duration to get the end_time_range.
+           
+            t = Time.now
+            year = t.strftime("%Y")
+            month = t.strftime("%-m")
+            day_of_week = t.strftime("%w")
 
+            ## this gives the combined year,month,day.
+            ymd = specification[0..2].map.each_with_index{|value,key|
+              value.gsub!(/\*/) { |match| 
+                  if key == 0
+                    match = year
+                  elsif key == 1
+                    match = month
+                  elsif key == 2
+                    match = day_of_week
+                  end
+              }
+              value
+            }
+
+            ## so given a time instance.
+
+            ## now we have to get the epoch of this day.
+            t = DateTime.strptime(ymd.join(" "), '%Y-%-m-%w')
+
+            ## now we have to add to this the number of seconds as start range.
+            t = t + specification[3]
+
+
+            self.time_information[:start_time_range] = [t.to_i,t.to_i + specification[4]]
+
+            self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
+
+          end
         end
         
       else
-        ## if it has a time since previous step.
-        ## just add the time since previous step to the previous step end_time -> to get the current step start_time.
-        ## and then add the step duration to the current_step start_time to get its end_time.
+        self.time_information[:start_time_range] = previous_step_time_information[:end_time_range].map{|c| c = c + previous_step_time_information[:minimum_time_since_previous_step]}
+        self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
       end  
 
   
