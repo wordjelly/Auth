@@ -411,145 +411,108 @@ class Auth::Workflow::Sop
 	end
 
 	## iterates the cart_items in the last order of this sop, and sees which of them has the latest start time from the provided hash.
-	## @param[Hash] cart_item_latest_time : 
-	## structure : cart_item_id => [start_time_range_beginning,start_time_range_end]
-	## returns the latest start time of all the cart_items
-	## @return[Array] : the maximum time range out of all the cart items.
-	## @example : 
-	## {"aba412sfda" => [10,20], "abc12312klak" => [5,40], "arrt223jlka" => [20,30]}
-	## will rerturn [20,30]
-	def last_time_slot_applicable_to_present_cart_items(cart_item_latest_time)
+	## @param[Hash] cart_items_latest_time : 
+	## structure : 
+	## 
+	##
+	## cart_item_id => {:start_time_range => [], :end_time_range => []}
+	## 
+	## 
+	##
+	## @return[Hash] : a hash with just one cart item entry in it.
 
-		latest_start = nil
-		cart_item_latest_time.keys.each do |c_id|
+	def last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
+
+		latest_end = {}
+		cart_items_latest_time.keys.each do |c_id|
 			if self.orders.last.cart_item_ids.include? c_id
-				latest_start = cart_item_latest_time[c_id] if (latest_start.blank? || latest_start[0] < cart_item_latest_time[c_id][0])
+
+				latest_end[c_id] = cart_items_latest_time[c_id] if (latest_end.empty? || (cart_items_latest_time[c_id][:end_time_range][1] > latest_end[c_id][:end_time_range][1]))
+
 			end
 		end
 
-		return latest_start
+		return latest_end
 	end
-	
 
-	## 
-	def schedule_order(cart_item_latest_time)
+	## @param[Auth::Workflow::Step] last_step : the last step in the sop.
+	## @param[Hash] cart_items_latest_time : the hash of latest time information for each cart_item, passed in from the assembly#schedule_sop_order
+	## @return[Hash] cart_items_latest_time : will update the 
 
-		latest_time_slot = last_time_slot_applicable_to_present_cart_items(cart_item_latest_time)
+	def update_cart_items_latest_time(last_step,cart_items_latest_time)
 
-		## it may be returned as nil , and in that case, we cannot use it to modulate the latest time.
+		cart_items_latest_time.keys.each do |c_id|
+			if self.orders.last.cart_item_ids.include? c_id
+				cart_items_latest_time[c_id][:start_time_range] = last_step.time_information[:start_time_range]
+				cart_items_latest_time[c_id][:end_time_range] = last_step.time_information[:end_time_range]
+			end
+		end		
 
-		## similarly this cart_item_latest_time has to be updated, for all the cart items, one step at a time.
+		cart_items_latest_time
 
-		## the duration till the last step of the previous_sop.
-		duration_after_start_in_seconds = 0
-
-		step_counter = 0
-
-		requirement_hash_to_schedule = {}
+	end
 
 
-		## in order to get the stage_index, sop_index, we will have to perform an aggregation, and get those values.
+	def schedule_order(cart_items_latest_time, requirement_query_hash)
+
+		latest_ending_cart_item = last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
+
+
 		self.steps.each_with_index{|step,key|
 
-			if step.applicable
+			next unless step.applicable
 				
-				step.step_index = key
-				step.stage_index = self.stage_index
-				step.sop_index = self.sop_index
-				
-				## transfer the location requirements from the product to the step.
-				step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
+			step.step_index = key
+			step.stage_index = self.stage_index
+			step.sop_index = self.sop_index
+		
+			step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
-				
-				if key > 0
-					step.resolve_location(self.steps[key-1].location_information)
-					step.resolve_time(self.steps[key-1].time_information)
-				else 
-					step.resolve_location
-					
-					## now if we have to resolve this
-					## there are three possibilties
-					## when we resolve time, what do we want to get as the output?
-					## a start time range, and an end time range.
-					## so let me write that in the def.
-					step.resolve_time
-				end
-
-				step.requirements.each_with_index{|req,req_key|
-
-					if req.applicable && req.schedulable
-						
-						## will first assign the steps location information to the requirement, and then resolve the requirement_location.
-						
-						
-						req.resolve_location(self.steps[key].location_information,self.steps[key].time_information,self.steps[key].resolved_location_id,self.steps[key].resolved_time)
-
-						## will first assign the steps time information to the requirement, and then resolve the requirement_time.
-						req.resolve_time(self.steps[key].location_information,self.steps[key].time_information,self.steps[key].resolved_location_id,self.steps[key].resolved_time)
-						
-
-					end
-
-				}
-				
-				## now calculates the steps duration.
-
-				step.calculate_duration
-
-				## will add this duration to the duration_after_start.
-				## the problem here is that we need to know at what time the previous sop ends.
-				## the last step of the previous sop
-				## and that needs to be transferred to this schedule order.
-
-				duration_after_start_in_seconds += (step.calculated_duration || step.duration)
-				
-
-				step.requirements.each_with_index{|req,req_key|
-
-					if req.applicable && req.schedulable
-				
-=begin		
-						## adds the duration since the first step to the start_time and end_time of the requirement.
-						
-						req.add_duration_since_first_step(duration_after_start_in_seconds)
-
-						## adds the step duration to the end_time.
-						
-						req.add_duration_from_step(self.calculated_duration || self.duration)
-							
-						## will create a new entry in the query hash for this requirement, or will add this requirement to a reference requirement, if the parameter :follow_reference_requirement is true.
-						## basically it means that this requirmenet is continuing across multiple steps.
-						## so we just add to the duration of the previous step from where it was required.
-
-						req.add_to_query_hash(stage_index,sop_index,step_index,req_index,requirement_hash_to_schedule,(self.resolve || req.resolve))
-=end						
-					end
-				}
-
-				step_counter += 1
+			step.calculate_duration
+			
+			if key > 0
+				step.resolve_location(self.steps[key-1].location_information)
+				step.resolve_time(self.steps[key-1].time_information)
+			else 
+				step.resolve_location
+				step.resolve_time(latest_ending_cart_item)
 			end
+
+			step.requirements.each_with_index{|req,req_key|
+
+				next unless (req.applicable && req.schedulable)	
+				
+				
+				if req.reference_requirement_address
+						
+
+
+					if existing_entry = requirement_query_hash[req.reference_requirement_address][step.time_information[:start_time_range][0]]
+
+						## for that entry, the new end time, is the end time of the current step.
+						new_hash = {:start_time_range => existing_entry[:start_time_range], :end_time_range => step.time_information[:start_time_range][1]}
+
+						## now set this as the new hash.
+						requirement_query_hash[req.reference_requirement_address][new_hash[end_time_range][1]] = new_hash
+					else
+						requirement_query_hash[req.reference_requirement_address][self.time_information[:end_time_range][1]] = {:start_time_range => self.time_information[:start_time_range], :end_time_range => self.time_information[:end_time_range]}
+
+					end
+
+				else	
+
+					## same shit.
+					requirement_query_hash[req.get_self_address][self.time_information[:end_time_range][1]] = {:start_time_range => self.time_information[:start_time_range], :end_time_range => self.time_information[:end_time_range]}					
+
+				end
+				
+
+			}
+			
 		}
 
-		## now builds the query.
+		return update_cart_items_latest_time(self.steps.last,cart_items_latest_time)		
 
-		query = {"$or" => []}
-
-		requirement_hash_to_schedule.keys.each do |requirement_address|
-
-			req = requirement_hash_to_schedule[requirement_address]
-
-			req.build_query(query)
-
-		end
-
-		## here we want have this emit another event ?
-		## or not ?
-		## for the moment to test, we will have it emit.
-		## the entire sop.
-		#e = Auth::Transaction::Event.new
-		#e.arguments = {}
-		#e.arguments[:steps] = self.steps
-		#[e]
 	end
 
 

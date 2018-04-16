@@ -151,30 +151,17 @@ module Auth::Concerns::WorkflowConcern
 
     end
 
-    ## should set a start_time_range and an end_time_range on the time_information hash.
-    ## this will be passed on to all the requirements in the step,that are schedulable.
-    ## what can be passed into this?
-    ## suppose this step has defined only a duration.
-    ## suppose it has a start_time_range and a duration.
-    ## suppose it has a start_time_range + time since previous step + duration
-    ## first of all -> if it has a start time range, then it has to define the time since previous step.
-    ## otherwise it is meaningless.
-    ## if it does not have a start time range it can still mention the time since the previous step.
-    ## and the duration.
-    ## and both these things can so incoming in that case will be the start_time from a previous step.
-    ## so what it will do is check against that.
-    ## so won't all this be an absolute (like in terms, yes.)
+    
     def resolve_time(previous_step_time_information)
 
-    
+
       if self.time_information[:start_time_specification]
         
-        return unless self.time_information[:minimum_time_since_previous_step]        
-        
+        raise("minimum time since previous step is absent") unless self.time_information[:minimum_time_since_previous_step]        
         if previous_step_time_information
 
           time_range_based_on_previous_step = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
-          
+
           range_size_in_seconds = time_range_based_on_previous_step[1] - time_range_based_on_previous_step[0]
           
           start_time = Time.at(time_range_based_on_previous_step[0])
@@ -186,68 +173,79 @@ module Auth::Concerns::WorkflowConcern
           start_time_as_strftime << start_time -start_time_day_beginning
 
           start_time_as_strftime << range_size_in_seconds
-            
-          ## now which condition does it satisfy.
-          
+
+          matched = true
+
           self.time_information[:start_time_specification].each_with_index {|spec,key|
-            matched = true
+            
             spec[0..2].each_with_index{|unit,u_key|
+              
               if unit=~/\*/
 
               else
                 matched = false if unit != start_time_as_strftime[u_key]
               end
             }
-            break if matched == true
+
+            ## at this stage if matched is true, then check the fourth and the fifth argument 
+            next if matched == false
+
+            matched = false unless ((spec[3].to_i < start_time_as_strftime[3].to_i) && (start_time_as_strftime[3].to_i < start_time_as_strftime[4].to_i) && (start_time_as_strftime[4].to_i < spec[4].to_i))
+            
           }
+
+          raise "does not satisfy the start time specification" if matched == false
 
           self.time_information[:start_time_range] = time_range_based_on_previous_step
 
-          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
+          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
 
         else
-          
-          final_specificatin = self.time_information[:start_time_specification].map do |specification|
+            
+          ## we consider the earliest specification.
+          specification = self.time_information[:start_time_specification][0]
+   
+          t = Time.now
+          year = t.strftime("%Y")
+          month = t.strftime("%-m")
+          day_of_week = t.strftime("%w")
 
-           
-            t = Time.now
-            year = t.strftime("%Y")
-            month = t.strftime("%-m")
-            day_of_week = t.strftime("%w")
-
-            ## this gives the combined year,month,day.
-            ymd = specification[0..2].map.each_with_index{|value,key|
-              value.gsub!(/\*/) { |match| 
-                  if key == 0
-                    match = year
-                  elsif key == 1
-                    match = month
-                  elsif key == 2
-                    match = day_of_week
-                  end
-              }
-              value
+          ## replace all the stars in the first three things in the specification , with the relevant unit from the current time.
+          ## eg. if year is * then replace it with the current year.
+          ymd = specification[0..2].map.each_with_index{|value,key|
+            value.gsub!(/\*/) { |match| 
+                if key == 0
+                  match = year
+                elsif key == 1
+                  match = month
+                elsif key == 2
+                  match = day_of_week
+                end
             }
+            value
+          }
 
-            ## so given a time instance.
-
-            ## now we have to get the epoch of this day.
-            t = DateTime.strptime(ymd.join(" "), '%Y-%-m-%w')
-
-            ## now we have to add to this the number of seconds as start range.
-            t = t + specification[3]
+          
+          ## now convert this into a datetime.
+          puts "ymd joint : #{ymd.join(' ')}"
+          t = DateTime.strptime(ymd.join(" "), '%Y %m %w')
 
 
-            self.time_information[:start_time_range] = [t.to_i,t.to_i + specification[4]]
+          ## add the seconds since the beginning of the day to this.
+          t = t + specification[3].to_i
 
-            self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
+          ## the start time range becomes the time + the seconds to be added onto it, as defined in the specification.
+          self.time_information[:start_time_range] = [t.to_i,t.to_i + specification[4].to_i]
 
-          end
+          ## and the end_time_range becomes as usual the start_time _+ the duration.
+          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
+
         end
         
       else
-        self.time_information[:start_time_range] = previous_step_time_information[:end_time_range].map{|c| c = c + previous_step_time_information[:minimum_time_since_previous_step]}
-        self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.time_information[:duration]}
+        raise "previous step time information absent" unless (previous_step_time_information && previous_step_time_information[:start_time_range])
+        self.time_information[:start_time_range] = previous_step_time_information[:end_time_range]
+        self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
       end  
 
   

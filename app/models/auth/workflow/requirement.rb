@@ -11,6 +11,8 @@ class Auth::Workflow::Requirement
     ## eg: stages.1.sops.2.steps.4.requirements.4
     field :reference_requirement_address, type: String
 
+
+
     ## if true will not create a new entry in the schedule query hash for this requirement.
     ## otherwise will create.
     field :follow_reference_requirement, type: Boolean, default: false
@@ -128,6 +130,13 @@ class Auth::Workflow::Requirement
       return model
 
     end
+
+    ## @param[Integer] index : the index of the requirment inside the step.
+    ## @return[String] address : something like : "stages:0:sops:1:steps:2:requirements:3"
+    def get_self_address(index)
+      "stages:#{self.stage_index}:sops:#{self.sop_index}:steps:#{self.step_index}:requirements:#{index}"
+    end
+
 
     def calculate_required_states(order)
       states.each do |state|
