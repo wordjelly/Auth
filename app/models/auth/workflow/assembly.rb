@@ -1095,7 +1095,7 @@ class Auth::Workflow::Assembly
 
     e = Auth::Transaction::Event.new
     e.arguments = {:sops => new_sops.to_json(:methods => [:sop_index,:stage_index]), :order => order.to_json}
-    puts e.arguments.to_s
+    #puts e.arguments.to_s
     e.object_class = Auth.configuration.assembly_class
     e.method_to_call = "schedule_order"
     e.object_id = order.assembly_id.to_s

@@ -1,0 +1,565 @@
+{
+	"applicable" : true,
+	"master" : true,
+	"stages" : [
+		{
+			"applicable" : true,
+			"sops" : [
+				{
+					"applicable_to_product_ids" : [],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : ["1","2"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"time_information" : {
+								"start_time_specification" : [["*","*","4","0","86300"]],
+								"minimum_time_since_previous_step" : 0
+							},
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : [],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"applicable" : true,
+			"sops" : [
+				{
+					"applicable_to_product_ids" : [],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : [],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : ["1","2"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"applicable" : true,
+			"sops" : [
+				{
+					"applicable_to_product_ids" : ["1"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : ["2"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				},
+				{
+					"applicable_to_product_ids" : [],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						},
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								},
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

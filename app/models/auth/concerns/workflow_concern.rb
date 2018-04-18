@@ -43,6 +43,8 @@ module Auth::Concerns::WorkflowConcern
     ## @param[Array] location_categories : 
     def generate_location_query(location_coordinates,within_radius,location_categories=nil)
       
+      #puts "the location coordinates are:"
+      #puts location_coordinates.to_s
 
       point = Mongoid::Geospatial::Point.new(location_coordinates[:lng],location_coordinates[:lat])
 

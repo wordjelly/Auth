@@ -77,17 +77,77 @@ module RequirementQueryHashSupport
     return assembly
   end
 
+  
+  def build_and_save_products(n,admin)
+    products = []
+    n.times do |t|
+      product = Auth.configuration.product_class.constantize.new(price: 300, resource_id: admin.id.to_s, resource_class: admin.class.name, signed_in_resource: admin)
+       expect(product.save).to be_truthy
+       products << product
+    end 
+    products
+  end
+
+
+  def build_and_save_cart_items(products,user)
+    cart_items = []
+    products.each do |product|
+      c = Auth.configuration.cart_item_class.constantize.new(product_id: product.id.to_s, resource_id: user.id.to_s, resource_class: user.class.name, signed_in_resource: user)
+      
+      expect(c.save).to be_truthy
+      cart_items << c
+    end
+
+    cart_items
+  end
+
+
   def update_assembly_with_products_and_create_cart_items(loaded_assembly,admin,user)
+
     products_to_build = {}
     products_built = {}
+    locations_to_build = {}
+    
     loaded_assembly.stages.each_with_index {|stage,stage_index|
       stage.sops.each_with_index {|sop,sop_index|
         sop.applicable_to_product_ids.each_with_index {|p_id,p_index|
           products_to_build[p_id] = [] unless products_to_build.include? p_id
           products_to_build[p_id] << [stage_index,sop_index,p_index]
         }
+        sop.steps.each_with_index {|step,step_index|
+          if location_id = step.location_information["location_id"]
+            locations_to_build[location_id] = [] unless locations_to_build[location_id]
+            locations_to_build[location_id] << [stage_index,sop_index,step_index] 
+          end
+          ## otherwise if the location information has some latitude and longitued and with our without categories.
+          ## then it can directly create location objects out of it.
+          ## and nothing needs to be replaced in the assembly.
+          ## modulate the lat long slightly.
+          if step.location_information["location_point_coordinates"]
+            lat = step.location_information["location_point_coordinates"]["lat"]
+            lng = step.location_information["location_point_coordinates"]["lng"]
+            location_obj = Auth.configuration.location_class.constantize.new(location: {:lat => lat - 0.01, :lng => lng + 0.01})
+            location_obj.location_categories = step.location_information["location_categories"] if step.location_information["location_categories"]
+
+            #puts "the location obj is:"
+            #puts location_obj.attributes.to_s
+
+            expect(location_obj.save).to be_truthy
+          end
+        }
       }
     }
+
+    
+    locations_to_build.keys.each do |l_id|
+      location = Auth.configuration.location_class.constantize.new(location: {:lat => 10.0, :lng => 15.0}, location_categories: ["hematology_station","biochemistry_station"])
+      expect(location.save).to be_truthy
+      locations_to_build[l_id].each do |address|
+        loaded_assembly.stages[address[0]].sops[address[1]].steps[address[2]]["location_information"]["location_id"] = location.id.to_s
+      end
+    end
+
+
     
     products_to_build.keys.each do |p_id|
       product = Auth.configuration.product_class.constantize.new(price: 300, resource_id: admin.id.to_s, resource_class: admin.class.name, signed_in_resource: admin)
@@ -112,6 +172,7 @@ module RequirementQueryHashSupport
 
   end
 
+
   ## the stops can be the different steps in the pipeline which you want returned.
   ## they have to be the name of the functions called in the pipeline.
   def pipeline(stops,a,cart_items)
@@ -124,25 +185,31 @@ module RequirementQueryHashSupport
 
     search_sop_events = a.clone_to_add_cart_items(options)
     
-    expect(search_sop_events.size).to eq(1)
+    #expect(search_sop_events.size).to eq(1)
 
     pipeline_results[:search_sop_events] = search_sop_events if stops[:search_sop_events]
     
+    return pipeline_results unless search_sop_events.size > 0
+
     create_order_events = search_sop_events.first.process
     
-    expect(create_order_events.size).to eq(1)
+    #expect(create_order_events.size).to eq(1)
 
     pipeline_results[:create_order_events] = create_order_events if stops[:create_order_events]
     
+    return pipeline_results unless create_order_events.size > 0
+
     schedule_sop_events = create_order_events.first.process
     
-    expect(schedule_sop_events.size).to eq(1)
+    #expect(schedule_sop_events.size).to eq(1)
     
     pipeline_results[:schedule_sop_events] = schedule_sop_events if stops[:schedule_sop_events]
 
+    return pipeline_results unless schedule_sop_events.size > 0
+
     after_schedule_sop = schedule_sop_events.first.process
     
-    expect(after_schedule_sop.size).to eq(1)
+    #expect(after_schedule_sop.size).to eq(1)
     
     after_schedule_sop = after_schedule_sop.first
     
@@ -152,105 +219,6 @@ module RequirementQueryHashSupport
 
   end
 
-  ## will create an assembly with 
-  ## two stages,
-  ## one sop in each stage
-  ## one step in each sop
-  def setup
-
-    products = {}
-
-    3.times do |n|
-      p = Auth.configuration.product_class.constantize.new
-      p.price = 30
-      p.signed_in_resource = @admin
-      expect(p.save).to be_truthy
-      products[p.id.to_s] = p
-    end
-
-    a = Auth.configuration.assembly_class.constantize.new( applicable: true)
-    
-    stage = Auth.configuration.stage_class.constantize.new( applicable: true)
-    
-    sop = Auth.configuration.sop_class.constantize.new( applicable: true, applicable_to_product_ids: products.keys)
-    
-    step_one = Auth.configuration.step_class.constantize.new(applicable: true, duration: 300)
-
-
-    step_one.time_information[:start_time_specification] = [["*","*","4","0","86300"]]
-
-    step_one.time_information[:minimum_time_since_previous_step] = 0
-
-
-    requirement_for_step_one = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
-
-    step_one.requirements << requirement_for_step_one
-    sop.steps << step_one
-    stage.sops << sop
-    a.stages << stage
-
-
-    stage_two = Auth.configuration.stage_class.constantize.new(applicable: true)
-    
-    sop_two = Auth.configuration.sop_class.constantize.new(applicable: true, applicable_to_product_ids: products.keys)
-
-    step_two = Auth.configuration.step_class.constantize.new(applicable: true, duration: 300)
-
-    requirement_for_step_two = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
-
-    requirement_for_step_two.reference_requirement_address = "stages:0:sops:0:steps:0:requirements:0"
-    
-    step_two.requirements << requirement_for_step_two
-    sop_two.steps << step_two
-    stage_two.sops << sop_two
-    a.stages << stage_two
-    a.master = true
-    a.valid?
-    #puts a.errors.full_messages.to_s
-    expect(a.save).to be_truthy
-
-    ## create some cart items from the products.
-    
-    cart_items = []
-    products.keys.each do |pr|
-      puts pr.to_s
-      
-      cart_item = Auth.configuration.cart_item_class.constantize.new
-      cart_item.product_id = pr
-      cart_item.signed_in_resource = @u
-      cart_item.resource_class = @u.class.name
-      cart_item.resource_id = @u.id.to_s
-      cart_item.valid?
-      puts cart_item.errors.full_messages
-      expect(cart_item.save).to be_truthy
-      cart_items << cart_item
-    end 
-
-    ## now let us first clone the assembly.
-    options = {}
-    options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
-
-    search_sop_events = a.clone_to_add_cart_items(options)
-    
-    expect(search_sop_events.size).to eq(1)
-    
-    
-
-    create_order_events = search_sop_events.first.process
-    
-    expect(create_order_events.size).to eq(1)
-    
-    schedule_sop_events = create_order_events.first.process
-    
-    expect(schedule_sop_events.size).to eq(1)
-    
-    after_schedule_sop = schedule_sop_events.first.process
-    
-    expect(after_schedule_sop.size).to eq(1)
-    
-    after_schedule_sop = after_schedule_sop.first
-
-  end
 
 end
 

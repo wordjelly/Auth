@@ -440,10 +440,10 @@ class Auth::Workflow::Sop
 			greatest_end_time = value unless greatest_end_time
 
 			if greatest_end_time
-				puts "value is:" 
-				puts value.to_s
-				puts "greatest end time is:"
-				puts greatest_end_time.to_s
+				#puts "value is:" 
+				#puts value.to_s
+				#puts "greatest end time is:"
+				#puts greatest_end_time.to_s
 				if value[:end_time_range][1] > greatest_end_time[:end_time_range][1]
 					greatest_end_time = value
 				end
@@ -486,14 +486,14 @@ class Auth::Workflow::Sop
 
 		latest_ending_cart_item = last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
 
-		puts "the latest ending cart item is:"
-		puts latest_ending_cart_item.to_s
+		#puts "the latest ending cart item is:"
+		#puts latest_ending_cart_item.to_s
 
 		self.steps.each_with_index{|step,key|
 
 			next unless step.applicable
 					
-			puts "the self stage index is: #{self.stage_index}, and self sop index is: #{self.sop_index}"
+			#puts "the self stage index is: #{self.stage_index}, and self sop index is: #{self.sop_index}"
 			step.step_index = key
 			step.stage_index = self.stage_index
 			step.sop_index = self.sop_index
@@ -506,7 +506,7 @@ class Auth::Workflow::Sop
 				step.resolve_location(self.steps[key-1].location_information)
 				step.resolve_time(self.steps[key-1].time_information)
 			else 
-				puts "came to resolve time for the first step."
+				#puts "came to resolve time for the first step."
 				step.resolve_location
 				step.resolve_time(latest_ending_cart_item)
 			end
@@ -520,12 +520,12 @@ class Auth::Workflow::Sop
 				req.sop_index = step.sop_index
 				req.step_index = step.step_index
 
-				puts "the step stage index is: #{step.stage_index}"
-				puts "step sop index is : #{step.sop_index}"
-				puts "step step index is: #{step.step_index}"
+				#puts "the step stage index is: #{step.stage_index}"
+				#puts "step sop index is : #{step.sop_index}"
+				#puts "step step index is: #{step.step_index}"
 
-				puts "the address is:"
-				puts req.get_self_address(req_key)
+				#puts "the address is:"
+				#puts req.get_self_address(req_key)
 
 				if req.reference_requirement_address == nil
 
@@ -538,10 +538,10 @@ class Auth::Workflow::Sop
 
 				else 		
 
-					puts "the reference requirement address is:"
-					puts req.reference_requirement_address.to_s
+					#puts "the reference requirement address is:"
+					#puts req.reference_requirement_address.to_s
 
-					puts requirement_query_hash.to_s
+					#puts requirement_query_hash.to_s
 						
 					if requirement_query_hash[req.reference_requirement_address].last[:end_time_range] == step.time_information[:start_time_range]
 
