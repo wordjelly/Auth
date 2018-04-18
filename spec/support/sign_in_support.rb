@@ -67,6 +67,193 @@ module AdminRootPathSupport
   end
 end
 
+
+module RequirementQueryHashSupport
+
+  def load_assembly_from_json(json_file_path)
+    assembly_as_hash = JSON.parse(IO.read(json_file_path))
+    assembly = Auth.configuration.assembly_class.constantize.new(assembly_as_hash)
+    ## just return the assembly as is.
+    return assembly
+  end
+
+  def update_assembly_with_products_and_create_cart_items(loaded_assembly,admin,user)
+    products_to_build = {}
+    products_built = {}
+    loaded_assembly.stages.each_with_index {|stage,stage_index|
+      stage.sops.each_with_index {|sop,sop_index|
+        sop.applicable_to_product_ids.each_with_index {|p_id,p_index|
+          products_to_build[p_id] = [] unless products_to_build.include? p_id
+          products_to_build[p_id] << [stage_index,sop_index,p_index]
+        }
+      }
+    }
+    
+    products_to_build.keys.each do |p_id|
+      product = Auth.configuration.product_class.constantize.new(price: 300, resource_id: admin.id.to_s, resource_class: admin.class.name, signed_in_resource: admin)
+      expect(product.save).to be_truthy
+      products_to_build[p_id].each do |address|
+        loaded_assembly.stages[address[0]].sops[address[1]].applicable_to_product_ids[address[2]] = product.id.to_s
+      end
+      products_built[product.id.to_s] = product
+    end
+
+    puts loaded_assembly.errors.full_messages unless loaded_assembly.save
+
+    cart_items = products_built.keys.map{|p_id|
+      c = Auth.configuration.cart_item_class.constantize.new(product_id: p_id, resource_id: user.id.to_s, resource_class: user.class.name, signed_in_resource: user)
+      
+      expect(c.save).to be_truthy
+
+      p_id = c
+    }
+
+    {assembly: loaded_assembly, products: products_built, cart_items: cart_items}
+
+  end
+
+  ## the stops can be the different steps in the pipeline which you want returned.
+  ## they have to be the name of the functions called in the pipeline.
+  def pipeline(stops,a,cart_items)
+    
+    pipeline_results = {}
+
+    options = {}
+
+    options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+
+    search_sop_events = a.clone_to_add_cart_items(options)
+    
+    expect(search_sop_events.size).to eq(1)
+
+    pipeline_results[:search_sop_events] = search_sop_events if stops[:search_sop_events]
+    
+    create_order_events = search_sop_events.first.process
+    
+    expect(create_order_events.size).to eq(1)
+
+    pipeline_results[:create_order_events] = create_order_events if stops[:create_order_events]
+    
+    schedule_sop_events = create_order_events.first.process
+    
+    expect(schedule_sop_events.size).to eq(1)
+    
+    pipeline_results[:schedule_sop_events] = schedule_sop_events if stops[:schedule_sop_events]
+
+    after_schedule_sop = schedule_sop_events.first.process
+    
+    expect(after_schedule_sop.size).to eq(1)
+    
+    after_schedule_sop = after_schedule_sop.first
+    
+    pipeline_results[:after_schedule_sop] = after_schedule_sop if stops[:after_schedule_sop]
+
+    pipeline_results
+
+  end
+
+  ## will create an assembly with 
+  ## two stages,
+  ## one sop in each stage
+  ## one step in each sop
+  def setup
+
+    products = {}
+
+    3.times do |n|
+      p = Auth.configuration.product_class.constantize.new
+      p.price = 30
+      p.signed_in_resource = @admin
+      expect(p.save).to be_truthy
+      products[p.id.to_s] = p
+    end
+
+    a = Auth.configuration.assembly_class.constantize.new( applicable: true)
+    
+    stage = Auth.configuration.stage_class.constantize.new( applicable: true)
+    
+    sop = Auth.configuration.sop_class.constantize.new( applicable: true, applicable_to_product_ids: products.keys)
+    
+    step_one = Auth.configuration.step_class.constantize.new(applicable: true, duration: 300)
+
+
+    step_one.time_information[:start_time_specification] = [["*","*","4","0","86300"]]
+
+    step_one.time_information[:minimum_time_since_previous_step] = 0
+
+
+    requirement_for_step_one = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
+
+    step_one.requirements << requirement_for_step_one
+    sop.steps << step_one
+    stage.sops << sop
+    a.stages << stage
+
+
+    stage_two = Auth.configuration.stage_class.constantize.new(applicable: true)
+    
+    sop_two = Auth.configuration.sop_class.constantize.new(applicable: true, applicable_to_product_ids: products.keys)
+
+    step_two = Auth.configuration.step_class.constantize.new(applicable: true, duration: 300)
+
+    requirement_for_step_two = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
+
+    requirement_for_step_two.reference_requirement_address = "stages:0:sops:0:steps:0:requirements:0"
+    
+    step_two.requirements << requirement_for_step_two
+    sop_two.steps << step_two
+    stage_two.sops << sop_two
+    a.stages << stage_two
+    a.master = true
+    a.valid?
+    #puts a.errors.full_messages.to_s
+    expect(a.save).to be_truthy
+
+    ## create some cart items from the products.
+    
+    cart_items = []
+    products.keys.each do |pr|
+      puts pr.to_s
+      
+      cart_item = Auth.configuration.cart_item_class.constantize.new
+      cart_item.product_id = pr
+      cart_item.signed_in_resource = @u
+      cart_item.resource_class = @u.class.name
+      cart_item.resource_id = @u.id.to_s
+      cart_item.valid?
+      puts cart_item.errors.full_messages
+      expect(cart_item.save).to be_truthy
+      cart_items << cart_item
+    end 
+
+    ## now let us first clone the assembly.
+    options = {}
+    options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+
+    search_sop_events = a.clone_to_add_cart_items(options)
+    
+    expect(search_sop_events.size).to eq(1)
+    
+    
+
+    create_order_events = search_sop_events.first.process
+    
+    expect(create_order_events.size).to eq(1)
+    
+    schedule_sop_events = create_order_events.first.process
+    
+    expect(schedule_sop_events.size).to eq(1)
+    
+    after_schedule_sop = schedule_sop_events.first.process
+    
+    expect(after_schedule_sop.size).to eq(1)
+    
+    after_schedule_sop = after_schedule_sop.first
+
+  end
+
+end
+
 module DiscountSupport
   
   def create_cart_items(signed_in_res,user=nil,number=5,price=10.0)
@@ -348,6 +535,8 @@ module AdminCreateUserSupport
   end
 
 end
+
+
 
 module WorkflowSupport
 
@@ -835,6 +1024,9 @@ RSpec.configure do |config|
 
   config.include OrderCreationFlow, :type => :request
   config.include OrderCreationFlow, :type => :model
+
+  config.include RequirementQueryHashSupport, :type => :request
+  config.include RequirementQueryHashSupport, :type => :model
 
 end
 

@@ -1120,7 +1120,7 @@ class Auth::Workflow::Assembly
     end
     
     e = Auth::Transaction::Event.new
-    e.arguments = {:sops => sops.to_json}
+    e.arguments = {:sops => sops.to_json, :requirement_query_hash => requirement_query_hash.to_json}
     e.object_class = Auth.configuration.assembly_class
     e.method_to_call = "after_schedule_order"
     e.object_id = order.assembly_id.to_s
