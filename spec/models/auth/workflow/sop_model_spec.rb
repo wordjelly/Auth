@@ -619,19 +619,6 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 					end
 
 
-					it " -- resolves step location where location information is provided in the step itself -- " do 
-
-					end
-
-					it " -- resolves step location, where location information is transferred from the first step/previous step -- " do 
-
-					end
-
-
-					it " -- resolves step location, where the location information is passed in from the cart items -- " do 
-
-					end			
-	
 				end
 
 				context " -- duration and time -- " do 
@@ -651,71 +638,163 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						expect(a.stages.first.sops.first.steps.first.valid?).not_to be_truthy
 					end
 
-					it " -- assembly schedule sop function, has a hash with the latest time range for every cart item,and that is updated after every step --  " do 
+								
+				end
+
+				context " -- requirement query hash function -- " do 
+					context " -- no start time specification -- " do 
+						context " -- requirement has a reference requirement -- " do 
+
+							it " -- if requirement time requirements are continuous then expands the existing time range in the hash  -- ", :req_query_ref_continuous do 
+										
+								products = {}
+								3.times do |n|
+									p = Auth.configuration.product_class.constantize.new
+									p.price = 30
+									p.signed_in_resource = @admin
+									expect(p.save).to be_truthy
+									products[p.id.to_s] = p
+								end
+
+								a = Auth.configuration.assembly_class.constantize.new( applicable: true)
+								
+								stage = Auth.configuration.stage_class.constantize.new( applicable: true)
+								
+								sop = Auth.configuration.sop_class.constantize.new( applicable: true, applicable_to_product_ids: products.keys)
+								
+								step_one = Auth.configuration.step_class.constantize.new(applicable: true, duration: 300)
 
 
+								step_one.time_information[:start_time_specification] = [["*","*","4","0","86300"]]
 
-					end
-
-					it " -- while starting the sop, it gathers the last known start-end time range for every cart item -- " do 
-
+								step_one.time_information[:minimum_time_since_previous_step] = 0
 
 
-					end
+								requirement_for_step_one = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
 
-					
-
-					it " -- DURING RESOLVE STEP -- first its duration is calculated, then -> if a step has a start time range, then it is left untouched, if not, then its duration is added to the start_time range of either the previous step or the from the sop info hash -- " do 
-
-
-					end
-
-	
-					context " -- requirement -- " do 
+								step_one.requirements << requirement_for_step_one
+								sop.steps << step_one
+								stage.sops << sop
+								a.stages << stage
 
 
-						it " -- requirement just directly takes the steps time information and duration -- " do 
+								stage_two = Auth.configuration.stage_class.constantize.new(applicable: true)
+								
+								sop_two = Auth.configuration.sop_class.constantize.new(applicable: true, applicable_to_product_ids: products.keys)
 
+								step_two = Auth.configuration.step_class.constantize.new(applicable: true, duration: 400)
 
-						end
+								requirement_for_step_two = Auth.configuration.requirement_class.constantize.new(schedulable: true, applicable: true)
 
-						context " -- requirement has a reference requirement address " do 
+								requirement_for_step_two.reference_requirement_address = "stages:0:sops:0:steps:0:requirements:0"
+								
+								step_two.requirements << requirement_for_step_two
+								sop_two.steps << step_two
+								stage_two.sops << sop_two
+								a.stages << stage_two
+								a.master = true
+								a.valid?
+								#puts a.errors.full_messages.to_s
+								expect(a.save).to be_truthy
 
-							it " -- the start time and end time are added to that requirement's time information, if they are continuous, otherwise, as an array of arrays -- " do 
+								## create some cart items from the products.
+								
+								cart_items = []
+								products.keys.each do |pr|
+									puts pr.to_s
+									
+									cart_item = Auth.configuration.cart_item_class.constantize.new
+									cart_item.product_id = pr
+									cart_item.signed_in_resource = @u
+									cart_item.resource_class = @u.class.name
+									cart_item.resource_id = @u.id.to_s
+									cart_item.valid?
+									puts cart_item.errors.full_messages
+									expect(cart_item.save).to be_truthy
+									cart_items << cart_item
+								end 
+
+								## now let us first clone the assembly.
+								options = {}
+								options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
+
+								search_sop_events = a.clone_to_add_cart_items(options)
+								
+								expect(search_sop_events.size).to eq(1)
+								
+								
+
+								create_order_events = search_sop_events.first.process
+								
+								expect(create_order_events.size).to eq(1)
+								
+								schedule_sop_events = create_order_events.first.process
+								
+								expect(schedule_sop_events.size).to eq(1)
+								
+								after_schedule_sop = schedule_sop_events.first.process
+								
+								expect(after_schedule_sop.size).to eq(1)
+								
+								after_schedule_sop = after_schedule_sop.first
+
+								## now here we should get this to pass.
 
 
 							end
 
+							it " -- if requirement time requirements are not continuous then adds a new entry to the time requirements -- " do 
 
+
+							end
 
 						end
 
+						context " -- requirement does not have a reference requirement -- " do 
+
+							it " -- creates a new entry in the requirements query hash for this requirement -- " do 
 
 
+							end
+
+						end
+
+					end
+
+					context " -- start time specification -- " do 
+
+						context " -- previous time information provided -- " do 
+
+							context " -- requirement has a reference requirement -- " do 
+
+
+							end
+
+							context " -- requirement does not have a reference requirement -- " do 
+
+
+							end
+
+						end
+
+						context " -- previous time information not provided -- " do 
+
+							context " -- requirement has a reference requirement -- " do 
+
+
+							end
+
+							context " -- requirement does not have a reference requirement -- " do 
+
+
+							end
+
+						end
 
 					end
 
 				end
-
-				context " -- hash of end time for each cart item -- " do 
-
-				end
-
-
-				context " -- query builder -- " do 
-
-
-
-				end
-
-
-				context " -- updater -- " do 
-
-					it " -- iterates the results in ascending order of their start time ranges -- " do 
-
-					end
-
-				end
+			
 				
 				context " -- location queries -- ", :location_queries => true do 
 

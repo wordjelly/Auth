@@ -158,7 +158,7 @@ module Auth::Concerns::WorkflowConcern
       if self.time_information[:start_time_specification]
         
         raise("minimum time since previous step is absent") unless self.time_information[:minimum_time_since_previous_step]        
-        if previous_step_time_information
+        if !previous_step_time_information.empty?
 
           time_range_based_on_previous_step = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
 
@@ -243,6 +243,11 @@ module Auth::Concerns::WorkflowConcern
         end
         
       else
+        ## okay so imagine we are at the first step of a stage, and there is no previous step ?
+        ## how do we know the previous step?
+        ## well here that would mean the cart items already there.
+        ## this should have come from the cart_item_latest_time.
+        
         raise "previous step time information absent" unless (previous_step_time_information && previous_step_time_information[:start_time_range])
         self.time_information[:start_time_range] = previous_step_time_information[:end_time_range]
         self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}

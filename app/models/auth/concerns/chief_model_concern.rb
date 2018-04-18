@@ -9,7 +9,7 @@ module Auth::Concerns::ChiefModelConcern
 
 		include Mongoid::Document
 		include Mongoid::Timestamps
-
+		include Mongoid::EmbeddedErrors
 		## expected to be a hash with names of callbacks and boolean values.
 		## eg: {:before_save => true, :after_save => false..}
 		## used in conjunction with the provided skip_callback?(callback_name) method to determine whether to execute the callbacks or not.

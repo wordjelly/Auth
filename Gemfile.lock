@@ -12,6 +12,7 @@ PATH
       kaminari-mongoid
       materialize-sass (= 0.97.1)
       momentjs-rails
+      mongoid-embedded-errors
       mongoid-geospatial
       mongoid_versioned_atomic (= 0.0.7)
       omniauth (= 1.4.1)
@@ -725,6 +726,8 @@ GEM
       mongo (~> 2.1)
       origin (~> 2.1)
       tzinfo (>= 0.3.37)
+    mongoid-embedded-errors (2.1.1)
+      mongoid (>= 3.0)
     mongoid-geospatial (5.0.0)
       mongoid (>= 5.0.0.beta)
     mongoid_versioned_atomic (0.0.7)

@@ -29,6 +29,8 @@ require "aws-sdk"
 require "payuindia"
 require "cloudinary"
 require "mongoid/geospatial"
+require "mongoid-embedded-errors"
+
 
 module Auth
 end

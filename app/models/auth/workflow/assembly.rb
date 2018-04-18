@@ -1070,7 +1070,8 @@ class Auth::Workflow::Assembly
   ###############################################################
 
 
-  def create_order_in_multiple_sops(arguments)  
+  def create_order_in_multiple_sops(arguments) 
+
     ## the arguments are the sops, and order.
     return nil if(arguments[:sops].blank? || arguments[:order].blank?)
 
@@ -1082,13 +1083,19 @@ class Auth::Workflow::Assembly
     
     ## get the updated sops only.
     ## from the assembly.
-    sops.map!{|c| 
+    new_sops = sops.map{|c| 
       c = assembly_updated.stages[c.stage_index].sops[c.sop_index]
+    }
+
+    sops.each_with_index{|value,key|
+      new_sops[key].stage_index = value.stage_index
+      new_sops[key].sop_index = value.sop_index
     }
 
 
     e = Auth::Transaction::Event.new
-    e.arguments = {:sops => sops.to_json, :order => order.to_json}
+    e.arguments = {:sops => new_sops.to_json(:methods => [:sop_index,:stage_index]), :order => order.to_json}
+    puts e.arguments.to_s
     e.object_class = Auth.configuration.assembly_class
     e.method_to_call = "schedule_order"
     e.object_id = order.assembly_id.to_s
@@ -1102,15 +1109,17 @@ class Auth::Workflow::Assembly
     sops = JSON.parse(arguments[:sops]).map{|c| c = Auth.configuration.sop_class.constantize.new(c)}
     order = Auth.configuration.order_class.constantize.new(JSON.parse(arguments[:order]))
 
-    cart_item_latest_start_time = {}
+    cart_items_latest_time = {}
+    requirement_query_hash = {}
 
     sops.each do |sop|
-      cart_item_latest_start_time = sop.schedule_order(cart_item_latest_start_time)
+      response = sop.schedule_order(cart_items_latest_time,requirement_query_hash)
+
+      cart_items_latest_time = response[:cart_items_latest_time]
+      requirement_query_hash = response[:requirement_query_hash]
     end
     
     e = Auth::Transaction::Event.new
-
-    
     e.arguments = {:sops => sops.to_json}
     e.object_class = Auth.configuration.assembly_class
     e.method_to_call = "after_schedule_order"

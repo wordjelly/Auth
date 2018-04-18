@@ -154,7 +154,11 @@ class Auth::Workflow::Sop
 				#puts "sop hash is:"
 				#puts JSON.pretty_generate(sop_hash)
 
-				Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
+				k = Mongoid::Factory.from_db(Auth.configuration.sop_class.constantize,sop_hash)
+				k.stage_index = sop_hash["stage_index"]
+				k.sop_index = sop_hash["sop_index"]
+				k
+
 			}
 
 			## now emit create_order events.
@@ -162,8 +166,13 @@ class Auth::Workflow::Sop
 
 			## the important thing at this stage will be to add the relevant information on the order.
 			if applicable_sops.size > 0
+				#puts "THE FIRST STAGE INDEX IS:"
+				#puts applicable_sops.first.stage_index
+				#puts "the first sop index is:"
+				#puts applicable_sops.first.sop_index
 				e = Auth::Transaction::Event.new
 				e.arguments = options.merge({:sops => applicable_sops.to_json})
+				#puts e.arguments.to_s
 				e.object_class = Auth.configuration.assembly_class
 				e.method_to_call = "create_order_in_multiple_sops"
 				e.object_id = order.assembly_id.to_s
@@ -423,16 +432,26 @@ class Auth::Workflow::Sop
 
 	def last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
 
-		latest_end = {}
-		cart_items_latest_time.keys.each do |c_id|
-			if self.orders.last.cart_item_ids.include? c_id
+		
+		greatest_end_time = nil
+		
+		cart_items_latest_time.values.each_with_index{|value,key|
 
-				latest_end[c_id] = cart_items_latest_time[c_id] if (latest_end.empty? || (cart_items_latest_time[c_id][:end_time_range][1] > latest_end[c_id][:end_time_range][1]))
+			greatest_end_time = value unless greatest_end_time
 
+			if greatest_end_time
+				puts "value is:" 
+				puts value.to_s
+				puts "greatest end time is:"
+				puts greatest_end_time.to_s
+				if value[:end_time_range][1] > greatest_end_time[:end_time_range][1]
+					greatest_end_time = value
+				end
 			end
-		end
 
-		return latest_end
+		}
+
+		return greatest_end_time || {}
 	end
 
 	## @param[Auth::Workflow::Step] last_step : the last step in the sop.
@@ -441,27 +460,40 @@ class Auth::Workflow::Sop
 
 	def update_cart_items_latest_time(last_step,cart_items_latest_time)
 
-		cart_items_latest_time.keys.each do |c_id|
-			if self.orders.last.cart_item_ids.include? c_id
+		if cart_items_latest_time.empty?
+			self.orders.last.cart_item_ids.each do |c_id|
+				cart_items_latest_time[c_id] = {}
 				cart_items_latest_time[c_id][:start_time_range] = last_step.time_information[:start_time_range]
 				cart_items_latest_time[c_id][:end_time_range] = last_step.time_information[:end_time_range]
 			end
-		end		
+		else
+			cart_items_latest_time.keys.each do |c_id|
+				if self.orders.last.cart_item_ids.include? c_id
+					cart_items_latest_time[c_id][:start_time_range] = last_step.time_information[:start_time_range]
+					cart_items_latest_time[c_id][:end_time_range] = last_step.time_information[:end_time_range]
+				end
+			end	
+		end	
 
 		cart_items_latest_time
 
 	end
 
 
+	## this has to return the cart_items_latest_time, as well as requirement_query_hash
+	## both are hashes.
 	def schedule_order(cart_items_latest_time, requirement_query_hash)
 
 		latest_ending_cart_item = last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
 
+		puts "the latest ending cart item is:"
+		puts latest_ending_cart_item.to_s
 
 		self.steps.each_with_index{|step,key|
 
 			next unless step.applicable
-				
+					
+			puts "the self stage index is: #{self.stage_index}, and self sop index is: #{self.sop_index}"
 			step.step_index = key
 			step.stage_index = self.stage_index
 			step.sop_index = self.sop_index
@@ -474,44 +506,65 @@ class Auth::Workflow::Sop
 				step.resolve_location(self.steps[key-1].location_information)
 				step.resolve_time(self.steps[key-1].time_information)
 			else 
+				puts "came to resolve time for the first step."
 				step.resolve_location
 				step.resolve_time(latest_ending_cart_item)
 			end
 
 			step.requirements.each_with_index{|req,req_key|
 
+
 				next unless (req.applicable && req.schedulable)	
 				
-				
-				if req.reference_requirement_address
+				req.stage_index = step.stage_index
+				req.sop_index = step.sop_index
+				req.step_index = step.step_index
+
+				puts "the step stage index is: #{step.stage_index}"
+				puts "step sop index is : #{step.sop_index}"
+				puts "step step index is: #{step.step_index}"
+
+				puts "the address is:"
+				puts req.get_self_address(req_key)
+
+				if req.reference_requirement_address == nil
+
+
+					requirement_query_hash[req.get_self_address(req_key)] = [{:start_time_range => step.time_information[:start_time_range], :end_time_range => step.time_information[:end_time_range]}]
+
+				elsif requirement_query_hash[req.reference_requirement_address].nil?
+
+					requirement_query_hash[req.get_self_address(req_key)] = [{:start_time_range => step.time_information[:start_time_range], :end_time_range => step.time_information[:end_time_range]}]					
+
+				else 		
+
+					puts "the reference requirement address is:"
+					puts req.reference_requirement_address.to_s
+
+					puts requirement_query_hash.to_s
 						
+					if requirement_query_hash[req.reference_requirement_address].last[:end_time_range] == step.time_information[:start_time_range]
 
-
-					if existing_entry = requirement_query_hash[req.reference_requirement_address][step.time_information[:start_time_range][0]]
-
-						## for that entry, the new end time, is the end time of the current step.
-						new_hash = {:start_time_range => existing_entry[:start_time_range], :end_time_range => step.time_information[:start_time_range][1]}
-
+						
 						## now set this as the new hash.
-						requirement_query_hash[req.reference_requirement_address][new_hash[end_time_range][1]] = new_hash
-					else
-						requirement_query_hash[req.reference_requirement_address][self.time_information[:end_time_range][1]] = {:start_time_range => self.time_information[:start_time_range], :end_time_range => self.time_information[:end_time_range]}
+						requirement_query_hash[req.reference_requirement_address][-1] = {:start_time_range => requirement_query_hash[req.reference_requirement_address].last[:start_time_range], :end_time_range => step.time_information[:end_time_range]}
+
+					elsif requirement_query_hash[req.reference_requirement_address].last[:end_time_range][1] < step.time_information[:start_time_range][0]
+
+						requirement_query_hash[req.reference_requirement_address] << {:start_time_range => step.time_information[:start_time_range], :end_time_range => step.time_information[:end_time_range]}
 
 					end
 
-				else	
-
-					## same shit.
-					requirement_query_hash[req.get_self_address][self.time_information[:end_time_range][1]] = {:start_time_range => self.time_information[:start_time_range], :end_time_range => self.time_information[:end_time_range]}					
-
+					
 				end
-				
 
 			}
 			
 		}
 
-		return update_cart_items_latest_time(self.steps.last,cart_items_latest_time)		
+		cart_items_latest_time =  update_cart_items_latest_time(self.steps.last,cart_items_latest_time)
+
+		return {:cart_items_latest_time => cart_items_latest_time, :requirement_query_hash => requirement_query_hash}		
 
 	end
 
