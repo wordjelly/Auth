@@ -1,0 +1,55 @@
+{
+	"applicable" : true,
+	"master" : true,
+	"stages" : [
+		{
+			"applicable" : true,
+			"sops" : [
+				{
+					"applicable_to_product_ids" : ["0","1","2"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"time_information" : {
+								"start_time_specification" : [["*","*","4","0","86300"]],
+								"minimum_time_since_previous_step" : 0
+							},
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"applicable" : true,
+			"sops" : [
+				{
+					"applicable_to_product_ids" : ["0","1","2"],
+					"applicable" : true,
+					"steps" : [
+						{
+							"applicable" : true,
+							"duration" : 300,
+							"requirements" : [
+								{
+									"schedulable" : true,
+									"applicable" : true
+								}
+							],
+							"time_information" : {
+								"minimum_time_since_previous_step" : 300
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

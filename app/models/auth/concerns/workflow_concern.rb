@@ -251,7 +251,7 @@ module Auth::Concerns::WorkflowConcern
         ## this should have come from the cart_item_latest_time.
         
         raise "previous step time information absent" unless (previous_step_time_information && previous_step_time_information[:start_time_range])
-        self.time_information[:start_time_range] = previous_step_time_information[:end_time_range]
+        self.time_information[:start_time_range] = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
         self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
       end  
 

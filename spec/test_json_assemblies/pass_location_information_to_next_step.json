@@ -28,7 +28,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -92,7 +92,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							},
 							"time_information" : {
 								"start_time_specification" : [["*","*","4","0","86300"]],
@@ -160,7 +160,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -229,7 +229,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -293,7 +293,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -357,7 +357,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -426,7 +426,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -490,7 +490,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{
@@ -554,7 +554,7 @@
 							],
 							"location_information" : {
 								"within_radius" : 20,
-								"location_point_coordinates" : [10,20]	
+								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							}
 						},
 						{

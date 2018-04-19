@@ -501,13 +501,23 @@ class Auth::Workflow::Sop
 			step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
 			step.calculate_duration
+
+			## how to set the default time information.
+			step.time_information ||= {:minimum_time_since_previous_step => 0}
+			step.time_information[:minimum_time_since_previous_step] ||= 0
+			## done.
 			
 			if key > 0
 				step.resolve_location(self.steps[key-1].location_information)
 				step.resolve_time(self.steps[key-1].time_information)
 			else 
 				#puts "came to resolve time for the first step."
+				
 				step.resolve_location
+
+				#puts "latest ending cart item is:"
+				#puts latest_ending_cart_item.to_s
+
 				step.resolve_time(latest_ending_cart_item)
 			end
 
@@ -541,15 +551,21 @@ class Auth::Workflow::Sop
 					#puts "the reference requirement address is:"
 					#puts req.reference_requirement_address.to_s
 
+					#puts "this is the existing requirmenet query hash."
 					#puts requirement_query_hash.to_s
-						
+					#puts "this is the step time information"
+					#puts step.time_information		
+
 					if requirement_query_hash[req.reference_requirement_address].last[:end_time_range] == step.time_information[:start_time_range]
 
-						
+						#puts "end time range of last step is equal to the start time range of this step"
+
 						## now set this as the new hash.
 						requirement_query_hash[req.reference_requirement_address][-1] = {:start_time_range => requirement_query_hash[req.reference_requirement_address].last[:start_time_range], :end_time_range => step.time_information[:end_time_range]}
 
-					elsif requirement_query_hash[req.reference_requirement_address].last[:end_time_range][1] < step.time_information[:start_time_range][0]
+					elsif requirement_query_hash[req.reference_requirement_address].last[:end_time_range][1] < step.time_information[:start_time_range][1]
+
+						#puts "end time range of last step is less than start time range of this step."
 
 						requirement_query_hash[req.reference_requirement_address] << {:start_time_range => step.time_information[:start_time_range], :end_time_range => step.time_information[:end_time_range]}
 

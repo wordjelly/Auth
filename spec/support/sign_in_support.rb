@@ -124,6 +124,8 @@ module RequirementQueryHashSupport
           ## and nothing needs to be replaced in the assembly.
           ## modulate the lat long slightly.
           if step.location_information["location_point_coordinates"]
+           # puts "the location information is:"
+           # puts step.location_information
             lat = step.location_information["location_point_coordinates"]["lat"]
             lng = step.location_information["location_point_coordinates"]["lng"]
             location_obj = Auth.configuration.location_class.constantize.new(location: {:lat => lat - 0.01, :lng => lng + 0.01})

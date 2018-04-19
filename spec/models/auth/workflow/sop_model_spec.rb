@@ -36,7 +36,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 			it " -- returns empty response if no sop's are found -- ", :first_test => true do 
 				
-				assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/2.json")
+				assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/no_applicable_sops.json")
 
 				expect(assembly.save).to be_truthy
 
@@ -52,7 +52,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 			it " -- finds applicable sops, and creates an event that will create the order in all those sops. -- ", :second_test => true do 
 	
-				assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/1.json")
+				assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/continuous_time_reference_requirement.json")
 
 				assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
 
@@ -73,7 +73,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 					it " -- assigns the location information from the first cart item to the step if the step location information is blank -- ", :third_test => true do 
 
-						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/3.json")
+						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/assign_location_information_from_cart_item_to_step.json")
 
 						assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
 
@@ -123,7 +123,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 					it "-- passes on location information from a previous step if the step does not have its own location information -- ", :fourth_test => true do 
 
 
-						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/4.json")
+						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/pass_location_information_to_next_step.json")
 
 						assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
 
@@ -146,7 +146,8 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 								## then we expect the location information to be 
 								if step_key > 0
 									expect(step.location_information["within_radius"]).to eq(20)
-									expect(step.location_information["location_point_coordinates"]).to eq([10,20])
+									 
+									expect(step.location_information["location_point_coordinates"]).to eq({"lat" => 10, "lng" => 20})
 								end
 							}
 						end
@@ -187,116 +188,6 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 					it " -- resolves location provieded location coordinates and within radius and categories -- ", :sixth_test do 
 
-=begin
-						locations = []
-
-						lc = Auth::Workflow::Location.new
-						lc.location = {:lat => 10.0, :lng => 15.0}
-						lc.location_categories = ["hematology_station","biochemistry_station"]
-						expect(lc.save).to be_truthy
-						locations << lc
-
-
-						lc2 = Auth::Workflow::Location.new
-						lc2.location = {:lat => 10.1, :lng => 15.1}
-						lc2.location_categories = ["biochemistry_station"]
-						expect(lc2.save).to be_truthy
-						locations << lc2
-
-						## now we do the usual assembly creation part.	
-
-						options = {}
-
-						products = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
-
-						products.map{|c|
-							c.resource_id = @admin.id.to_s
-							c.resource_class = @admin.class.to_s
-							c.price = 30
-							expect(c.save).to be_truthy
-						}
-
-						products_for_requirements = [Auth.configuration.product_class.constantize.new,Auth.configuration.product_class.constantize.new]
-
-						products_for_requirements.map{|c|
-							c.resource_id = @admin.id.to_s
-							c.resource_class = @admin.class.to_s
-							c.price = 30
-							expect(c.save).to be_truthy
-						}
-
-						options[:stages] = 3
-						options[:sops] = 3
-						options[:steps] = 3
-						options[:requirements] = 3
-						
-
-						first_product_applicable_to_sops = ["0.1","1.2","2.0"]
-
-						second_product_applicable_to_sops =  ["0.1","1.2","2.1"]
-
-						options[:products] = {products.first.id.to_s.to_sym => first_product_applicable_to_sops, products.last.id.to_s.to_sym => second_product_applicable_to_sops}
-
-						options[:requirements_products] = {products_for_requirements.first.id.to_s.to_sym => ["0.1.1.0","1.2.0.2","2.0.1.2"], products_for_requirements.last.id.to_s.to_sym => ["0.1.2.1","1.2.1.2","2.1.2.2"]}
-
-						response = create_assembly_with_options(options)
-
-						expect(response[:errors]).to be_blank
-
-						assembly = response[:assembly]
-						expect(assembly.save).to be_truthy
-						assembly.master = true
-
-						## add some location information to the first step in every sop.
-
-						cart_items = products.map{|p|
-							c = Auth.configuration.cart_item_class.constantize.new
-							c.product_id = p.id.to_s
-							c.resource_id = @u.id.to_s
-							c.resource_class = @u.class.to_s
-							c.signed_in_resource = @u
-							expect(c.save).to be_truthy
-							c
-						}
-
-						assembly.stages.each_with_index {|stage,key|
-							stage.sops.each_with_index {|sop,sop_key|
-
-								address = "#{key}.#{sop_key}"
-								if (first_product_applicable_to_sops + second_product_applicable_to_sops).include? address
-									
-									## add a location id to all the steps and pass resolve to true on all of them.
-									[0,1,2].each do |st_key|
-										assembly.stages[key].sops[sop_key].steps[st_key].resolve = true	
-										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:location_point_coordinates] = {:lat => 10.11, :lng => 14.99}
-										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:within_radius] = 10
-										assembly.stages[key].sops[sop_key].steps[st_key].location_information[:location_categories] = ["biochemistry_station"]
-									end
-								end 
-							}
-						}
-
-						## the first thing to check is whether for each of those sops, each of the steps has been actually given a resolved id.
-
-
-
-						## now we expect that all the resulting steps will have a location id.
-						expect(assembly.save).to be_truthy
-
-						## so now what.
-
-						options = {}
-						options[:order] = Auth.configuration.order_class.constantize.new(:cart_item_ids => cart_items.map{|c| c = c.id.to_s}).to_json
-						search_sop_events = assembly.clone_to_add_cart_items(options)
-						expect(search_sop_events.size).to eq(1)
-						create_order_events = search_sop_events.first.process
-						expect(create_order_events.size).to eq(1)
-						schedule_sop_events = create_order_events.first.process
-						expect(schedule_sop_events.size).to eq(1)
-						after_schedule_sop = schedule_sop_events.first.process
-						expect(after_schedule_sop.size).to eq(1)
-						after_schedule_sop = after_schedule_sop.first
-=end
 
 						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/location_coordinates_and_some_with_categories_test.json")
 
@@ -351,7 +242,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							it " -- if requirement time requirements are continuous then expands the existing time range in the hash  -- ", :req_query_ref_continuous do 
 									
-								assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/1.json")
+								assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/continuous_time_reference_requirement.json")
 
 								
 								assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
@@ -372,7 +263,26 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							end
 
-							it " -- if requirement time requirements are not continuous then adds a new entry to the time requirements -- " do 
+							it " -- if requirement time requirements are not continuous then adds a new entry to the time requirements -- ", :discontinuous_reference_requirement do 
+
+								assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/discontinuous_time_reference_requirement.json")
+								
+								assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
+
+								assembly = assembly_products_and_cart_items[:assembly]
+
+								cart_items = assembly_products_and_cart_items[:cart_items]
+
+								pipeline_results = pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)
+
+								
+								requirement_query_hash = JSON.parse(pipeline_results[:after_schedule_sop][:arguments][:requirement_query_hash])
+
+								## now in this requirement query hash we should find, that for the given requirement, there is two things.
+								first_requirement = requirement_query_hash["stages:0:sops:0:steps:0:requirements:0"]
+
+								
+								expect(first_requirement.size).to eq(2)
 
 
 							end
@@ -383,6 +293,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							it " -- creates a new entry in the requirements query hash for this requirement -- " do 
 
+								
 
 							end
 
@@ -453,9 +364,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						
 						location_query = loc.generate_location_query({:lat => 10.0, :lng => 15.01},10,["biochemistry_station"])
 
-						puts "query is:"
-						puts location_query
-
+						
 						location_results = Auth.configuration.location_class.constantize.where(location_query)
 
 						expect(location_results.size).to eq(2)
