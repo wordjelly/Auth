@@ -503,8 +503,9 @@ class Auth::Workflow::Sop
 			step.calculate_duration
 
 			## how to set the default time information.
-			step.time_information ||= {:minimum_time_since_previous_step => 0}
+			step.time_information ||= {:minimum_time_since_previous_step => 0, :maximum_time_since_previous_step => 1}
 			step.time_information[:minimum_time_since_previous_step] ||= 0
+			step.time_information[:maximum_time_since_previous_step] ||= 1
 			## done.
 			
 			if key > 0

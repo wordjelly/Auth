@@ -75,6 +75,8 @@ class Auth::Workflow::Step
 	attr_accessor :sop_id
 	attr_accessor :step_index
 
+	
+
 	def self.permitted_params
 		[{:step => [:name, :applicable, :description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index]},:id]
 	end

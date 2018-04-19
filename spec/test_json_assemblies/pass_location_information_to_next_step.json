@@ -95,7 +95,7 @@
 								"location_point_coordinates" : {"lat" : 10, "lng" : 20}	
 							},
 							"time_information" : {
-								"start_time_specification" : [["*","*","4","0","86300"]],
+								"start_time_specification" : ["*","*","*","4","0","86300"],
 								"minimum_time_since_previous_step" : 0
 							}
 						},

@@ -34,6 +34,38 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				Auth::Workflow::Location.delete_all
 			end
 
+			context " -- find nearest instant -- ", :nearest_instant do 
+
+				it " -- finds the nearest instant given one variable -- " do 
+
+					step = Auth.configuration.step_class.constantize.new
+					nearest_instant = step.get_nearest_instant(["*","*","10","*"],[Time.now.to_i, (Time.now + 5.years).to_i])
+
+					t = Time.at(nearest_instant)
+					expect(t.day).to eq(10)
+
+				end
+
+				it " -- finds the nearest instant given two variables -- " do 
+
+					step = Auth.configuration.step_class.constantize.new
+					nearest_instant = step.get_nearest_instant(["2022","*","10","*"],[Time.now.to_i, (Time.now + 10.years).to_i])
+
+					t = Time.at(nearest_instant)
+					expect(t.day).to eq(10)		
+					expect(t.year).to eq(2022)			
+
+				end
+
+				it " -- returns nil if instant not in range -- " do 
+
+					step = Auth.configuration.step_class.constantize.new
+					nearest_instant = step.get_nearest_instant(["2022","*","10","*"],[Time.now.to_i, (Time.now + 1.years).to_i])
+					expect(nearest_instant).to be_nil
+				end
+
+			end
+
 			it " -- returns empty response if no sop's are found -- ", :first_test => true do 
 				
 				assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/no_applicable_sops.json")
@@ -293,7 +325,20 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							it " -- creates a new entry in the requirements query hash for this requirement -- " do 
 
+								assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/no_reference_requirement.json")
 								
+								assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
+
+								assembly = assembly_products_and_cart_items[:assembly]
+
+								cart_items = assembly_products_and_cart_items[:cart_items]
+
+								pipeline_results = pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)
+
+								
+								requirement_query_hash = JSON.parse(pipeline_results[:after_schedule_sop][:arguments][:requirement_query_hash])
+
+								expect(requirement_query_hash.size).to eq(2)
 
 							end
 
@@ -305,8 +350,29 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 						context " -- previous time information provided -- " do 
 
+							context " -- step -- " do 
+
+								it " -- throws error if time information based on previous step does not match current specifications --", :specification_mismatch do 
+
+									assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/time_specification_mismatch.json")
+								
+									assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
+
+									assembly = assembly_products_and_cart_items[:assembly]
+
+									cart_items = assembly_products_and_cart_items[:cart_items]
+
+									expect {pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)}.to raise_error("does not satisfy the start time specification")
+
+								end
+
+
+							end
+
 							context " -- requirement has a reference requirement -- " do 
 
+								## this will create two seperate times,
+								## so we just run it with the discontinuous options.
 
 							end
 

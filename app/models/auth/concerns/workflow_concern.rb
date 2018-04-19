@@ -16,9 +16,10 @@ module Auth::Concerns::WorkflowConcern
     ## :start_time_range -> the absolute time in epoch when this thing can start ([from,to])
     ## :end_time_range -> the absolute time in epoch when this thing can end ([from,to])
     ## :start_time_specification -> 
-    ## eg : [[year,month,weekday,range_beginning,range_ending]..]
-    ## eg : [[*,2,*,seconds_since_12_am,seconds_since_start]] : star means all values are permitted for that unit. and 2.30 -> 4.30 is the allowed time for this thing.  
+    ## eg : [[year,month,day_of_month,weekday,range_beginning,range_ending]..]
+    ## eg : [[*,2,*,*,seconds_since_12_am,seconds_since_start]] : star means all values are permitted for that unit. and 2.30 -> 4.30 is the allowed time for this thing.  
     ## :minimum_time_after_previous_step -> number of seconds after previous step's end_time that this thing can start. These many seconds have to elapse.
+    ## :maximum_time_after_previous_step -> the maximum number of seconds that can elapse after the previous step for this step to start.
     field :time_information, type: Hash, default: {}
 
     field :location_information, type: Hash, default: {}
@@ -153,93 +154,89 @@ module Auth::Concerns::WorkflowConcern
 
     end
 
-    
+
+    def get_nearest_instant(spec,range)
+      
+      year = nil
+      month = nil
+      day_of_week = nil
+      day_of_month = nil
+      date_specs = {}
+     
+      regex_pattern = ""
+      spec[0..3].map.each_with_index{|value,key|
+          if value =~ /\*/
+            regex_pattern += "[0-9]{4}" if key == 0
+            regex_pattern += "[0-9]{2}" if key == 1
+            regex_pattern += "[0-9]{2}" if key == 2
+            regex_pattern += "[0-9]{1}" if key == 3
+          else
+            regex_pattern += value
+          end
+      }
+        
+      #puts "this is the strftime format."
+      #puts $time_hash_strftime_format.to_s
+
+      #puts "the regex pattern is:"
+      #puts regex_pattern.to_s
+
+      from_index = $day_id_hash[Time.now.strftime($time_hash_strftime_format)]
+      
+      #puts "from index is: #{from_index}"
+
+      nearest_instant = nil
+      
+      $date_hash.keys[from_index..-1].each do |dt|
+        nearest_instant = $date_hash[dt] if (dt=~/#{regex_pattern}/ && (range[0] <= $date_hash[dt]) && ($date_hash[dt] <= range[1]))
+        break if nearest_instant
+      end
+
+      nearest_instant
+      
+    end
+
+   
     def resolve_time(previous_step_time_information)
 
 
       if self.time_information[:start_time_specification]
         
-        raise("minimum time since previous step is absent") unless self.time_information[:minimum_time_since_previous_step]        
+        raise("minimum time since previous step is absent") unless self.time_information[:minimum_time_since_previous_step] 
+        
+        raise("maximum time since previous step is absent") unless self.time_information[:maximum_time_since_previous_step]
+
         if !previous_step_time_information.empty?
+
+          #puts "previous step time information is:"
+          #puts previous_step_time_information.to_s
 
           time_range_based_on_previous_step = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
 
-          range_size_in_seconds = time_range_based_on_previous_step[1] - time_range_based_on_previous_step[0]
-          
-          start_time = Time.at(time_range_based_on_previous_step[0])
-          
-          start_time_day_beginning = start_time.beginning_of_day 
+          time_range_based_on_previous_step_maximum = 
+            previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:maximum_time_since_previous_step]}
 
-          start_time_as_strftime = start_time.strftime('%Y %-m %w').split("\s")
+          range_width = time_range_based_on_previous_step[1] - time_range_based_on_previous_step[0]
 
-          start_time_as_strftime << start_time -start_time_day_beginning
+          start_time = get_nearest_instant(self.time_information[:start_time_specification],[time_range_based_on_previous_step[0],time_range_based_on_previous_step_maximum[0]])
 
-          start_time_as_strftime << range_size_in_seconds
+          ## now we want to know which of these start times, is falling in our start time range, take the earliest one of all.
 
-          matched = true
+          raise "does not satisfy the start time specification" unless start_time
 
-          self.time_information[:start_time_specification].each_with_index {|spec,key|
-            
-            spec[0..2].each_with_index{|unit,u_key|
-              
-              if unit=~/\*/
-
-              else
-                matched = false if unit != start_time_as_strftime[u_key]
-              end
-            }
-
-            ## at this stage if matched is true, then check the fourth and the fifth argument 
-            next if matched == false
-
-            matched = false unless ((spec[3].to_i < start_time_as_strftime[3].to_i) && (start_time_as_strftime[3].to_i < start_time_as_strftime[4].to_i) && (start_time_as_strftime[4].to_i < spec[4].to_i))
-            
-          }
-
-          raise "does not satisfy the start time specification" if matched == false
-
-          self.time_information[:start_time_range] = time_range_based_on_previous_step
+          self.time_information[:start_time_range] = [start_time,start_time + range_width]
 
           self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
 
         else
             
-          ## we consider the earliest specification.
-          specification = self.time_information[:start_time_specification][0]
-   
-          t = Time.now
-          year = t.strftime("%Y")
-          month = t.strftime("%-m")
-          day_of_week = t.strftime("%w")
-
-          ## replace all the stars in the first three things in the specification , with the relevant unit from the current time.
-          ## eg. if year is * then replace it with the current year.
-          ymd = specification[0..2].map.each_with_index{|value,key|
-            value.gsub!(/\*/) { |match| 
-                if key == 0
-                  match = year
-                elsif key == 1
-                  match = month
-                elsif key == 2
-                  match = day_of_week
-                end
-            }
-            value
-          }
-
           
-          ## now convert this into a datetime.
-          puts "ymd joint : #{ymd.join(' ')}"
-          t = DateTime.strptime(ymd.join(" "), '%Y %m %w')
+          t = get_nearest_instant(self.time_information[:start_time_specification],[Time.now.to_i,(Time.now + 5.years).to_i])
+  
+          raise "Could not find a satsifactory time instant" unless t
 
+          self.time_information[:start_time_range] = [t.to_i,t.to_i + self.time_information[:start_time_specification][5].to_i]
 
-          ## add the seconds since the beginning of the day to this.
-          t = t + specification[3].to_i
-
-          ## the start time range becomes the time + the seconds to be added onto it, as defined in the specification.
-          self.time_information[:start_time_range] = [t.to_i,t.to_i + specification[4].to_i]
-
-          ## and the end_time_range becomes as usual the start_time _+ the duration.
           self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
 
         end

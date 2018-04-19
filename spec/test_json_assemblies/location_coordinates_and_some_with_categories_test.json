@@ -93,7 +93,7 @@
 								"location_categories" : ["1","2"]	
 							},
 							"time_information" : {
-								"start_time_specification" : [["*","*","4","0","86300"]],
+								"start_time_specification" : ["*","*","*","4","0","86300"],
 								"minimum_time_since_previous_step" : 0
 							}
 						},
