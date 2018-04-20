@@ -398,7 +398,27 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							context " -- requirement does not have a reference requirement -- " do 
 
-								## it will create two entries 
+								 it " -- two entries in the requirments hash -- " do 
+
+								 	assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/two_seperate_requirements_with_time_specs.json")
+									
+									assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
+
+									assembly = assembly_products_and_cart_items[:assembly]
+
+									cart_items = assembly_products_and_cart_items[:cart_items]
+
+									pipeline_results = pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)
+
+									requirement_query_hash = JSON.parse(pipeline_results[:after_schedule_sop][:arguments][:requirement_query_hash])
+
+									puts requirement_query_hash.to_s
+
+									## so there is some problem here.
+									## gotta think what's wrong with this shit.
+									expect(requirement_query_hash.size).to eq(2)
+
+								 end
 
 							end
 
@@ -406,13 +426,21 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 						context " -- previous time information not provided -- " do 
 
-							context " -- requirement has a reference requirement -- " do 
+							it " -- requirement follows the time specification provided -- " do 
 
+								assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/start_time_specification_no_previous_time_information.json")
+									
+								assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
 
-							end
+								assembly = assembly_products_and_cart_items[:assembly]
 
-							context " -- requirement does not have a reference requirement -- " do 
+								cart_items = assembly_products_and_cart_items[:cart_items]
 
+								pipeline_results = pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)
+
+								requirement_query_hash = JSON.parse(pipeline_results[:after_schedule_sop][:arguments][:requirement_query_hash])
+
+								expect(requirement_query_hash.size).to eq(1)
 
 							end
 
