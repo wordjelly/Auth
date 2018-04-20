@@ -40,13 +40,14 @@
 							"requirements" : [
 								{
 									"schedulable" : true,
-									"applicable" : true
+									"applicable" : true,
+									"reference_requirement_address" : "stages:0:sops:0:steps:0:requirements:0"
 								}
 							],
 							"time_information" : {
 								"start_time_specification" : ["*","*","01","*","0","86300"],
-								"minimum_time_since_previous_step" : 0,
-								"maximum_time_since_previous_step" : 10	
+								"minimum_time_since_previous_step" : 500,
+								"maximum_time_since_previous_step" : 864000000	
 							}
 						}
 					]

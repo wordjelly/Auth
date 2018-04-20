@@ -364,6 +364,8 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 									expect {pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)}.to raise_error("does not satisfy the start time specification")
 
+
+
 								end
 
 
@@ -371,13 +373,32 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 							context " -- requirement has a reference requirement -- " do 
 
-								## this will create two seperate times,
-								## so we just run it with the discontinuous options.
+								it " -- reference requirement has two time specifications -- ", :reference_req_two_time_specs => true do 
+									
+									assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/two_steps_time_specification.json")
+									
+									assembly_products_and_cart_items = update_assembly_with_products_and_create_cart_items(assembly,@admin,@u)
+
+									assembly = assembly_products_and_cart_items[:assembly]
+
+									cart_items = assembly_products_and_cart_items[:cart_items]
+
+									pipeline_results = pipeline({:search_sop_events => true, :create_order_events => true, :schedule_sop_events => true, :after_schedule_sop => true},assembly,cart_items)
+
+									requirement_query_hash = JSON.parse(pipeline_results[:after_schedule_sop][:arguments][:requirement_query_hash])
+
+									## now in this requirement query hash we should find, that for the given requirement, there is two things.
+									first_requirement = requirement_query_hash["stages:0:sops:0:steps:0:requirements:0"]
+
+									
+									expect(first_requirement.size).to eq(2)
+								end
 
 							end
 
 							context " -- requirement does not have a reference requirement -- " do 
 
+								## it will create two entries 
 
 							end
 
