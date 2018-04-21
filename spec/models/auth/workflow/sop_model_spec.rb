@@ -98,7 +98,6 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 			
 			end
 
-			
 			context " -- schedule order --  " do 
 
 				context " -- transferring location information -- ", :transfer_location => true do 
@@ -489,7 +488,9 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				end	
 
 		 	end
-			
+	
+		 	
+
 		end
 
 	end

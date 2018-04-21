@@ -1,0 +1,67 @@
+{
+	"assembly" : {
+		
+	},
+	"schedules" : [
+		{
+			"bookings" : [
+				{
+					"requirement_id" : "1",
+					"slots" : [
+						{
+							"start_time" : 1,
+							"end_time" : 2
+						},
+						{
+							"start_time" : 3,
+							"end_time" : 4
+						}
+					]
+				},
+				{
+					"requirement_id" : "2",
+					"slots" : [
+						{
+							"start_time" : 1,
+							"end_time" : 2
+						},
+						{
+							"start_time" : 3,
+							"end_time" : 4
+						}
+					]
+				}
+			]
+		},
+		{
+			"bookings" : [
+				{
+					"requirement_id" : "1",
+					"slots" : [
+						{
+							"start_time" : 5,
+							"end_time" : 6
+						},
+						{
+							"start_time" : 5,
+							"end_time" : 6
+						}
+					]
+				},
+				{
+					"requirement_id" : "2",
+					"slots" : [
+						{
+							"start_time" : 7,
+							"end_time" : 8
+						},
+						{
+							"start_time" : 7,
+							"end_time" : 8
+						}
+					]
+				}
+			]
+		}
+	]
+}

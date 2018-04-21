@@ -138,6 +138,12 @@ module Auth
 
     attr_accessor :schedule_class
     attr_accessor :schedule_controller
+
+    attr_accessor :booking_class
+    attr_accessor :booking_controller
+
+    attr_accessor :slot_class
+    attr_accessor :slot_controller
     ########################################################
     ##
     ##
@@ -314,6 +320,12 @@ module Auth
 
       @schedule_class = "Auth::Workflow::Schedule"
       @schedule_controller = "auth/workflow/schedules"
+
+      @booking_class = "Auth::Workflow::Booking"
+      @booking_controller = "auth/workflow/bookings"
+
+      @slot_class = "Auth::Workflow::Slot"
+      @slot_controller = "auth/workflow/slots"
       ########################################################
       ##
       ##

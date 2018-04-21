@@ -102,6 +102,35 @@ module RequirementQueryHashSupport
   end
 
 
+  ## given the file path will load the schedules,check which requirements are there inside them, create those many requirements and update them inside the relevant schedule.  
+  def load_and_create_schedules_bookings_and_requirements(file_path)
+    ## so basically here you cannot build the requirements individually.
+    ## we will have to provide an address for the requirement as well
+    ## stage,sop,step,req_index also has to be given.
+    ## so you have to simulatenously provide assembly and the schedules.
+    ## with corresponding requirement ids
+    schedules_array = JSON.parse(IO.read(file_path))["schedules"]
+    requirements_to_build = {}
+    schedules = schedules_array.each_with_index.map{|c,i|
+      c = Auth.configuration.schedule_class.constantize.new(c)
+      c.bookings.each_with_index{|b,b_i|
+        ## now if the booking has a requirement id
+        requirements_to_build[b.requirement_id.to_s] = [i,b_i] unless requirements_to_build[b.requirement_id.to_s]
+      }
+      c
+    }
+    ## now we can take these requirements 
+    requirements_to_build.keys.each do |requirement_id|
+      r = Auth.configuration.requirement_class.constantize.new
+      expect(r.save).to be_truthy   
+      requirement_add = requirements_to_build[requirement_id]
+      schedules[requirement_add[0]].bookings[requirement_add[1]].requirement_id = r.id.to_s
+    end
+
+    return {:schedules => schedules}
+
+  end
+
   def update_assembly_with_products_and_create_cart_items(loaded_assembly,admin,user)
 
     products_to_build = {}
