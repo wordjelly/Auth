@@ -188,7 +188,8 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				end
 
 				context " -- resolve --  " do 
-				
+
+=begin
 					it " -- resolves location provided location id -- ", :fifth_test => true do 
 
 						assembly = load_assembly_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/location_id_test.json")
@@ -209,6 +210,8 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 
 
 						## add shit here.
+						## so it does not really resolve a location ever.
+						## all it does is assigns the information from the previous step to the current step.
 						sops.each do |sop|
 							sop.steps.each do |step|
 								expect(step.resolved_location_id).not_to be_blank
@@ -243,7 +246,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						end
 
 					end
-
+=end
 
 				end
 
@@ -452,7 +455,7 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 				
 				context " -- location queries -- ", :location_queries => true do 
 
-					it " -- given 20 location objects, finds the nearest one given a spherical distance -- " do 
+					it " -- given some location objects, finds the nearest one given a spherical distance -- " do 
 
 						Auth::Workflow::Location.delete_all
 
@@ -484,6 +487,8 @@ RSpec.describe Auth::Workflow::Sop, type: :model, :sop_model => true do
 						expect(location_results.size).to eq(2)
 
 					end
+
+					
 
 				end	
 

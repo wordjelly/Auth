@@ -10,4 +10,7 @@ class Auth::Workflow::Booking
 
 	field :requirement_capacity, type: Integer
 
+	field :requirement_category, type: String
+
+
 end

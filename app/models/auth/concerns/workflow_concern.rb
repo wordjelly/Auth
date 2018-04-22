@@ -100,58 +100,20 @@ module Auth::Concerns::WorkflowConcern
 
 
     ### @param[Hash] location_information : the location information of the present step.
-    ## @param[Hash] time_information : the time information of the present step.
-    ## @param[String] resolved_location_id : the resolved_location_id of the present step.
-    ## @param[Integer] resolved_time : the resolved_time of the present_step
-    ## will first check if a location_id is already present in the current location_information.
-    ## if yes, will do nothing.
-    ## if no, will assign the location_id from the provided location_information hash.
-    ## next will check if within_radius and location_point_coordinates are already present in the location_information otherwise will try to assing from the provided location_information hash.
-    ## at this point, will look whether this location needs to be resolved or not, and if not then will return.
-    ## if it needs to be resolved, it will call the generate_location_query, using the location information now assigned, and will assign a location id based on the results of that query.
-    ## the time_information and resolved_time params are not used.!
-    def resolve_location(location_information={},time_information={},resolved_location_id=nil,resolved_time=nil)
+    ## will copy over 'location_id','within_radius' and location_point_coordinates if these are not already specified.
+    def resolve_location(location_information={})
 
-      self.location_information.deep_symbolize_keys!
+        self.location_information.deep_symbolize_keys!
 
-      self.location_information[:location_id] ||= location_information[:location_id]
-
-      self.location_information[:within_radius] ||= location_information[:within_radius]
-
-      self.location_information[:location_point_coordinates] ||= location_information[:location_point_coordinates]
-
-      self.location_information[:location_categories] ||= location_information[:location_categories]
-
-      
-      return unless self.resolve
-    
-      
+        self.location_information[:location_id] ||= location_information[:location_id]
         
-      if self.location_information[:location_id]
-        ## the result is to just find
-        self.resolved_location_id = Auth.configuration.location_class.constantize.find(self.location_information[:location_id]).id.to_s
-        
+        self.location_information[:within_radius] ||= location_information[:within_radius]
+
+        self.location_information[:location_point_coordinates] ||= location_information[:location_point_coordinates]
       
-      elsif (self.location_information[:location_point_coordinates] && self.location_information[:within_radius])
-  
-          ## what if it is just a location category?
-          ## we cannot query just on a location category.
-          ## so if there is a category, then add it to 
-          ## so here we can do the query.
-          query = generate_location_query(self.location_information[:location_point_coordinates],self.location_information[:within_radius],self.location_information[:location_categories]) 
+        self.location_information[:location_categories] ||= location_information[:location_categories]
 
-         # puts "the query is:"
-         # puts query.to_s
-          results = Auth.configuration.location_class.constantize.where(query)
-         # puts "the results size is:"
-         # puts results.size.to_s
-          
-          self.resolved_location_id = results.first.id.to_s if results.size > 0
-          
-      end
-        
-
-
+     
     end
 
 
@@ -197,7 +159,7 @@ module Auth::Concerns::WorkflowConcern
     end
 
    
-    def resolve_time(previous_step_time_information)
+    def resolve_start_time(previous_step_time_information)
 
 
       if self.time_information[:start_time_specification]
@@ -226,7 +188,7 @@ module Auth::Concerns::WorkflowConcern
 
           self.time_information[:start_time_range] = [start_time,start_time + range_width]
 
-          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
+          
 
         else
             
@@ -237,7 +199,6 @@ module Auth::Concerns::WorkflowConcern
 
           self.time_information[:start_time_range] = [t.to_i,t.to_i + self.time_information[:start_time_specification][5].to_i]
 
-          self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
 
         end
         
@@ -249,11 +210,17 @@ module Auth::Concerns::WorkflowConcern
         
         raise "previous step time information absent" unless (previous_step_time_information && previous_step_time_information[:start_time_range])
         self.time_information[:start_time_range] = previous_step_time_information[:end_time_range].map{|c| c = c + self.time_information[:minimum_time_since_previous_step]}
-        self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
+        
       end  
 
-  
     end
+
+    def resolve_end_time
+      self.time_information[:end_time_range] = self.time_information[:start_time_range].map{|c| c = c + self.duration}
+    end
+
+    ## here we should have a calculate simultaneous requirement at the prescribed location, using the requirement ids.
+
 
 
     def calculate_duration

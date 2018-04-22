@@ -70,8 +70,11 @@ end
 
 module RequirementQueryHashSupport
 
-  def load_assembly_from_json(json_file_path)
+  ## @param[String] json_file_path : the path to the json file which holds the assembly definition.
+  ## @param[Boolean] document_is_root : defaults to true, if false, will consider the assembly to be specified at the 'assembly' key in the json file. 
+  def load_assembly_from_json(json_file_path,document_is_root=true)
     assembly_as_hash = JSON.parse(IO.read(json_file_path))
+    assembly_as_hash = document_is_root ? assembly_as_hash : assembly_as_hash["assembly"]
     assembly = Auth.configuration.assembly_class.constantize.new(assembly_as_hash)
     ## just return the assembly as is.
     return assembly
@@ -102,32 +105,24 @@ module RequirementQueryHashSupport
   end
 
 
-  ## given the file path will load the schedules,check which requirements are there inside them, create those many requirements and update them inside the relevant schedule.  
-  def load_and_create_schedules_bookings_and_requirements(file_path)
-    ## so basically here you cannot build the requirements individually.
-    ## we will have to provide an address for the requirement as well
-    ## stage,sop,step,req_index also has to be given.
-    ## so you have to simulatenously provide assembly and the schedules.
-    ## with corresponding requirement ids
+  ## @param[String] file_path : the path of the file from where load the  
+  ## @param[Auth::User] admin : an admin user
+  ## @param[Auth::User] user : a normal user
+  ## @return[Hash] a response hash containing three keys : assembly, cart_items and schedules, all created and persisted to the database.
+  def load_and_create_schedules_bookings_and_requirements(file_path,admin,user)
+
+    loaded_assembly = load_assembly_from_json(file_path,false)
+    response  = update_assembly_with_products_and_create_cart_items(loaded_assembly,admin,user)
+
     schedules_array = JSON.parse(IO.read(file_path))["schedules"]
     requirements_to_build = {}
     schedules = schedules_array.each_with_index.map{|c,i|
       c = Auth.configuration.schedule_class.constantize.new(c)
-      c.bookings.each_with_index{|b,b_i|
-        ## now if the booking has a requirement id
-        requirements_to_build[b.requirement_id.to_s] = [i,b_i] unless requirements_to_build[b.requirement_id.to_s]
-      }
+      expect(c.save).to be_truthy
       c
     }
-    ## now we can take these requirements 
-    requirements_to_build.keys.each do |requirement_id|
-      r = Auth.configuration.requirement_class.constantize.new
-      expect(r.save).to be_truthy   
-      requirement_add = requirements_to_build[requirement_id]
-      schedules[requirement_add[0]].bookings[requirement_add[1]].requirement_id = r.id.to_s
-    end
 
-    return {:schedules => schedules}
+    return response.merge(:schedules => schedules)
 
   end
 
@@ -137,6 +132,8 @@ module RequirementQueryHashSupport
     products_built = {}
     locations_to_build = {}
     
+    ## we need the new ids assinged for the requirements.
+
     loaded_assembly.stages.each_with_index {|stage,stage_index|
       stage.sops.each_with_index {|sop,sop_index|
         sop.applicable_to_product_ids.each_with_index {|p_id,p_index|

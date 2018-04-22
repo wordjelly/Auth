@@ -183,12 +183,12 @@ class Auth::Workflow::Step
 				self.time_information = self.time_information.merge(time_information) 
 			end
 			
-			#puts self.location_information if !self.location_information.blank?
+			## the variables if any are added only to the step.
+			## the requirements that are noted inside the step , can have only a category.
+			## requirements can always have only a category, there is no such thing as a direct requirement id
 
-			#puts self.time_information if !self.time_information.blank?
-			
-			## now for each requirement of this step do the same, as long as the requirement is applicable.
-			
+
+=begin
 			self.requirements.each_with_index{|requirement,key|
 				if requirement.applicable
 					
@@ -203,9 +203,16 @@ class Auth::Workflow::Step
 
 				end
 			}
-
+=end
 		end
 
+	end
+
+	def resolve_requirements
+		## first let me start by creating some simple json objects
+		## okay how to assess for requirements.
+		## basically the sop is going to always define a requirement category
+		## so when that requirement is searched for we are looking for something with a
 	end
 		
 	## if this step is made applicable, it must have either a duration or a duration calculation function.

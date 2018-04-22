@@ -1,0 +1,23 @@
+## sop 1: collect anytime from 8am to 9am
+              ## => step 1 :
+                ## => depart :
+                ## => time : 8 am. -> 9 am
+                ## => duration : based on location, and distance of requirement from the location. 
+                ## => location is within 50 km of patient coordinates, 
+                ## => here there is a need to resolve the duration actually.
+                ## => that actually implies resolve requirement.
+                ## => which means search for that requirement which satisfies these conditions best, and add it already as being booked for this time slot.
+                ## => then later on in the query, we search directly for that requirement id and that time slot.
+                ## => so if resolve is true, then the requirement is to be resolved, not the location.
+                ## => at certain other stages, it may be necessary to independently resolve location for some reason.
+                ## => so that facility should also be provided.
+              ## => step 2 :
+                ## => arrive 
+                ## => time : immediately after
+                ## => duration : 1 min
+                ## => location : patient location
+                ## => here we dont need to do anything.
+              ## => step 3:
+                ## => collect
+                ## => 
+      ## sop 2: 

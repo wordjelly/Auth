@@ -486,8 +486,20 @@ class Auth::Workflow::Sop
 
 		latest_ending_cart_item = last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
 
-		#puts "the latest ending cart item is:"
-		#puts latest_ending_cart_item.to_s
+		
+=begin
+--------------------- PREFERRED FLOW OF EVENTS ---------------------
+
+      ## resolve location basically takes the coordinates from a provided location id if at all
+      ## resolve time is then fired, it just finalizes the start time.
+      ## thereafter -> if resolve is ticked, then requirement query is fired, using the start time, and end time if it is there.
+      ## thereafter -> calculate duration is fired, in which the duration if not specified is assigned by using any variables from time_information or location_information.
+      ## thereafter -> resolve time is fired, which basically sets the end time equal to the start_time + duration.
+      ## then the whole thing is transferred to the requirement query.
+
+--------------------------------------------------------------------
+=end
+
 
 		self.steps.each_with_index{|step,key|
 
@@ -508,19 +520,13 @@ class Auth::Workflow::Sop
 			step.time_information[:maximum_time_since_previous_step] ||= 1
 			## done.
 			
-			if key > 0
-				step.resolve_location(self.steps[key-1].location_information)
-				step.resolve_time(self.steps[key-1].time_information)
-			else 
-				#puts "came to resolve time for the first step."
-				
-				step.resolve_location
+			step.resolve_location(key > 0 ? self.steps[key-1].location_information : {})
+			step.resolve_start_time(key > 0 ? self.steps[key-1].time_information : latest_ending_cart_item)
+			step.resolve_requirements if step.resolve
+			step.calculate_duration
+			step.resolve_end_time
 
-				#puts "latest ending cart item is:"
-				#puts latest_ending_cart_item.to_s
-
-				step.resolve_time(latest_ending_cart_item)
-			end
+			
 
 			step.requirements.each_with_index{|req,req_key|
 
@@ -531,13 +537,7 @@ class Auth::Workflow::Sop
 				req.sop_index = step.sop_index
 				req.step_index = step.step_index
 
-				#puts "the step stage index is: #{step.stage_index}"
-				#puts "step sop index is : #{step.sop_index}"
-				#puts "step step index is: #{step.step_index}"
-
-				#puts "the address is:"
-				#puts req.get_self_address(req_key)
-
+				
 				if req.reference_requirement_address == nil
 
 

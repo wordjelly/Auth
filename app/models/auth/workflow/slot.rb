@@ -8,4 +8,5 @@ class Auth::Workflow::Slot
 
 	field :end_time, type: Integer
 
+	
 end

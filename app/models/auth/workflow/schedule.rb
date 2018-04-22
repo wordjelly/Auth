@@ -8,4 +8,5 @@ class Auth::Workflow::Schedule
 
 	embeds_many :bookings, :class_name => Auth.configuration.booking_class
 
+
 end
