@@ -136,6 +136,7 @@ module Auth
     attr_accessor :location_class
     attr_accessor :location_controller
 
+    ## these three are not used.
     attr_accessor :schedule_class
     attr_accessor :schedule_controller
 
@@ -144,6 +145,17 @@ module Auth
 
     attr_accessor :slot_class
     attr_accessor :slot_controller
+    ## the above three are not used.
+
+    ## this is also no longer user.
+    attr_accessor :overlap_class
+    attr_accessor :overlap_controller
+
+    attr_accessor :minute_class
+    attr_accessor :minute_controller
+
+    attr_accessor :entity_class
+    attr_accessor :entity_controller
     ########################################################
     ##
     ##
@@ -326,6 +338,15 @@ module Auth
 
       @slot_class = "Auth::Workflow::Slot"
       @slot_controller = "auth/workflow/slots"
+
+      @overlap_class = "Auth::Workflow::Overlap"
+      @overlap_controller = "auth/workflow/overlaps"
+
+      @minute_class = "Auth::Workflow::Minute"
+      @minute_controller = "auth/workflow/minutes"
+
+      @entity_class = "Auth::Workflow::Entity"
+      @entity_controller = "auth/workflow/entities"
       ########################################################
       ##
       ##

@@ -1,0 +1,143 @@
+{
+	"__comment" : "Contains two locations, each location with 5 minutes, and each minute with 3 different entites.",
+	"locations" : [
+		{
+			"geom" : [58.22,27.45],
+			"location_categories" : ["1","2","3"],
+			"minutes" : [
+				{
+					"minute" : 1,
+					"minimum_entity_duration" : 9,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,10],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,10],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,9],
+							"booked" : false
+						}
+					]
+				},
+				{
+					"minute" : 2,
+					"minimum_entity_duration" : 8,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,9],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,9],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,8],
+							"booked" : false
+						}
+					]
+				},
+				{
+					"minute" : 3,
+					"minimum_entity_duration" : 7,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,8],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,8],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,7],
+							"booked" : false
+						}
+					]
+				}
+			]
+		},
+		{
+			"geom" : [58.23,27.43],
+			"location_categories" : ["1","2","3"],
+			"minutes" : [
+				{
+					"minute" : 1,
+					"minimum_entity_duration" : 9,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,10],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,10],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,9],
+							"booked" : false
+						}
+					]
+				},
+				{
+					"minute" : 2,
+					"minimum_entity_duration" : 8,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,9],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,9],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,8],
+							"booked" : false
+						}
+					]
+				},
+				{
+					"minute" : 3,
+					"minimum_entity_duration" : 7,
+					"entities" : [
+						{
+							"category" : "a",
+							"duration" : [0,8],
+							"booked" : false
+						},
+						{
+							"category" : "b",
+							"duration" : [0,8],
+							"booked" : false
+						},
+						{
+							"category" : "c",
+							"duration" : [0,7],
+							"booked" : false
+						}
+					]
+				}
+			]
+		}
+	]
+}

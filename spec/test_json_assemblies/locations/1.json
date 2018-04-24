@@ -2,64 +2,36 @@
 	"__comment" : "There are five locations. Each has different coordinates. Each location has 5 tlocations. The 1st and 2nd tlocations are for one entity, the 3rd and 4th are for another entity, and the 5th is for a third entity. The 1st entity and second entity have the same entity category, but the fourth entity has a different category. The times of the first, and second tlocations are different, the 3rd tlocation corresponds somewhat with the first and the fourth corresponds with the second. The fifth tlocation has a variable time. The locations 2,3,4 have coordinates very close to :lat => 27.45, :lng => 58.22, So it would be best to search for something within some km of that region. Also none of the tlocations are booked.",
 	"locations" : [
 		{
-			"location" : {
-				"lat" : 9.45,
-				"lng" : 59.23
-			},
+			"geom" : [58.22,27.45],
 			"location_categories" : ["1","2","3"],
 			"tlocations" : [
 				{
 					"start_time" : 1,
 					"end_time" : 2,
+					"duration" : 1,
 					"entity_category" : "1",
-					"entity_id" : "1",
+					"entity_id" : "4",
 					"deletable" : true,
-					"booked" : false
+					"booked" : false,
+					"overlaps" : [
+						{
+							"overlap_category" : "1",
+							"overlap_duration" : 3600,
+							"overlap_eid" : "2",
+							"overlap_booked" : false
+						},
+						{
+							"overlap_category" : "2",
+							"overlap_duration" : 4000,
+							"overlap_eid" : "3",
+							"overlap_booked" : false
+						}
+					]
 				},
 				{
 					"start_time" : 4,
 					"end_time" : 5,
-					"entity_category" : "1",
-					"entity_id" : "1",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "1a",
-					"entity_id" : "2",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 5,
-					"end_time" : 9,
-					"entity_category" : "1a",
-					"entity_id" : "2",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "2",
-					"entity_id" : "3",
-					"deletable" : true,
-					"booked" : false
-				}
-			]
-		},
-		{
-			"location" : {
-				"lat" : 27.45,
-				"lng" : 58.22
-			},
-			"location_categories" : ["1","2","3"],
-			"tlocations" : [
-				{
-					"start_time" : 1,
-					"end_time" : 2,
+					"duration" : 1,
 					"entity_category" : "1",
 					"entity_id" : "4",
 					"deletable" : true,
@@ -68,179 +40,56 @@
 				{
 					"start_time" : 4,
 					"end_time" : 5,
+					"duration" : 1,
+					"entity_category" : "1",
+					"entity_id" : "4",
+					"deletable" : true,
+					"booked" : false,
+					"overlaps" : [
+						{
+							"overlap_category" : "2",
+							"overlap_duration" : 3600,
+							"overlap_eid" : "2",
+							"overlap_booked" : false
+						},
+						{
+							"overlap_category" : "3",
+							"overlap_duration" : 4000,
+							"overlap_eid" : "3",
+							"overlap_booked" : false
+						}
+					]
+				}
+			]
+		},
+		{
+			"geom" : [58.22,27.45],
+			"location_categories" : ["1","2","3"],
+			"tlocations" : [
+				{
+					"start_time" : 1,
+					"end_time" : 2,
+					"duration" : 1,
 					"entity_category" : "1",
 					"entity_id" : "4",
 					"deletable" : true,
 					"booked" : false
 				},
 				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "1a",
-					"entity_id" : "5",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 5,
-					"end_time" : 9,
-					"entity_category" : "1a",
-					"entity_id" : "5",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "2",
-					"entity_id" : "6",
-					"deletable" : true,
-					"booked" : false
-				}
-			]
-		},
-		{
-			"location" : {
-				"lat" : 27.45,
-				"lng" : 58.23
-			},
-			"location_categories" : ["1","2","3"],
-			"tlocations" : [
-				{
-					"start_time" : 1,
-					"end_time" : 2,
+					"start_time" : 4,
+					"end_time" : 5,
+					"duration" : 1,
 					"entity_category" : "1",
-					"entity_id" : "7",
+					"entity_id" : "4",
 					"deletable" : true,
 					"booked" : false
 				},
 				{
 					"start_time" : 4,
 					"end_time" : 5,
+					"duration" : 1,
 					"entity_category" : "1",
-					"entity_id" : "7",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "1a",
-					"entity_id" : "8",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 5,
-					"end_time" : 9,
-					"entity_category" : "1a",
-					"entity_id" : "8",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "2",
-					"entity_id" : "9",
-					"deletable" : true,
-					"booked" : false
-				}
-			]
-		},
-		{
-			"location" : {
-				"lat" : 27.45,
-				"lng" : 58.23
-			},
-			"location_categories" : ["1","2","3"],
-			"tlocations" : [
-				{
-					"start_time" : 1,
-					"end_time" : 2,
-					"entity_category" : "1",
-					"entity_id" : "10",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 4,
-					"end_time" : 5,
-					"entity_category" : "1",
-					"entity_id" : "10",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "1a",
-					"entity_id" : "11",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 5,
-					"end_time" : 9,
-					"entity_category" : "1a",
-					"entity_id" : "11",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "2",
-					"entity_id" : "12",
-					"deletable" : true,
-					"booked" : false
-				}
-			]
-		},
-		{
-			"location" : {
-				"lat" : 9.45,
-				"lng" : 59.23
-			},
-			"location_categories" : ["1","2","3"],
-			"tlocations" : [
-				{
-					"start_time" : 1,
-					"end_time" : 2,
-					"entity_category" : "1",
-					"entity_id" : "13",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 4,
-					"end_time" : 5,
-					"entity_category" : "1",
-					"entity_id" : "13",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "1a",
-					"entity_id" : "14",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 5,
-					"end_time" : 9,
-					"entity_category" : "1a",
-					"entity_id" : "14",
-					"deletable" : true,
-					"booked" : false
-				},
-				{
-					"start_time" : 1,
-					"end_time" : 3,
-					"entity_category" : "2",
-					"entity_id" : "15",
+					"entity_id" : "4",
 					"deletable" : true,
 					"booked" : false
 				}

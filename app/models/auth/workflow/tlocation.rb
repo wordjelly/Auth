@@ -1,8 +1,12 @@
 class Auth::Workflow::Tlocation
 
-  include Auth::Concerns::WorkflowConcern
-  	
+  #include Auth::Concerns::WorkflowConcern
+  
+  include Mongoid::Document 
+
   embedded_in :location, :class_name => Auth.configuration.location_class
+
+  embeds_many :overlaps, :class_name => Auth.configuration.overlap_class
 
   ## the entity id.
   field :entity_id, type: String
@@ -25,8 +29,10 @@ class Auth::Workflow::Tlocation
   ## whether the slot is booked or free, for assignment.
   field :booked, type: Boolean, default: true
 
-  before_save do |document|
-    document.duration = document.end_time - document.start_time
-  end
+
+  field :duration, type: Integer
+
+  
+  
   
 end

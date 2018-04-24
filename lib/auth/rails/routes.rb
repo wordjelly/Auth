@@ -36,6 +36,12 @@ module ActionDispatch::Routing
 
 	      resources :slots, :controller =>  Auth.configuration.slot_controller
 
+	      resources :overlaps, :controller =>  Auth.configuration.overlap_controller
+
+	      resources :minutes, :controller =>  Auth.configuration.minute_controller
+
+	      resources :entities, :controller =>  Auth.configuration.entity_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller
