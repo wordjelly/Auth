@@ -42,6 +42,8 @@ module ActionDispatch::Routing
 
 	      resources :entities, :controller =>  Auth.configuration.entity_controller
 
+	      resources :specifications, :controller =>  Auth.configuration.specification_controller
+
 	      ## image controller is required by default.
 	      ## 
 	      #resources :images, :controller => Auth.configuration.image_controller

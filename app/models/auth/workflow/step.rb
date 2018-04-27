@@ -19,51 +19,26 @@ class Auth::Workflow::Step
 
 	validate :duration_or_duration_calculation_function_exists
 
-	##########################################################
-	##
-	##
-	## SCHEDULing specifications and fields.
-	##
-	##
-	##########################################################
+	## and array of the type :
+	## [[1,1],[1,2],[1,3]] : the first element of every sub array is the day_id, and the last element is the minute.
+	field :start_minute_list, type: Array, default: []
 
-		## we need to provide time based information for scheduling this step
-		######################################################
-		##
-		##
-		## TIME BASED FIELDS
-		##
-		## ALL NUMBERING ON TIME BASED FIELDS STARTS WITH 
-		##
-		######################################################
+	field :resolved_location_id, type: String
 
-		## this will be different for different product_ids.
-		## there will have to be a switch which says it can just follow the previous step.
+    field :resolved_time, type: Integer
 
+    field :calculated_duration, type: Integer
 
-		## what is the location ?
-		## a direct id or a location category.
-		## or what ?
-		## sometimes it has to be inferred, like the previous location of the product.
-		## we can have a location lookup?
-		## for the moment its category -> and that will default to searching for the nearest location based on a category
+    field :duration, type: Integer
 
-		## or it can just have a switch called previous, which is the default, in which case, it just follows the earlier step.
-		
+    ## we need to provide a duration calculation function here.
+    field :duration_calculation_function, type: String, default: ""
 
+    field :category, type: Array, default: []
 
-		## we need to provide location based information for doing this step
+    field :resolved_id, type: String
 
-
-		## we need to provide 
-
-	##########################################################
-	##
-	##
-	##
-	##
-	##
-	##########################################################
+    field :resolve, type: Boolean, default: false
 
 	attr_accessor :assembly_id
 	attr_accessor :assembly_doc_version
@@ -74,6 +49,8 @@ class Auth::Workflow::Step
 	attr_accessor :sop_doc_version
 	attr_accessor :sop_id
 	attr_accessor :step_index
+
+
 
 	
 
@@ -137,6 +114,30 @@ class Auth::Workflow::Step
 
 	end
 
+	def clear_start_minute_list
+		self.start_minute_list.clear
+	end
+
+
+	def merge_cart_item_specifications(cart_items)
+		cart_items.each do |cart_item|
+			 
+			if specification = cart_item.get_specification(self.stage_index.to_s + "_" + self.sop_index.to_s + "_" + self.step_index.to_s)
+				
+				## now the specification may have a start and end time range.
+				## and we have to check if that fits with the time_information start and end_time specifications.
+				## for eg: so we do find_nearest_instant.
+				## if it fits, then use it as the start_time_range and end_time range, in the time_information_hash, for the cart_item.
+				## otherwise, break and return false.
+
+				## then for the location if a target location is given , we can check if this step defines any location restraints.
+
+				## finally 
+
+			end
+
+		end
+	end
 
 	#########################################################
 	## 
@@ -146,6 +147,40 @@ class Auth::Workflow::Step
 	##
 	##
 	########################################################
+
+	## so for the first step -> it will read from cart_item -> will check if the step itself has some specifications.
+	## but for what ?
+	## is it necessary ?
+	## okay so if defined, then check
+	## so that will establish a start_time and end_time_range
+	## then there will be a query done
+	## that will be fired based on the type of step.
+	## so the step has to define which query to fire? 
+	## basically if the query is defined for a geopoint.
+	## like location is also passed in from the cart_item.
+	## like it provides a location.
+	## how to distinguish between a situation that needs a target location to be reached, vs a situation where 
+	## how to know which entity categories are going to be needed? 
+	## that is also to be defined in the step (the so called requirements.)
+	## suppose we have given a location. what is this location ? 
+	## so if a location id is given, then it is directly provided, otherwise, the location is a nearest location, 
+	## so a transport query will have to be defined.
+	## for eg : we need an entity,that is nearest to this entity.
+	## if a speed is defined, then 
+	## see normally we need entities, at a location id, at a specified time. that is our basic query.
+	## but in this case, we need them at * location id, nearest to a particular location id, and at a certain speed.
+
+	## so basically the step will define the query type to be used, and ask for certain parameters to be defined, by the cart items.
+	
+	## so the cart item will have to carry , time information, location information for particular step addresses, and also any additional parameters
+	
+	## so the product has to have an embedded document.
+	## it has a step address:
+	## it has a location information hash
+	## it has a time information hash
+	## it has a additional_parameters_hash
+	## all these things are defined in the cart item.
+	## so now these parameters will be used in the step to perform the query.
 
 	## @param[Auth::Workflow::Order] order : the latest added order which is being scheduled.
 	## @param[Integer] stage_index : the index of the stage

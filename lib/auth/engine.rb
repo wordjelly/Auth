@@ -156,6 +156,9 @@ module Auth
 
     attr_accessor :entity_class
     attr_accessor :entity_controller
+
+    attr_accessor :specification_class
+    attr_accessor :specification_controller
     ########################################################
     ##
     ##
@@ -347,6 +350,9 @@ module Auth
 
       @entity_class = "Auth::Workflow::Entity"
       @entity_controller = "auth/workflow/entities"
+
+      @specification_class = "Auth::Workflow::Specification"
+      @specification_controller = "auth/workflow/specifications"
       ########################################################
       ##
       ##

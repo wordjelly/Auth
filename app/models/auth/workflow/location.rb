@@ -23,171 +23,39 @@ class Auth::Workflow::Location
 	## {:type => "Point", :coordinates => [lng,lat]}
 	field :geom, type: Array
 
-	## also remember to make an index on it.
-	## this may be the only reason why this is not working as expected.
+	
 
-
-	## @param[Hash] coordinates : a hash of the type :lat, :lng , which has the latitude and longitude near which you want to find the requirement categories. 
-	## @param[Integer] within_radius : a radius from the coordinates, within which to search for locations. Should be specified in meters only.
-	## @param[Array] requirement_categories : array of strings, which represent the requirement categories that are to be searched for.
-	## @param[Array] time_range : start and end time within which to search for slots for the given requirements
-	## @param[Float] average_transit_speed_in_mph : the speed at which the requirement is expected to cover the distance, specified in meters per hour. 
-	## @example : suppose we want to search if a scooter(req category 1) and rider(req category 2) is free, within 30 km of a certain location anytime between 9 am and 10 am. This query attempts to solve the problem.
-	## @return
-	def self.find_nearest_free_requirement_categories(coordinates,within_radius,entity_categories,time_range,average_transit_speed_in_mph)
-
-		agg_stages = [
-			{
-				"$geoNear" => {
-					"near" => {
-						"type" => "Point",
-						"coordinates" => [coordinates[:lng],coordinates[:lat]]
-					},
-					"maxDistance" => within_radius,
-					"spherical" => true,
-					"distanceField" => "dist_calculated",
-    				"includeLocs" => "dist_location",
-    				"query" => {
-    					"tlocations" => {
-							"$elemMatch" => {
-								"booked" => false,
-	 	    					"entity_category" => entity_categories[0],
-	 	    					"start_time" => {
-	 	    						"$gte" => time_range[0],
-	 	    						"$lte" => time_range[1]
-	 	    					}
-							}
-						}	
-    				}
-				}
-			},
-			{
-				"$addFields" => {
-					"approx_duration" => {
-						"$divide" => 
-							[
-								"$dist_calculated",
-								average_transit_speed_in_mph
-							]
-					}
-				}
-			},
-			{
-				"$unwind" => "$tlocations"
-			},
-			## keep those documents where the category is one of which we need, and duration is > required duration.
-			## use a reduce to add to an array the categories which we are interested in, if it is of the required duration.
-			## and then 
-			## there has to be another less complicated way to get these overlapping requirement free slots.
-=begin
-			{
-				"$project" => {
-					"altered_overlaps" => {
-						"$reduce" => {
-							"input" => "$tlocations.overlaps",
-							"initialValue" => {
-								"our_categories" => []
-							},
-							"in" => {
-								"our_categories" => {
-									"$cond" => {
-										"if" => {
-											"$and" => [
-												{
-													"$setIsSubset" => 
-												}
-											]
-										}
-									}
-								}
-							}
-
-						}
-					}	
-				}
-			}
-=end
-			## filter on the overlaps.
-			## now we have only which overlap with the targets.
-			## and then we need to know which of them overlap for atleast that long.
-			## modify the overlaps, if the the overlap duration is 
-		]
-
-=begin
-		entity_categories[1..-1].each do |category|
-
-
-			agg_stages[4]["$match"]["$and"][0]["tlocations.overlaps"]["$all"] <<  
-				{
-					"$elemMatch" => {
-						"overlap_duration" => {
-							"$gte" => "$approx_duration"
-						},
-						"overlap_booked" => false,
-						"overlap_category" => category
-					}
-    			}
-		end
-=end
-		puts JSON.pretty_generate(agg_stages)
-
-		response = Auth::Workflow::Location.collection.aggregate(agg_stages)
-
-		
+	## suppose we just want the nearest one, then location id is not a must, or it can be an array of location_ids as well.
+	## we need a requirement, that is also nearest to our current location.
+	## so we can provide a nearest to condition here as well.
+	## so frankly speaking, other than the speed step it is the same.
+	## category,minute_range,day_ids,location_ids=[]
+	def self.find_entity(options)
+		return if options[:category].blank?
+		return if (options[:minute_range].blank? || options[:minute_range][0] > options[:minute_range][1])
+		return if options[:day_ids].blank?
+		#return if (location_ids.map{|c| })
+		# generate a list of minutes, that can be done, and return the both the list and first minute
+		## actually just return the list.
 	end
 
-	 
-	def self.agg
 
-		## basically we want to sum up the durations of the free slots.
-		## these are present inside the tlocations.
-		## so how to do this
-		response = Auth.configuration.location_class.constantize.collection.aggregate([
-			{
-				"$addFields" =>
-				{ 
-					"test_field" => {
-						"$reduce" => {
-							"input" => "$tlocations",
-							"initialValue" => {
-								"free_duration" => 0,
-								"last_value" => 0
-							},
-							"in" => {
-								"free_duration" => {
-									## here we have to apply the condition.
-									## that if it is 
-									"$cond" => {
-										"if" => {
-											"$eq" => ["$$value.last_value",0]
-										},
-										"then" => {
-											"$sum" => [100,"$$value.free_duration"]
-											
-										},
-										"else" => {"$sum" => [1,"$$value.free_duration"]
-										}
-									}
-								},
-								"last_value" => 0
-							}
-		 				}
-	 				}
- 				}
+	## @use : 
+	## Given a point with "#coordinates", we want to find, the nearest location to it, within a distance of #within_radius, that has all the entity "#categories", that are simultaneously free for the time it takes for those entities to reach the point, at a "#speed". THe #minute_range specifies the start minute range for the entities to depart from their locations. The #day_ids specify on which day_ids, we want to search. It will return the nearest location that is found, that satisfies all the above conditions. The returned hash contains all the entities, on that minute, and it also includes the location coordianates and the day_id.
+	## @param[Float] speed : speed in m/s at which the entities will cover the distance.
+	## @param[Hash] coordinates : a hash which has two keys :- 'lat' and 'lng', representing the latitude and longitude of the point.
+	## @param[Float] within_radius : the maximum radius in meters around the #coordinates, in which to search for locations.
+	## @param[Array] categories : each element should be a string, which represents a categoSry of the target entity.
+	## @param[Array] minute_range :[Range] it conveys a minute in time from midnight(midnight is 0). There should be two elements : eg : [0..100] : means anytime from minute 0 -> minute 100. Max two elements are allowed, first has to be less than or equal to the second.
+	## @param[Array] day_ids : an array of integers. ids of days on which to search for the given time range.
+	def self.loc(speed=20,coordinates={:lat => 27.45, :lng => 58.22},within_radius=10000,categories=["1","2","3"],minute_range=[0,100],day_ids=[])
 
-			},
- 			"$project" => {
- 				"test_field" => 1
- 			}
-		])
-
-		response.each do |res|
-			puts res.to_s
-		end
-
-	end
-
-	def self.loc(speed=20,coordinates={:lat => 27.45, :lng => 58.22},within_radius=10000,categories=["1","2","3"],time_range=[0,100])
+		return if speed.blank?
+		return if (coordinates.blank? || coordinates[:lat].blank? || coordinates[:lng].blank?)
+		return if (within_radius <= 0)
+		return if (minute_range.blank? || minute_range[0] > minute_range[1])
+		return if categories.blank?
+		return if day_ids.blank?
 
 		aggregation_clause = 
 		[
@@ -202,11 +70,20 @@ class Auth::Workflow::Location
 					"distanceField" => "dist_calculated",
 					"includeLocs" => "dist_location",
 					"query" => {
-						"minutes.entities" => {
-							"$all" => [
+						"$and" => [
+							{
+								"minutes.entities" => {
+									"$all" => [
 
-							]
-						}
+									]
+								}
+							},
+							{
+								 "day_id" => {
+								 	"$in" => day_ids
+								 }
+							}
+						]
 					}
 				}
 			},
@@ -257,7 +134,7 @@ class Auth::Workflow::Location
 		]
 
 		categories.each do |category|
-			aggregation_clause[0]["$geoNear"]["query"]["minutes.entities"]["$all"] << 
+			aggregation_clause[0]["$geoNear"]["query"]["$and"][0]["minutes.entities"]["$all"] << 
 			{
 				"$elemMatch" => {
 					"category" => category,

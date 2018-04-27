@@ -7,10 +7,6 @@ module Auth::Concerns::WorkflowConcern
 		include Mongoid::Document
   	include Auth::Concerns::OwnerConcern
 
-
-    field :resolve, type: Boolean, default: false
-
-
     ## three keys are possible
     ## :duration -> time in seconds of this thing.
     ## :start_time_range -> the absolute time in epoch when this thing can start ([from,to])
@@ -24,20 +20,9 @@ module Auth::Concerns::WorkflowConcern
 
     field :location_information, type: Hash, default: {}
 
-    field :resolved_location_id, type: String
+    field :miscellaneous_information, type: Hash, default: {}
 
-    field :resolved_time, type: Integer
-
-    field :calculated_duration, type: Integer
-
-    field :duration, type: Integer
-
-    ## we need to provide a duration calculation function here.
-    field :duration_calculation_function, type: String, default: ""
-
-    field :category, type: Array, default: []
-
-    field :resolved_id, type: String
+    
 
     ## @param[Hash] location_coordinates : expected of the format {:lat => float, :lng => float}
     ## @param[Array] within_radius : integer

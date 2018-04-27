@@ -5,6 +5,7 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::ChiefModelConcern
 	include Auth::Concerns::OwnerConcern
 	include Auth::Concerns::EsConcern
+	embeds_many :specifications, :class_name => Auth.configuration.specification_class
 
 	included do 
 	INDEX_DEFINITION = {
@@ -81,9 +82,12 @@ module Auth::Concerns::Shopping::ProductConcern
 		field :stock, type: Float, default: 0.0
 
 		## for WORKFLOW
-		field :location_information, type: Hash, default: {}
-		field :time_information, type: Hash, default: {}
+		#field :location_information, type: Hash, default: {}
+		#field :time_information, type: Hash, default: {}
 		
+				
+
+
 		## all products are public to be searched.
 		before_save do |document|
 			self.public = "yes"
@@ -101,6 +105,11 @@ module Auth::Concerns::Shopping::ProductConcern
 	    public: public
 	 }
 	end 
+
+
+	def get_specification(address)
+		self.specifications.select{|c| c.address == address}.first
+	end
 
 
 end

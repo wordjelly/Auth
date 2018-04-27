@@ -479,28 +479,40 @@ class Auth::Workflow::Sop
 
 	end
 
+	## @param[Array] cart_items : array of cart item objects, basically the cart_items from the order which are applicable to this sop.
+	## @param[Hash] cart_item => last_step hash.
+	## this hash contains the last step for each cart item
+	## if more than one cart item has been updated in a step,
+	## so suppose we have more than one cart item on a particular step, then what ? 
+	## step_address => [cart_item_ids,step]
+	## step_address => [cart_item_ids,step]
+	## @return nil: returns nothing.
+	def schedule_order_new(cart_items,cart_item_to_preceeding_step_hash)
+		self.steps.each_with_index.map{|step,key|
+			self.steps[key - 1].clear_start_minute_list if key >= 1
+			break unless step.merge_cart_item_specifications(cart_items)
+			break unless step.merge_previous_step_information(self.steps[key - 1],cart_item_to_preceeding_step_hash)
+			## query adds the latest step,
+			## and then in the next thing, we clear out the earlier step's minute list.
+			step.query(cart_item_to_preceeding_step_hash)
+		}
+		cart_item_to_preceeding_step_hash
+	end
 
 	## this has to return the cart_items_latest_time, as well as requirement_query_hash
 	## both are hashes.
+	## we should just update the results of the query on the step itself.
+	## and schedule order should return the last step.
+	## and nothing more.
+	## secondly, there is only one call.
+	## basically it sends the cart_item information to the step
+	## so schedule order should receive the cart items array.
+	## and nothing else.
 	def schedule_order(cart_items_latest_time, requirement_query_hash)
 
 		latest_ending_cart_item = last_time_slot_applicable_to_present_cart_items(cart_items_latest_time)
 
 		
-=begin
---------------------- PREFERRED FLOW OF EVENTS ---------------------
-
-      ## resolve location basically takes the coordinates from a provided location id if at all
-      ## resolve time is then fired, it just finalizes the start time.
-      ## thereafter -> if resolve is ticked, then requirement query is fired, using the start time, and end time if it is there.
-      ## thereafter -> calculate duration is fired, in which the duration if not specified is assigned by using any variables from time_information or location_information.
-      ## thereafter -> resolve time is fired, which basically sets the end time equal to the start_time + duration.
-      ## then the whole thing is transferred to the requirement query.
-
---------------------------------------------------------------------
-=end
-
-
 		self.steps.each_with_index{|step,key|
 
 			next unless step.applicable
@@ -509,7 +521,13 @@ class Auth::Workflow::Sop
 			step.step_index = key
 			step.stage_index = self.stage_index
 			step.sop_index = self.sop_index
-		
+	
+			## here we have to check the specifications passed in with the cart items, against the specifications provided inside the step
+			## and if all is ok, then it will take those and pass them to the query type defined in the step.
+			## that is the idea.
+			## so it has to make a seperate query maybe for each of the cart items.
+			## it will have to have this map somewhere.
+			## of all the query results till now for each cart_item.		
 			step.modify_tlocation_conditions_for_each_product(self.orders.last,self.stage_index,self.sop_index,key)
 
 			step.calculate_duration
