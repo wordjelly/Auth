@@ -114,29 +114,23 @@ class Auth::Workflow::Step
 
 	end
 
-	def clear_start_minute_list
-		self.start_minute_list.clear
-	end
-
 
 	def merge_cart_item_specifications(cart_items)
+		
 		cart_items.each do |cart_item|
-			 
+	
+			self.time_information[cart_item.id.to_sym] = {}
+
 			if specification = cart_item.get_specification(self.stage_index.to_s + "_" + self.sop_index.to_s + "_" + self.step_index.to_s)
+
+				self.time_information[cart_item.id.to_sym].merge({:start_time_range => specification.start_time_range})
 				
-				## now the specification may have a start and end time range.
-				## and we have to check if that fits with the time_information start and end_time specifications.
-				## for eg: so we do find_nearest_instant.
-				## if it fits, then use it as the start_time_range and end_time range, in the time_information_hash, for the cart_item.
-				## otherwise, break and return false.
-
-				## then for the location if a target location is given , we can check if this step defines any location restraints.
-
-				## finally 
-
+				self.location_information[cart_item.id.to_sym].merge(specification.location)
+				
 			end
 
 		end
+
 	end
 
 	#########################################################
@@ -243,12 +237,7 @@ class Auth::Workflow::Step
 
 	end
 
-	def resolve_requirements
-		## first let me start by creating some simple json objects
-		## okay how to assess for requirements.
-		## basically the sop is going to always define a requirement category
-		## so when that requirement is searched for we are looking for something with a
-	end
+	
 		
 	## if this step is made applicable, it must have either a duration or a duration calculation function.
 	def duration_or_duration_calculation_function_exists

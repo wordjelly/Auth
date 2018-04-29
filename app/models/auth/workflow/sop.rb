@@ -488,15 +488,25 @@ class Auth::Workflow::Sop
 	## step_address => [cart_item_ids,step]
 	## @return nil: returns nothing.
 	def schedule_order_new(cart_items,cart_item_to_preceeding_step_hash)
+		
+		## so to do this, we will have to save the results ordered by minute.
+		## how to do this with multiple locations.
+		## if more than one location is present at a minute, for more than one entity?
+		## in that aggregation we sort by minute.
+		## and nearness of the location.
+		## so first of all how to do that, then only we can move forward here.
 		self.steps.each_with_index.map{|step,key|
-			self.steps[key - 1].clear_start_minute_list if key >= 1
+			
 			break unless step.merge_cart_item_specifications(cart_items)
-			break unless step.merge_previous_step_information(self.steps[key - 1],cart_item_to_preceeding_step_hash)
-			## query adds the latest step,
-			## and then in the next thing, we clear out the earlier step's minute list.
-			step.query(cart_item_to_preceeding_step_hash)
+
+			## now the next step is to do the query.
+			## once we have the results from the query
+			## we can add that to the step
+			## then we can 
 		}
+
 		cart_item_to_preceeding_step_hash
+		
 	end
 
 	## this has to return the cart_items_latest_time, as well as requirement_query_hash

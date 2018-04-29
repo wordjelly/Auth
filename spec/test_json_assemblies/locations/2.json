@@ -4,6 +4,7 @@
 		{
 			"geom" : [58.22,27.45],
 			"location_categories" : ["1","2","3"],
+			"day_id" : 0,
 			"minutes" : [
 				{
 					"minute" : 1,
@@ -73,6 +74,7 @@
 		{
 			"geom" : [58.23,27.43],
 			"location_categories" : ["1","2","3"],
+			"day_id" : 0,
 			"minutes" : [
 				{
 					"minute" : 1,

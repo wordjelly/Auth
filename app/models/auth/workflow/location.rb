@@ -23,7 +23,11 @@ class Auth::Workflow::Location
 	## {:type => "Point", :coordinates => [lng,lat]}
 	field :geom, type: Array
 
-	
+
+=begin
+	logic for range determination
+	initially we have 
+=end	
 
 	## suppose we just want the nearest one, then location id is not a must, or it can be an array of location_ids as well.
 	## we need a requirement, that is also nearest to our current location.
@@ -48,14 +52,21 @@ class Auth::Workflow::Location
 	## @param[Array] categories : each element should be a string, which represents a categoSry of the target entity.
 	## @param[Array] minute_range :[Range] it conveys a minute in time from midnight(midnight is 0). There should be two elements : eg : [0..100] : means anytime from minute 0 -> minute 100. Max two elements are allowed, first has to be less than or equal to the second.
 	## @param[Array] day_ids : an array of integers. ids of days on which to search for the given time range.
-	def self.loc(speed=20,coordinates={:lat => 27.45, :lng => 58.22},within_radius=10000,categories=["1","2","3"],minute_range=[0,100],day_ids=[])
+	def self.loc(options)
 
-		return if speed.blank?
-		return if (coordinates.blank? || coordinates[:lat].blank? || coordinates[:lng].blank?)
-		return if (within_radius <= 0)
-		return if (minute_range.blank? || minute_range[0] > minute_range[1])
-		return if categories.blank?
-		return if day_ids.blank?
+		speed = options[:speed]
+		coordinates = options[:coordinates]
+		within_radius = options[:within_radius]
+		categories = options[:categories]
+		minute_range = options[:minute_range]
+		day_ids = options[:day_ids]
+
+		raise "speed not provided" if speed.blank?
+		raise "either coordinates blank or coordinate latitude or longitude not provided" if (coordinates.blank? || coordinates[:lat].blank? || coordinates[:lng].blank?)
+		raise "within radius less than zero" if (within_radius <= 0)
+		raise "minute range blank or start minute is greater than end minute" if (minute_range.blank? || minute_range[0] > minute_range[1])
+		raise "entity categories blank" if categories.blank?
+		raise "day ids blank" if (day_ids.blank?)
 
 		aggregation_clause = 
 		[
@@ -65,7 +76,7 @@ class Auth::Workflow::Location
 						"type" => "Point",
 						"coordinates" => [coordinates[:lng],coordinates[:lat]]
 					},
-					"maxDistance" => within_radius,
+					"maxDistance" => 10000000,
 					"spherical" => true,
 					"distanceField" => "dist_calculated",
 					"includeLocs" => "dist_location",
@@ -79,9 +90,9 @@ class Auth::Workflow::Location
 								}
 							},
 							{
-								 "day_id" => {
-								 	"$in" => day_ids
-								 }
+								"day_id" => {
+									"$in" => day_ids
+								}
 							}
 						]
 					}
@@ -129,9 +140,27 @@ class Auth::Workflow::Location
 				}
 			},
 			{
-				"$limit" => 1
+				"$group" => {
+					"_id" => "$minutes.minute",
+					"locations" => {
+						"$push" => "$_id" 
+					}
+				}
+			},
+			{
+				"$sort" => {
+					"_id" => 1
+				}
 			}
 		]
+
+		## we are matching those minutes which have at least the required duration.
+		## the location document consists of the hundred nearest locations anyways.
+		## but we may land up with multiple locations for a minute.
+		## so now we will have to group by minute.
+		## inside that by location.
+		## then we can sort by minute.
+
 
 		categories.each do |category|
 			aggregation_clause[0]["$geoNear"]["query"]["$and"][0]["minutes.entities"]["$all"] << 
@@ -143,6 +172,7 @@ class Auth::Workflow::Location
 			}
 		end
 
+
 		categories.each do |category|
 			aggregation_clause[3]["$match"]["minutes.entities"]["$all"] << 
 			{
@@ -152,6 +182,9 @@ class Auth::Workflow::Location
 				}
 			}
 		end
+
+		puts "the aggregation clause is:"
+		puts aggregation_clause.to_s
 
 		Auth.configuration.location_class.constantize.collection.aggregate(aggregation_clause)
 

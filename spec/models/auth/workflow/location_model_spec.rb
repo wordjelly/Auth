@@ -157,7 +157,13 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 				}
 
 				## uses the default values as described in the function.
-				response = Auth.configuration.location_class.constantize.loc
+				## now time to overload this.
+				options = {:speed => 20, :coordinates => {:lat => 27.45, :lng => 58.22}, :within_radius => 10000, :categories => ["a","b","c"], :minute_range => [0,100], :day_ids => [0]}
+
+				response = Auth.configuration.location_class.constantize.loc(options)
+
+				#speed=20,coordinates={:lat => 27.45, :lng => 58.22},within_radius=10000,categories=["1","2","3"],minute_range=[0,100],day_ids=[]
+
 
 				response.each do |res|
 					puts JSON.pretty_generate(res)
@@ -165,6 +171,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 
 			end
 
+=begin
 			it " -- agg on large location number -- ", :lagg => true do 
 
 				response = Auth.configuration.location_class.constantize.loc
@@ -174,7 +181,8 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 				end				
 
 			end
-
+=end
+=begin
 			it " -- large location number of locations -- ", :bulk => true do 
 
 				Auth.configuration.location_class.constantize.delete_all
@@ -212,7 +220,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 				end
 
 			end
-
+=end
 		end
 
 	end

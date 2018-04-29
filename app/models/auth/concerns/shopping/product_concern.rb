@@ -5,9 +5,12 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::ChiefModelConcern
 	include Auth::Concerns::OwnerConcern
 	include Auth::Concerns::EsConcern
-	embeds_many :specifications, :class_name => Auth.configuration.specification_class
+	
 
 	included do 
+	
+	embeds_many :specifications, :class_name => Auth.configuration.specification_class
+
 	INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
