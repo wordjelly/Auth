@@ -3,7 +3,6 @@ class Auth::Workflow::Specification
 	embedded_in :products, :class_name => Auth.configuration.product_class
 
 	field :address, type: String
-		
 	## the problem is that while creating the cart_item, we will have to copy over the specifications as well.
 	## so need to add a before_create callback in the cart_item
 
@@ -23,7 +22,7 @@ class Auth::Workflow::Specification
 	
 	## the index of the chosen specification from amongst the permitted_start_time_ranges
 	## and actual will be got based on that.
-	field :selected_start_time_range, type: Integer
+	field :selected_start_time_range, type: Array
 
 	## what location categories are permitted.
 	field :permitted_location_categories, type: Array, default: []
@@ -44,7 +43,7 @@ class Auth::Workflow::Specification
 
 	field :selected_location_ids, type: Array
 
-	field :permitted_location_ids, type: Array
+	field :permitted_location_ids, type: Array, default: []
 
 	## this has to be resolved from amongst all the options in the specification.
 	## it has an order of preference like  :
@@ -93,16 +92,16 @@ class Auth::Workflow::Specification
       	nearest_day_midnight_epoch = nil
       
 	    $date_hash.keys[from_index..-1].each_with_index {|dt,key|
-	        nearest_day_midnight_epoch = (key*86400 + current_time.beginning_of_day.to_i) if (dt=~/#{regex_pattern}/
+	        nearest_day_midnight_epoch = (key*86400 + current_time.beginning_of_day.to_i) if dt=~/#{regex_pattern}/
 	        break if nearest_day_midnight_epoch
 	    }
 
 	    ## this is the nearest date
 
-	    raise "matching date could not be found with specification:#{spec}" unless nearest_day_midnight_epoch
+	    raise "matching date could not be found with specification" unless nearest_day_midnight_epoch
 
 	    
-	    {:start_time_range_beginning => nearest_day_midnight_epoch + spec[4], :start_time_range_end => nearest_day_midnight_epoch + spec[4] + spec[5]}
+	    {:start_time_range_beginning => nearest_day_midnight_epoch + selected_start_time_range[4].to_i, :start_time_range_end => nearest_day_midnight_epoch + selected_start_time_range[4].to_i + selected_start_time_range[5].to_i}
 
 	end
 

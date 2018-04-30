@@ -250,6 +250,60 @@ module RequirementQueryHashSupport
 
 end
 
+module SpecificationSupport
+
+  ## @return[Array] cart_items : array of cart items loaded from the json file specified in json_file_path. Each cart item is given its own product. It also creates the location objects if any location ids are specified inside the specifications.
+  def load_cart_items_from_json(json_file_path)
+
+    root = JSON.parse(IO.read(json_file_path))
+
+    cart_items_hashes = root["cart_items"]
+    
+    cart_items = []
+
+    cart_items_hashes.each do |citem_hash|
+      c = Auth.configuration.cart_item_class.constantize.new(citem_hash)
+      c.signed_in_resource = @u
+      c.resource_id = @u.id.to_s
+      c.resource_class = @u.class.name.to_s
+      ## whatever is the product id, make one like that
+      product = Auth.configuration.product_class.constantize.new
+      product.signed_in_resource = @admin
+      product.resource_id = @admin.id.to_s
+      product.resource_class = @admin.class.name.to_s
+      expect(product.save).to be_truthy
+      c.product_id = product.id.to_s
+      expect(c.save).to be_truthy
+      cart_items << c
+    end
+
+    cart_items.each do |citem|
+      citem.specifications.each do |spec|
+        location_ids_actual = {}
+        if spec.permitted_location_ids.size > 0
+          spec.permitted_location_ids.each_with_index {|lid,k|
+            l = Auth.configuration.location_class.constantize.new
+            expect(l.save).to be_truthy
+            location_ids_actual[lid] = l.id.to_s          
+          }
+          ## now we have to also replace the selected location ids if at all.
+          if spec.selected_location_ids
+            spec.selected_location_ids.map!{|c| 
+              c = location_ids_actual[c]
+            }
+          end
+          spec.permitted_location_ids = location_ids_actual.values
+        end
+      end
+      expect(citem.save).to be_truthy
+    end
+
+    cart_items
+
+  end
+
+end
+
 module DiscountSupport
   
   def create_cart_items(signed_in_res,user=nil,number=5,price=10.0)
@@ -1023,6 +1077,9 @@ RSpec.configure do |config|
 
   config.include RequirementQueryHashSupport, :type => :request
   config.include RequirementQueryHashSupport, :type => :model
+
+  config.include SpecificationSupport, :type => :request
+  config.include SpecificationSupport, :type => :model
 
 end
 

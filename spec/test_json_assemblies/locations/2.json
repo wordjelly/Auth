@@ -1,10 +1,9 @@
 {
-	"__comment" : "Contains two locations, each location with 5 minutes, and each minute with 3 different entites.",
+	"__comment" : "Contains two locations, each location with 5 minutes, and each minute with 3 different entites, suppose duration is 4, then how to check, so we are seeing where duration is gte the duration.",
 	"locations" : [
 		{
 			"geom" : [58.22,27.45],
-			"location_categories" : ["1","2","3"],
-			"day_id" : 0,
+			"location_categories" : ["5"],
 			"minutes" : [
 				{
 					"minute" : 1,
@@ -12,17 +11,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,10],
+							"duration" : 10,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,10],
+							"duration" : 10,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						}
 					]
@@ -33,17 +32,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						}
 					]
@@ -54,17 +53,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,7],
+							"duration" : 7,
 							"booked" : false
 						}
 					]
@@ -74,7 +73,6 @@
 		{
 			"geom" : [58.23,27.43],
 			"location_categories" : ["1","2","3"],
-			"day_id" : 0,
 			"minutes" : [
 				{
 					"minute" : 1,
@@ -82,17 +80,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,10],
+							"duration" : 10,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,10],
+							"duration" : 10,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						}
 					]
@@ -103,17 +101,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,9],
+							"duration" : 9,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						}
 					]
@@ -124,17 +122,17 @@
 					"entities" : [
 						{
 							"category" : "a",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						},
 						{
 							"category" : "b",
-							"duration" : [0,8],
+							"duration" : 8,
 							"booked" : false
 						},
 						{
 							"category" : "c",
-							"duration" : [0,7],
+							"duration" : 7,
 							"booked" : false
 						}
 					]

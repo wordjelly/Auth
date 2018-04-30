@@ -49,10 +49,9 @@ class Auth::Workflow::Step
 	attr_accessor :sop_doc_version
 	attr_accessor :sop_id
 	attr_accessor :step_index
-
-
-
 	
+
+	attr_accessor :query_information
 
 	def self.permitted_params
 		[{:step => [:name, :applicable, :description,:assembly_id,:assembly_doc_version,:stage_id, :stage_doc_version, :stage_index, :sop_id, :sop_doc_version, :sop_index, :doc_version, :step_index]},:id]
@@ -116,21 +115,79 @@ class Auth::Workflow::Step
 
 
 	def merge_cart_item_specifications(cart_items)
+
+		_time = {}
+		_only_location_cart_items = {}
 		
 		cart_items.each do |cart_item|
-	
-			self.time_information[cart_item.id.to_sym] = {}
-
+		
 			if specification = cart_item.get_specification(self.stage_index.to_s + "_" + self.sop_index.to_s + "_" + self.step_index.to_s)
 
-				self.time_information[cart_item.id.to_sym].merge({:start_time_range => specification.start_time_range})
-				
-				self.location_information[cart_item.id.to_sym].merge(specification.location)
+				if start_time_range = specification.start_time_range
+					_time[start_time_range.to_s] = {:sort_key => start_time_range[0]} unless _time[start_time_range.to_s]
+					if loc = specification.location
+						_time[start_time_range.to_s][loc.to_s] = [] unless _time[start_time_range.to_s][loc.to_s]
+						_time[start_time_range.to_s][loc.to_s] << cart_item.id.to_s
+						
+					else
+						_time[start_time_range.to_s]["any_location"] = {:cart_item_ids => [cart_item.id.to_s]}
+					end
+				else
+					if loc = specification.location
+						
+						_only_location_cart_items[loc.to_s] = {:cart_item_ids => [], :location => loc.to_s} unless _only_location_cart_items[loc.to_s]
+
+						_only_location_cart_items[loc.to_s][:cart_item_ids] << cart_item.id.to_s
+
+					else
+					
+						## no time information and no location information , will not be performed at all.
+					
+					end
+
+				end
+
+
 				
 			end
 
 		end
 
+		_time = _time.sort_by{|k,v| v[:sort_key]}.to_h
+
+		_only_location_cart_items.each do |loc|
+			found_existing = false
+			_time.keys.each do |k|
+				unless _time[k][loc].nil?
+					_time[k][loc][:cart_item_ids]+= _only_location_cart_items[loc][:cart_item_ids]
+					found_existing = true
+					break
+				end
+				unless found_existing
+					_time[_time.keys.first][loc] = {:cart_item_ids => _only_location_cart_items[loc][:cart_item_ids]}
+				end
+			end
+		end
+
+		## the _time contains all the queries and how they are to be performed.
+		## okay so first this will have to be tested.
+		## then can do the merge from previous step
+		## then comes the finding of the most appropriate time slot, and doing the bsearch as well.
+		## or if necessary querying backwards.
+		## this is only applicable to the first step for every cart item.
+		## we have to be rest assured that no further steps are going to interfere with this.;
+		## finally have to flip the whole thing, onto the cart items.
+
+	end
+
+	def append_time_and_location_information_based_on_previous_step
+
+	end
+
+	def do_query
+		
+
+	
 	end
 
 	#########################################################

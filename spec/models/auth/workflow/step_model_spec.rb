@@ -5,6 +5,7 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 	end
 
+=begin
 	context " -- resolve time specs -- " do
 
 		context " -- start_time_specifications present -- " do 
@@ -156,7 +157,42 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 
 	end
+=end
+	
 
+	context " -- merge_cart_item_specifications -- " do 
+
+		context " -- no specification for cart item -- " do 
+
+		end
+
+		context " -- cart item has specification -- " do 
+
+			context " -- time specification present -- " do 
+
+
+				context " -- time speficiation already exists -- " do 
+
+
+				end
+
+				context " -- time specification new -- " do 
+
+					context " -- has location specification -- " do 
+
+					end
+
+					context " -- no location specification -- " do 
+
+					end
+
+				end
+
+			end
+
+		end		
+
+	end
 	
 
 end

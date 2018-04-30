@@ -6,7 +6,7 @@ class Auth::Workflow::Entity
 
 	field :category, type: String
 	
-	field :duration, type: Array
+	field :duration, type: Integer
 
 	field :booked, type: Boolean
 
