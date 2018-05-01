@@ -250,6 +250,8 @@ module RequirementQueryHashSupport
 
 end
 
+
+
 module SpecificationSupport
 
   ## @return[Array] cart_items : array of cart items loaded from the json file specified in json_file_path. Each cart item is given its own product. It also creates the location objects if any location ids are specified inside the specifications.
@@ -277,22 +279,28 @@ module SpecificationSupport
       cart_items << c
     end
 
+
+    locations = {}
+
+
     cart_items.each do |citem|
       citem.specifications.each do |spec|
         location_ids_actual = {}
         if spec.permitted_location_ids.size > 0
           spec.permitted_location_ids.each_with_index {|lid,k|
-            l = Auth.configuration.location_class.constantize.new
-            expect(l.save).to be_truthy
-            location_ids_actual[lid] = l.id.to_s          
+            if locations[lid]
+
+            else
+              l = Auth.configuration.location_class.constantize.new
+              expect(l.save).to be_truthy
+              locations[lid] = l
+            end     
           }
-          ## now we have to also replace the selected location ids if at all.
-          if spec.selected_location_ids
-            spec.selected_location_ids.map!{|c| 
-              c = location_ids_actual[c]
-            }
-          end
-          spec.permitted_location_ids = location_ids_actual.values
+
+          spec.permitted_location_ids.map{|c| c = locations[c]}
+         
+          spec.permitted_location_ids.map{|c| c = locations[c]} if spec.permitted_location_ids
+          
         end
       end
       expect(citem.save).to be_truthy
@@ -1080,6 +1088,8 @@ RSpec.configure do |config|
 
   config.include SpecificationSupport, :type => :request
   config.include SpecificationSupport, :type => :model
+
+  
 
 end
 

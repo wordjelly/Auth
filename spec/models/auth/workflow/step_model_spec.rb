@@ -2,7 +2,25 @@ require 'rails_helper'
 RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 	before(:all) do 
+		User.delete_all
 
+		## create one non admin user
+		@u = User.new(attributes_for(:user_confirmed))
+        @u.save
+        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
+        @c.redirect_urls = ["http://www.google.com"]
+        @c.versioned_create
+        @u.client_authentication["testappid"] = "testestoken"
+        @u.save
+        @ap_key = @c.api_key
+        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+
+		## create one admin user.
+		@admin = User.new(attributes_for(:admin_confirmed))
+        @admin.admin = true
+        @admin.client_authentication["testappid"] = "testestoken2"
+        @admin.save
+        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 	end
 
 =begin
@@ -157,40 +175,138 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 
 	end
+	NOT APPLICABLE ANYMORE.
 =end
 	
 
 	context " -- merge_cart_item_specifications -- " do 
 
-		context " -- no specification for cart item -- " do 
-
+		before(:example) do 
+			Auth.configuration.location_class.constantize.delete_all
+			Auth.configuration.cart_item_class.constantize.delete_all
+			Auth.configuration.product_class.constantize.delete_all
 		end
 
-		context " -- cart item has specification -- " do 
+		context " -- one cart item  -- " do 
 
-			context " -- time specification present -- " do 
+			context " -- no specification for cart item -- " do 
 
-
-				context " -- time speficiation already exists -- " do 
-
-
-				end
-
-				context " -- time specification new -- " do 
-
-					context " -- has location specification -- " do 
-
-					end
-
-					context " -- no location specification -- " do 
-
-					end
-
+				it " -- return empty hash -- " do 
+					step = Auth.configuration.step_class.constantize.new
+					step.stage_index = 0
+					step.sop_index = 0
+					step.step_index = 0
+					cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/1.json")
+					expect(step.merge_cart_item_specifications(cart_items)).to be_empty
 				end
 
 			end
 
-		end		
+			context " -- cart item has specification -- " do 
+
+				context " -- time specification present -- " do 
+
+					context " -- time speficiation already exists -- " do 
+
+						it " -- adds the cart item to existing time spec -- ", :tru_test => true do 
+
+
+								step = Auth.configuration.step_class.constantize.new
+								step.stage_index = 0
+								step.sop_index = 0
+								step.step_index = 0
+								cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/4.json")
+								response = step.merge_cart_item_specifications(cart_items) 
+								expect(response).not_to be_empty
+								expect(response.keys.size).to eq(1)
+								expect(response.values.first.keys).to eq([:sort_key, :start_time_range, :any_location])
+								puts JSON.pretty_generate(response)
+								## expect there to be two cart item ids.
+								expect(response.values.first[:any_location][:cart_item_ids].size).to eq(2)
+
+
+						end
+
+					end
+
+					context " -- time specification new -- " do 
+
+						context " -- no location specification -- " do 
+
+							it " -- returns a hash with one key i.e the time specification --  " do 
+
+								step = Auth.configuration.step_class.constantize.new
+								step.stage_index = 0
+								step.sop_index = 0
+								step.step_index = 0
+								cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/2.json")
+								response = step.merge_cart_item_specifications(cart_items) 
+								expect(response).not_to be_empty
+								expect(response.keys.size).to eq(1)
+								expect(response.values.first.keys).to eq([:sort_key, :start_time_range, :any_location])
+
+							end
+
+						end
+
+						context " -- has location specification -- " do 
+
+							it " -- returns hash with cart item as the single key, and time range with location spec  -- ", :loc_test => true do 
+
+								step = Auth.configuration.step_class.constantize.new
+								step.stage_index = 0
+								step.sop_index = 0
+								step.step_index = 0
+								cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/3.json")
+								response = step.merge_cart_item_specifications(cart_items) 
+
+								expect(response).not_to be_empty
+								expect(response.keys.size).to eq(1)
+								
+								response.values.first.keys.each do |k|
+									if k.to_s == "start_time_range"
+									elsif k.to_s == "sort_key"
+									elsif k.to_s == "any_location"
+									else
+										## here we expect to see the location ids.
+										expect(response.values.first[k].keys).to eq([:location,:cart_item_ids])
+									end
+								end
+
+
+							end
+
+						end
+
+					end
+
+					context " -- some items have only location specifications -- " do 
+
+						it " -- a time specification has the same location as the those items which have only location specifications, so it adds the cart items to that time spec, loc spec.  -- ", :five => true do 
+
+							step = Auth.configuration.step_class.constantize.new
+							step.stage_index = 0
+							step.sop_index = 0
+							step.step_index = 0
+							cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/5.json")
+							response = step.merge_cart_item_specifications(cart_items) 
+							response.values.first.keys.each do |v|
+								if v.to_s == "sort_key"
+								elsif v.to_s == "start_time_range"
+								elsif v.to_s == "any_location"
+								else
+									expect(response.values.first[v][:cart_item_ids].size).to eq(2)
+								end
+							end
+						end
+
+					end
+
+				end
+
+			end		
+
+		end
 
 	end
 	

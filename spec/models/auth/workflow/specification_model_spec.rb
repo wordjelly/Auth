@@ -1,5 +1,5 @@
 require 'rails_helper'
-RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
+RSpec.describe Auth::Workflow::Step, type: :model, :specification_model => true do
 
 	before(:all) do
 		User.delete_all
@@ -46,7 +46,7 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 				cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/specifications/2.json")
 
-				expect{cart_items.first.specifications.first.start_time_range}.to raise_error("start time range not selected")
+				expect{cart_items.first.specifications.first.start_time_range(Time.now)}.to raise_error("start time range not selected")
 
 			end
 
@@ -54,7 +54,7 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 				cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/specifications/4.json")
 
-				expect{cart_items.first.specifications.first.start_time_range}.to raise_error("matching date could not be found with specification")
+				expect{cart_items.first.specifications.first.start_time_range(Time.now)}.to raise_error("matching date could not be found with specification")
 				
 			end
 
@@ -62,7 +62,7 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 				cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/specifications/3.json")
 
-				cart_items.first.specifications.first.start_time_range
+				cart_items.first.specifications.first.start_time_range(Time.now)
 
 
 			end

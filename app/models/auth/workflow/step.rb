@@ -116,28 +116,54 @@ class Auth::Workflow::Step
 
 	def merge_cart_item_specifications(cart_items)
 
+		current_time = Time.now
+
 		_time = {}
 		_only_location_cart_items = {}
 		
-		cart_items.each do |cart_item|
-		
-			if specification = cart_item.get_specification(self.stage_index.to_s + "_" + self.sop_index.to_s + "_" + self.step_index.to_s)
+		## here the problem is that we have to add a start time, that is consistent for all the specifications at the minimum
+		## while entering the step.
 
-				if start_time_range = specification.start_time_range
-					_time[start_time_range.to_s] = {:sort_key => start_time_range[0]} unless _time[start_time_range.to_s]
+		cart_items.each do |cart_item|
+			puts "doing cart item: #{cart_item.id.to_s}"
+			if specification = cart_item.get_specification(self.stage_index.to_s + ":" + self.sop_index.to_s + ":" + self.step_index.to_s)
+
+				if start_time_range = specification.start_time_range(current_time)
+					puts "has start time range."
+					_time[Base64.encode64(start_time_range.to_s)] = {:sort_key => start_time_range[:start_time_range_beginning], :start_time_range => start_time_range, :any_location => {}} unless _time[Base64.encode64(start_time_range.to_s)]
+
 					if loc = specification.location
-						_time[start_time_range.to_s][loc.to_s] = [] unless _time[start_time_range.to_s][loc.to_s]
-						_time[start_time_range.to_s][loc.to_s] << cart_item.id.to_s
+					
+						
+						
+						_time[Base64.encode64(start_time_range.to_s)][Base64.encode64(loc.to_s)] = {:location => loc, :cart_item_ids => []} unless _time[Base64.encode64(start_time_range.to_s)][Base64.encode64(loc.to_s)]
+						
+						_time[Base64.encode64(start_time_range.to_s)][Base64.encode64(loc.to_s)][:cart_item_ids] << cart_item.id.to_s
 						
 					else
-						_time[start_time_range.to_s]["any_location"] = {:cart_item_ids => [cart_item.id.to_s]}
+						
+						if _time[Base64.encode64(start_time_range.to_s)][:any_location][:cart_item_ids]
+							
+							puts "any location cart item ids already exist."
+
+							_time[Base64.encode64(start_time_range.to_s)][:any_location][:cart_item_ids] << cart_item.id.to_s
+
+						else
+
+							puts "they dont exist."
+							
+							_time[Base64.encode64(start_time_range.to_s)][:any_location][:cart_item_ids] = [cart_item.id.to_s]
+						
+						end
+
 					end
+											
 				else
 					if loc = specification.location
 						
-						_only_location_cart_items[loc.to_s] = {:cart_item_ids => [], :location => loc.to_s} unless _only_location_cart_items[loc.to_s]
+						_only_location_cart_items[Base64.encode64(loc.to_s)] = {:cart_item_ids => [], :location => loc.to_s} unless _only_location_cart_items[Base64.encode64(loc.to_s)]
 
-						_only_location_cart_items[loc.to_s][:cart_item_ids] << cart_item.id.to_s
+						_only_location_cart_items[Base64.encode64(loc.to_s)][:cart_item_ids] << cart_item.id.to_s
 
 					else
 					
@@ -153,12 +179,22 @@ class Auth::Workflow::Step
 
 		end
 
-		_time = _time.sort_by{|k,v| v[:sort_key]}.to_h
+		puts JSON.pretty_generate(_time)
 
-		_only_location_cart_items.each do |loc|
+		_time = _time.sort_by{|k,v| v[:sort_key]}.to_h
+		## so what to do if there is no sort key.
+
+		_only_location_cart_items.keys.each do |loc|
 			found_existing = false
 			_time.keys.each do |k|
 				unless _time[k][loc].nil?
+
+					#puts "this is _time[k][loc]"
+					#puts _time[k][loc]
+
+					#puts "this is only locations cart items"
+					#puts _only_location_cart_items[loc][:cart_item_ids]
+
 					_time[k][loc][:cart_item_ids]+= _only_location_cart_items[loc][:cart_item_ids]
 					found_existing = true
 					break
@@ -169,27 +205,31 @@ class Auth::Workflow::Step
 			end
 		end
 
-		## the _time contains all the queries and how they are to be performed.
-		## okay so first this will have to be tested.
-		## then can do the merge from previous step
-		## then comes the finding of the most appropriate time slot, and doing the bsearch as well.
-		## or if necessary querying backwards.
-		## this is only applicable to the first step for every cart item.
-		## we have to be rest assured that no further steps are going to interfere with this.;
-		## finally have to flip the whole thing, onto the cart items.
+		_time
 
-	end
-
-	def append_time_and_location_information_based_on_previous_step
-
-	end
-
-	def do_query
 		
-
 	
 	end
 
+	def append_time_and_location_information_based_on_previous_step
+		## suppose we have the previous step saying some things
+		## and now we have 3 cart items here.
+		## so they have to be matched to whichever group they belong to.
+		## so for that we will have to go over the hash.
+		## and then assign them there.
+		## based on time since previous query, we have to change the start time ranges.
+		## based on the query results.
+		## the query will provide a start and an end time.
+		## so we will have to hold the minutes from the earlier query for all the cart items.
+		## from the previous step.
+		## when you come to a step, clear the previous step.
+	end
+
+	def do_query
+
+	end
+
+	
 	#########################################################
 	## 
 	## CALLED FROM:

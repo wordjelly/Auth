@@ -61,13 +61,13 @@ class Auth::Workflow::Specification
 			return {:within_radius => self.selected_within_radius, :origin_location => self.origin_location, :location_categories => self.selected_location_categories}
 		end
 
-		return {}
+		return nil
 	end
 
 	
-	def start_time_range
+	def start_time_range(current_time)
 
-		return {} if permitted_start_time_ranges.blank?
+		return nil if permitted_start_time_ranges.blank?
 
 		raise "start time range not selected" unless selected_start_time_range
 	
@@ -84,7 +84,7 @@ class Auth::Workflow::Specification
           end
       	}
         	
-        current_time = Time.now
+        
 
       	from_index = $day_id_hash[current_time.strftime($time_hash_strftime_format)]
       
