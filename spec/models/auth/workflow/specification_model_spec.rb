@@ -50,7 +50,7 @@ RSpec.describe Auth::Workflow::Step, type: :model, :specification_model => true 
 
 			end
 
-			it " -- raises no matching date if nearest date matching spec could not be found -- " do 
+			it " -- raises no matching date if nearest date matching spec could not be found -- ", :no_matching_date => true do 
 
 				cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/specifications/4.json")
 

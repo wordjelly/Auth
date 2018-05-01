@@ -43,6 +43,10 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 
 			end
 
+		end
+
+		context " -- travel search -- " do 
+
 			it " -- finds requirements from categories a, b at the nearest location, free for time taken to travel between that location and given point. -- ", :minute_agg do 
 
 				Auth.configuration.location_class.constantize.delete_all
@@ -73,7 +77,39 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 
 			end
 
-		
+			it " -- filters with location ids and categories if they are passed into the options -- " do 
+
+				Auth.configuration.location_class.constantize.delete_all
+
+				json_defintion = JSON.parse(IO.read("/home/bhargav/Github/auth/spec/test_json_assemblies/locations/2.json"))
+
+				location_hashes = json_defintion["locations"]
+
+				
+				locations = location_hashes.map{|c|
+					c = Auth.configuration.location_class.constantize.new(c)
+					expect(c.save).to be_truthy
+					c
+				}
+
+				options = {:speed => 20000, :coordinates => {:lat => 27.45, :lng => 58.22}, :within_radius => 10000, :categories => ["a","b","c"], :minute_ranges => [[0,100]], :location_categories => ["1","2","3"],}
+
+				response = Auth.configuration.location_class.constantize.loc(options)
+
+				total_results = 0
+				expected_result_minutes_in_asc_order = [1,2,3]
+				response.each do |res|
+					puts JSON.pretty_generate(res)
+					expect(res["locations"].size).to eq(1)
+					expect(res["_id"]).to eq(expected_result_minutes_in_asc_order[total_results])
+					total_results+=1
+				end
+				expect(total_results).to eq(3)
+
+
+
+			end
+
 		end
 
 		context " -- find entity -- ", :find_entity => true do 
@@ -140,7 +176,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 
 			end
 
-			it " -- if location ids and categories are provided, only ids are considered -- ", :find_entity_location_ids do 
+			it " -- if location ids and categories are provided, both are considered. -- ", :find_entity_location_ids do 
 
 				Auth.configuration.location_class.constantize.delete_all
 
@@ -155,7 +191,9 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 					c
 				}
 
-				options = {:duration => 2, :categories => ["a","b","c"], :minute_ranges => [[0,100]], :location_ids => [locations.first.id.to_s]}
+				# since the first location has a category of 5, we will ask for category of second location and id of the first location.
+				# so it should return no results.
+				options = {:duration => 2, :categories => ["1","2","3"], :minute_ranges => [[0,100]], :location_ids => [locations.first.id.to_s]}
 
 				response = Auth.configuration.location_class.constantize.find_entity(options)
 			
@@ -168,7 +206,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 				end			
 
 
-				expect(total_results).to eq(3)
+				expect(total_results).to eq(0)
 
 
 			end

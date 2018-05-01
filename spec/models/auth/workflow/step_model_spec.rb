@@ -302,12 +302,41 @@ RSpec.describe Auth::Workflow::Step, type: :model, :step_model => true do
 
 					end
 
+					context " -- some items have a location specification, but it does not match any of the location specifications in the time specifications that already exists -- " do 
+
+						it " -- adds them to the earliest time specification -- " do 
+
+							step = Auth.configuration.step_class.constantize.new
+							step.stage_index = 0
+							step.sop_index = 0
+							step.step_index = 0
+							cart_items = load_cart_items_from_json("/home/bhargav/Github/auth/spec/test_json_assemblies/steps/6.json")
+							response = step.merge_cart_item_specifications(cart_items)
+							
+							## this should get added to the earliest time range.
+							## so the first item should have 
+							puts JSON.pretty_generate(response)
+
+						end
+
+					end
+
 				end
 
 			end		
 
 		end
 
+	end
+
+	context " -- query -- " do 
+		## how to test this in the first place.
+		## basically the start time range is defined
+		## if location ids are provided then they can be used -> in the basic find_entity query.
+		## so first let us have those options provided in the find_entity query.
+		## and what is the required return type
+		## thereafter, it will look at the earliest and latest ranges.
+		## if an origin location is provided, and there is a within radius and location categories, then they can also be provided, the speed part is optional.
 	end
 	
 

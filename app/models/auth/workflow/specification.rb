@@ -12,8 +12,8 @@ class Auth::Workflow::Specification
 	## each element has the following elements:
 	## 0 -> year specification
 	## 1 -> month specification
-	## 2 -> day_of_week (0->6 : representing monday -> sunday)
-	## 3 -> day_of_month (1-31 : representing the dates)
+	## 2 -> day_of_month (1-31 : representing the dates)
+	## 3 -> day_of_week (0->6 : representing monday -> sunday)
 	## 4 -> seconds since midnight, minimum time after midnight at which this step can be started to be performed.
 	## 5 -> how many seconds to add to the [4] to get the maximum time after midnight at which the step can be started. This can be any value, implying that the step can be started on some subsequent day , relative to this day.
 	## these time specifications are added directly to the step that they refer to.
@@ -72,7 +72,10 @@ class Auth::Workflow::Specification
 		raise "start time range not selected" unless selected_start_time_range
 	
 		regex_pattern = ""
-      	
+      		
+		#puts "selected start time range is:" 
+		#puts selected_start_time_range.to_s
+
       	selected_start_time_range[0..3].map.each_with_index{|value,key|
           if value =~ /\*/
             regex_pattern += "[0-9]{4}" if key == 0
@@ -84,7 +87,7 @@ class Auth::Workflow::Specification
           end
       	}
         	
-        
+        #puts "the regex pattern is: #{regex_pattern}"
 
       	from_index = $day_id_hash[current_time.strftime($time_hash_strftime_format)]
       
@@ -93,7 +96,11 @@ class Auth::Workflow::Specification
       
 	    $date_hash.keys[from_index..-1].each_with_index {|dt,key|
 	        nearest_day_midnight_epoch = (key*86400 + current_time.beginning_of_day.to_i) if dt=~/#{regex_pattern}/
-	        break if nearest_day_midnight_epoch
+	        if nearest_day_midnight_epoch
+	        	#puts "dt is: #{dt}"
+	    		#puts nearest_day_midnight_epoch.to_s
+	    		break
+	    	end
 	    }
 
 	    ## this is the nearest date

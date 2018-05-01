@@ -121,9 +121,11 @@ class Auth::Workflow::Location
 						"$in" => location_ids.map{|c| c = BSON::ObjectId(c)}
 					}
 				}
+
+		end
 	
 			
-		elsif !location_categories.nil?
+		if !location_categories.nil?
 			aggregation_clause[0]["$match"]["$and"] << 
 				{
 					"location_categories" => 
@@ -174,11 +176,16 @@ class Auth::Workflow::Location
 	## @param[Array] day_ids : an array of integers. ids of days on which to search for the given time range.
 	def self.loc(options)
 
+
 		speed = options[:speed]
 		coordinates = options[:coordinates]
 		within_radius = options[:within_radius]
 		categories = options[:categories]
 		minute_ranges = options[:minute_ranges]
+		
+		## these two are optional parameters.
+		location_categories = options[:location_categories]
+		location_ids = options[:location_ids]
 		
 
 		raise "speed not provided" if speed.blank?
@@ -306,6 +313,32 @@ class Auth::Workflow::Location
 					"$lte" => mrange[1]
 				}
 			} 
+		end
+
+
+		if !location_categories.nil?
+
+			aggregation_clause[0]["$geoNear"]["query"]["$and"] << 
+				{
+					"location_categories" => 
+						{
+							"$in" => location_categories
+						}
+				}
+		end
+
+		## now add a test for this.
+
+		if !location_ids.nil?
+
+			aggregation_clause[0]["$geoNear"]["query"]["$and"] << 
+				{
+					"location_ids" => 
+						{
+							"$in" => location_ids
+						}
+				}
+
 		end
 
 	
