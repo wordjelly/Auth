@@ -83,6 +83,8 @@ module Auth::Concerns::Shopping::ProductConcern
 		field :price, type: BigDecimal
 		field :name, type: String
 		field :stock, type: Float, default: 0.0
+		## a product can only belong to one bunch.
+		field :bunch, type: String
 
 		## for WORKFLOW
 		#field :location_information, type: Hash, default: {}

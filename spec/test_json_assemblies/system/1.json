@@ -1,74 +1,107 @@
 {
-	"levels" : 
-	[
+	"products" : [
 		{
-			"__comments" : "this is the first level",
-			"branches" : 
-			[
-				{
-					"__comments" : "this is the first branch, the category can refer to a bunch of products all being sent in simultaneously. And that is defined in the definitions",
-					"product_category" : "a",
-					"definitions" : 
-					[
-						{
-							"__comments" : "the outputs products are for one quantity of the product id defined here",
-							"product_requirements" : {
-								"product_id" : 10,
-								"product_id_2" : 20
-							},
-							"time_specifications" : 
-							[
-								["2018","*","20","*","0","5000"],
-								["2018","*","22","*","0","10000"]
-							],
-							"location_specifications" : {
-								"minimum_radius" : 10,
-								"maximum_radius" : 1000,
-								"location_categories" : ["l1","l2","l3"],
-								"location_ids" : ["lid1","lid2","lid3"]
-							},
-							"duration" : 100,
-							"entity_categories_needed_simultaneously_with_capacity" : {
-								"a1" : 10,
-								"a2" : 15,
-								"a3" : 16
-							},
-							"creations" : [
-								{
-									"applicable_to_product_ids" : ["a","b","c"],
-									"__comments" : "",
-									"summatable" : true,
-									"rounding_factor" : "half_up/half_down",
-									"outputs" : [
-										{
-											"product_id" : "x",
-											"destination_address" : "l:b:d",
-											"quantity_per_incoming_product" : 10
-										},
-										{
-											"product_id" : "y",
-											"destination_address" : "l:b:d",
-											"quantity_per_incoming_product" : 5
-										}
-									]
-								}
-							],
-							"units" : 
-							[
-								{
-									"__comments" : "cart items are added one at a time to the branch. It is checked to which creation they are applicable. If one is found, then it is checked if it is mergable. If yes, then it is checked if a unit already exists for that creation_id. If yes, then using the quantity per incoming product, n new objects of that product are created, and a query is fired for the provided time specification. It is merged with the query results of the existing unit, and then the output ids generated are also added to that unit. Otherwise a new unit is created. Then it goes forward.",
-									"query_results" : [],
-									"creation_id" : "",
-									"output_ids_to_generated_object_ids" : {
-										"x" : ["1","2","3","4"],
-										"y" : ["a","b","c","d"]
-									}
-								}
-							]
-						}
-					]
-				}
-			]
+			"_id" : "first_product",
+			"bunch" : "a"		
+		},
+		{
+			"_id" : "second_product",
+			"bunch" : "b"
+		},
+		{
+			"_id" : "third_product",
+			"bunch" : "c"
+		},
+		{
+			"_id" : "fourth_product",
+			"bunch" : "d"
 		}
-	]
+	],
+	"cart_items" : [
+		{
+			 "product_id" : "first_product"
+		},
+		{
+			"product_id" : "second_product"
+		}
+	],
+	"wrapper" :
+	{
+		"levels" : 
+		[
+			{
+				"__comments" : "this is the first level",
+				"branches" : 
+				[
+					{
+						"__comments" : "this is the first branch, the category can refer to a bunch of products all being sent in simultaneously. And that is defined in the definitions",
+						"product_bunch" : "a",
+						"definitions" : 
+						[
+							{
+								"__comments" : "the outputs products are for one quantity of the product id defined here",
+								"product_requirements" : {
+									"first_product" : 1
+								},
+								"time_specifications" : 
+								[
+									["2018","*","20","*","0","5000"],
+									["2018","*","22","*","0","10000"]
+								],
+								"location_specifications" : {
+									"minimum_radius" : 10,
+									"maximum_radius" : 1000,
+									"location_categories" : ["l1","l2","l3"],
+									"location_ids" : ["lid1","lid2","lid3"]
+								},
+								"duration" : 100,
+								"entity_categories_needed_simultaneously_with_capacity" : {
+									"a1" : 10,
+									"a2" : 15,
+									"a3" : 16
+								},
+								"creations" : [
+									{
+										"__comments" : "in the simultaneous product requirements it refers to the index numbers in the incoming quantities inside the definition.",
+										"applicable_to_product_ids" : ["a","b","c"],
+										"simultaneous_product_requirements" : {
+											"first_product" : [0]
+										},
+										"summatable" : true,
+										"rounding_factor" : "half_up/half_down",
+										"outputs" : [
+											{
+												"_id" : "l0:b0:d0:c0:o0",
+												"product_id" : "third_product",
+												"destination_address" : "l:b:d",
+												"quantity_per_incoming_product" : 10
+											},
+											{
+												"_id" : "l0:b0:d0:c0:o1",
+												"product_id" : "fourth_product",
+												"destination_address" : "l:b:d",
+												"quantity_per_incoming_product" : 5
+											}
+										]
+									}
+								],
+								"units" : 
+								[
+									{
+										"__comments" : "cart items are added one at a time to the branch. It is checked to which creation they are applicable. If one is found, then it is checked if it is mergable. If yes, then it is checked if a unit already exists for that creation_id. If yes, then using the quantity per incoming product, n new objects of that product are created, and a query is fired for the provided time specification. It is merged with the query results of the existing unit, and then the output ids generated are also added to that unit. Otherwise a new unit is created. Then it goes forward.",
+										"query_results" : [],
+										"creation_id" : "",
+										"output_ids_to_generated_object_ids" : {
+											"l0:b0:d0:c0:o0" : [],
+											"l0:b0:d0:c0:o1" : []
+										}
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
 }

@@ -32,6 +32,8 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		before(:example) do 
 			Auth::System::Wrapper.delete_all
+			Auth.configuration.product_class.constantize.delete_all
+			Auth.configuration.cart_item_class.constantize.delete_all
 		end
 
 
@@ -39,15 +41,82 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 			it " -- loads wrapper from json file -- " do 
 
-				wrapper = get_wrapper_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/1.json")
-				wrapper = Auth::System::Wrapper.new(wrapper)
-				expect(wrapper.levels.size).to eq(1)
+				wrapper = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/1.json")
+				expect(wrapper.address).to be_nil
+				wrapper.levels.each_with_index {|l,lindex|
+					expect(l.address).to eq("l#{lindex}")
+					l.branches.each_with_index{|b,bindex|
+						expect(b.address).to eq(l.address + ":b#{bindex}")
+						b.definitions.each_with_index{|d,dindex|
+							expect(d.address).to eq(b.address + ":d#{dindex}")
+							d.creations.each_with_index{|c,cindex|
+								expect(c.address).to eq(d.address + ":c#{cindex}")
+							}
+							d.units.each_with_index{|u,uindex|
+								expect(u.address).to eq(d.address + ":u#{uindex}")
+							}
+						}
+					}
+				}
 				
+			end
+
+
+
+		end
+
+=begin
+		context " -- adding of cart items -- " do 
+
+			context " -- locates brance, defintion and creation -- " do 
+
+				context " -- address provided -- " do 
+
+				end
+
+				context " -- address not provided -- " do 
+
+					it  " -- wrapper finds level and branch with 	appropriate product category -- "
+
+						
+
+					do
+
+
+					it " -- branch finds definition with appropriate product requirements -- " do 
+
+
+					end
+
+
+					it " -- definition finds correct creation -- " do 
+
+
+					end
+					
+				end
 
 			end
 
 		end
 
+		context " -- processes cart items one at a time -- " do 
+
+		end
+
+
+		context " -- query -- " do 
+
+			it " -- stores the results -- " do 
+
+			end
+
+			it " -- merges results up each level -- " do 
+
+			end
+
+		end
+=end
 	end
 
 end

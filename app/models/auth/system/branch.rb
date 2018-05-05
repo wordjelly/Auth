@@ -4,8 +4,8 @@ class Auth::System::Branch
 	embeds_many :definitions, :class_name => "Auth::System::Definition"
 	embeds_many :units, :class_name => "Auth::System::Unit"
 	embedded_in :level, :class_name => "Auth::System::Level"
-	field :product_category, type: String
-
-	## at a certain point the unit will add the products it has to a 
-
+	field :product_bunch, type: String
+	field :cart_item_ids, type: Array
+	
+	
 end

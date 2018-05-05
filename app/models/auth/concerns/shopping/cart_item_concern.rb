@@ -131,6 +131,17 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :accept_order_at_percentage_of_price, type: Float, default: 1.00
 
 
+		#################################################################
+		##
+		##
+		## ATTRIBUTES FOR TESTS
+		##
+		##
+		#################################################################
+
+		
+
+
 		before_destroy do |document|
 			
 			if !skip_callback?("before_destroy")

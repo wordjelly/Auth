@@ -9,4 +9,5 @@ class Auth::System::Definition
 	field :duration, type: Integer
 	field :entity_categories_needed_simultaneously_with_capacity, type: Hash
 
+
 end
