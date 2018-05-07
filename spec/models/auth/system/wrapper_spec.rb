@@ -117,55 +117,22 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		end
 
+		context " -- schedule -- " do 
 
-		context " -- query -- " do 
+			it " -- gets the query results of the last applied definition for any given object -- " do 
 
-			context " -- time specifications -- " do 
-
-				it " -- builds from spec, if it is the first step -- " do 
-
-				end
-
-				it " -- builds from previous if it is a subsequent step -- " do 
-				end
-
+				## just search recursively backwards.
+				## you get the time unit which contains thsi.
+				## find a common point where all can be started.
+				## for this those query results will have to be intersected.
+				## basically just intersect the minute arrays.
+				## now we can consider a schedule query
+				## first we have to compare the incoming time to the time and location specifications.
+				## then we can do the query
+				## the results will be saved in the units : each unit corresponds to one "element" in the incoming object ids arrays.
+				## and then it will have to be keyed by destination.
+				## and here it will actually add all the items from those units to the destinations.
 			end
-
-			context " -- location specifications -- " do 
-
-
-			end
-
-			it " -- does query and creates unit -- " do 
-
-			end
-
-			it " -- does another query and modifies query results in unit -- " do 
-
-			end
-
-			it " -- stores the query details in the overlap hash -- " do 
-
-			end
-
-		end
-
-
-
-		context " -- process step, check in , and next step -- " do 
-
-
-		end
-
-
-		context " -- query backtrace -- " do 
-
-
-		end
-
-
-		context " -- update locations -- " do 
-
 
 		end
 

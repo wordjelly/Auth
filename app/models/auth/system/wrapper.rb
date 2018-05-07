@@ -51,4 +51,15 @@ class Auth::System::Wrapper
 		end	
 	end
 
+
+	## 9th
+	def backtrace
+
+	end
+
+	## 9th
+	def create_schedules
+
+	end
+
 end
