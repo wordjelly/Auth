@@ -1,4 +1,5 @@
 {
+	"__comments" : "both the cart items are applicable to the branch with product bunch 'a'. so both are added there. Then the objects are grouped by the value in each of their miscellaneous_attributes for each definition, if such a value exists. that value will have the address of the definition::number, so we just do a regex scan of the definitions to see which groups match them and add that directly.",
 	"products" : [
 		{
 			"_id" : "first_product",
@@ -19,10 +20,16 @@
 	],
 	"cart_items" : [
 		{
-			 "product_id" : "first_product"
+			 "product_id" : "first_product",
+			 "miscellaneous_attributes" : {
+			 	"l0:b0:d0" : "l0:b0:d0:0" 
+			 }
 		},
 		{
-			"product_id" : "first_product"
+			"product_id" : "first_product",
+			"miscellaneous_attributes" : {
+				"l0:b0:d0" : "l0:b0:d0:1"
+			}
 		}
 	],
 	"wrapper" :
@@ -36,14 +43,16 @@
 					{
 						"__comments" : "this is the first branch, the category can refer to a bunch of products all being sent in simultaneously. And that is defined in the definitions. ----- from input objects grouped by time slot ---- the input_object_ids from above are reorganized like this before trying to match them to the definitions.",
 						"input_object_ids" : 
-						["level:branch:definition:unit:object_id","these are not predefined, just the ones which were added to this branch, either directly or because they have the product_bunch."],
+						[
+
+						],
 						"product_bunch" : "a",
 						"merge_output" : true,
 						"definitions" : 
 						[
 							{
 								"__comments" : "we want an array of array of definition addresses",
-								"input_requirements" : ["array of output object ids, all must share a common start and end time."],
+								"input_requirements" : ["*"],
 								"time_specifications" : 
 								[
 									["2018","*","20","*","0","5000"],

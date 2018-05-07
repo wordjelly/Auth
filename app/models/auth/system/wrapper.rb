@@ -7,20 +7,26 @@ class Auth::System::Wrapper
 		document.add_addresses
 	end
 	
-	def add_cart_items
-		## first add the cart items to the branches.
+	## @return[Array] _branches : an array of branch addresses, where the items were added.
+	def add_cart_items(cart_item_ids)
 		_branches = []
-		self.cart_item_ids.each do |cid|
+		cart_item_ids.each do |cid|
+			branch_located = false
 			cart_item = Auth.configuration.cart_item_class.constantize.find(cid)
 			self.levels.each do |level|
 				level.branches.each do |branch|
-					if branch.product_bunch == cart_item.product_bunch
-						branch.cart_item_ids << cid
+					if branch.product_bunch == cart_item.bunch
+						branch.input_object_ids << cid
+						_branches << branch.address unless _branches.include? branch.address
+						branch_located = true
 					end
 				end
 			end
+			raise "could not find a branch for #{cid}" unless branch_located
 		end
+		_branches 
 	end
+
 
 	def add_addresses
 		_level = 0
@@ -32,11 +38,6 @@ class Auth::System::Wrapper
 				branch.definitions.each do |definition|
 					_definition = 0
 					definition.address = branch.address + ":d" + _definition.to_s
-					_creation = 0
-					definition.creations.each do |creation|
-						creation.address = definition.address + ":c" + _creation.to_s
-						_creation+=1
-					end
 					_unit = 0
 					definition.units.each do |unit|
 						unit.address = definition.address + ":u" + _unit.to_s

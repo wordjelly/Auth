@@ -41,7 +41,8 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 			it " -- loads wrapper from json file -- " do 
 
-				wrapper = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/1.json")
+				response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/1.json")
+				wrapper = response[:wrapper]
 				expect(wrapper.address).to be_nil
 				wrapper.levels.each_with_index {|l,lindex|
 					expect(l.address).to eq("l#{lindex}")
@@ -49,9 +50,6 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 						expect(b.address).to eq(l.address + ":b#{bindex}")
 						b.definitions.each_with_index{|d,dindex|
 							expect(d.address).to eq(b.address + ":d#{dindex}")
-							d.creations.each_with_index{|c,cindex|
-								expect(c.address).to eq(d.address + ":c#{cindex}")
-							}
 							d.units.each_with_index{|u,uindex|
 								expect(u.address).to eq(d.address + ":u#{uindex}")
 							}
@@ -65,7 +63,6 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		end
 
-=begin
 		context " -- adding of cart items -- " do 
 
 			context " -- locates brance, defintion and creation -- " do 
@@ -76,47 +73,102 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 				context " -- address not provided -- " do 
 
-					it  " -- wrapper finds level and branch with 	appropriate product category -- "
+					it  " -- wrapper adds cart_items to applicable branches. -- " do 
 
+						response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/2.json")
+						wrapper = response[:wrapper]
+						cart_items = response[:cart_items]
+						products = response[:products]
+						wrapper.add_cart_items(cart_items.map{|c| c = c.id.to_s})
+						expect(wrapper.levels[0].branches[0].input_object_ids.size).to eq(2)
 						
-
-					do
-
-
-					it " -- branch finds definition with appropriate product requirements -- " do 
-
-
 					end
 
 
-					it " -- definition finds correct creation -- " do 
+					it " -- wrapper raises branch not found error, if a branch could not be found for a cart item -- " do 
 
-
+												
 					end
 					
+					it " -- branch input objects are added to definitions based on group key -- " do 
+
+						response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/3.json")
+						wrapper = response[:wrapper]
+						cart_items = response[:cart_items]
+						products = response[:products]
+						wrapper.add_cart_items(cart_items.map{|c| c = c.id.to_s})
+						wrapper.levels.each do |level|
+							level.branches.each do |branch|
+								branch.add_cart_items
+							end
+						end
+						expect(wrapper.levels[0].branches[0].definitions[0].input_object_ids.size).to eq(2)
+					end
+
+					it " -- raises no definition satisfied if no definition can be found for all the cart items -- " do 
+
+
+					end
+
+
 				end
 
 			end
 
 		end
 
-		context " -- processes cart items one at a time -- " do 
-
-		end
-
 
 		context " -- query -- " do 
 
-			it " -- stores the results -- " do 
+			context " -- time specifications -- " do 
+
+				it " -- builds from spec, if it is the first step -- " do 
+
+				end
+
+				it " -- builds from previous if it is a subsequent step -- " do 
+				end
 
 			end
 
-			it " -- merges results up each level -- " do 
+			context " -- location specifications -- " do 
+
+
+			end
+
+			it " -- does query and creates unit -- " do 
+
+			end
+
+			it " -- does another query and modifies query results in unit -- " do 
+
+			end
+
+			it " -- stores the query details in the overlap hash -- " do 
 
 			end
 
 		end
-=end
+
+
+
+		context " -- process step, check in , and next step -- " do 
+
+
+		end
+
+
+		context " -- query backtrace -- " do 
+
+
+		end
+
+
+		context " -- update locations -- " do 
+
+
+		end
+
 	end
 
 end

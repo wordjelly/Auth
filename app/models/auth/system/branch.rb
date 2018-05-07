@@ -5,7 +5,13 @@ class Auth::System::Branch
 	embeds_many :units, :class_name => "Auth::System::Unit"
 	embedded_in :level, :class_name => "Auth::System::Level"
 	field :product_bunch, type: String
-	field :cart_item_ids, type: Array
+	field :merge_output, type: Boolean
+	field :input_object_ids, type: Array, default: []
 	
-	
+	def add_cart_items
+		self.definitions.each do |definition|
+			definition.add_cart_items(self.input_object_ids.map{|c| c = Auth.configuration.cart_item_class.constantize.find(c)})
+		end
+	end
+
 end

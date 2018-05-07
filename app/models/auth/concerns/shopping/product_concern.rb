@@ -82,16 +82,16 @@ module Auth::Concerns::Shopping::ProductConcern
 		#include MongoidVersionedAtomic::VAtomic	
 		field :price, type: BigDecimal
 		field :name, type: String
-		field :stock, type: Float, default: 0.0
 		## a product can only belong to one bunch.
 		field :bunch, type: String
-
+		##PERMITTED
+		##the number of this product that are being added to the cart
+		##permitted
+		field :quantity, type: Float, default: 1
 		## for WORKFLOW
 		#field :location_information, type: Hash, default: {}
 		#field :time_information, type: Hash, default: {}
-		
-				
-
+		field :miscellaneous_attributes, type: Hash, default: {}
 
 		## all products are public to be searched.
 		before_save do |document|
@@ -116,5 +116,34 @@ module Auth::Concerns::Shopping::ProductConcern
 		self.specifications.select{|c| c.address == address}.first
 	end
 
+
+
+	##################################################################
+	##
+	##
+	## FOR SYSTEM.
+	##
+	##
+	##################################################################
+
+	def get_group_value(group_by_key)
+		if group_by_key == "*" 
+			return "*"
+		else
+			return self.miscellaneous_attributes[group_by_key]
+		end
+	end
+	
+	## @param[String] req : the requirement from the definition. It consists of "*" wildcard, or a product id, or a definition address + product_id -> which is basically one of the output products of the definition.
+	## @return[Boolean] : true/false if this product satisfies the requirement or not.
+	def satisfies_requirement(req)
+		if ((req == self.id.to_s) || (req == "*"))
+			true
+		elsif req == (self.miscellaneous_attributes[:address] + ":" + self.id.to_s)
+			true
+		else
+			false
+		end
+	end
 
 end

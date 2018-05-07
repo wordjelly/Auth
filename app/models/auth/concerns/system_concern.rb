@@ -7,7 +7,8 @@ module Auth::Concerns::SystemConcern
 		include Mongoid::Document
 		field :__comments, type: String
 		field :address, type: String	
-		field :cart_item_ids, type: Array  	
+		
+	
 	end
 
 end

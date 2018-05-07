@@ -1,7 +1,6 @@
 class Auth::System::Unit
 	include Auth::Concerns::SystemConcern
 	embedded_in :definition, :class_name => "Auth::System::Definition"
+	field :definition_plus_input_group_id, type: String
 	field :query_results, type: Array
-	field :creation_id, type: String
-	field :output_ids_to_generated_object_ids, type: Hash
 end	

@@ -97,11 +97,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		field :resource_id, type: String
 		
 		##PERMITTED
-		##the number of this product that are being added to the cart
-		##permitted
-		field :quantity, type: Integer, default: 1
-
-		##PERMITTED
 		
 		##not permitted
 		field :parent_id, type: String
@@ -134,11 +129,11 @@ module Auth::Concerns::Shopping::CartItemConcern
 		#################################################################
 		##
 		##
-		## ATTRIBUTES FOR TESTS
+		## ATTRIBUTES FOR SYSTEM
 		##
 		##
 		#################################################################
-
+		field :unit_id, type: String
 		
 
 
@@ -431,7 +426,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	end
 
 	def product_attributes_to_assign
-		["name","price"]
+		["name","price","bunch"]
 	end
 
 	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.
@@ -447,5 +442,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 	    public: public
 	 }
 	end 
+
 
 end
