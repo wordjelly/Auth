@@ -119,19 +119,55 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		context " -- schedule -- " do 
 
-			it " -- gets the query results of the last applied definition for any given object -- " do 
+			context " -- multiple units in individual input object id elements -- " do 
 
-				## just search recursively backwards.
-				## you get the time unit which contains thsi.
-				## find a common point where all can be started.
-				## for this those query results will have to be intersected.
-				## basically just intersect the minute arrays.
-				## now we can consider a schedule query
-				## first we have to compare the incoming time to the time and location specifications.
-				## then we can do the query
-				## the results will be saved in the units : each unit corresponds to one "element" in the incoming object ids arrays.
-				## and then it will have to be keyed by destination.
-				## and here it will actually add all the items from those units to the destinations.
+				context " -- no previous query results -- " do 
+					
+					it " -- adds a wildcard entry into the intersection results. -- " do 	
+
+						response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/3.json")
+						
+						wrapper = response[:wrapper]
+						
+						cart_items = response[:cart_items]
+						
+						products = response[:products]
+						
+						wrapper.add_cart_items(cart_items.map{|c| c = c.id.to_s})
+
+						wrapper.levels.each do |level|
+							level.branches.each do |branch|
+								branch.add_cart_items
+							end
+						end
+						
+						expect(wrapper.levels[0].branches[0].definitions[0].input_object_ids.size).to eq(2)
+
+						wrapper.levels.each do |level|
+							level.branches.each do |branch|
+								branch.do_schedule_queries
+							end
+						end
+
+						expect(wrapper.levels[0].branches[0].definitions[0].intersection_results[0]).to eq([{:minute=>"*", :locations=>["*"]}])
+
+					end
+
+
+					it " -- checks time specified in the cart_item for congruence with time specifications, and sets a common time specification for the query -- " do 
+
+						## so each cart item will have a certain start time mentioned on it.
+						## so this becomes the fallback for the set_time_specifications function.
+
+					end
+
+					it " -- checks location specified in the cart_item for congruence with locations specifications, and sets a common location specification for the query -- " do 
+
+
+					end
+
+				end
+
 			end
 
 		end

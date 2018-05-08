@@ -14,4 +14,11 @@ class Auth::System::Branch
 		end
 	end
 
+	def do_schedule_queries
+		self.definitions.each do |definition|
+			definition.find_input_object_id_common_schedules
+			definition.apply_time_specifications
+		end
+	end
+
 end
