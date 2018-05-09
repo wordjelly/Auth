@@ -123,7 +123,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 				context " -- no previous query results -- " do 
 					
-					it " -- adds a wildcard entry into the intersection results. -- " do 	
+					it " -- adds a wildcard entry into the intersection results. -- ", :wildcard => true do 	
 
 						response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/3.json")
 						

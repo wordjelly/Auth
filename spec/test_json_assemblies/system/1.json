@@ -46,15 +46,11 @@
 								"input_requirements" : ["array of output object ids, all must share a common start and end time."],
 								"time_specifications" : 
 								[
-									["2018","*","20","*","0","5000"],
-									["2018","*","22","*","0","10000"]
+									
 								],
-								"location_specifications" : {
-									"minimum_radius" : 10,
-									"maximum_radius" : 1000,
-									"location_categories" : ["l1","l2","l3"],
-									"location_ids" : ["lid1","lid2","lid3"]
-								},
+								"location_specifications" : [
+									
+								],
 								"duration" : 100,
 								"entity_categories_needed_simultaneously_with_capacity" : {
 									"a1" : 10,

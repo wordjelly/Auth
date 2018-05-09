@@ -134,16 +134,6 @@ module Auth::Concerns::Shopping::ProductConcern
 		end
 	end
 	
-	## @param[String] req : the requirement from the definition. It consists of "*" wildcard, or a product id, or a definition address + product_id -> which is basically one of the output products of the definition.
-	## @return[Boolean] : true/false if this product satisfies the requirement or not.
-	def satisfies_requirement(req)
-		if ((req == self.id.to_s) || (req == "*"))
-			true
-		elsif req == (self.miscellaneous_attributes[:address] + ":" + self.id.to_s)
-			true
-		else
-			false
-		end
-	end
+	
 
 end

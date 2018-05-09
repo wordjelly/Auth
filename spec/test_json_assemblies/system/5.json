@@ -1,4 +1,5 @@
 {
+	"__comments" : "this is to simulate an error that there are no start time range specifications, for any of the cart items, meant for a particular unit.",
 	"products" : [
 		{
 			"_id" : "first_product",
@@ -6,23 +7,21 @@
 		},
 		{
 			"_id" : "second_product",
-			"bunch" : "b"
-		},
-		{
-			"_id" : "third_product",
-			"bunch" : "c"
-		},
-		{
-			"_id" : "fourth_product",
-			"bunch" : "d"
+			"bunch" : "a"
 		}
 	],
 	"cart_items" : [
 		{
-			 "product_id" : "first_product"
+			 "product_id" : "first_product",
+			 "miscellaneous_attributes" : {
+			 	"l0:b0:d0" : "l0:b0:d0:0" 
+			 }
 		},
 		{
-			"product_id" : "first_product"
+			"product_id" : "second_product",
+			"miscellaneous_attributes" : {
+				"l0:b0:d0" : "l0:b0:d0:0"
+			}
 		}
 	],
 	"wrapper" :
@@ -34,7 +33,6 @@
 				"branches" : 
 				[
 					{
-						"__comments" : "this is the first branch, the category can refer to a bunch of products all being sent in simultaneously. And that is defined in the definitions. ----- from input objects grouped by time slot ---- the input_object_ids from above are reorganized like this before trying to match them to the definitions.",
 						"input_object_ids" : 
 						[
 
@@ -44,9 +42,8 @@
 						"definitions" : 
 						[
 							{
-								
 								"__comments" : "we want an array of array of definition addresses",
-								"input_requirements" : ["*"],
+								"input_requirements" : ["*","*"],
 								"time_specifications" : 
 								[
 									
@@ -67,8 +64,8 @@
 								},
 								"merge_output" : true,
 								"output_objects" : {
-									"citem_id" : 0.2,
-									"citem_id2" : 0.4
+									"product_id" : 0.2,
+									"product_id2" : 0.4
 								},
 								"units" : 
 								[

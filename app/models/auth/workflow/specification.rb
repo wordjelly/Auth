@@ -45,6 +45,8 @@ class Auth::Workflow::Specification
 
 	field :permitted_location_ids, type: Array, default: []
 
+	validate :permitted_start_time_ranges_format
+	
 	## this has to be resolved from amongst all the options in the specification.
 	## it has an order of preference like  :
 	## if location ids are selected, then return those
@@ -111,5 +113,39 @@ class Auth::Workflow::Specification
 	    {:start_time_range_beginning => nearest_day_midnight_epoch + selected_start_time_range[4].to_i, :start_time_range_end => nearest_day_midnight_epoch + selected_start_time_range[4].to_i + selected_start_time_range[5].to_i}
 
 	end
+
+	private
+
+	
+	def permitted_start_time_ranges_format
+		
+		permitted_start_time_ranges.each do |arr|
+			arr.each_with_index{|val,key|
+				unless val == "*"
+					if key == 0
+						## check that it is a valid year.
+						self.errors.add(:permitted_start_time_ranges,"the year #{val}, is invald") unless val =~ /20\d\d/
+					elsif key == 1
+						## check that it is a valid month with two digits.
+						self.errors.add(:permitted_start_time_ranges,"the month #{val}, is invald") unless val =~ /^(([0][1-9])|([1][0-2]))$/
+					elsif key == 2
+						## check that it is a valid day of month, zero padded left.
+						self.errors.add(:permitted_start_time_ranges,"the day #{val}, is invald") unless val =~ /^(([0][1-9])|([1][0-9])|([2][0-9])|([3][0-2]))$/
+					elsif key == 3
+						## check that it is a single digit between 0-6
+						self.errors.add(:permitted_start_time_ranges,"the day of week #{val}, is invald") unless val =~ /^(([0][1-9])|([1][0-9])|([2][0-9])|([3][0-2]))$/
+					elsif key == 4
+						## currently dont generate any errors here.
+					elsif key == 5
+					end
+				end
+			}
+		end
+
+
+
+	end
+
+
 
 end

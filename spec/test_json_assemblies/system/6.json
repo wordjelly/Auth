@@ -1,5 +1,5 @@
 {
-	"__comments" : "here both the products have the same product bunch, but they are different products. In the first cart item, the selected start time range is february of 2019. In the second cart item the selected start time range is march of 2019. Okay so they should both land up in the first branch, of the first definition. The input requirements for the first definition are just two stars, so basically it will group two items at a time.",
+	"__comments" : "the start time specifications overlap. here we test for the overlapping time to be determined as the final time. The first time specification is 2nd of feb 2019, 0 -> 5000, and the second one is 2nd of feb 2019, 500 -> 10000, so there is an overlap. So the effective time should be 500 -> 5000 on 2nd of feb 2019.",
 	"products" : [
 		{
 			"_id" : "first_product",
@@ -36,10 +36,10 @@
 			 	{
 			 		"address" : "l0:b0:d0",
 			 		"permitted_start_time_ranges" : [
-						["2019","03","20","*","0","5000"],
+						["2019","02","20","*","500","10000"],
 						["2019","03","22","*","0","10000"]
 					],
-					"selected_start_time_range" : ["2019","03","20","*","0","5000"]
+					"selected_start_time_range" : ["2019","02","20","*","500","10000"]
 			 	}
 			]
 		}

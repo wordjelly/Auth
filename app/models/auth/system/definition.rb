@@ -6,7 +6,7 @@ class Auth::System::Definition
 	embeds_many :units, :class_name => "Auth::System::Unit"
 	
 	field :time_specifications, type: Array, default: []
-	field :location_specifications, type: Hash, default: {}
+	field :location_specifications, type: Array, default: []
 	field :duration, type: Integer
 	field :entity_categories_needed_simultaneously_with_capacity, type: Hash, default: {}
 	field :physical_requirements, type: Hash, default: {}
@@ -20,6 +20,9 @@ class Auth::System::Definition
 	
 	## the results of the intersects, one for each element in the input object ids.
 	field :intersection_results, type: Array, default: []
+
+	## can we store this in the time specifications.?
+	## 
 	
 	## @return[Boolean] true/false : depending on whether anything could be added to this definition or not.
  	def add_cart_items(input_objects)
@@ -159,25 +162,27 @@ class Auth::System::Definition
 		}
 	end
 
-	## 7th
+	## let me first individually test this function.
 	def apply_time_specifications
 
 		current_time = Time.now
+		
 		self.intersection_results.each_with_index {|intersection_result,key|
 
 			cart_item_ids = self.input_object_ids[key]
 			cart_items = cart_item_ids.map{|c| c = Auth.configuration.cart_item_class.constantize.find(c)}
-			## now we have to find the time range that is applicable.
-			if intersection_result[:minute] == "*"
+			
+			if intersection_result[0][:minute] == "*"
 				start_time_ranges = []
 				cart_items.each do |citem|
-					## if the cart item has a specification 
-					if ((citem.specifications[self.address]) && (citem.specifications[self.address].selected_start_time_range))
-						start_time_ranges << citem.specification[self.address].start_time_range
+					## we have to see if the specifications contain this address or not.
+					if specification = citem.get_specification(self.address)
+						start_time_ranges << specification.start_time_range(current_time)
 					end
 				end
+
 				raise "no start time range found" if start_time_ranges.empty?
-			
+	
 				start_time_ranges.sort { |a, b| a[:start_time_range_beginning] <=> b[:start_time_range_beginning] }
 
 				first_start_time_beginning = start_time_ranges[0][:start_time_range_beginning]
@@ -186,19 +191,19 @@ class Auth::System::Definition
 				## now check all the others
 				start_time_ranges[1..-1].each do |srange|
 					beg = srange[:start_time_range_beginning]
-					raise "start time range cannot be synchronized" if beg >= earliest_start_time_end
+					raise "start time range cannot be synchronized" if beg >= first_start_time_end
 				end
 
 				## the combined start_time becomes:
 				## the end time becomes the earliest of the end times.
 				
-
-				final_beginning_time = start_time_ranges[0][:start_time_range_beginning]
+				final_beginning_time = start_time_ranges[-1][:start_time_range_beginning]
 				final_end_time = start_time_ranges.map{|c| c = c[:start_time_range_end]}.sort { |a, b| a <=> b }[0]
 
+				time_specifications << {:start_time_range_beginning => final_beginning_time, :start_time_range_end => final_end_time}
+
 			else
-	
-				## check each of the minutes to see if the fulfill the time_specification criteria.
+				
 
 
 			end
@@ -207,7 +212,10 @@ class Auth::System::Definition
 
 	## 7th
 	def apply_location_specifications
-
+		## should apply the location specifications in a similar manner.
+		## then we will move to actually doing the query.
+		## then storing that and pushing forward to the next level.
+		## and there they go back to all this.
 	end
 
 	## 8th

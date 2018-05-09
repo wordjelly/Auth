@@ -443,5 +443,27 @@ module Auth::Concerns::Shopping::CartItemConcern
 	 }
 	end 
 
+=begin
+	## @param[String] req : the requirement from the definition. It consists of "*" wildcard, or a product id, or a definition address + product_id -> which is basically one of the output products of the definition. But here it will have the product id, not the self id.
+	## it has to be the product id.
+	## @return[Boolean] : true/false if this product satisfies the requirement or not.
+	## from where is this to be called ?
+	## see first we grouped it by the value for that definition.
+	## now the question is , that how many things are needed ?
+	## is this even necessary?
+	## does it need an output address ?
+	## i don't think this is needed.
+	## we are just going to make the groups.
+	## that's where all this will be synchronized
+	def satisfies_requirement(req)
+		if ((req == self.product_id.to_s) || (req == "*"))
+			true
+		elsif req == (self.miscellaneous_attributes[:address] + ":" + self.product_id.to_s)
+			true
+		else
+			false
+		end
+	end
+=end
 
 end
