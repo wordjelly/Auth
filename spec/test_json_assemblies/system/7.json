@@ -1,0 +1,121 @@
+{
+	"__comments" : "test finding common location ids.",
+	"products" : [
+		{
+			"_id" : "first_product",
+			"bunch" : "a"		
+		},
+		{
+			"_id" : "second_product",
+			"bunch" : "a"
+		}
+	],
+	"locations" : [
+		{
+			"_id" : "first_location"
+		},
+		{
+			"_id" : "second_location"
+		},
+		{
+			"_id" : "third_location"
+		},
+		{
+			"_id" : "fourth_location"
+		}
+	],
+	"cart_items" : [
+		{
+			 "product_id" : "first_product",
+			 "miscellaneous_attributes" : {
+			 	"l0:b0:d0" : "l0:b0:d0:0" 
+			 },
+			 "specifications" : [
+			 	{
+			 		"address" : "l0:b0:d0",
+			 		"permitted_start_time_ranges" : [
+						["2019","02","20","*","0","5000"],
+						["2019","02","22","*","0","10000"]
+					],
+					"selected_start_time_range" : ["2019","02","20","*","0","5000"],
+					"permitted_location_ids" : ["first_location","second_location"],
+					"selected_location_ids" : ["first_location","second_location"]
+			 	}
+			 ]
+		},
+		{
+			"product_id" : "second_product",
+			"miscellaneous_attributes" : {
+				"l0:b0:d0" : "l0:b0:d0:0"
+			},
+			"specifications" : [
+			 	{
+			 		"address" : "l0:b0:d0",
+			 		"permitted_start_time_ranges" : [
+						["2019","02","20","*","500","10000"],
+						["2019","03","22","*","0","10000"]
+					],
+					"selected_start_time_range" : ["2019","02","20","*","500","10000"],
+					"permitted_location_ids" : ["first_location","third_location"],
+					"selected_location_ids" : ["first_location","third_location"]
+			 	}
+			]
+		}
+	],
+	"wrapper" :
+	{
+		"levels" : 
+		[
+			{
+				"__comments" : "this is the first level",
+				"branches" : 
+				[
+					{
+						"input_object_ids" : 
+						[
+
+						],
+						"product_bunch" : "a",
+						"merge_output" : true,
+						"definitions" : 
+						[
+							{
+								"__comments" : "we want an array of array of definition addresses",
+								"input_requirements" : ["*","*"],
+								"time_specifications" : 
+								[
+									
+								],
+								"location_specifications" : [
+									
+								],
+								"duration" : 100,
+								"entity_categories_needed_simultaneously_with_capacity" : {
+									"a1" : 10,
+									"a2" : 15,
+									"a3" : 16
+								},
+								"physical_requirements" : {
+									"p1" : 2,
+									"p2" : 3,
+									"p3" : 4
+								},
+								"merge_output" : true,
+								"output_objects" : {
+									"product_id" : 0.2,
+									"product_id2" : 0.4
+								},
+								"units" : 
+								[
+									{
+										"query_results" : []
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

@@ -31,6 +31,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :definition_model => true do
 			Auth::System::Wrapper.delete_all
 			Auth.configuration.product_class.constantize.delete_all
 			Auth.configuration.cart_item_class.constantize.delete_all
+			Auth.configuration.location_class.constantize.delete_all
 		end
 		
 		context " -- apply_time_specification -- " do 
@@ -123,6 +124,56 @@ RSpec.describe Auth::System::Wrapper, type: :model, :definition_model => true do
 			context " -- previous query intersections provide minutes -- " do 
 
 
+
+			end
+
+		end
+
+		context " -- apply location specification -- " do 
+
+			context " -- locations is wildcard -- " do 
+
+				context " -- only location ids - " do 
+
+					it " -- returns the common location ids after intersecting -- ", :common_locations => true do 
+						
+						response = create_from_file("/home/bhargav/Github/auth/spec/test_json_assemblies/system/7.json")
+						
+
+						wrapper = response[:wrapper]
+						
+						cart_items = response[:cart_items]
+						
+						products = response[:products]
+						
+						wrapper.add_cart_items(cart_items.map{|c| c = c.id.to_s})
+
+						wrapper.levels.each do |level|
+							level.branches.each do |branch|
+								branch.add_cart_items
+							end
+						end
+						
+						wrapper.levels.each do |level|
+							level.branches.each do |branch|
+								branch.do_schedule_queries
+							end
+						end
+
+						expect(wrapper.levels[0].branches[0].definitions[0].location_specifications[0][:location_ids]).to eq(["first_location"])
+
+
+					end
+
+					it " -- raises no common location if no common location can be found -- " do 
+
+					end
+
+				end
+
+				context " -- location ids and within radius are both provided -- " do 
+
+				end
 
 			end
 

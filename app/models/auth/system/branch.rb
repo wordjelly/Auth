@@ -18,6 +18,7 @@ class Auth::System::Branch
 		self.definitions.each do |definition|
 			definition.find_input_object_id_common_schedules
 			definition.apply_time_specifications
+			definition.apply_location_specifications
 		end
 	end
 

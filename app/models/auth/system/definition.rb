@@ -206,33 +206,151 @@ class Auth::System::Definition
 				
 
 
+
 			end
 		}
 	end
 
 	## 7th
 	def apply_location_specifications
-		## should apply the location specifications in a similar manner.
-		## then we will move to actually doing the query.
-		## then storing that and pushing forward to the next level.
-		## and there they go back to all this.
+
+		## each intersection result refers to one "product" or "product_equivalent" coming in.
+		self.intersection_results.each_with_index {|intersection_result,key|
+
+			cart_item_ids = self.input_object_ids[key]
+			cart_items = cart_item_ids.map{|c| c = Auth.configuration.cart_item_class.constantize.find(c)}
+
+			if intersection_result[0][:locations] == ["*"]
+
+				within_radius_type_location_specifications = 0
+
+				loc_sp = {:loc_id_type => [], :within_radius_type => []}
+
+				cart_items.each do |citem|
+					if specification = citem.get_specification(self.address)
+
+						if location_information = specification.location
+
+							if location_information[:within_radius]
+								loc_sp[:within_radius_type] << location_information if location_information[:within_radius].empty?
+								raise "more than one within radius type of location" unless loc_sp[:within_radius_type].include? location_information	
+							else
+								loc_sp[:loc_id_type] << location_information
+							end
+
+						end
+
+					end
+				end
+
+				common_location_ids = nil
+
+				if loc_sp[:loc_id_type].size > 0
+
+					#puts "the first loc_sp loc_id_type"
+					#puts loc_sp[:loc_id_type][0].to_s
+
+					common_location_ids = loc_sp[:loc_id_type].inject(loc_sp[:loc_id_type][0][:location_ids]){|result,el| result = result & el[:location_ids]}
+
+					puts "the common location ids are:"
+					puts common_location_ids
+
+					raise "could not find common location ids" if common_location_ids.size == 0
+				end
+
+				if loc_sp[:within_radius_type].size == 1
+					
+					
+
+					if common_location_ids
+						coords = loc_sp[:within_radius_type][0][:origin_location]
+						within_radius = loc_sp[:within_radius_type][0][:within_radius]
+						permitted_location_categories = loc_sp[:within_radius_type][0][:location_categories]
+				
+						common_location_ids = validate_locations_within_radius(common_location_ids,coordinates,within_radius,permitted_location_categories)
+						if common_location_ids.size > 0
+							## these should be added to the location specifications.
+							self.location_specifications << {:location_ids => common_location_ids}
+						end
+					else
+						## in this case the 
+						self.location_specifications << loc_sp[:within_radius_type][0]
+					end
+
+				else
+					self.location_specifications << {:location_ids => common_location_ids}
+				end
+
+			else
+
+				## here it will depend on the location ids specified in the intersects.
+				## and how to apply these.
+
+			end
+		}
+
 	end
 
-	## 8th
-	def schedule
-		## location query and normal query
-		## with capacity.
+
+
+	## @param[Array] location_ids : the location ids which we want to check are within the radius for the provided coordinates.
+	## @param[Hash] coordinates : the coordinates of the origin point.
+	## @param[Float] within_radius : the radius within the coordinates where to look if the location ids lie.
+	## @return[Array] location_ids_satisfying_conditions : the location ids which lie within the radius of the coordinates.  
+	def validate_locations_within_radius(location_ids,coordinates,within_radius)
+
+		aggregation_clause = 
+		[
+			{
+				"$geoNear" => {
+					"near" => {
+						"type" => "Point",
+						"coordinates" => [coordinates[:lng],coordinates[:lat]]
+					},
+					"maxDistance" => within_radius,
+					"spherical" => true,
+					"distanceField" => "dist_calculated",
+					"includeLocs" => "dist_location",
+					"query" => {
+						 "$and" => [
+							 {
+							 	"_id" => {
+							 		"$in" => locations_ids.map{|c| c = BSON::ObjectId(c)}
+								 }
+							 }
+						 ]
+					}
+				}
+			},
+			{
+				"$limit" => location_ids.size
+			},
+			{
+				"$project" => {
+
+				}
+			}
+		]
+
+		if location_categories
+			aggregation_clause[0]["$geoNear"]["query"]["$and"] << {
+				"location_categories" => {
+					"$in" => location_categories
+				}
+			}
+		end
+
+		response = Auth.configuration.location_class.constantize.collection.aggregate(aggregation_clause)
+
+
+		location_ids_satisfying_conditions = []
+		response.each do |res|
+			location_ids_satisfying_conditions << res["_id"]
+		end
+
+
+		return location_ids_satisfying_conditions
+
 	end
-
-	def maintain_common_query_hash
-		
-	end
-
-	## 8th
-	def dispatch_to_next_level
-
-	end
-
-	#### how will add_cart_item, delayed_cart_item, worker_sick, delete_cart_item, delete_entire_order, guideline_rescheduling
 
 end

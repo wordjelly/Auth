@@ -7,6 +7,14 @@ module SystemSupport
 		description = JSON.parse(IO.read(file_path))
 		cart_items = []
 		products = []
+		locations = []
+
+		description["locations"].each do |loc|
+			location = Auth.configuration.location_class.constantize.new(loc)	
+			expect(location.save).to be_truthy
+			locations << location
+		end
+
 		description["products"].each do |product|
 			pro = Auth.configuration.product_class.constantize.new(product)
 			pro.signed_in_resource = @admin
@@ -28,7 +36,7 @@ module SystemSupport
 
 		wrapper = Auth::System::Wrapper.new(description["wrapper"])
 		expect(wrapper.save).to be_truthy
-		{:wrapper => wrapper, :cart_items => cart_items, :products => products}
+		{:wrapper => wrapper, :cart_items => cart_items, :products => products, :locations => locations}
 	end
 
 
