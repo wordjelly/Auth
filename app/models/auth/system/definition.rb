@@ -232,7 +232,7 @@ class Auth::System::Definition
 						if location_information = specification.location
 
 							if location_information[:within_radius]
-								loc_sp[:within_radius_type] << location_information if location_information[:within_radius].empty?
+								loc_sp[:within_radius_type] << location_information unless location_information[:within_radius].nil?
 								raise "more than one within radius type of location" unless loc_sp[:within_radius_type].include? location_information	
 							else
 								loc_sp[:loc_id_type] << location_information
@@ -252,8 +252,8 @@ class Auth::System::Definition
 
 					common_location_ids = loc_sp[:loc_id_type].inject(loc_sp[:loc_id_type][0][:location_ids]){|result,el| result = result & el[:location_ids]}
 
-					puts "the common location ids are:"
-					puts common_location_ids
+					#puts "the common location ids are:"
+					#puts common_location_ids
 
 					raise "could not find common location ids" if common_location_ids.size == 0
 				end
@@ -261,16 +261,17 @@ class Auth::System::Definition
 				if loc_sp[:within_radius_type].size == 1
 					
 					
-
 					if common_location_ids
 						coords = loc_sp[:within_radius_type][0][:origin_location]
 						within_radius = loc_sp[:within_radius_type][0][:within_radius]
 						permitted_location_categories = loc_sp[:within_radius_type][0][:location_categories]
 				
-						common_location_ids = validate_locations_within_radius(common_location_ids,coordinates,within_radius,permitted_location_categories)
+						common_location_ids = validate_locations_within_radius(common_location_ids,coords,within_radius,permitted_location_categories)
 						if common_location_ids.size > 0
 							## these should be added to the location specifications.
 							self.location_specifications << {:location_ids => common_location_ids}
+						else
+							raise "could not find common location ids" if common_location_ids.size == 0
 						end
 					else
 						## in this case the 
@@ -297,7 +298,7 @@ class Auth::System::Definition
 	## @param[Hash] coordinates : the coordinates of the origin point.
 	## @param[Float] within_radius : the radius within the coordinates where to look if the location ids lie.
 	## @return[Array] location_ids_satisfying_conditions : the location ids which lie within the radius of the coordinates.  
-	def validate_locations_within_radius(location_ids,coordinates,within_radius)
+	def validate_locations_within_radius(location_ids,coordinates,within_radius,location_categories)
 
 		aggregation_clause = 
 		[
@@ -315,7 +316,7 @@ class Auth::System::Definition
 						 "$and" => [
 							 {
 							 	"_id" => {
-							 		"$in" => locations_ids.map{|c| c = BSON::ObjectId(c)}
+							 		"$in" => location_ids
 								 }
 							 }
 						 ]
@@ -327,7 +328,7 @@ class Auth::System::Definition
 			},
 			{
 				"$project" => {
-
+					"_id" => 1
 				}
 			}
 		]

@@ -9,10 +9,12 @@ module SystemSupport
 		products = []
 		locations = []
 
-		description["locations"].each do |loc|
-			location = Auth.configuration.location_class.constantize.new(loc)	
-			expect(location.save).to be_truthy
-			locations << location
+		if description["locations"]
+			description["locations"].each do |loc|
+				location = Auth.configuration.location_class.constantize.new(loc)	
+				expect(location.save).to be_truthy
+				locations << location
+			end
 		end
 
 		description["products"].each do |product|
