@@ -259,8 +259,6 @@ class Auth::System::Definition
 				end
 
 				if loc_sp[:within_radius_type].size == 1
-					
-					
 					if common_location_ids
 						coords = loc_sp[:within_radius_type][0][:origin_location]
 						within_radius = loc_sp[:within_radius_type][0][:within_radius]
@@ -274,12 +272,17 @@ class Auth::System::Definition
 							raise "could not find common location ids" if common_location_ids.size == 0
 						end
 					else
-						## in this case the 
+						## in this case there is only a single within_radius_type of location specifications, and nothing else.
+						## so here it will carry all the location information only.
 						self.location_specifications << loc_sp[:within_radius_type][0]
 					end
 
 				else
-					self.location_specifications << {:location_ids => common_location_ids}
+					if common_location_ids.nil?
+						self.location_specifications << {}
+					else
+						self.location_specifications << {:location_ids => common_location_ids}
+					end
 				end
 
 			else
@@ -292,9 +295,15 @@ class Auth::System::Definition
 
 	end
 
+	## will take the time and location information and make queries.
+	def search_locations
+		## if it is a within radius type, then it is one possibility, otherwise it is a simple location category search.
+		## and what kind of result output is necessary.
+		## and what about the situation where no location information is specified for the query, in that case, empty shit should get passed into the array of location information.
+		## so first let me add a test for that.
+	end
 
-
-	## @param[Array] location_ids : the location ids which we want to check are within the radius for the provided coordinates.
+	## @param[Array] location_ids : the location ids which we want to check are within the radius for the provided coordinates. This is an array of strings.
 	## @param[Hash] coordinates : the coordinates of the origin point.
 	## @param[Float] within_radius : the radius within the coordinates where to look if the location ids lie.
 	## @return[Array] location_ids_satisfying_conditions : the location ids which lie within the radius of the coordinates.  

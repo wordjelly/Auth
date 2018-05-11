@@ -1,0 +1,145 @@
+{
+	"__comments" : "first location and fifth location are common to the second and third cart items. So only these two will be considered, for checking if they are within radius, for the first cart item. While both are within radius, only the first cart item has the categories defined in the first cart item. So only the first location should be eventually chosen.",
+	"products" : [
+		{
+			"_id" : "first_product",
+			"bunch" : "a"		
+		},
+		{
+			"_id" : "second_product",
+			"bunch" : "a"
+		}
+	],
+	"locations" : [
+		{
+			"_id" : "first_location",
+			"geom" : [59.10,22.10],
+			"location_categories" : ["a","b","c"]
+		},
+		{
+			"_id" : "second_location",
+			"geom" : [59.10,22.10],
+			"location_categories" : ["a","b","c"]
+		},
+		{
+			"_id" : "third_location",
+			"geom" : [79.10,22.10],
+			"location_categories" : ["a","b","c"]
+		},
+		{
+			"_id" : "fourth_location",
+			"geom" : [79.10,22.10]
+		},
+		{
+			"_id" : "fifth_location",
+			"geom" : [59.10,22.10],
+			"location_categories" : ["d"]
+		}
+	],
+	"cart_items" : [
+		{
+			 "product_id" : "first_product",
+			 "miscellaneous_attributes" : {
+			 	"l0:b0:d0" : "l0:b0:d0:0" 
+			 },
+			 "specifications" : [
+			 	{
+			 		"address" : "l0:b0:d0",
+			 		"permitted_start_time_ranges" : [
+						["2019","02","20","*","0","5000"],
+						["2019","02","22","*","0","10000"]
+					],
+					"selected_start_time_range" : ["2019","02","20","*","0","5000"]
+			 	}
+			 ]
+		},
+		{
+			 "product_id" : "first_product",
+			 "miscellaneous_attributes" : {
+			 	"l0:b0:d0" : "l0:b0:d0:0" 
+			 },
+			 "specifications" : [
+			 	{
+			 		"address" : "l0:b0:d0",
+			 		"permitted_start_time_ranges" : [
+						["2019","02","20","*","0","5000"],
+						["2019","02","22","*","0","10000"]
+					],
+					"selected_start_time_range" : ["2019","02","20","*","0","5000"]
+			 	}
+			 ]
+		},
+		{
+			"product_id" : "second_product",
+			"miscellaneous_attributes" : {
+				"l0:b0:d0" : "l0:b0:d0:0"
+			},
+			"specifications" : [
+			 	{
+			 		"address" : "l0:b0:d0",
+			 		"permitted_start_time_ranges" : [
+						["2019","02","20","*","500","10000"],
+						["2019","03","22","*","0","10000"]
+					],
+					"selected_start_time_range" : ["2019","02","20","*","500","10000"]
+			 	}
+			]
+		}
+	],
+	"wrapper" :
+	{
+		"levels" : 
+		[
+			{
+				"__comments" : "this is the first level",
+				"branches" : 
+				[
+					{
+						"input_object_ids" : 
+						[
+
+						],
+						"product_bunch" : "a",
+						"merge_output" : true,
+						"definitions" : 
+						[
+							{
+								"__comments" : "we want an array of array of definition addresses",
+								"input_requirements" : ["*","*"],
+								"time_specifications" : 
+								[
+									
+								],
+								"location_specifications" : [
+									
+								],
+								"duration" : 100,
+								"entity_categories_needed_simultaneously_with_capacity" : {
+									"a1" : 10,
+									"a2" : 15,
+									"a3" : 16
+								},
+								"physical_requirements" : {
+									"p1" : 2,
+									"p2" : 3,
+									"p3" : 4
+								},
+								"merge_output" : true,
+								"output_objects" : {
+									"product_id" : 0.2,
+									"product_id2" : 0.4
+								},
+								"units" : 
+								[
+									{
+										"query_results" : []
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}
