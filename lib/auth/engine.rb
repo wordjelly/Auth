@@ -151,6 +151,12 @@ module Auth
     attr_accessor :overlap_class
     attr_accessor :overlap_controller
 
+    #######################################################
+    ####        CURRENTLY USED                         ####
+
+    attr_accessor :category_class
+    attr_accessor :category_controller
+
     attr_accessor :minute_class
     attr_accessor :minute_controller
 
@@ -347,6 +353,9 @@ module Auth
 
       @minute_class = "Auth::Workflow::Minute"
       @minute_controller = "auth/workflow/minutes"
+
+      @category_class = "Auth::Workflow::Category"
+      @category_controller = "auth/workflow/categories"
 
       @entity_class = "Auth::Workflow::Entity"
       @entity_controller = "auth/workflow/entities"

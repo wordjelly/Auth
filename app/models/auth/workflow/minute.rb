@@ -13,8 +13,6 @@ class Auth::Workflow::Minute
 	## this tells the exact hour and minute that this minute represents.
 	field :hour_description, type: String
 
-	embeds_many :entities, :class_name => Auth.configuration.entity_class
-
-
+	embeds_many :categories, :class_name => Auth.configuration.category_class
 
 end

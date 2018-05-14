@@ -221,7 +221,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :definition_model => true do
 					end
 
 
-					
+
 
 					it " -- raises no common location id found error, if the provided location ids are not within the given radius -- " do
 
@@ -295,6 +295,76 @@ RSpec.describe Auth::System::Wrapper, type: :model, :definition_model => true do
 						expect(wrapper.levels[0].branches[0].definitions[0].location_specifications).to eq([{}])		
 
 					end
+
+				end
+
+			end
+
+		end
+
+		context " -- build query overlap hash -- " do 
+
+			it " -- accepts a query result as an argument -- " do 
+
+				## should query result be an object or a simple hash ?
+				## it is basically going to be like :
+				## minute -> location -> entity_category => [ids]
+				## so let it be a hash of hashes.
+				## as far as overlap hash is concerned, let it be , an object.
+
+			end
+
+			it " -- adds a range to the hash -- " do 
+
+
+			end
+
+
+			it " -- splits an existing range in the hash, and updates the capacity -- " do 
+
+
+			end
+
+		end
+
+		context " -- do query -- " do 
+			## now we need to search for the entity categories.
+			context " -- no location information -- " do 
+
+				it " -- searches for minutes with required entity categories -- " do 
+
+
+
+				end
+
+			end
+
+			context " -- location information -- " do 
+				
+				context " -- within radius type -- " do 
+					
+					context " -- transit speed is provided -- " do 
+
+						it " -- does the transit type of query -- " do 
+
+							## so here we have to give the definition the required entity categories.
+							## before doing this will have to do the overlap.
+							## because it has to refer to the overlap before formulating the query.
+							##
+
+						end
+
+					end
+
+					context " -- no transit speed -- " do 
+
+					end
+
+				end
+
+				context " -- location ids type -- " do 
+
+					it " -- finds the minutes with the required entity categories, "
 
 				end
 

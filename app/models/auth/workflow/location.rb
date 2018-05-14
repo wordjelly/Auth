@@ -210,7 +210,7 @@ class Auth::Workflow::Location
 					"query" => {
 						"$and" => [
 							{
-								"minutes.entities" => {
+								"minutes.categories" => {
 									"$all" => [
 
 									]
@@ -241,7 +241,7 @@ class Auth::Workflow::Location
 			},
 			{
 				"$match" => {
-					"minutes.entities" => {
+					"minutes.categories" => {
 						"$all" => [
 
 						]
@@ -249,58 +249,72 @@ class Auth::Workflow::Location
 				}
 			},
 			{
-				"$addFields" => {
-					"has_duration" => {
-						"$subtract" => 
-						[
-							"$minutes.minimum_entity_duration",
-							"$approx_duration"
-						]
+				"$project" => {
+					"applicable_categories" => {
+						"$filter" => {
+							"input" => "$minutes.categories",
+							"as" => "categs",
+							"cond" => {
+								"$and" => [
+									{ "$in" => 
+										[
+											"$$categs.category",
+											categories
+										]
+									},
+									{
+										"$gte" => 
+										[
+											"$$categs.max_free_duration",
+											"$approx_duration"
+										]	
+									}
+								]
+							}
+						}	
+					}
+				}
+			},
+			{
+				"$project" => {
+					"applicable_category_size" => {
+						"$size" => "$applicable_categories"
 					}
 				}
 			},
 			{
 				"$match" => {
-					"has_duration" => {
-						"$gte" => 0
+					"applicable_category_size" => {
+						"$eq" => categories.size
 					}
-				}
-			},
-			{
-				"$group" => {
-					"_id" => "$minutes.minute",
-					"locations" => {
-						"$push" => "$_id" 
-					}
-				}
-			},
-			{
-				"$sort" => {
-					"_id" => 1
 				}
 			}
 		]
 
-		
+		## okay so now we are getting it like this.
+		## we want to now modify the location object to have the category capacities, and all that shit.		
 
 
 		categories.each do |category|
-			aggregation_clause[0]["$geoNear"]["query"]["$and"][0]["minutes.entities"]["$all"] << 
+			aggregation_clause[0]["$geoNear"]["query"]["$and"][0]["minutes.categories"]["$all"] << 
 			{
 				"$elemMatch" => {
 					"category" => category,
-					"booked" => false
+					"capacity" => {
+						"$gte" => 1
+					}
 				}
 			}
 		end
 
-
 		categories.each do |category|
-			aggregation_clause[3]["$match"]["minutes.entities"]["$all"] << 
+			aggregation_clause[3]["$match"]["minutes.categories"]["$all"] << 
 			{
 				"$elemMatch" => {
 					"category" => category,
-					"booked" => false
+					"capacity" => {
+						"$gte" => 1
+					}
 				}
 			}
 		end
