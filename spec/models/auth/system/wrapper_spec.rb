@@ -172,6 +172,220 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		end
 
+		context " -- overlap hash -- ", :overlap_hash => true do 
+
+			context " -- unit tests -- " do 
+				
+				context " -- manage minute -- " do 
+
+					it " -- manages equal minute -- " do 
+						wrapper = Auth::System::Wrapper.new
+						
+						wrapper.overlap_hash = {
+							"abc" => {
+								10 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								}
+							}
+						}
+
+						minute_hash_to_merge = {
+							"c1_c2_c3" => {
+								:categories => ["c1","c2","c3"],
+								:query_ids => ["1"]
+							}
+						}
+
+						minute = 10
+						
+						location_id = "abc"
+
+						## now we will call manage_minute on this wrapper 
+
+						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
+
+						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						wrapper.overlap_hash.deep_symbolize_keys!
+						#puts "this is the overlap hash at location id"
+						#puts wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids].to_s
+						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+
+					end
+
+					it " -- manages only lower minute -- " do 
+
+						## so it should just add this minute.
+						## nothing more.
+
+						wrapper = Auth::System::Wrapper.new
+						
+						wrapper.overlap_hash = {
+							"abc" => {
+								8 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								}
+							}
+						}
+
+						minute_hash_to_merge = {
+							"c1_c2_c3" => {
+								:categories => ["c1","c2","c3"],
+								:query_ids => ["1"]
+							}
+						}
+
+						minute = 10
+						
+						location_id = "abc"
+
+						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
+
+						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						wrapper.overlap_hash.deep_symbolize_keys!
+						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+
+
+					end
+
+					it " -- manages only higher minute -- " do 
+
+						## it should just add the minute.
+						wrapper = Auth::System::Wrapper.new
+						
+						wrapper.overlap_hash = {
+							"abc" => {
+								12 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								}
+							}
+						}
+
+						minute_hash_to_merge = {
+							"c1_c2_c3" => {
+								:categories => ["c1","c2","c3"],
+								:query_ids => ["1"]
+							}
+						}
+
+						minute = 10
+						
+						location_id = "abc"
+
+						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
+
+						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						wrapper.overlap_hash.deep_symbolize_keys!
+						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+
+					end
+
+					it " -- manages higher and lower minute -- ", :combined_minute => true do 
+
+						## in this case it will fuse the stuff from the lower minute.
+						wrapper = Auth::System::Wrapper.new
+						
+						wrapper.overlap_hash = {
+							"abc" => {
+								1 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								},
+								12 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								}
+							}
+						}
+
+						minute_hash_to_merge = {
+							"c1_c2_c3" => {
+								:categories => ["c1","c2","c3"],
+								:query_ids => ["1"]
+							}
+						}
+
+						minute = 10
+						
+						location_id = "abc"
+
+						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
+
+						wrapper.overlap_hash.deep_symbolize_keys!
+
+						## we expect this to have the query ids, 10,12,1 at the minute 10.
+						wrapper.overlap_hash.deep_symbolize_keys!
+						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+						expect(wrapper.overlap_hash[location_id.to_sym][1]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12"])
+
+					end
+
+				end
+
+				context " -- manage start and end minutes together -- ", :se_together => true do
+
+					it " -- adds start and end minute in between two existing minutes -- " do 
+
+						wrapper = Auth::System::Wrapper.new
+						
+						wrapper.overlap_hash = {
+							"abc" => {
+								1 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								},
+								12 => {
+									"c1_c2_c3" => {
+										:query_ids => ["10","12"]
+									}
+								}
+							}
+						}
+
+
+						
+						minute_to_insert = {
+							"c1_c2_c3" => {
+								:categories => ["c1","c2","c3"],
+								:query_ids => ["1"]
+							}
+						}
+
+						start_minute = 5
+						end_minute = 7
+						location_id = "abc"
+
+						wrapper.manage_minute(minute_to_insert,end_minute,location_id)
+
+						## now when its adding the start minute, what is the problem.
+						## it is adding both 
+						wrapper.manage_minute(minute_to_insert,start_minute,location_id)
+
+						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						## 5 and 7 should have similar shit in them.s
+
+						wrapper.overlap_hash.deep_symbolize_keys!
+
+						expect(wrapper.overlap_hash[location_id.to_sym][5]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+						expect(wrapper.overlap_hash[location_id.to_sym][7]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+					end 	
+
+				end
+
+			end
+
+			
+
+		end
+
 	end
 
 end

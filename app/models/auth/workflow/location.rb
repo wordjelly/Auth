@@ -81,7 +81,7 @@ class Auth::Workflow::Location
 					"$and" 	=> 	
 					[
 						{
-							"minutes.entities" => {
+							"minutes.categories" => {
 								"$all" => [
 
 								]
@@ -100,17 +100,13 @@ class Auth::Workflow::Location
 			},
 			{
 				"$group" => {
-					"_id" => "$minutes.minute",
-					"locations" => {
-						"$push" => "$_id" 
+					"_id" => "$_id",
+					"minutes" => {
+						"$push" => "$minutes"
 					}
 				}
-			},
-			{
-				"$sort" => {
-					"_id" => 1
-				}
 			}
+			
 		]
 
 		if !location_ids.nil?
@@ -136,15 +132,13 @@ class Auth::Workflow::Location
 		end 
 
 		
-		## now for the minute range queries.
 		categories.each do |category|
-			aggregation_clause[0]["$match"]["$and"][0]["minutes.entities"]["$all"] << 
+			aggregation_clause[0]["$match"]["$and"][0]["minutes.categories"]["$all"] << 
 			{
 				"$elemMatch" => {
 					"category" => category,
-					"booked" => false,
-					"duration" => {
-						"$gte" => duration
+					"capacity" => {
+						"$gte" => 1
 					}
 				}
 			}
@@ -250,6 +244,7 @@ class Auth::Workflow::Location
 			},
 			{
 				"$project" => {
+					"minutes" => 1,
 					"applicable_categories" => {
 						"$filter" => {
 							"input" => "$minutes.categories",
@@ -277,6 +272,7 @@ class Auth::Workflow::Location
 			},
 			{
 				"$project" => {
+					"minutes" => 1,
 					"applicable_category_size" => {
 						"$size" => "$applicable_categories"
 					}
@@ -288,11 +284,16 @@ class Auth::Workflow::Location
 						"$eq" => categories.size
 					}
 				}
+			},
+			{
+				"$group" => {
+					"_id" => "$_id",
+					"minutes" => {
+						"$push" => "$minutes"
+					}
+				}
 			}
 		]
-
-		## okay so now we are getting it like this.
-		## we want to now modify the location object to have the category capacities, and all that shit.		
 
 
 		categories.each do |category|

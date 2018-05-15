@@ -16,10 +16,10 @@ class Auth::System::Wrapper
 	{
 		"location_id" : {
 			"minute_range_start" : {
-					"combination_of_categories" : [query_ids....]
+					"combination_of_categories" : {:query_ids => []}
 			},
 			"minute_range_end" : {
-					"combination_of_categories" : [query_ids...]
+					"combination_of_categories" : {:query_ids => []}
 			}
 		}
 	}
@@ -32,46 +32,61 @@ class Auth::System::Wrapper
 	## @param[Hash] incoming : the incoming hash that we want to merge, this will be with just one key. e.g : {categories_to_fuse.to_s => {:categories => [array_of_categories], query_ids => [query_id]}}
 	## @return[Hash] existing : after merging in the incoming hash.
 	def merge_minute_hash(existing,incoming)
+		fused = existing.deep_dup
 		incoming.keys.each do |k|
-			existing[k][:query_ids] << incoming[k][:query_ids][0] if existing[k]
-			existing[k] = incoming[k]
+			if fused[k]
+				fused[k][:query_ids] << incoming[k][:query_ids][0]
+			else 
+				fused[k] = incoming[k]
+			end
 		end
-		existing
+		fused
 	end
 
 	## @param[Hash] minute_hash_to_insert : the query id and the categories for the minute we are wanting to insert. e.g : {categories_to_fuse.to_s => {:categories => [array_of_categories], query_ids => [query_id]}}
 	## @param[Integer] minute : either the start or end_minute.
+	## @param[String] location_id : the id of the location.
 	## @return[nil]
-	def manage_minute(minute_hash_to_insert,minute)
+	def manage_minute(minute_hash_to_insert,minute,location_id)
 
-		existing_minutes = self.overflow_hash[location_id].keys.sort { |a, b| a <=> b }
+		existing_minutes = self.overlap_hash[location_id].keys.sort { |a, b| a <=> b }
 
-		less_than_minute = existing_minutes.bsearch{|c| c < minute}
+		puts existing_minutes.to_s		
 
-		equal_to_minute = existing_minutes.bsearch{|c| c == minute}
+		less_than_minute = nil
+		if  existing_minutes[0] < minute
+			less_than_minute = existing_minutes[0]
+		else
+			less_than_minute = existing_minutes.bsearch{|c| c.to_i < minute.to_i}
+		end
 
-		greater_than_minute = existing_minutes.bsearch{|c| c > minute}
+		equal_to_minute = existing_minutes.bsearch{|c| c.to_i == minute.to_i}
 
+		greater_than_minute = existing_minutes.bsearch{|c| c.to_i > minute.to_i}
 
 		## suppose there is an equal to , then we have to fuse it with that.
 		## **(minute).............
 		if equal_to_minute 
-			self.overflow_hash[location_id][minute] =  merge_minute_hash(self.overflow_hash[location_id][minute],minute_hash_to_insert)
+			#puts "GOT EQUAL TO MINUTE."
+			self.overlap_hash[location_id][minute] =  merge_minute_hash(self.overlap_hash[location_id][minute],minute_hash_to_insert)
 		
 		else
 
 			## only less than or only greater than, and equal to is nil.
 			## **..........(minute) || (minute)............**
 			if ((less_than_minute && greater_than_minute.nil?) || (less_than_minute.nil? && greater_than_minute))
-				self.overflow_hash[location_id][minute] = minute_to_insert 
+				#puts "EITHER ONLY LESS OR ONLY GREATER."
+				self.overlap_hash[location_id][minute] = minute_hash_to_insert 
 			end
 
 			## less than and greater than, and equal to is nil
 			## **................(minute)...............**
 			if greater_than_minute && less_than_minute
+				#puts "------- GOT THE LESS THAN AND GREATER THAN BOTH ---- "
 				## in this case we want to fuse in the less than minute with this one and add it in.
-				fused_hash = merge_minute_hash(self.overflow_hash[location_id][less_than_minute],minute_hash_to_insert)
-				self.overflow_hash[location_id][minute] = fused_hash
+				fused_hash = merge_minute_hash(self.overlap_hash[location_id][less_than_minute],minute_hash_to_insert)
+
+				self.overlap_hash[location_id][minute] = fused_hash
 			end
 
 		end
@@ -89,11 +104,11 @@ class Auth::System::Wrapper
 	## @return[nil]
 	def update_intervening_minutes(minute_hash_to_insert,start_minute,end_minute)
 
-		existing_minutes = self.overflow_hash[location_id].keys.sort { |a, b| a <=> b }
+		existing_minutes = self.overlap_hash[location_id].keys.sort { |a, b| a <=> b }
 
 		existing_minutes.each do |min|
 			if ((min > start_minute) && (min < end_minute))
-				self.overflow_hash[location_id][min] = merge_minute_hash(self.overflow_hash[location_id][min],minute_hash_to_insert)
+				self.overlap_hash[location_id][min] = merge_minute_hash(self.overlap_hash[location_id][min],minute_hash_to_insert)
 			end
 		end
 
@@ -108,13 +123,13 @@ class Auth::System::Wrapper
 	## @return[nil]
 	def add_start_end_minute(start_minute,end_minute,location_id,categories_searched_for,query_id)
 
-		self.overflow_hash[location_id] = {} unless self.overlap_hash[location_id]
+		self.overlap_hash[location_id] = {} unless self.overlap_hash[location_id]
 
 		minute_to_insert = {categories_searched_for.join("_") => {:categories => categories_searched_for, :query_ids => [query_id]}}
 
-		manage_minute(minute_to_insert,end_minute)
+		manage_minute(minute_to_insert,end_minute,location_id)
 
-		manage_minute(minute_to_insert,start_minute)
+		manage_minute(minute_to_insert,start_minute,location_id)
 
 		update_intervening_minutes(minute_to_insert,start_minute,end_minute)
 
@@ -159,9 +174,9 @@ class Auth::System::Wrapper
 			
 			indices_of_minutes_to_prune[location_index] = []
 
-			location_overflow_hash = self.overflow_hash[location["_id"]]
+			location_overlap_hash = self.overlap_hash[location["_id"]]
 			
-			sorted_minutes = location_overflow_hash.keys.sort { |a, b| a<=>b }
+			sorted_minutes = location_overlap_hash.keys.sort { |a, b| a<=>b }
 
 			location["minutes"].each_with_index{|minute_hash,index|
 
@@ -209,14 +224,11 @@ class Auth::System::Wrapper
 
 				category_requirements.keys.each do |s|
 
-					## iterate the categories, 
-
-					indices_of_minutes_to_prune[location_index] << index unless (minute_hash["categories"][s] >= category_requirements[s])
+					indices_of_minutes_to_prune[location_index] << index unless (minute_categories[s] >= category_requirements[s])
 				end
 				
 			}
 
-			## now prune that.
 		}
 
 		indices_of_minutes_to_prune.keys.each do |location_index|
@@ -236,7 +248,7 @@ class Auth::System::Wrapper
 	end
 
 	## first will have to write the tests for making the actual queries.
-	## then the test for filtering it through the overflow_hash
+	## then the test for filtering it through the overlap_hash
 	## then populating the overflow hash.
 	## then passing forward of the last minute/location id : those tests.
 

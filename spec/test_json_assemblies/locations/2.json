@@ -7,7 +7,6 @@
 			"minutes" : [
 				{
 					"minute" : 1,
-					// we can have an element that says, 
 					"categories" : [
 						{
 							"category" : "a",
