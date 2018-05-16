@@ -41,6 +41,23 @@ module SystemSupport
 		{:wrapper => wrapper, :cart_items => cart_items, :products => products, :locations => locations}
 	end
 
+	def get_location_aggregation_result
+
+		json_defintion = JSON.parse(IO.read("/home/bhargav/Github/auth/spec/test_json_assemblies/locations/3.json"))
+
+		location_hashes = json_defintion["locations"]
+			
+		locations = location_hashes.map{|c|
+			c = Auth.configuration.location_class.constantize.new(c)
+			expect(c.save).to be_truthy
+			c
+		}
+
+		options = {:duration => 2, :categories => ["a","b","c"], :minute_ranges => [[0,100]]}
+
+		response = Auth.configuration.location_class.constantize.find_entity(options)
+					
+	end
 
 end
 

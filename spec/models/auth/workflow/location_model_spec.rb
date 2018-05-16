@@ -74,7 +74,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 				total_results = 0
 				expected_result_minutes_in_asc_order = [1,2,3]
 				
-				response.each do |res|
+				response.each_with_index {|res,res_index|
 					expect(res["minutes"]).not_to be_empty
 					res["minutes"].each do |minute|
 						expect(minute["categories"]).not_to be_empty
@@ -85,7 +85,7 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 						end
 					end
 					total_results+=1
-				end
+				}
 				
 				expect(total_results).to eq(2)
 

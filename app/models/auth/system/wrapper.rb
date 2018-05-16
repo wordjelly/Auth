@@ -51,49 +51,53 @@ class Auth::System::Wrapper
 
 		existing_minutes = self.overlap_hash[location_id].keys.sort { |a, b| a <=> b }
 
-		puts existing_minutes.to_s		
 
-		less_than_minute = nil
-		if  existing_minutes[0] < minute
-			less_than_minute = existing_minutes[0]
-		else
-			less_than_minute = existing_minutes.bsearch{|c| c.to_i < minute.to_i}
-		end
+		if existing_minutes.size > 0
 
-		equal_to_minute = existing_minutes.bsearch{|c| c.to_i == minute.to_i}
-
-		greater_than_minute = existing_minutes.bsearch{|c| c.to_i > minute.to_i}
-
-		## suppose there is an equal to , then we have to fuse it with that.
-		## **(minute).............
-		if equal_to_minute 
-			#puts "GOT EQUAL TO MINUTE."
-			self.overlap_hash[location_id][minute] =  merge_minute_hash(self.overlap_hash[location_id][minute],minute_hash_to_insert)
-		
-		else
-
-			## only less than or only greater than, and equal to is nil.
-			## **..........(minute) || (minute)............**
-			if ((less_than_minute && greater_than_minute.nil?) || (less_than_minute.nil? && greater_than_minute))
-				#puts "EITHER ONLY LESS OR ONLY GREATER."
-				self.overlap_hash[location_id][minute] = minute_hash_to_insert 
+			less_than_minute = nil
+			if  existing_minutes[0] < minute
+				less_than_minute = existing_minutes[0]
+			else
+				less_than_minute = existing_minutes.bsearch{|c| c.to_i < minute.to_i}
 			end
 
-			## less than and greater than, and equal to is nil
-			## **................(minute)...............**
-			if greater_than_minute && less_than_minute
-				#puts "------- GOT THE LESS THAN AND GREATER THAN BOTH ---- "
-				## in this case we want to fuse in the less than minute with this one and add it in.
-				fused_hash = merge_minute_hash(self.overlap_hash[location_id][less_than_minute],minute_hash_to_insert)
+			equal_to_minute = existing_minutes.bsearch{|c| c.to_i == minute.to_i}
 
-				self.overlap_hash[location_id][minute] = fused_hash
+			greater_than_minute = existing_minutes.bsearch{|c| c.to_i > minute.to_i}
+
+			## suppose there is an equal to , then we have to fuse it with that.
+			## **(minute).............
+			if equal_to_minute 
+				#puts "GOT EQUAL TO MINUTE."
+				self.overlap_hash[location_id][minute] =  merge_minute_hash(self.overlap_hash[location_id][minute],minute_hash_to_insert)
+			
+			else
+
+				## only less than or only greater than, and equal to is nil.
+				## **..........(minute) || (minute)............**
+				if ((less_than_minute && greater_than_minute.nil?) || (less_than_minute.nil? && greater_than_minute))
+					#puts "EITHER ONLY LESS OR ONLY GREATER."
+					self.overlap_hash[location_id][minute] = minute_hash_to_insert 
+				end
+
+				## less than and greater than, and equal to is nil
+				## **................(minute)...............**
+				if greater_than_minute && less_than_minute
+					#puts "------- GOT THE LESS THAN AND GREATER THAN BOTH ---- "
+					## in this case we want to fuse in the less than minute with this one and add it in.
+					fused_hash = merge_minute_hash(self.overlap_hash[location_id][less_than_minute],minute_hash_to_insert)
+
+					self.overlap_hash[location_id][minute] = fused_hash
+				end
+
 			end
 
+			## there is one more possibility where there is nothing else.
+			## in that case, we have to add the start and end minute direct.
+		else
+
+			self.overlap_hash[location_id][minute] = minute_hash_to_insert 
 		end
-
-		## there is one more possibility where there is nothing else.
-		## in that case, we have to add the start and end minute direct.
-
 
 	end
 
@@ -101,8 +105,9 @@ class Auth::System::Wrapper
 	## @param[Hash] minute_hash_to_insert : the query id and the categories for the minute we are wanting to insert. e.g : {categories_to_fuse.to_s => {:categories => [array_of_categories], query_ids => [query_id]}}
 	## @param[Integer] start_minute : the start_minute for the location_id.
 	## @param[Integer] end_minute : the end_minute for the location_id.
+	## @param[String] location_id : the location id.
 	## @return[nil]
-	def update_intervening_minutes(minute_hash_to_insert,start_minute,end_minute)
+	def update_intervening_minutes(minute_hash_to_insert,start_minute,end_minute,location_id)
 
 		existing_minutes = self.overlap_hash[location_id].keys.sort { |a, b| a <=> b }
 
@@ -125,13 +130,14 @@ class Auth::System::Wrapper
 
 		self.overlap_hash[location_id] = {} unless self.overlap_hash[location_id]
 
+
 		minute_to_insert = {categories_searched_for.join("_") => {:categories => categories_searched_for, :query_ids => [query_id]}}
 
 		manage_minute(minute_to_insert,end_minute,location_id)
 
 		manage_minute(minute_to_insert,start_minute,location_id)
 
-		update_intervening_minutes(minute_to_insert,start_minute,end_minute)
+		update_intervening_minutes(minute_to_insert,start_minute,end_minute,location_id)
 
 	end
 
@@ -142,10 +148,15 @@ class Auth::System::Wrapper
 	## @return[nil]
 	def update_overlap_hash(query_result,categories_searched_for,query_id)
 		query_result.each do |location|
+			
+			location_id = location["_id"]
 			start_minute = location["minutes"].first["minute"]
 			end_minute = location["minutes"].last["minute"]
-			location_id = location["_id"]
-			add_start_end_minute(start_minute,end_minute,location_id,categories_searched_for,query_id)
+			
+			if (start_minute && end_minute)
+				add_start_end_minute(start_minute,end_minute,location_id,categories_searched_for,query_id)
+			end
+
 		end
 	end
 
@@ -154,12 +165,27 @@ class Auth::System::Wrapper
 	## @return[Array] applicable_query_ids : the number of query_ids that are applicable to overlap with this query_id. Returns nil if the array is empty.
 	def applicable_query_ids(query_result_id,category_combination_query_ids)
 
-		return nil
+		## for now this returns the whole combination of shit.
+		return category_combination_query_ids
 
 	end
 
 =begin
-@eg : 
+basically how this works is as follows : - 
+1. for each location in the result
+	-iterate each minute
+	-check which categories are present in that minute : "minute_categories"
+	- now find a minute in the overlap hash that is applicable to this minute (equal, or such that this minute is between two other minutes.)
+	- iterate each category combination stored in this minute
+	- does the category combination have any category in common with what we searched for ?
+	- yes
+		- in order for the minute in the query result to be constrained by this category combination, it will have to have all the categories in this category combination, so does it ?
+		- yes
+			- now we have to check how many query ids in the query ids of this category combination, are applicable to our incoming query id.
+			- that is the required capacity for the common categories in the query result minute.
+		- no  
+	- no
+
 =end
 
 	## @param[Mongo::Aggregation::Result] query_result : the result of the query.
@@ -167,7 +193,7 @@ class Auth::System::Wrapper
 	## @param[String] query_id : the string id of the query.
 	## @return[Hash] query_result : the query result after pruning it.
 	def filter_query_results(query_result,categories_searched_for,query_id)
-
+		
 		indices_of_minutes_to_prune = {}
 
 		query_result.each_with_index {|location,location_index|
@@ -176,6 +202,8 @@ class Auth::System::Wrapper
 
 			location_overlap_hash = self.overlap_hash[location["_id"]]
 			
+			next unless location_overlap_hash
+
 			sorted_minutes = location_overlap_hash.keys.sort { |a, b| a<=>b }
 
 			location["minutes"].each_with_index{|minute_hash,index|
@@ -189,10 +217,35 @@ class Auth::System::Wrapper
 				minute_categories = minute_hash["categories"].map{|c| c = [c["category"],c["capacity"]]}.to_h
 				
 				## a minute in the overlap hash that is either less than or equal to this minute
-				applicable_minute = sorted_minutes.bsearch{|c| c <= minute}
+				applicable_minute = nil
+
+				#puts "the minute coming in is: #{minute}"
+				#puts "sorted minutes are: #{sorted_minutes}" 
+
+				## is there anything less than minute in sorted_minutes
+				if sorted_minutes.include? minute
+					applicable_minute = minute
+				else
+					## iterate and the minute you find something less than this, black it out.
+					sorted_minutes.each_with_index {|s,k|
+						if s > minute
+							if k > 0
+								applicable_minute = sorted_minutes[k-1]
+							end
+							break
+						end
+					}
+				end
 
 				## iterating each category combination in the applicable overlap hash minute.
-				applicable_minute.keys.each do |k|
+				#puts "the applicable minute is:"
+				#puts applicable_minute.to_s
+				#puts "location overlap hash"
+				#puts location_overlap_hash.to_s
+
+				next unless applicable_minute
+				
+				location_overlap_hash[applicable_minute].keys.each do |k|
 					
 					## split the categories on "_"
 					categories_in_this_key = k.split("_")
@@ -209,11 +262,15 @@ class Auth::System::Wrapper
 						if minute_hash_contains_all_categories_in_this_key.size == categories_in_this_key.size
 							
 							## how many query ids are applicable from those in the overlap hash, to the current query id, at this combination?
-							if increment_by = applicable_query_ids(applicable_minute[k][:query_ids],query_id)
+							
+
+							if increment_by = applicable_query_ids(location_overlap_hash[applicable_minute][k][:query_ids],query_id)
 
 								## increment all the category requirements of the common categories by that much.
+								#puts "these are the category requirements"
+								#puts category_requirements.to_s
 								common_categories.each do |cc|
-									category_requirements[cc]+=increment_by
+									category_requirements[cc]+=increment_by.size
 								end
 
 							end 
@@ -231,9 +288,19 @@ class Auth::System::Wrapper
 
 		}
 
+		## okay so rather than pruning, this will have to be passed in as a part of the result.
+		## and when we go to update the 
+		puts "minutes to prune are:"
+		puts JSON.pretty_generate(indices_of_minutes_to_prune)
+		
 		indices_of_minutes_to_prune.keys.each do |location_index|
 			indices_of_minutes_to_prune[location_index].each do |min_index|
-				query_result[location_index][min_index] = {}
+				#puts "doing location index"
+				#puts location_index
+				#puts "doing min index:"
+				#puts min_index
+
+				query_result[location_index.to_i]["minutes"][min_index] = {}
 			end
 		end
 
@@ -242,18 +309,13 @@ class Auth::System::Wrapper
 	end
 
 	## THIS IS THE ONLY FUNCTION THAT IS TO BE CALLED.
+	## @param[Array] query_result : A mongo aggregation result object, on which to_a has been called.
+	## @param[Array] categories_searched_for : array of strings , the entity categories that were searched for.
+	## @param[String] query_id : the id of the query, used in the filtering process.
 	def process_query_results(query_result,categories_searched_for,query_id)
-		query_result = filter_query_results(query_result,categories_searched_for)
+		query_result = filter_query_results(query_result,categories_searched_for,query_id)
 		update_overlap_hash(query_result,categories_searched_for,query_id)
 	end
-
-	## first will have to write the tests for making the actual queries.
-	## then the test for filtering it through the overlap_hash
-	## then populating the overflow hash.
-	## then passing forward of the last minute/location id : those tests.
-
-	## so i have four hours, will attempt to do first test in 
-
 	#################### OVERLAP HASH FUNCTIONS END ######################
 
 

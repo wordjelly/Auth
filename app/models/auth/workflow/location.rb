@@ -99,6 +99,42 @@ class Auth::Workflow::Location
 				"$unwind" => "$minutes"
 			},
 			{
+				"$project" => {
+					"minutes" => 1,
+					"applicable_categories" => {
+						"$filter" => {
+							"input" => "$minutes.categories",
+							"as" => "categs",
+							"cond" => {
+								"$and" => [
+									{ "$in" => 
+										[
+											"$$categs.category",
+											categories
+										]
+									},
+								]
+							}
+						}
+					}
+				}
+			},
+			{
+				"$project" => {
+					"minutes" => 1,
+					"applicable_category_size" => {
+						"$size" => "$applicable_categories"
+					}
+				}
+			},
+			{
+				"$match" => {
+					"applicable_category_size" => {
+						"$eq" => categories.size
+					}
+				}
+			},
+			{
 				"$group" => {
 					"_id" => "$_id",
 					"minutes" => {
