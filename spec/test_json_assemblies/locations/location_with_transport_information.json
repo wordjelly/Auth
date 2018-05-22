@@ -1,5 +1,5 @@
 {
-	"__comment" : "we are going to say, how many of these categories are there in this minute, we get some categories, then we are going to say, do we have the capacity for such a query? First how many query ids are applicable to this query id, the ones which could impinge. For eg : earlier i wanted things free more than 20 mins. Now i want things that are free more than 50 mins.",
+	"__comment" : "entities are already there, just add the transport from location id, transport to location id attributes.",
 	"locations" : [
 		{
 			"_id" : "first_location",
@@ -27,15 +27,25 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"departs_from_location_id" : "first_location",
+									"arrives_at_location_id" : "second_location",
+									"arrives_at_location_coordinates" : [22.0,10.5
+									],
+									"arrives_at_location_categories" : ["l1"],
+									"transport_capacity" : 100
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						},
@@ -47,15 +57,21 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						},
@@ -67,15 +83,21 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						}
@@ -102,15 +124,21 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						},
@@ -122,15 +150,21 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						},
@@ -142,15 +176,21 @@
 							[
 								{
 									"duration" : 10,
-									"booked" : true
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 10,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								},
 								{
 									"duration" : 9,
-									"booked" : false
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
 								}
 							]
 						}

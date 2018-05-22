@@ -41,9 +41,10 @@ module SystemSupport
 		{:wrapper => wrapper, :cart_items => cart_items, :products => products, :locations => locations}
 	end
 
-	def get_location_aggregation_result
+	## a default path is provided here.
+	def get_location_aggregation_result(path="/home/bhargav/Github/auth/spec/test_json_assemblies/locations/3.json")
 
-		json_defintion = JSON.parse(IO.read("/home/bhargav/Github/auth/spec/test_json_assemblies/locations/3.json"))
+		json_defintion = JSON.parse(IO.read(path))
 
 		location_hashes = json_defintion["locations"]
 			
@@ -57,6 +58,20 @@ module SystemSupport
 
 		response = Auth.configuration.location_class.constantize.find_entity(options)
 					
+	end
+
+	## will simply load consumable objects from the provided file
+	def load_consumables(path)
+		json_defintion = JSON.parse(IO.read(path))
+		consumables = json_defintion["consumables"].map{|c|
+			c = Auth::Workflow::Consumable.new(c)
+		}	
+		consumables
+	end	
+
+	def load_overlap_hash(path)
+		overlap_hash = JSON.parse(IO.read(path))
+		overlap_hash
 	end
 
 end

@@ -175,27 +175,42 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		context " -- overlap hash -- ", :overlap_hash => true do 
 
+			## first finalize the queries from location queries.
+
+
 			context " -- unit tests -- " do 
 				
 				context " -- manage minute -- " do 
 
-					it " -- manages equal minute -- " do 
+					it " -- manages equal minute -- ", :manage_equal_minute => true do 
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								10 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								}
-							}
-						}
+						## here we will load this overlap hash from the file.
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
+						wrapper.overlap_hash.deep_symbolize_keys!
+
+						### it basically has to include the type of the category and the capacity therein.
+						## not just the query id.
 
 						minute_hash_to_merge = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
+									}
+								}
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -207,35 +222,43 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
 
-						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						
 						wrapper.overlap_hash.deep_symbolize_keys!
-						#puts "this is the overlap hash at location id"
-						#puts wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids].to_s
-						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+						
+						expect(wrapper.overlap_hash[location_id.to_sym][minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
 
 					end
 
-					it " -- manages only lower minute -- " do 
+
+					it " -- manages only lower minute -- ", :manage_lower_minute => true do 
 
 						## so it should just add this minute.
 						## nothing more.
 
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								8 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								}
-							}
-						}
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/2.json")
+						wrapper.overlap_hash.deep_symbolize_keys!
 
 						minute_hash_to_merge = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
+									}
+								}
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -245,32 +268,41 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
 
-						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						puts JSON.pretty_generate(wrapper.overlap_hash)
 						wrapper.overlap_hash.deep_symbolize_keys!
-						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+						
+						expect(wrapper.overlap_hash[location_id.to_sym][minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(1)
 
 
 					end
 
-					it " -- manages only higher minute -- " do 
 
-						## it should just add the minute.
+					it " -- manages only higher minute -- ", :manage_higher_minute => true do 
+
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								12 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								}
-							}
-						}
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/3.json")
+						wrapper.overlap_hash.deep_symbolize_keys!
 
 						minute_hash_to_merge = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
+									}
+								}
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -280,36 +312,42 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper.manage_minute(minute_hash_to_merge,minute,location_id)
 
-						#puts JSON.pretty_generate(wrapper.overlap_hash)
+						puts JSON.pretty_generate(wrapper.overlap_hash)
 						wrapper.overlap_hash.deep_symbolize_keys!
-						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+						
+						expect(wrapper.overlap_hash[location_id.to_sym][minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(1)
 
 					end
+
 
 					it " -- manages higher and lower minute -- ", :combined_minute => true do 
 
 						## in this case it will fuse the stuff from the lower minute.
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								1 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								},
-								12 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								}
-							}
-						}
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/4.json")
+
+						wrapper.overlap_hash.deep_symbolize_keys!
 
 						minute_hash_to_merge = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
+									}
+								}
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -323,12 +361,20 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						## we expect this to have the query ids, 10,12,1 at the minute 10.
 						wrapper.overlap_hash.deep_symbolize_keys!
-						expect(wrapper.overlap_hash[location_id.to_sym][minute]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
-						expect(wrapper.overlap_hash[location_id.to_sym][1]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12"])
+						
+						## basically it should insert into the current minute the stuff from the lower minute.
+
+
+						
+						
+						expect(wrapper.overlap_hash[location_id.to_sym][minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
+
+						expect(wrapper.overlap_hash[location_id.to_sym][minute.to_s.to_sym]["consumables_hash".to_sym][:con2].size).to eq(1)
 
 					end
 
 				end
+
 
 				context " -- manage start and end minutes together -- ", :se_together => true do
 
@@ -336,27 +382,29 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								1 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								},
-								12 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/4.json")
+
+						wrapper.overlap_hash.deep_symbolize_keys!
+
+						minute_to_insert = {
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
 									}
 								}
-							}
-						}
-
-
-						
-						minute_to_insert = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -368,16 +416,26 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper.manage_minute(minute_to_insert,start_minute,location_id)
 
+						
 						#puts JSON.pretty_generate(wrapper.overlap_hash)
 						## 5 and 7 should have similar shit in them.s
 
 						wrapper.overlap_hash.deep_symbolize_keys!
 
-						expect(wrapper.overlap_hash[location_id.to_sym][5]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
-						expect(wrapper.overlap_hash[location_id.to_sym][7]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+						puts JSON.pretty_generate(wrapper.overlap_hash)
+							
+						expect(wrapper.overlap_hash[location_id.to_sym][start_minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
+
+						expect(wrapper.overlap_hash[location_id.to_sym][start_minute.to_s.to_sym]["consumables_hash".to_sym][:con2].size).to eq(1)
+
+						expect(wrapper.overlap_hash[location_id.to_sym][end_minute.to_s.to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
+
+						expect(wrapper.overlap_hash[location_id.to_sym][end_minute.to_s.to_sym]["consumables_hash".to_sym][:con2].size).to eq(1)
+
 					end 	
 
 				end
+
 
 				context " -- updates intervening minutes -- ", :update_intervening_minutes => true do 
 
@@ -385,27 +443,29 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 						wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = {
-							"abc" => {
-								3 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
-									}
-								},
-								12 => {
-									"c1_c2_c3" => {
-										:query_ids => ["10","12"]
+						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/5.json")
+
+						wrapper.overlap_hash.deep_symbolize_keys!
+
+						minute_to_insert = {
+							:categories_hash => {
+								:c1_c2_c3 => {
+									:categories => ["c1","c2","c3"],
+									:query_ids => {
+										"1" => {
+											"c1" => [["type_2",10],["type3",20],["type4",40]],
+											"c2" => [["type_2",10],["type3",20],["type4",40]]
+										}
 									}
 								}
-							}
-						}
-
-
-						
-						minute_to_insert = {
-							"c1_c2_c3" => {
-								:categories => ["c1","c2","c3"],
-								:query_ids => ["1"]
+							},
+							:consumables_hash => {
+								:con1 => [
+									{
+										:quantity => 5,
+										:query_ids => ["1"]		
+									}
+								]
 							}
 						}
 
@@ -414,23 +474,31 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 						location_id = "abc"
 
 						wrapper.manage_minute(minute_to_insert,end_minute,location_id)
-						
+
 						wrapper.manage_minute(minute_to_insert,start_minute,location_id)
 
+						
 						wrapper.update_intervening_minutes(minute_to_insert,start_minute,end_minute,location_id)
 
 						wrapper.overlap_hash.deep_symbolize_keys!
 
-						expect(wrapper.overlap_hash[location_id.to_sym][3]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
+						puts JSON.pretty_generate(wrapper.overlap_hash)
 
-						expect(wrapper.overlap_hash[location_id.to_sym][12]["c1_c2_c3".to_sym][:query_ids]).to eq(["10","12","1"])
-						
-						expect(wrapper.overlap_hash[location_id.to_sym][1]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+						## the intervening minutes should have the stuff from the preceeding element.
+						## for 4,12 the con1 count should be 2.
+						expect(wrapper.overlap_hash[location_id.to_sym]["4".to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
 
-						expect(wrapper.overlap_hash[location_id.to_sym][15]["c1_c2_c3".to_sym][:query_ids]).to eq(["1"])
+						#expect(wrapper.overlap_hash[location_id.to_sym][start_minute.to_s.to_sym]["consumables_hash".to_sym][:con2].size).to eq(1)
+
+						expect(wrapper.overlap_hash[location_id.to_sym]["12".to_sym]["consumables_hash".to_sym][:con1].size).to eq(2)
+
+						#expect(wrapper.overlap_hash[location_id.to_sym][end_minute.to_s.to_sym]["consumables_hash".to_sym][:con2].size).to eq(1)
+
 					end
 
 				end
+
+=begin
 
 				context " -- integrated overlap hash population test -- ", :populate_overlap_hash => true do 
 
@@ -440,8 +508,9 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 						categories_searched_for = ["a","b","c"]
 						query_id = "first_query"
 						wrapper = Auth::System::Wrapper.new
-						
-						wrapper.update_overlap_hash(query_result,categories_searched_for,query_id)
+						consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
+
+						wrapper.update_overlap_hash(query_result,categories_searched_for,query_id,consumables)
 						
 						wrapper.overlap_hash.deep_symbolize_keys!
 
@@ -466,11 +535,13 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 							"second_location" => {
 								5 => {
 									"a_b_c" => {
+										:categories => ["a","b","c"],
 										:query_ids => ["10","12"]
 									}
 								},
 								20 => {
 									"a_b_c" => {
+										:categories => ["a","b","c"],
 										:query_ids => ["10","12"]
 									}
 								}
@@ -482,7 +553,9 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 						categories_searched_for = ["a","b","c"]
 						query_id = "first_query"
 						
-						wrapper.update_overlap_hash(query_result,categories_searched_for,query_id)
+						consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
+
+						wrapper.update_overlap_hash(query_result,categories_searched_for,query_id,consumables)
 						
 						wrapper.overlap_hash.deep_symbolize_keys!
 
@@ -506,6 +579,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 					end
 
 				end
+=end
 
 				context " -- filters query results -- ", :filter_query_results => true do 
 
@@ -513,48 +587,45 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 					context " -- unit test -- " do
 
-						it " -- gives applicable minute only if directly equal or between two existing minutes -- " do 
+						it " -- gives applicable minute only if directly equal or between two existing minutes -- ", :failing_spec => true do 
 
 							wrapper = Auth::System::Wrapper.new
 						
-							wrapper.overlap_hash = {
-								"second_location" => {
-									5 => {
-										"a_b_c" => {
-											:query_ids => ["10","12","14"]
-										}
-									},
-									20 => {
-										"a_b_c" => {
-											:query_ids => ["10","12","14"]
-										}
-									}
-								}
-							}	
+							wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/6.json")
+
+							wrapper.overlap_hash.deep_symbolize_keys!
 							
-							## so what will is it expected to do here.
-							## ?
-							## we already have a_b_c, at the lesser than minute
-							## so all the categories intersect.
-							## from the minute in the overlap hash.
-							## for the combination in the incoming minute.
-							## the question is whether the capacity is sufficient or not.
-							## let me first make the query ids return true.
-							## that will automatically increment the capacity and the query_result should get pruned.
+							## the location objects will have to first be modified
+							## see some entities will have to be added for transport.
+							## does it affect directly.
+							## how does the minute to insert change ?
+							## the minute to insert how is it generated ?
+							## 
+
+
 							query_result = get_location_aggregation_result
+							
 							categories_searched_for = ["a","b","c"]
+							
 							query_id = "first_query"
 
 							query_result = query_result.to_a
-							query_result = wrapper.filter_query_results(query_result,categories_searched_for,query_id)
+							 
+							consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
 
-							## the location id "second_location" should have had all its minutes pruned out.
+							query_result = wrapper.filter_query_results(query_result,categories_searched_for,query_id,consumables)
+
+							## now we have to write the function to actually filter out this.
+							## okay so here in
+
+							#puts JSON.pretty_generate(query_result)
+								
 							query_result[0]["minutes"].each do |min|
 								expect(min).to be_empty
 							end
 
 						end
-
+=begin
 						context " -- applicable minute found -- " do 
 
 							it " -- does not prune unless some common categories are found -- ", :no_common_categories => true do 
@@ -569,11 +640,13 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 									"second_location" => {
 										5 => {
 											"a2_b2_c2" => {
+												:categories => ["a2","b2","c2"],
 												:query_ids => ["10","12","14"]
 											}
 										},
 										20 => {
 											"a2_b2_c2" => {
+												:categories => ["a2","b2","c2"],
 												:query_ids => ["10","12","14"]
 											}
 										}
@@ -585,8 +658,10 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 								categories_searched_for = ["a","b","c"]
 								query_id = "first_query"
 
+								consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
+
 								query_result = query_result.to_a
-								filtered_query_results = wrapper.filter_query_results(query_result,categories_searched_for,query_id)
+								filtered_query_results = wrapper.filter_query_results(query_result,categories_searched_for,query_id,consumables)
 								expect(filtered_query_results).to eq(query_result)
 
 							end
@@ -604,11 +679,13 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 									"second_location" => {
 										5 => {
 											"a_b_c2" => {
+												:categories => ["a","b","c2"],
 												:query_ids => ["10","12","14"]
 											}
 										},
 										20 => {
 											"a_b_c2" => {
+												:categories => ["a","b","c2"],
 												:query_ids => ["10","12","14"]
 											}
 										}
@@ -621,10 +698,46 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 								query_id = "first_query"
 
 								query_result = query_result.to_a
-								filtered_query_results = wrapper.filter_query_results(query_result,categories_searched_for,query_id)
+								consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
+								filtered_query_results = wrapper.filter_query_results(query_result,categories_searched_for,query_id,consumables)
 								expect(filtered_query_results).to eq(query_result)
 
 							end
+
+						end
+=end
+						it " -- prunes if just the consumables are not enough -- ", :consumable_prune => true do 
+
+							wrapper = Auth::System::Wrapper.new
+						
+							wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/7.json")
+
+							wrapper.overlap_hash.deep_symbolize_keys!
+							
+							query_result = get_location_aggregation_result
+							
+							## so the location aggregation result is going to have to provide such a minute to insert
+							## not only the categories searched for, but also a default type will have to be provided.
+
+							categories_searched_for = ["a","b","c"]
+							
+							query_id = "first_query"
+
+							query_result = query_result.to_a
+							 
+							consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")
+
+							query_result = wrapper.filter_query_results(query_result,categories_searched_for,query_id,consumables)
+
+							## now we have to write the function to actually filter out this.
+							## okay so here in
+
+							puts JSON.pretty_generate(query_result)
+
+							query_result[0]["minutes"].each do |min|
+								expect(min).to be_empty
+							end
+
 
 						end
 
@@ -632,7 +745,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 				end
 
-
+=begin
 				context " -- first populate empty overlap hash, then filter subsequent query", :populate_then_filter => true do 
 
 					it " -- first query and second query will be same, so the second query leads to complete pruning -- " do 
@@ -640,20 +753,23 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 						categories_searched_for = ["a","b","c"]
 						query_id = "first_query"
 
+						consumables = load_consumables("/home/bhargav/Github/auth/spec/test_json_assemblies/consumables/1.json")		
+
 						## now we directly call the main function.
 						wrapper = Auth::System::Wrapper.new
 
 						query_result = query_result.to_a
 
-						wrapper.process_query_results(query_result,categories_searched_for,query_id)
+						wrapper.process_query_results(query_result,categories_searched_for,query_id,consumables)
 
 						
 						categories_searched_for = ["a","b","c"]
 						query_id = "second_query"
 
-						
+	
+										
 
-						wrapper.process_query_results(query_result,categories_searched_for,query_id)		
+						wrapper.process_query_results(query_result,categories_searched_for,query_id,consumables)		
 
 						## so basically what will happen here is that everything from the second result will get pruned out.
 
@@ -665,16 +781,7 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 					end
 
 				end
-
-
-				context " -- first populate empty overlap hash, then filter subsequent query, then add the filtered query results to the overlap hash -- " do 
-
-					## okay so this time, everything does not get filtered
-					## some things are in common so they get filtered, the rest of it gets added.
-					## this is the last test
-
-
-				end
+=end
 
 			end			
 
@@ -684,11 +791,15 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 end
 
-## add / remove / delay / batched updates : 4 (day after and after that.)
-## backtrace, merge, query id tracing : 4 (tomorrow.)
-## adding barcode ids, and also serial/numbers, mark requirements : 4
-## step video / image coordination : 4
-## api to add step instructions, and actually add the sop's : 4
+## add / remove / delay / batched updates(2) + 1 : 4 (day after and after that.)
+
+## backtrace(2) + (1) test, merge, query id tracing : 4 (tomorrow.)
+
+## adding barcode ids, and also serial/numbers, mark requirements, modulating step instructions, api to add step instructions, and actually add the sop's, step video / image coordination : 8
+
+## from tomorrow : chinese walls.
+
+## today incorporate mark requirements in overflow hash, then 
 
 ## to do after june 7th
 
@@ -699,3 +810,7 @@ end
 ## integration into shopping cart : 3 days
 ## apis for symptom test, survey, animation and image : 4 days
 ## actual deployment
+
+
+## first step is query
+## then 

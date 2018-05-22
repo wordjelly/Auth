@@ -9,21 +9,47 @@ class Auth::System::Definition
 	field :location_specifications, type: Array, default: []
 	field :duration, type: Integer
 	field :entity_categories_needed_simultaneously_with_capacity, type: Hash, default: {}
+
+	## inside the minutes we will have only static first time use physical requirements.
+	## like tubes , beakers, slides, whatever.
+	## how to coordinate for things created in a previous minute ?
 	field :physical_requirements, type: Hash, default: {}
+
 	field :merge_output, type: Boolean, default: false
+
+	## the minimum time before and after the initial unit, in which we can merge incoming additional products.
+	## the numbers are in seconds
+	## by default it is 10 seconds before and after.
+	field :merge_time_range, type: Array, default: [-10,10]
+		
+	## what would be output for one input bunch.
+	## key -> product id
+	## value -> quantity(float)
 	field :output_objects, type: Hash, default: {}
+	
 	field :input_requirements, type: Array, default: []
+	
+	## an array of arrays, each inner array contains a bunch of cart item ids.
 	field :input_object_ids, type: Array, default: []
-	
-	## whether the locations of incoming objects inside each object_id element are to be kept common?
-	field :intersection_location_commonality, type: Boolean, default: false
-	
+		
 	## the results of the intersects, one for each element in the input object ids.
 	field :intersection_results, type: Array, default: []
 
-	## can we store this in the time specifications.?
-	## 
+	## one for each input object id bunch.
+	field :query_options, type: Array, default: []
+
+	## one for each input object id bunch.
+	field :query_results, type: Array, default: []
+
+	## whether the locations of incoming objects inside each object_id element are to be kept common?
+	field :intersection_location_commonality, type: Boolean, default: false
 	
+	
+	## the dispatch id
+	## the definition id of the next_definition.
+	field :next_definition_location, type: String
+		
+
 	## @return[Boolean] true/false : depending on whether anything could be added to this definition or not.
  	def add_cart_items(input_objects)
 		groups = {}
@@ -137,7 +163,10 @@ class Auth::System::Definition
 				]
 
 			else
-			
+				
+				## so the input object ids are like that
+				## now what about the units.
+=begin
 				query_results_array.first.each do |minute_hash|
 					minute = minute_hash[:minute]
 					locations = minute_hash[:locations]
@@ -155,7 +184,7 @@ class Auth::System::Definition
 						end
 					end
 				end
-			
+=end			
 			end
 
 			intersection_results << combined_array
@@ -203,9 +232,7 @@ class Auth::System::Definition
 				time_specifications << {:start_time_range_beginning => final_beginning_time, :start_time_range_end => final_end_time}
 
 			else
-				
-
-
+			
 
 			end
 		}
@@ -295,13 +322,6 @@ class Auth::System::Definition
 
 	end
 
-	## will take the time and location information and make queries.
-	def search_locations
-		## if it is a within radius type, then it is one possibility, otherwise it is a simple location category search.
-		## and what kind of result output is necessary.
-		## and what about the situation where no location information is specified for the query, in that case, empty shit should get passed into the array of location information.
-		## so first let me add a test for that.
-	end
 
 	## @param[Array] location_ids : the location ids which we want to check are within the radius for the provided coordinates. This is an array of strings.
 	## @param[Hash] coordinates : the coordinates of the origin point.
@@ -361,6 +381,97 @@ class Auth::System::Definition
 
 		return location_ids_satisfying_conditions
 
+	end
+
+
+	####################################################################
+	##
+	##
+	## QUERY AND SUBSEQUENT FUNCTIONS.
+	## decide how to assay the locations, whether to have multiple mini locations or have one location only. finish this as well today.
+	## today will do query and merge into existing unit, and add barcode.
+	## tomorrow will do video and photo instructions.
+	####################################################################
+	
+	def default_location_specification
+
+	end
+
+	## @param[Hash] location_information : a location information hash, with a coordinates and a radius, key.
+	## @eg : {:within_radius => self.selected_within_radius, :origin_location => self.origin_location, :location_categories => self.selected_location_categories}
+	## @return[Float] speed : speed in meters/second.
+	def lookup_speed(location_information)
+		20
+	end
+
+	## @return[Hash] options : the hash of options for the query.
+	def build_query(location_information,time_information)
+		options = {}
+		
+		options[:minute_ranges] = [time_information[:start_time_range_beginning], time_information[:start_time_range_end]]
+		
+		options[:categories] = self.entity_categories_needed_simultaneously_with_capacity.keys
+
+		## these two may or may not be defined.
+		options[:location_ids] = location_information[:location_ids]
+		options[:location_categories] = location_information[:location_categories]
+
+		if location_information[:within_radius]
+			options[:speed] = lookup_speed(location_information)	
+			options[:coordinates] = location_information[:origin_location]
+		elsif location_information[:location_ids]
+			
+		else
+			raise "location information has neither within radius nor location ids."
+		end
+
+		options[:query_id] = BSON::ObjectId.new.to_s
+
+		self.query_options << options
+
+		options
+
+	end
+
+	def query
+		self.input_object_ids.each_with_index {|input_object_id_group,index|
+			location_information = self.location_specifications[index]
+			time_information = self.time_specifications[index]
+			location_information = default_location_specification if location_information.blank?
+			raise "no time information provided" if time_information.blank?
+			query_options = build_query(location_information,time_information)
+			if query_options[:within_radius]
+				after_query(Auth.configuration.location_class.constantize.loc(options))
+			else
+				after_query(Auth.configuration.location_class.constantize.find_entity(options))
+			end
+			
+		}
+	end
+
+	def after_query(query_result)
+			
+		self.level.wrapper.process_query_results(query_result,entity_categories_needed_simultaneously_with_capacity.keys,query_id,consumables)
+			
+
+	end
+
+	def merge_into_existing_unit
+		## will check if merge is true
+		## if yes, then will check the existing units for merge_range
+		## if possible, will merge
+		## if not possible, will return false.
+		## this may make it necessary to 
+	end
+
+	def build_unit_from_output_hash_object_specifications
+		## will call generate_barcodes and callouts on the unit
+		## will also call generate_new_instructions.
+	end
+
+	def dispatch_to_next_level
+		## will check if this is the last incoming product bunch
+		## if yes, will dispatch all the products to the next level.
 	end
 
 end

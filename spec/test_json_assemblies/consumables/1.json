@@ -1,0 +1,13 @@
+{
+	"consumables" : 
+	[
+		{
+			"product_id" : "first_product",
+			"quantity" : 10
+		},
+		{
+			"product_id" : "second_product",
+			"quantity" : 3
+		}
+	]
+}

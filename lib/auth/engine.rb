@@ -108,6 +108,9 @@ module Auth
     ##
     ##
     ########################################################
+    attr_accessor :consumable_class
+    attr_accessor :consumable_controller
+
     attr_accessor :assembly_class
     attr_accessor :assembly_controller
 
@@ -133,6 +136,7 @@ module Auth
     attr_accessor :tlocation_class
     attr_accessor :tlocation_controller
 
+    ## CURRENTLY USED
     attr_accessor :location_class
     attr_accessor :location_controller
 
@@ -150,6 +154,8 @@ module Auth
     ## this is also no longer user.
     attr_accessor :overlap_class
     attr_accessor :overlap_controller
+
+
 
     #######################################################
     ####        CURRENTLY USED                         ####
@@ -362,6 +368,10 @@ module Auth
 
       @specification_class = "Auth::Workflow::Specification"
       @specification_controller = "auth/workflow/specifications"
+
+      ## this is the 
+      @consumable_class = "Auth::Workflow::Consumable"
+      @consumable_controller = "auth/workflow/consumables"
       ########################################################
       ##
       ##
