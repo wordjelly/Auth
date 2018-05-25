@@ -1,26 +1,23 @@
 {
-	"abc" : {
-		"10" : {
-			"categories_hash" : {
-				"c1_c2_c3" : {
-					"categories" : ["c1","c2","c3"],
-					"query_ids" : ["10","12"]
-				}
-			},
-			"consumables_hash" : {
-				"con1" : [
-					{
-						"quantity" : 1,
-						"query_ids" : ["10","12"]
-					}
-				],
-				"con2" : [
-					{
-						"quantity" : 2,
-						"query_ids" : ["10","12"]
-					}
-				]
-			}
-		}
-	} 
+  "5b04851f421aa910c46a01a2": {
+    "1": {
+      "consumables": {
+      },
+      "categories": {
+        "a": {
+          "category_names": [
+            "a"
+          ],
+          "query_ids": {
+            "first_query": 
+            {
+              "a" :{
+                "5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

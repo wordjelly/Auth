@@ -1,8 +1,10 @@
 {
-	"__comment" : "we are going to say, how many of these categories are there in this minute, we get some categories, then we are going to say, do we have the capacity for such a query? First how many query ids are applicable to this query id, the ones which could impinge. For eg : earlier i wanted things free more than 20 mins. Now i want things that are free more than 50 mins.",
+	"__comment" : "",
 	"locations" : [
 		{
-			"_id" : "first_location",
+			"_id" : {
+				"$oid" : "5b04851f421aa910c46a01a2"
+			},
 			"geom" : [58.22,27.45],
 			"location_categories" : ["5"],
 			"minutes" : [
@@ -84,7 +86,9 @@
 			]
 		},
 		{
-			"_id" : "second_location",
+			"_id" : {
+				"$oid" : "5b048531421aa910c46a01a3"
+			},
 			"geom" : [58.23,27.43],
 			"location_categories" : ["1","2","3"],
 			"minutes" : [

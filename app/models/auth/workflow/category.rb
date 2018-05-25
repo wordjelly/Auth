@@ -7,11 +7,12 @@ class Auth::Workflow::Category
 	field :capacity, type: Integer
 	field :max_free_duration, type: Integer
 		
-	## while inserting the minute into the overlap hash, we need to group the entities by the types that they represent.
-	## this is especially for the transport requests
-	## from - to
-	## for the location ids.
-	## 
+	## THESE ACCESSORS ARE REQUIRED WHILE DOING THE GROUP STAGES IN THE AGGREGATIONS, AND ARE NOT NEEDED OR USED ANYWHERE
+	attr_accessor :location
+	attr_accessor :minute
+	attr_accessor :minute_actual
+	
+	
 	def get_types_for_overlap_hash
 		## how will this work
 		## what is the first thing that has to be done.

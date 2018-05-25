@@ -2,7 +2,7 @@
 	"__comment" : "entities are already there, just add the transport from location id, transport to location id attributes.",
 	"locations" : [
 		{
-			"_id" : "first_location",
+			"_id" : "5b04851f421aa910c46a01a2",
 			"geom" : [58.22,27.45],
 			"location_categories" : ["5"],
 			"minutes" : [
@@ -34,12 +34,12 @@
 								{
 									"duration" : 10,
 									"booked" : false,
-									"departs_from_location_id" : "first_location",
-									"arrives_at_location_id" : "second_location",
+									"departs_from_location_id" : "5b04851f421aa910c46a01a2",
+									"arrives_at_location_id" : "5b04851f421aa910c46a01a2",
 									"arrives_at_location_coordinates" : [22.0,10.5
 									],
 									"arrives_at_location_categories" : ["l1"],
-									"transport_capacity" : 100
+									"transport_capacity" : 1
 								},
 								{
 									"duration" : 9,
@@ -199,7 +199,7 @@
 			]
 		},
 		{
-			"_id" : "second_location",
+			"_id" : "5b048531421aa910c46a01a3",
 			"geom" : [58.23,27.43],
 			"location_categories" : ["1","2","3"],
 			"minutes" : [

@@ -374,7 +374,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 							"$gte" => category["transport_capacity"]
 						}  
 
-						query_clause["minutes.categories.entities.departs_from_location_id"] = arr["location_id"]
+						query_clause["minutes.categories.entities.departs_from_location_id"] = arr["location_id"].to_s
 
 						query_clause["minutes.categories.entities.arrives_at_location_categories"] = {
 							"$in" => category["arrives_at_location_categories"]
@@ -431,14 +431,20 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 		aggregation_clause << {
 				"$group" => {
 					"_id" => "$minutes.categories._id",
+					"category" => {
+						"$first" => "$minutes.categories.category"
+					},
 					"entities" => {
 						"$push" => "$minutes.categories.entities"
 					},
 					"minute" => {
-						"$push" => "$minutes._id"
+						"$first" => "$minutes._id"
+					},
+					"minute_actual" => {
+						"$first" => "$minutes.minute"
 					},
 					"location" => {
-						"$push" => "$_id"
+						"$first" => "$_id"
 					}
 				}
 			}
@@ -446,8 +452,12 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 		aggregation_clause <<
 			{
 				"$group" => {
-					"_id" => {
-						"$arrayElemAt" => ["$minute",0]
+					"_id" => "$minute",
+					"location" => {
+						"$first" => "$location"
+						},
+					"minute" => {
+						"$first" => "$minute_actual"
 					},
 					"categories" => {
 						"$push" => "$$ROOT"
@@ -458,9 +468,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 		aggregation_clause <<
 			{
 				"$group" => {
-					"_id" => {
-						"$arrayElemAt" => ["$categories.location",0]
-					},
+					"_id" => "$location",
 					"minutes" => {
 						"$push" => "$$ROOT"
 					}
@@ -486,6 +494,9 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 	end
 
 	def self.find_entities_transport(query_array)
+		Auth.configuration.location_class.constantize.all.each do |l|
+			puts l.id.to_s
+		end
 		aggregation_clause = []
 		ids_or_categories = filter_by_location_ids_or_categories?(query_array)
 		aggregation_clause = add_location_id_filter(aggregation_clause,query_array) 
@@ -494,6 +505,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 		aggregation_clause = unwind_categories(aggregation_clause)
 		aggregation_clause = unwind_entities(aggregation_clause)
 		aggregation_clause = add_entity_transport_filter(aggregation_clause,query_array)
+		aggregation_clause = regroup_from_entities(aggregation_clause)
 		puts JSON.pretty_generate(aggregation_clause)
 		Auth.configuration.location_class.constantize.collection.aggregate(aggregation_clause)
 	end

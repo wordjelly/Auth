@@ -34,30 +34,81 @@ class Auth::System::Wrapper
 	## @param[Hash] existing : the existing hash at the minute.
 	## @param[Hash] incoming : the incoming hash that we want to merge, this will be with two keys : {:categories_hash => {}. :consumables_hash => {}}
 	## @return[Hash] existing : after merging in the incoming hash.
-	def merge_minute_hash(existing,incoming)
-		fused = existing.deep_dup
+	def merge_minute_hash(fused,incoming)
+		existing = fused.deep_dup
 		
-		[:categories_hash].each do |type|
-			incoming[type].keys.each do |k|
+		puts "existing is:"
+		puts JSON.pretty_generate(existing)
+
+		puts "incoming is:"
+		puts JSON.pretty_generate(incoming)
+
+		## now comes the question of how we are going to merge this stuff exactly ?
+		## 
+		## check the category combination.
+
+		incoming[:categories].keys.each do |category_combination|
+			if existing[:categories][category_combination]
+				puts "found category combination #{combination}"
+
+				incoming[:categories][category_combination][:query_ids].keys.each do |q_id|
+
+					puts "searching query id: #{q_id}"
+
+					if existing[:categories][category_combination][:query_ids][q_id]
+
+						puts "query id exists #{q_id}"
+
+						incoming[:categories][category_combination][:query_ids][q_id].keys.each do |cat|
+
+
+							## we will have to search all the query ids, in the existing for this category, and if we find it , then we can proceed.
+							if existing[:categories][category_combination][:query_ids][q_id][cat]
+
+								incoming[:categories][category_combination][:query_ids][q_id][cat].keys.each do |type|
+
+									if existing[:categories][category_combination][:query_ids][q_id][cat][type]
+
+										existing[:categories][category_combination][:query_ids][q_id][cat][type] += incoming[:categories][category_combination][:query_ids][q_id][cat][type] 
+									
+									else
+
+										existing[:categories][category_combination][:query_ids][q_id][cat][type] = incoming[:categories][category_combination][:query_ids][q_id][cat][type] 
+
+									end
+
+								end
+
+							else
+								existing[:categories][category_combination][:query_ids][q_id][type] = incoming[:categories][category_combination][:query_ids][q_id][cat]
+							end
+
+						end
+
+					else
 				
-				if fused[type][k]
-					fused[type][k][:query_ids] << incoming[type][k][:query_ids][0]
-				else 
-					fused[type][k] = incoming[type][k]
+						existing[:categories][category_combination][:query_ids][q_id] = incoming[:categories][category_combination][:query_ids][q_id]
+					end
 				end
-			end
-		end
 
-		incoming[:consumables_hash].keys.each do |product_id|
-			## do we already have this product_id ?
-			if fused[:consumables_hash][product_id]
-				fused[:consumables_hash][product_id] << incoming[:consumables_hash][product_id]
 			else
-				fused[:consumables_hash][product_id] =  incoming[:consumables_hash][product_id]
+				
+				existing[:categories][category_combination] = incoming[:categories][category_combination]
 			end
 		end
 
-		fused
+
+		incoming[:consumables].keys.each do |product_id|
+			## do we already have this product_id ?
+			if existing[:consumables][product_id]
+				existing[:consumables][product_id] << incoming[:consumables][product_id]
+			else
+				existing[:consumables][product_id] =  incoming[:consumables][product_id]
+			end
+		end
+
+		existing
+
 	end
 
 	## @param[Hash] minute_hash_to_insert : the query id and the categories for the minute we are wanting to insert. e.g : {categories_to_fuse.to_s => {:categories => [array_of_categories], query_ids => [query_id]}}
@@ -65,8 +116,14 @@ class Auth::System::Wrapper
 	## @param[String] location_id : the id of the location.
 	## @return[nil]
 	def manage_minute(minute_hash_to_insert,minute,location_id)
-		
-		location_id = location_id.to_sym
+				
+		puts "this is the minute to insert."
+		puts "minute to insert is: #{minute}"
+
+		location_id = location_id.to_s.to_sym
+
+		## it depends if the location already exists in the location hash.
+		self.overlap_hash[location_id] = {} unless self.overlap_hash[location_id]
 
 		existing_minutes = self.overlap_hash[location_id].keys.map{|c| c = c.to_s.to_i}.sort { |a, b| a <=> b }
 
@@ -100,7 +157,8 @@ class Auth::System::Wrapper
 			## suppose there is an equal to , then we have to fuse it with that.
 			## **(minute).............
 			if equal_to_minute 
-				
+
+
 				self.overlap_hash[location_id][minute.to_s.to_sym] =  merge_minute_hash(self.overlap_hash[location_id][minute.to_s.to_sym],minute_hash_to_insert)
 			
 			else
@@ -127,7 +185,6 @@ class Auth::System::Wrapper
 			## there is one more possibility where there is nothing else.
 			## in that case, we have to add the start and end minute direct.
 		else
-
 			self.overlap_hash[location_id][minute.to_s.to_sym] = minute_hash_to_insert 
 		end
 
@@ -140,7 +197,7 @@ class Auth::System::Wrapper
 	## @param[String] location_id : the location id.
 	## @return[nil]
 	def update_intervening_minutes(minute_hash_to_insert,start_minute,end_minute,location_id)
-		location_id = location_id.to_sym
+		location_id = location_id.to_s.to_sym
 
 		existing_minutes = self.overlap_hash[location_id].keys.map{|c| c = c.to_s.to_i}.sort { |a, b| a <=> b }
 
@@ -152,69 +209,7 @@ class Auth::System::Wrapper
 
 	end
 
-	## Updates the existing ranges in the overflow hash for this location id.
-	## @param[Hash] start_minute_hash : the start_minute for the location id.
-	## @param[Hash] end_minute_hash : the end_minute for the location id.
-	## @param[String] location_id : the location_id from the query result.
-	## @param[Array] categories_searched_for : the categories searched for in the query.
-	## @param[String] query_id : the id of the query
-	## @return[nil]
-	def add_start_end_minute(start_minute,end_minute,location_id,categories_searched_for,query_id,consumables_searched_for)
-
-		start_minute = start_minute_hash["minute"]
-		end_minute = end_minute_hash["minute"]
-
-		self.overlap_hash[location_id] = {} unless self.overlap_hash[location_id]
-
-		## so here you have to add the consumables.
-		## okay so suppose we added the consumables, now what happens next.
-
-		## to insert it simultaneously , the minute to insert will be 
-		## {:categories => {}, :consumables => {}}
-
-
-
-		## and there it will be 
-		## problem with this is no problem.
-		c_hash = {}
-		consumables_searched_for.each do |consumable_obj|
-			c_hash[consumable_obj.product_id] = 
-			[
-				{
-					:quantity => consumable_obj.quantity,
-					:query_ids => [query_id] 
-				}
-			]
-			## now when we add it, we just go on adding the quantity consumed by the query id.
-		end
-
-
-=begin
-		##TO BE ADDED AFTER THE LOCATION SIDE OF IT IS READY.
-		query_ids = {query_id.to_sym => {}}
-		start_minute["categories"].each do |category|
-			c = Auth::System::Category.new(category)
-			## like [["type1",20],["type2",30]]
-			query_ids[query_id.to_sym][c.category.to_sym] = c.get_types_for_overlap_hash 
-		end
-=end
-		query_ids = [query_id]
-		minute_to_insert = {
-			:categories_hash => {
-				categories_searched_for.join("_") => {:categories => categories_searched_for, :query_ids => query_ids}
-			},
-			:consumables_hash => c_hash
-		}
-
-		
-
-		manage_minute(minute_to_insert,end_minute,location_id)
-
-		manage_minute(minute_to_insert,start_minute,location_id)
-
-		update_intervening_minutes(minute_to_insert,start_minute,end_minute,location_id)
-
-	end
+	
 
 	## let me first test uptil here.
 
@@ -225,23 +220,53 @@ class Auth::System::Wrapper
 	## @param[String] query_id : the arbitarily assigned id to the query.
 	## @param[Array] consumables_searched_for : array of consumable objects.
 	## @return[nil]
-	def update_overlap_hash(query_result,categories_searched_for,query_id,consumables_searched_for)
+	def update_overlap_hash(query_result,query_array,query_id)
 		query_result.each do |location|
 			
-			location_id = location["_id"]
-			start_minute = location["minutes"].first
-			end_minute = location["minutes"].last
+			puts JSON.pretty_generate(location)
 			
+			location_id = location["_id"]
+			
+			start_minute = Auth::Workflow::Minute.new(location["minutes"].first)
+			end_minute = Auth::Workflow::Minute.new(location["minutes"].last)
+
+
 			if (start_minute && end_minute)
-				add_start_end_minute(start_minute,end_minute,location_id,categories_searched_for,query_id,consumables_searched_for)
+			
+				manage_minute(end_minute.minute_to_insert(query_id),end_minute.minute,location_id)
+
+				if(start_minute.minute != end_minute.minute)
+					manage_minute(start_minute.minute_to_insert(query_id),start_minute.minute,location_id)
+					update_intervening_minutes(start_minute.minute_to_insert(query_id),start_minute.minute,end_minute.minute,location_id)
+				end
+			
 			end
 
 		end
+
+
 	end
 
+	## lets say i get a range of minutes
+	## now i dispatch to the next layer
+	## we know we can start anytime from the first -> last minute.
+	## i can store the minutes
+	## that's the only way really.
+	## and thereafter i can store subsequent things in those minutes
+	## so we have a hash like this:
+=begin
+	{
+		root_query => {
+			min_1 => for min 1 to be viable,
+			min_2
+			min_3
+			min_4
+		}
+	}
+=end
 	## @param[String] query_result_id : the id of the incoming query result.
 	## @param[Array] category_combination_query_ids : the query_ids of the category_combination inside the applicable minute in the overflow hash.
-	## @return[Array] applicable_query_ids : the number of query_ids that are applicable to overlap with this query_id. Returns nil if the array is empty.
+	## @return[Array] applicable_query_ids : the query ids which are applicable to @query_result_id.
 	def applicable_query_ids(query_result_id,category_combination_query_ids)
 
 		## for now this returns the whole combination of shit.
@@ -267,17 +292,27 @@ basically how this works is as follows : -
 
 =end
 
-	
-	## fear is the key! RIP Alistair Mac'Lean	
 
-	## @param[Mongo::Aggregation::Result] query_result : the result of the query.
-	## @param[Array] categories_searched_for : an array of categories searched for.
-	## @param[String] query_id : the string id of the query.
-	## @param[Array] consumables_searched_for : Array of consumable objects.
-	## @return[Hash] query_result : the query result after pruning it.
-	## here comes the problematic part, for the manage requireemnts.
-	def filter_query_results(query_result,categories_searched_for,query_id,consumables_searched_for)
-		
+	
+	## will first convert the query result into an array
+	def filter_query_results(query_result,query_array,query_id)
+		query_result = query_result.to_a
+		## this is going to be a hash
+		## the problem is that we wont have the types
+		## how to know the type ?
+		## we need to know what is the 
+		categories_searched_for = query_array.first["categories"].map{|c| c = c["category"]}
+
+		category_quantities = query_array.first["categories"].map{|c| 
+			c = [c["category"].to_sym,(c["transport_capacity"] || c["capacity"])]
+		}.to_h
+
+
+			
+		consumables_searched_for = []
+		if query_array.first["consumables"]
+			consumables_searched_for = query_array.first["consumables"].map{|c| c = Auth.configuration.consumable_class.constantize.new(c)}
+		end
 
 		indices_of_minutes_to_prune = {}
 
@@ -285,7 +320,7 @@ basically how this works is as follows : -
 			
 			indices_of_minutes_to_prune[location_index] = []
 
-			location_overlap_hash = self.overlap_hash[location["_id"].to_sym]
+			location_overlap_hash = self.overlap_hash[location["_id"].to_s.to_sym]
 			
 			next unless location_overlap_hash
 
@@ -293,24 +328,35 @@ basically how this works is as follows : -
 
 			location["minutes"].each_with_index{|minute_hash,index|
 
-				category_requirements = categories_searched_for.map{|c| c = [c,1]}.to_h
-				consumable_requirements = consumables_searched_for.map{|c| c = [c.product_id.to_s,c.quantity]}.to_h
+				## if you require only one type per category, then there is no problem.
+				## we can just double it, whatever is coming in.
+				category_requirements = categories_searched_for.map{|c| c = [c.to_sym,{}]}.to_h
 
-				## the minute[Integer]
-				minute = minute_hash["minute"]
+
 				
-				## the categories found in this minute.
-				minute_categories = minute_hash["categories"].map{|c| c = [c["category"],c["capacity"]]}.to_h
-				minute_consumables = minute_hash["consumables"].map{|c| c = [c["product_id"],c["quantity"]]}.to_h
+				### have to initialize it with whatever were our entity requirements for the current query.
+				### but i dont know that exact combination.
+				## that is the issue.
+				## so here there are two options.
+				## one is that we have to know the type before hand
+				## or two it has to know if this type fits.
+				## 
+
+				consumable_requirements = consumables_searched_for.map{|c| c = [c.product_id.to_s,c.quantity]}.to_h if consumables_searched_for
+
+				minute_object = Auth.configuration.minute_class.constantize.new(minute_hash)
+
+				incoming_minute_category_entity_type = 
+							minute_object.get_category_entity_types
+
+				minute = minute_object.minute
 				
-				## a minute in the overlap hash that is either less than or equal to this minute
+				
+				minute_categories = minute_object.get_categories_to_capacity
+				minute_consumables = minute_object.get_consumable_to_quantity 
+				
 				applicable_minute = nil
 
-				#puts "the minute coming in is: #{minute}"
-				#puts "sorted minutes are: #{sorted_minutes}"
-				## suppose a previous minute contains only the  
-
-				## is there anything less than minute in sorted_minutes
 				if sorted_minutes.include? minute
 					applicable_minute = minute
 				else
@@ -328,35 +374,95 @@ basically how this works is as follows : -
 				#puts "applicable minute is: #{applicable_minute}"
 				next unless applicable_minute
 				
-				location_overlap_hash[applicable_minute.to_s.to_sym][:categories_hash].keys.each do |k|
+				location_overlap_hash[applicable_minute.to_s.to_sym][:categories].keys.each do |k|
 					
 					## split the categories on "_"
-					categories_in_this_key = location_overlap_hash[applicable_minute.to_s.to_sym][:categories_hash][k][:categories]
+					categories_in_this_key = location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:category_names]
 
 
-					
+					puts "categories in this key: #{categories_in_this_key}"
+
+					puts "categories searched for : #{categories_searched_for}"
+
 					common_categories = categories_in_this_key & categories_searched_for
 
-					
+					puts "common categories :#{common_categories}"
+
 					unless common_categories.empty?
 						
 						## does the minute hash i.e in the query result contain all the categories in the combination?
 						minute_hash_contains_all_categories_in_this_key = categories_in_this_key & minute_categories.keys
 
+						puts "minute hash contains all the categories in this key : #{minute_hash_contains_all_categories_in_this_key}"
+
 						## if it does, then it means that this minute has to satisfy the requirements of this combination.
 						if minute_hash_contains_all_categories_in_this_key.size == categories_in_this_key.size
-							
-							## how many query ids are applicable from those in the overlap hash, to the current query id, at this combination?
+								
+							puts "size is equal."
+							## the minute in the result, we want to get the hash of the categories to their entity types, with their capacities.
 							
 
-							if increment_by = applicable_query_ids(query_id,location_overlap_hash[applicable_minute.to_s.to_sym][:categories_hash][k][:query_ids])
+							puts "incoming entity types:" 
+							puts incoming_minute_category_entity_type
+
+							## now we will look which query ids from the overlap hash for the applicable minute are applicable to the current query id.
+
+							## so this applicable query ids, should just return an array of the applicable query ids to this query id.
+
+							if increment_by = applicable_query_ids(query_id,location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:query_ids].keys)	
+
+								puts "increment by is: #{increment_by}"
 
 								## increment all the category requirements of the common categories by that much.
-								#puts "these are the category requirements"
-								#puts category_requirements.to_s
-								#puts "increment by is: #{increment_by}"
+								
+								## now we have to search inside those query ids, for the types
+								## if we have the same types in any of the categories, then we have to go for it.
+								## for each category, in the common categories, see if it is there in the 
+								## we have to increment the type requirement incase it is the same type.
 								common_categories.each do |cc|
-									category_requirements[cc]+=increment_by.size
+									increment_by.each do |qid|
+
+
+
+
+										location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:query_ids][qid].keys.each do |cat|
+
+											## so this is the category.
+											if incoming_minute_category_entity_type[cat]
+
+												location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:query_ids][qid][cat].keys.each do |entity_type|
+
+													puts incoming_minute_category_entity_type.to_s
+
+													puts "cat is :#{cat}"
+													puts "entity type is: #{entity_type}"
+
+													## it is the same for consumables as well.
+													if incoming_minute_category_entity_type[cat][entity_type]
+
+
+														
+														## the incoming minute has the same entity.
+														## then we must add it to the requirements.
+
+														## category_requirements will be incremented.
+														if category_requirements[cat][entity_type]
+
+															category_requirements[cat][entity_type] += location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:query_ids][qid][cat][entity_type] 
+														else
+															category_requirements[cat][entity_type]
+															category_requirements[cat][entity_type] = (location_overlap_hash[applicable_minute.to_s.to_sym][:categories][k][:query_ids][qid][cat][entity_type] + category_quantities[cat])
+														end
+
+													end
+
+												end
+
+											end	
+
+										end
+										
+									end
 								end
 
 								## only whichever queries are applicable.
@@ -364,7 +470,7 @@ basically how this works is as follows : -
 								consumables_searched_for.each do |consumable|
 
 									## pick up for each of these from overlap hash, and create total combined requirements.
-									if existing_in_overlap_hash = location_overlap_hash[applicable_minute.to_s.to_sym][:consumables_hash][consumable.product_id]
+									if existing_in_overlap_hash = location_overlap_hash[applicable_minute.to_s.to_sym][:consumables][consumable.product_id]
 
 										existing_in_overlap_hash.each do |defi|
 
@@ -389,9 +495,16 @@ basically how this works is as follows : -
 
 				end
 
-				category_requirements.keys.each do |s|
+				puts "category requirements are:"
+				puts category_requirements.to_s
 
-					indices_of_minutes_to_prune[location_index] << index unless (minute_categories[s] >= category_requirements[s])
+				category_requirements.keys.each do |cat|
+					category_requirements[cat].keys.each do |type|
+
+						indices_of_minutes_to_prune[location_index] << index if incoming_minute_category_entity_type[cat][type] < category_requirements[cat][type]
+
+
+					end
 				end
 
 
@@ -400,22 +513,27 @@ basically how this works is as follows : -
 					indices_of_minutes_to_prune[location_index] << index unless (minute_consumables[c] >= consumable_requirements[c])
 
 				end
-
 				
 			}
 
 		}
 
-		## okay so rather than pruning, this will have to be passed in as a part of the result.
-		## and when we go to update the 
-		#puts "minutes to prune are:"
-		#puts JSON.pretty_generate(indices_of_minutes_to_prune)
+
 		
+	
 		indices_of_minutes_to_prune.keys.each do |location_index|
 			indices_of_minutes_to_prune[location_index].each do |min_index|
 				query_result[location_index.to_i]["minutes"][min_index] = {}
 			end
 		end
+
+		puts JSON.pretty_generate(query_result)
+
+		puts "-- INDICES TO PRUNE -->"
+		puts JSON.pretty_generate(indices_of_minutes_to_prune)
+
+		## OKAY SO NOW WE WANT TO GIVE THE CAPACITY AVAILABLE IN THE MINUTE COMING IN TO BE LESS THAN WHATEVER WE CAN AFFORD.
+		## 
 
 		query_result
 
@@ -429,8 +547,8 @@ basically how this works is as follows : -
 	def process_query_results(query_result,categories_searched_for,query_id,consumables_searched_for)
 		## first we can do for categories , then for consumables ?
 		## or simultaneously, simultaneously
-		query_result = filter_query_results(query_result,categories_searched_for,query_id,consumables_searched_for)
-		update_overlap_hash(query_result,categories_searched_for,query_id,consumables_searched_for)
+		#query_result = filter_query_results(query_result,categories_searched_for,query_id,consumables_searched_for)
+		#update_overlap_hash(query_result,categories_searched_for,query_id,consumables_searched_for)
 	end
 
 	#################### OVERLAP HASH FUNCTIONS END ######################

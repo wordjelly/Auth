@@ -1,6 +1,22 @@
 module SystemSupport
 
-	## @return[Auth::System::Wrapper]
+
+	def lr(id,incoming_type="human")
+		
+		corr = {
+			"first_location" => "5b04851f421aa910c46a01a2",
+			"second_location" => "5b048531421aa910c46a01a3"
+		}
+
+		rev_corr = corr.values.zip(corr.keys)
+
+		if incoming_type == "human"
+			corr[id]
+		else
+			rev_corr[id]
+		end
+
+	end
 
 	def create_from_file(file_path)
 
@@ -41,22 +57,21 @@ module SystemSupport
 		{:wrapper => wrapper, :cart_items => cart_items, :products => products, :locations => locations}
 	end
 
-	## a default path is provided here.
-	def get_location_aggregation_result(path="/home/bhargav/Github/auth/spec/test_json_assemblies/locations/3.json")
 
-		json_defintion = JSON.parse(IO.read(path))
+	def get_transport_location_result(location_info_array,location_json_file_name="location_with_transport_information.json")
+
+		json_defintion = JSON.parse(IO.read("/home/bhargav/Github/auth/spec/test_json_assemblies/locations/#{location_json_file_name}"))
 
 		location_hashes = json_defintion["locations"]
-			
+		
 		locations = location_hashes.map{|c|
 			c = Auth.configuration.location_class.constantize.new(c)
 			expect(c.save).to be_truthy
 			c
 		}
 
-		options = {:duration => 2, :categories => ["a","b","c"], :minute_ranges => [[0,100]]}
 
-		response = Auth.configuration.location_class.constantize.find_entity(options)
+		response = Auth.configuration.location_class.constantize.find_entities_transport(location_info_array)
 					
 	end
 
