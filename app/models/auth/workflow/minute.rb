@@ -1,5 +1,5 @@
 class Auth::Workflow::Minute
-
+=begin
 	include Mongoid::Document
 
 	embedded_in :location, :class_name => Auth.configuration.location_class
@@ -82,7 +82,8 @@ class Auth::Workflow::Minute
 		self.consumables.map{|c| c = [c.product_id,c.quantity]}.to_h unless self.consumables.empty?
 	end
 
-	
-	
+=end
 
+	
+	
 end

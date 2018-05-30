@@ -49,7 +49,7 @@ class Auth::System::Wrapper
 
 		incoming[:categories].keys.each do |category_combination|
 			if existing[:categories][category_combination]
-				puts "found category combination #{combination}"
+				puts "found category combination #{category_combination}"
 
 				incoming[:categories][category_combination][:query_ids].keys.each do |q_id|
 

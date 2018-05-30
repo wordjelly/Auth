@@ -1,6 +1,5 @@
 require 'rails_helper'
 
-
 RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
   	
 
@@ -175,45 +174,97 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 
 		context " -- overlap hash -- ", :overlap_hash => true do 
 
-			## first finalize the queries from location queries.
+			
+			context " -- filters query results -- ", :filter_query_results => true do 
 
-			context " -- loads overlap hash -- " do 
-
-				it " -- does a transport query and loads the results into the overlap hash -- ", :simple_overlap => true do 
-
+				it " -- common categories between searched categories and categories in result minute -- " do 
+					
+					
 					wrapper = Auth::System::Wrapper.new
+					
+					wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
+					
+					wrapper.overlap_hash.deep_symbolize_keys!
 
-					response = wrapper.update_overlap_hash(response,location_info_array,"first_query")
+					location_info_array = 
+					[
+						{
+							"start_time_range_beginning" => 0,
+							"start_time_range_end" => 100,
+							"duration" => 500,
+							"location_id" => BSON::ObjectId(lr("first_location")),
+							"categories" => [
+								{
+									"category" => "a",
+									"arrives_at_location_categories" => ["l1"],
+									"transport_capacity" => 1
+								}
+							]
+						}
+					]
 
-					puts wrapper.overlap_hash
-					expect(wrapper.overlap_hash.to_s).to eq('{:"5b04851f421aa910c46a01a2"=>{:"1"=>{:consumables=>{}, :categories=>{:a=>{:category_names=>["a"], :query_ids=>{:first_query=>{:"5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2"=>1}}}}}}}')
+					response = get_transport_location_result(location_info_array)
+
+					wrapper.filter_query_results(response,location_info_array,"second_query")
+
+
 
 				end
 
 			end
 
+			context " -- manage minute -- ", :manage_minute => true do 
 
-			context " -- unit tests -- " do 
-	
-				context " -- filters and updates overlap hash -- " do 
+				it " -- manages equal minute -- ", :manage_equal_minute => true do 
+					wrapper = Auth::System::Wrapper.new
+					
+					wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
+					
+					wrapper.overlap_hash.deep_symbolize_keys!
 
+					location_info_array = 
+					[
+						{
+							"start_time_range_beginning" => 0,
+							"start_time_range_end" => 100,
+							"duration" => 500,
+							"location_id" => BSON::ObjectId(lr("first_location")),
+							"categories" => [
+								{
+									"category" => "a",
+									"arrives_at_location_categories" => ["l1"],
+									"transport_capacity" => 1
+								}
+							]
+						}
+					]
 
+					response = get_transport_location_result(location_info_array)
+
+					response.each do |doc|
+						puts JSON.pretty_generate(doc)
+					end
+
+					wrapper.update_overlap_hash(response,location_info_array,"second_query")
+
+					#puts wrapper.overlap_hash.to_s
+					#puts JSON.pretty_generate(wrapper.overlap_hash)
+					expect(wrapper.overlap_hash.to_s).to eq('{:"5b04851f421aa910c46a01a2"=>{:"1"=>{:consumables=>{}, :categories=>{:a=>{:category_names=>["a"], :query_ids=>{:first_query=>{:a=>{:"5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2"=>1}}, :second_query=>{:a=>{:"5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2"=>1}}}}}}}}')
+					
 				end
 
-				context " -- filters query results -- ", :filter_query_results => true do 
 
-					it " -- common categories between searched categories and categories in result minute -- " do 
-						
-						## it should prune the result from the location hash.
-						## because we are using a 
+				## existing minute is 2
+				## it finds 1
+				it " -- manage lower minute -- ", :lower_minute => true do 
 
-						wrapper = Auth::System::Wrapper.new
+					wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
+					wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/2.json")
 						
-						wrapper.overlap_hash.deep_symbolize_keys!
+					wrapper.overlap_hash.deep_symbolize_keys!
 
-						location_info_array = 
+					location_info_array = 
 						[
 							{
 								"start_time_range_beginning" => 0,
@@ -230,26 +281,27 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 							}
 						]
 
-						response = get_transport_location_result(location_info_array)
+					response = get_transport_location_result(location_info_array)
 
-						wrapper.filter_query_results(response,location_info_array,"second_query")
+					wrapper.update_overlap_hash(response,location_info_array,"second_query")
 
-
-
-					end
-
+					## there should be two things in that.
+					expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym].keys.size).to eq(2)
 				end
 
-				context " -- manage minute -- ", :manage_minute => true do 
+				## existing minute is 1
+				## it finds 2.
+				## so what happens in this case
+				## nothing it is just expected to add the minute.
+				it " -- manage higher minute -- ", :higher_minute => true do 
 
-					it " -- manages equal minute -- ", :manage_equal_minute => true do 
-						wrapper = Auth::System::Wrapper.new
+					wrapper = Auth::System::Wrapper.new
 						
-						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
+					wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
 						
-						wrapper.overlap_hash.deep_symbolize_keys!
+					wrapper.overlap_hash.deep_symbolize_keys!
 
-						location_info_array = 
+					location_info_array = 
 						[
 							{
 								"start_time_range_beginning" => 0,
@@ -266,133 +318,57 @@ RSpec.describe Auth::System::Wrapper, type: :model, :wrapper_model => true do
 							}
 						]
 
-						response = get_transport_location_result(location_info_array)
+					response = get_transport_location_result(location_info_array,"3.json")
 
-						wrapper.update_overlap_hash(response,location_info_array,"second_query")
+					wrapper.update_overlap_hash(response,location_info_array,"second_query")
 
-						puts wrapper.overlap_hash
-						#expect(wrapper.overlap_hash.to_s).to eq('{:"5b04851f421aa910c46a01a2"=>{:"1"=>{:consumables=>{}, :categories=>{:a=>{:category_names=>["a"], :query_ids=>{:first_query=>{:"5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2"=>1}, :second_query=>{:"5b04851f421aa910c46a01a2_5b04851f421aa910c46a01a2"=>1}}}}}}}')
-						
-					end
-
-
-					## existing minute is 2
-					## it finds 1
-					it " -- manage lower minute -- ", :lower_minute => true do 
-
-						wrapper = Auth::System::Wrapper.new
-							
-						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/2.json")
-							
-						wrapper.overlap_hash.deep_symbolize_keys!
-
-						location_info_array = 
-							[
-								{
-									"start_time_range_beginning" => 0,
-									"start_time_range_end" => 100,
-									"duration" => 500,
-									"location_id" => BSON::ObjectId(lr("first_location")),
-									"categories" => [
-										{
-											"category" => "a",
-											"arrives_at_location_categories" => ["l1"],
-											"transport_capacity" => 10
-										}
-									]
-								}
-							]
-
-						response = get_transport_location_result(location_info_array)
-
-						wrapper.update_overlap_hash(response,location_info_array,"second_query")
-
-						## there should be two things in that.
-						expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym].keys.size).to eq(2)
-					end
-
-					## existing minute is 1
-					## it finds 2.
-					## so what happens in this case
-					## nothing it is just expected to add the minute.
-					it " -- manage higher minute -- ", :higher_minute => true do 
-
-						wrapper = Auth::System::Wrapper.new
-							
-						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/1.json")
-							
-						wrapper.overlap_hash.deep_symbolize_keys!
-
-						location_info_array = 
-							[
-								{
-									"start_time_range_beginning" => 0,
-									"start_time_range_end" => 100,
-									"duration" => 500,
-									"location_id" => BSON::ObjectId(lr("first_location")),
-									"categories" => [
-										{
-											"category" => "a",
-											"arrives_at_location_categories" => ["l1"],
-											"transport_capacity" => 10
-										}
-									]
-								}
-							]
-
-						response = get_transport_location_result(location_info_array,"3.json")
-
-						wrapper.update_overlap_hash(response,location_info_array,"second_query")
-
-						## there should be two things in that.
-						expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym].keys.size).to eq(2)
-
-					end
-
-					## existing is 2
-					## it finds 
-					## 1 and 10
-					## so it should incorporate everything from 1  into 2
-					## and add 1, and 10.
-					it " -- manages higher and lower minute -- ", :higher_and_lower_minute => true do 
-
-						wrapper = Auth::System::Wrapper.new
-							
-						wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/2.json")
-							
-						wrapper.overlap_hash.deep_symbolize_keys!
-
-						location_info_array = 
-							[
-								{
-									"start_time_range_beginning" => 0,
-									"start_time_range_end" => 100,
-									"duration" => 500,
-									"location_id" => BSON::ObjectId(lr("first_location")),
-									"categories" => [
-										{
-											"category" => "a",
-											"arrives_at_location_categories" => ["l1"],
-											"transport_capacity" => 10
-										}
-									]
-								}
-							]
-
-						response = get_transport_location_result(location_info_array,"4.json")
-
-						wrapper.update_overlap_hash(response,location_info_array,"second_query")
-
-						puts JSON.pretty_generate(wrapper.overlap_hash)
-
-						
-						expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym]["2".to_sym][:categories]["a".to_sym][:query_ids].keys.size).to eq(2)
-
-					end
+					## there should be two things in that.
+					expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym].keys.size).to eq(2)
 
 				end
 
-			end			
+				## existing is 2
+				## it finds 
+				## 1 and 10
+				## so it should incorporate everything from 1  into 2
+				## and add 1, and 10.
+				it " -- manages higher and lower minute -- ", :higher_and_lower_minute => true do 
+
+					wrapper = Auth::System::Wrapper.new
+						
+					wrapper.overlap_hash = load_overlap_hash("/home/bhargav/Github/auth/spec/test_json_assemblies/overlap_hashes/2.json")
+						
+					wrapper.overlap_hash.deep_symbolize_keys!
+
+					location_info_array = 
+						[
+							{
+								"start_time_range_beginning" => 0,
+								"start_time_range_end" => 100,
+								"duration" => 500,
+								"location_id" => BSON::ObjectId(lr("first_location")),
+								"categories" => [
+									{
+										"category" => "a",
+										"arrives_at_location_categories" => ["l1"],
+										"transport_capacity" => 10
+									}
+								]
+							}
+						]
+
+					response = get_transport_location_result(location_info_array,"4.json")
+
+					wrapper.update_overlap_hash(response,location_info_array,"second_query")
+
+					puts JSON.pretty_generate(wrapper.overlap_hash)
+
+					
+					expect(wrapper.overlap_hash["5b04851f421aa910c46a01a2".to_sym]["2".to_sym][:categories]["a".to_sym][:query_ids].keys.size).to eq(2)
+
+				end
+
+			end
 
 		end
 

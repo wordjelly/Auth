@@ -236,6 +236,12 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 									qc = {}
 									qc["category"] = c["category"]
 
+									if arr["capacity"]
+										qc["capacity"] = {
+											"$gte" => arr["capacity"]
+										}
+									end
+
 									if arr["duration"]
 										qc["max_free_duration"] = {
 											"$gte" => arr["duration"]
@@ -251,6 +257,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 						}
 					]
 			}
+
 
 			if ids_or_categories == "ids"
 				aggregation_clause.last["$match"]["$or"].last["$and"] << 
@@ -380,11 +387,11 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 							"$in" => category["arrives_at_location_categories"]
 						}
 
-					else
+					#else
 					
-						query_clause["minutes.categories.capacity"] = {
-							"$gte" => category["capacity"]
-						}
+						#query_clause["minutes.categories.capacity"] = {
+						#	"$gte" => category["capacity"]
+						#}
 
 					end
 
@@ -428,6 +435,12 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 	end
 
 	def self.regroup_from_entities(aggregation_clause)
+
+		## this is not going to work.
+		## first group by the categories
+		## okay then what to group by ?
+		## 
+
 		aggregation_clause << {
 				"$group" => {
 					"_id" => "$minutes.categories._id",
@@ -449,6 +462,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 				}
 			}
 
+
 		aggregation_clause <<
 			{
 				"$group" => {
@@ -464,6 +478,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 					}	
 				}
 			}
+
 
 		aggregation_clause <<
 			{
@@ -494,9 +509,7 @@ FOR ALL THE QUERY METHODS, THE STRUCTURE OF THE INCOMING ARRAY IS AS FOLLOWS:
 	end
 
 	def self.find_entities_transport(query_array)
-		Auth.configuration.location_class.constantize.all.each do |l|
-			puts l.id.to_s
-		end
+		puts "came to transport filter."
 		aggregation_clause = []
 		ids_or_categories = filter_by_location_ids_or_categories?(query_array)
 		aggregation_clause = add_location_id_filter(aggregation_clause,query_array) 

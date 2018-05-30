@@ -7,11 +7,14 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::EsConcern
 	
 
+
 	included do 
 	
-	embeds_many :specifications, :class_name => Auth.configuration.specification_class
+		embeds_many :specifications, :class_name => Auth.configuration.specification_class
 
-	INDEX_DEFINITION = {
+		embeds_many :crawls, :class_name => "Auth::System::Template"
+
+		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
 				    		index: {
@@ -93,14 +96,14 @@ module Auth::Concerns::Shopping::ProductConcern
 		#field :time_information, type: Hash, default: {}
 		field :miscellaneous_attributes, type: Hash, default: {}
 
+
 		## all products are public to be searched.
 		before_save do |document|
 			self.public = "yes"
 		end
 
-		
-
 	end
+
 
 	def as_indexed_json(options={})
 	 {
@@ -111,29 +114,5 @@ module Auth::Concerns::Shopping::ProductConcern
 	 }
 	end 
 
-
-	def get_specification(address)
-		self.specifications.select{|c| c.address == address}.first
-	end
-
-
-
-	##################################################################
-	##
-	##
-	## FOR SYSTEM.
-	##
-	##
-	##################################################################
-
-	def get_group_value(group_by_key)
-		if group_by_key == "*" 
-			return "*"
-		else
-			return self.miscellaneous_attributes[group_by_key]
-		end
-	end
-	
-	
-
 end
+

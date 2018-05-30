@@ -450,6 +450,35 @@ RSpec.describe Auth::Workflow::Location, type: :model, :location_model => true d
 
 			end
 
+			it " -- returns both minutes in a location if they satisfy the 	depart and arrive conditions -- ", :multi_transport => true do 
+
+				location_info_array = 
+				[
+					{
+						"start_time_range_beginning" => 0,
+						"start_time_range_end" => 100,
+						"duration" => 500,
+						"location_id" => BSON::ObjectId(lr("first_location")),
+						"categories" => [
+							{
+								"category" => "a",
+								"arrives_at_location_categories" => ["l1"],
+								"transport_capacity" => 1
+							}
+						]
+					}
+				]
+
+				response = get_transport_location_result(location_info_array,"7.json")
+
+				result_counter = 0
+				response.each do |res|
+					expect(res["minutes"].size).to eq(2)
+				end
+
+
+			end
+
 		end
 
 

@@ -1,0 +1,359 @@
+{
+	"__comment" : "entities are already there, just add the transport from location id, transport to location id attributes.",
+	"locations" : [
+		{
+			"_id" : "5b04851f421aa910c46a01a2",
+			"geom" : [58.22,27.45],
+			"location_categories" : ["5"],
+			"minutes" : [
+				{
+					"minute" : 1,
+					"consumables" : [
+						{
+							"product_id" : "first_product",
+							"quantity" : 2.4
+						},
+						{
+							"product_id" : "second_product",
+							"quantity" : 0
+						}
+					],
+					"categories" : [
+						{
+							"category" : "a",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"departs_from_location_id" : "5b04851f421aa910c46a01a2",
+									"arrives_at_location_id" : "5b04851f421aa910c46a01a2",
+									"arrives_at_location_coordinates" : [22.0,10.5
+									],
+									"arrives_at_location_categories" : ["l1"],
+									"transport_capacity" : 1
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						},
+						{
+							"category" : "b",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						},
+						{
+							"category" : "c",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"minute" : 20,
+					"consumables" : [
+						{
+							"product_id" : "first_product",
+							"quantity" : 2.4
+						},
+						{
+							"product_id" : "second_product",
+							"quantity" : 0
+						}
+					],
+					"categories" : [
+						{
+							"category" : "a",
+							"max_free_duration" : 10,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						},
+						{
+							"category" : "b",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						},
+						{
+							"category" : "c",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 10,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								},
+								{
+									"duration" : 9,
+									"booked" : false,
+									"arrives_at_location_coordinates" : [22.0,10.5
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"_id" : "5b048531421aa910c46a01a3",
+			"geom" : [58.23,27.43],
+			"location_categories" : ["1","2","3"],
+			"minutes" : [
+				{
+					"minute" : 7,
+					"consumables" : [
+						{
+							"product_id" : "first_product",
+							"quantity" : 2.4
+						},
+						{
+							"product_id" : "second_product",
+							"quantity" : 0
+						}
+					],
+					"categories" : [
+						{
+							"category" : "a",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						},
+						{
+							"category" : "b",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						},
+						{
+							"category" : "c",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						}
+					]
+				},
+				{
+					"minute" : 17,
+					"consumables" : [
+						{
+							"product_id" : "first_product",
+							"quantity" : 2.4
+						},
+						{
+							"product_id" : "second_product",
+							"quantity" : 0
+						}
+					],
+					"categories" : [
+						{
+							"category" : "a",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						},
+						{
+							"category" : "b",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						},
+						{
+							"category" : "c",
+							"max_free_duration" : 500000,
+							"capacity" : 2,
+							"entities" : 
+							[
+								{
+									"duration" : 10,
+									"booked" : true
+								},
+								{
+									"duration" : 10,
+									"booked" : false
+								},
+								{
+									"duration" : 9,
+									"booked" : false
+								}
+							]
+						}
+					]
+				}
+			]	
+		}
+	]
+}
