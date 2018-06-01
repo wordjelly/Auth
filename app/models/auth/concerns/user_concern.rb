@@ -9,6 +9,7 @@ module Auth::Concerns::UserConcern
 
 	included do 
 
+		
 		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {

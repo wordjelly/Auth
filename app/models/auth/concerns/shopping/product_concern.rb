@@ -12,7 +12,9 @@ module Auth::Concerns::Shopping::ProductConcern
 	
 		embeds_many :specifications, :class_name => Auth.configuration.specification_class
 
-		embeds_many :crawls, :class_name => "Auth::System::Template"
+		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
+
+		
 
 		INDEX_DEFINITION = {
 				index_options:  {

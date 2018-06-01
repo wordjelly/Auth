@@ -8,7 +8,6 @@ class Auth::Work::Input
 	## value -> quantity
 	field :items, type: Hash, default: {}
 
-
-
-
 end
+
+## so the idea is first to get the crawls working properly.
