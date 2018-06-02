@@ -12,10 +12,9 @@ module Auth::Concerns::Shopping::ProductConcern
 	
 		embeds_many :specifications, :class_name => Auth.configuration.specification_class
 
-		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
+		embeds_many :cycles, :clsass_name => "Auth::Work::Cycle", :as => :product_cycles
 
 		
-
 		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
@@ -115,6 +114,39 @@ module Auth::Concerns::Shopping::ProductConcern
 	    public: public
 	 }
 	end 
+
+	def self.schedule_cycles(minutes,location_id,conditions = {})
+
+		products = Auth.configuration.product_class.constantize.all if conditions.blank?
+
+		products = Auth.configuration.product_class.constantize.where(conditions) if !conditions.blank?
+
+		## this will add the cycles to the minutes.
+		## that's all folks.
+
+		minutes.keys.each do |minute|
+			## what should be added here ?
+			## we will also have to add at those additional minutes.
+			products.each do |product|
+				all_cycles_valid = true
+				product.cycles.each do |cycle|
+					all_cycles_valid = cycle.requirements_satisfied(minute + time_since_prev_cycle,location_id)				
+				end
+				if all_cycles_valid == true
+					product.cycles.each do |cycle|
+						minute_at_which_to_add = minute + time_since_prev_cycle
+						if minutes[minute_at_which_to_add]
+							minutes[minute_at_which_to_add].cycles << cycle
+						else
+							raise "necessary minute not in range."
+						end
+					end
+				end
+			end
+		end
+
+
+	end
 
 end
 

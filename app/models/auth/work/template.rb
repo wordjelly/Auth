@@ -1,5 +1,7 @@
-class Auth::System::Template
+class Auth::Work::Template
 	
+	include Mongoid::Document
+
 	embedded_in :cycle, :class_name => "Auth::Work::Cycle"
 	field :product_id_to_generate, type: String
 	field :amount_generated, type: Float

@@ -2,25 +2,14 @@ class Auth::Work::Schedule
 
 	include Mongoid::Document
 
-	field :applicable_to_cycles, type: Array, default: []
 	field :start_time, type: Time
 	field :end_time, type: Time
 	field :location_id, type: String
 	field :for_object_id, type: String
 	field :for_object_class, type: String
-	field :can_do_cycles, type: Array
+	field :can_do_cycles, type: Array, default: []
 
-	def create_schedule
-		Auth::Work::Schedule.find_and_update
-		## find where
-		## start time < and end_time within_or equal
-		## or
-		## start time = and end_within or equal
-		## or
-		## start_time > and end_time equal or within.
-		## and then upsert
-		## if n modified is not one.
-		## return the schedule or nil.
+	def create_prev_not_exists
 		created_document = Auth::Work::Schedule.
 			where({
 				"$and" => [
@@ -68,20 +57,14 @@ class Auth::Work::Schedule
 			}).
 			find_one_and_update(
 				{
-					"$setonInsert" => self.attributes
+					"$setOnInsert" => self.attributes
 				},
 				{
-					:return_document => :after,
-					:upsert => true
+					:upsert => true,
+					:new => true
 				}
 			)
-
-		return created_document
+		
 	end
 
-	## so cycles are polymorphically embedded in minutes and products
-	## schedules store the cycle_code , as got from products
-	## then when cycles are to be added to the minutes, it takes each product, it checks which cycles are there in that product and at what interval, it then gets all the entities and workers that are applicable to each cycle, and adds them to each and every minute, and the subsequent cycles to the correctly intervaled minutes.
-	## okay so next step is to do this part.
-	## and today check out auth api and deploy it to aws simply.
 end

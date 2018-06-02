@@ -21,12 +21,27 @@ class Auth::Work::Cycle
 	field :duration, type: Integer
 
 	## time to next cycle
+	field :time_since_prev_cycle, type: Integer
+	
 	field :time_to_next_cycle, type: Integer
-		
+
 	## to process one product.
 	## how does the multiple work?
 	## how many to pass into the product crawl calculation, is it directly linear, or do we have a specific function?	
 	field :output, type: Array, default: []
+
+=begin
+	cycle_type => quantity
+	* cycle_type is a field registered on both 'user_concern' and 'auth/work/entity.rb'
+=end
+	field :requirements, type: Hash
+
+
+	field :cycle_code, type: String
+
+	before_save do |document|
+		document.cycle_code = BSON::ObjectId.new.to_s unless document.cycle_code
+	end
 
 
 	## @param[Array] prev_step_output: array of output hashes
@@ -52,6 +67,33 @@ class Auth::Work::Cycle
 				self.output << output_hash
 			end
 		end
+	end
+
+	def requirements_satisfied(minute,location_id)
+		begin
+			
+			location = Auth.configuration.location_class.constantize.find(location_id)
+			
+			applicable_schedules = Auth::Work::Schedule.where({:minute => minute, :location_id => location_id})
+			
+			return false if (applicable_schedules.blank? || applicable_schedules.size == 0)
+			
+			req = self.requirements.deep_dup
+			
+			applicable_schedules.each do |schedule|
+				schedule_for_object = schedule.for_object_class.constantize.find(schedule.for_object_id)
+				req[schedule_for_object.cycle_type] = req[schedule_for_object.cycle_type] - 1 if req[schedule_for_object.cycle_type]
+			end
+			
+			true if req.values.uniq[0] == 0
+			false
+
+		rescue
+
+			raise "location id provided to cycle does not exist"
+		
+		end
+
 	end
 
 end

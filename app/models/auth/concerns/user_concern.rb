@@ -9,7 +9,6 @@ module Auth::Concerns::UserConcern
 
 	included do 
 
-		
 		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
@@ -95,8 +94,6 @@ module Auth::Concerns::UserConcern
 		opts = Auth.configuration.auth_resources[self.name]
 
 		
-		
-		
 		## so if it doesnt respond to confirmed_at -> then create a client anyways
 		## if it responds to and the confirmed_at has changed, then create a client.
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) || (a.additional_login_param_status_changed? && a.additional_login_param_status == 2) }
@@ -122,6 +119,16 @@ module Auth::Concerns::UserConcern
 		## if a or b or c.
 		after_save :send_reset_password_link
 		
+		#######################################################
+		#
+		#
+		# FIELDS FOR WORK 
+		#
+		#
+		#######################################################
+
+		field :cycle_type, type: String
+
 		#######################################################
 		#
 		#
