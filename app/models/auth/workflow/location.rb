@@ -6,9 +6,9 @@ class Auth::Workflow::Location
 
 	include Mongoid::Document
 
-	embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
+	#embeds_many :tlocations, :class_name => Auth.configuration.tlocation_class
 
-	embeds_many :minutes, :class_name => Auth.configuration.minute_class
+	#embeds_many :minutes, :class_name => Auth.configuration.minute_class
 
 	field :location_categories, type: Array
 

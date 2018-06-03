@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wordjelly-auth (1.0.2)
+    wordjelly-auth (1.0.3)
       cloudinary
       devise (= 4.1.1)
       dotenv-rails

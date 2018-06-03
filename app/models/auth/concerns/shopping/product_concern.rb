@@ -10,9 +10,9 @@ module Auth::Concerns::Shopping::ProductConcern
 
 	included do 
 	
-		embeds_many :specifications, :class_name => Auth.configuration.specification_class
+		#embeds_many :specifications, :class_name => Auth.configuration.specification_class
 
-		embeds_many :cycles, :clsass_name => "Auth::Work::Cycle", :as => :product_cycles
+		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
 
 		
 		INDEX_DEFINITION = {
@@ -56,29 +56,29 @@ module Auth::Concerns::Shopping::ProductConcern
 					    	}
 					    },
 				        mappings: {
-				          Auth::OmniAuth::Path.pathify(Auth.configuration.product_class) => {
-				            properties: {
-				            	_all_fields: {
-				            		type: "text",
-				            		analyzer: "nGram_analyzer",
-					            	search_analyzer: "whitespace_analyzer"
-				            	},
-				                name: {
-				                	type: "keyword",
-				                	copy_to: "_all_fields"
-				                },
-				                price: {
-				                	type: "double",
-				                	copy_to: "_all_fields"
-				                },
-				                public: {
-				                	type: "keyword"
-				                },
-				                resource_id: {
-				                	type: "keyword",
-				                	copy_to: "_all_fields"
-				                }
-				            }
+				         	Auth::OmniAuth::Path.pathify(Auth.configuration.product_class) => {
+					            properties: {
+					            	_all_fields: {
+					            		type: "text",
+					            		analyzer: "nGram_analyzer",
+						            	search_analyzer: "whitespace_analyzer"
+					            	},
+					                name: {
+					                	type: "keyword",
+					                	copy_to: "_all_fields"
+					                },
+					                price: {
+					                	type: "double",
+					                	copy_to: "_all_fields"
+					                },
+					                public: {
+					                	type: "keyword"
+					                },
+					                resource_id: {
+					                	type: "keyword",
+					                	copy_to: "_all_fields"
+					                }
+					            }
 				        }
 				    }
 				}
@@ -115,36 +115,42 @@ module Auth::Concerns::Shopping::ProductConcern
 	 }
 	end 
 
-	def self.schedule_cycles(minutes,location_id,conditions = {})
+	module ClassMethods
 
-		products = Auth.configuration.product_class.constantize.all if conditions.blank?
+		## minutes : {epoch => minute object}
+		def schedule_cycles(minutes,location_id,conditions = {})
 
-		products = Auth.configuration.product_class.constantize.where(conditions) if !conditions.blank?
+			products = Auth.configuration.product_class.constantize.all if conditions.blank?
 
-		## this will add the cycles to the minutes.
-		## that's all folks.
+			products = Auth.configuration.product_class.constantize.where(conditions) if !conditions.blank?
 
-		minutes.keys.each do |minute|
-			## what should be added here ?
-			## we will also have to add at those additional minutes.
-			products.each do |product|
-				all_cycles_valid = true
-				product.cycles.each do |cycle|
-					all_cycles_valid = cycle.requirements_satisfied(minute + time_since_prev_cycle,location_id)				
-				end
-				if all_cycles_valid == true
+
+			minutes.keys.each do |minute|
+				## what should be added here ?
+				## we will also have to add at those additional minutes.
+				products.each do |product|
+					all_cycles_valid = true
 					product.cycles.each do |cycle|
-						minute_at_which_to_add = minute + time_since_prev_cycle
-						if minutes[minute_at_which_to_add]
-							minutes[minute_at_which_to_add].cycles << cycle
-						else
-							raise "necessary minute not in range."
+						all_cycles_valid = cycle.requirements_satisfied(minute + cycle.time_since_prev_cycle.minutes*60,location_id)				
+					end
+					if all_cycles_valid == true
+						product.cycles.each do |cycle|
+							minute_at_which_to_add = minute + cycle.time_since_prev_cycle.minutes*60
+							if minutes[minute_at_which_to_add]
+								minutes[minute_at_which_to_add].cycles << cycle
+							else
+								raise "necessary minute not in range."
+							end
 						end
 					end
 				end
 			end
-		end
 
+			puts minutes.to_s
+			
+			minutes
+
+		end
 
 	end
 

@@ -51,24 +51,7 @@ RSpec.describe Auth::Work::Cycle, type: :model, :cycle_model => true do
 			
 		end
 
-		context " -- create cycles inside minutes -- " do 
-
-			## see a cycle may require n number of different products
-			## so it has to basically assemble a hash of cycle codes, and counts and types of workers and entities that it needs
-			## then we can create the cycles out of that.
-			## so the cycle will have to have a requirements hash
-			## type -> count
-			it " -- finds and iterates applicable schedules, and adds all the cycles from them  -- " do 
-
-				## first assemble the cycles and what intervals they have to be done on in the minutes
-				## then find the schedules in those minutes
-				
-
-			end			
-
-		end
-
-		## after this is the incoming travellers
+		
 
 
 	end

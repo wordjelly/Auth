@@ -127,7 +127,7 @@ module Auth::Concerns::UserConcern
 		#
 		#######################################################
 
-		field :cycle_type, type: String
+		field :cycle_types, type: Hash
 
 		#######################################################
 		#
@@ -796,6 +796,8 @@ module Auth::Concerns::UserConcern
 		true
 	end
 
+
+	
 
 	
 	

@@ -2,9 +2,9 @@ class Auth::Work::Cycle
 		
 	include Mongoid::Document
 
-	embedded_in :minute_cycles, :class_name => "Auth::Work::Minute", :polymorphic => true
+	embedded_in :minutes, :class_name => "Auth::Work::Minute", :polymorphic => true
 
-	embedded_in :product_cycles, :class_name => Auth.configuration.product_class, :polymorphic => true
+	embedded_in :products, :class_name => Auth.configuration.product_class, :polymorphic => true
 
 	embeds_many :templates, :class_name => "Auth::Work::Template"
 
@@ -21,7 +21,7 @@ class Auth::Work::Cycle
 	field :duration, type: Integer
 
 	## time to next cycle
-	field :time_since_prev_cycle, type: Integer
+	field :time_since_prev_cycle, type: Integer, default: 0
 	
 	field :time_to_next_cycle, type: Integer
 
