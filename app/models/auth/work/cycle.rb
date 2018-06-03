@@ -69,30 +69,79 @@ class Auth::Work::Cycle
 		end
 	end
 
-	def requirements_satisfied(minute,location_id)
-		begin
-			
+	def requirements_satisfied(epoch,location_id)
+		#begin
+			#puts "came to requirements satisfied"
+			Auth.configuration.location_class.constantize.all.each do |l|
+				puts l.attributes.to_s
+			end
 			location = Auth.configuration.location_class.constantize.find(location_id)
 			
-			applicable_schedules = Auth::Work::Schedule.where({:minute => minute, :location_id => location_id})
+			#puts "location found :#{location}"
+			#puts "epoch : #{epoch}, and location id: #{location_id}"
+			time_for_query = Time.at(epoch)
+			applicable_schedules = Auth::Work::Schedule.collection.find({
+				"$and" => [
+					{
+						"location_id" => location_id
+					},
+					{
+						"start_time" => {
+							"$lte" => time_for_query
+						}
+					},
+					{
+						"end_time" => {
+							"$gte" => time_for_query
+						}
+					}
+				]
+			})
 			
+
+
+			#puts "applicable schedules:"
+			#puts applicable_schedules.to_s
+
+			applicable_schedules = applicable_schedules.to_a
+
 			return false if (applicable_schedules.blank? || applicable_schedules.size == 0)
 			
+			#puts "there are applicable schedules"
+
 			req = self.requirements.deep_dup
+			#puts "req are:"
+			#puts req.to_s
 			
+			applicable_schedules.map!{|c| c = Mongoid::Factory.from_db(Auth::Work::Schedule,c)}
+
 			applicable_schedules.each do |schedule|
+				
 				schedule_for_object = schedule.for_object_class.constantize.find(schedule.for_object_id)
-				req[schedule_for_object.cycle_type] = req[schedule_for_object.cycle_type] - 1 if req[schedule_for_object.cycle_type]
+				
+				#puts "schedule for object is: #{schedule_for_object}"
+
+				## so here the thing is that it can have many cycle types.
+
+				schedule_for_object.cycle_types.keys.each do |type|
+					req[type] = req[type] - 1 if req[type]
+				end
+					
+				#puts "req is: #{req}"
+
 			end
-			
-			true if req.values.uniq[0] == 0
-			false
+				
+			k = req.values.uniq
 
-		rescue
 
-			raise "location id provided to cycle does not exist"
+			return true if ((k[0] == 0) && (k.size == 1))
+			return false
+
+		#rescue
+
+		#	raise "location id provided to cycle does not exist"
 		
-		end
+		#end
 
 	end
 

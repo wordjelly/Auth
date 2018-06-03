@@ -26,6 +26,8 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 		before(:example) do 
 			Auth::Shopping::Product.delete_all
 			Auth.configuration.location_class.constantize.delete_all
+			Auth.configuration.user_class.constantize.delete_all
+			Auth::Work::Schedule.delete_all
 		end
 
 		it " -- adds cycles to appropriate minutes in the schedules -- " do 
@@ -55,7 +57,10 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 	        c.versioned_create
 	        u.client_authentication["testappid"] = "testestoken"
 	        u.cycle_types = {:person_trained_on_em_200 => true}
-		    u.save
+		    expect(u.save).to be_truthy
+
+		    #puts "---------------- ID OF THE SAVED USER -: #{u.id.to_s}"
+
 
 		    ## now the next thing is the entity
 		    e = Auth::Work::Entity.new
@@ -89,7 +94,7 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 		    l = Auth.configuration.location_class.constantize.new
 		    l.id = "first_location"
 		    l.save
-
+		    puts l.attributes.to_s
 		    ## so for the minutes, they are going to be the first and second minute in the duration of the schedules
 
 		    minutes = {}
@@ -104,11 +109,10 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 
 		    ## now that we have done that, we can pass in all this and see what happens.
 		    returned_minutes = Auth.configuration.product_class.constantize.schedule_cycles(minutes,"first_location")
-
-		    # so it hasnt yet added the minutes.
-		    #puts returned_minutes.size
-
-		    ## so now what is supposed to happen ?
+		    expect(returned_minutes.size).to eq(2)
+		    returned_minutes.keys.each do |time|
+		    	expect(returned_minutes[time].cycles).not_to be_empty
+		    end
 
 
 		end

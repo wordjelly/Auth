@@ -126,18 +126,27 @@ module Auth::Concerns::Shopping::ProductConcern
 
 
 			minutes.keys.each do |minute|
-				## what should be added here ?
-				## we will also have to add at those additional minutes.
+				#puts "doing minute: #{minute}"
 				products.each do |product|
+					#puts "doing product: #{product}"
 					all_cycles_valid = true
 					product.cycles.each do |cycle|
-						all_cycles_valid = cycle.requirements_satisfied(minute + cycle.time_since_prev_cycle.minutes*60,location_id)				
+						#puts "doing cycle : #{cycle}"
+						all_cycles_valid = cycle.requirements_satisfied(minute + cycle.time_since_prev_cycle.minutes*60,location_id)
+						#puts "all cycles valid becomes ------------------------------------------------------------- #{all_cycles_valid.to_s}"				
 					end
 					if all_cycles_valid == true
 						product.cycles.each do |cycle|
 							minute_at_which_to_add = minute + cycle.time_since_prev_cycle.minutes*60
+							#puts "minute at which to add is: #{minute_at_which_to_add}"
+							#puts minutes.keys.to_s
 							if minutes[minute_at_which_to_add]
+
 								minutes[minute_at_which_to_add].cycles << cycle
+
+								#puts "these are the cycles---------"
+								#puts minutes[minute_at_which_to_add].cycles.to_s
+
 							else
 								raise "necessary minute not in range."
 							end
@@ -146,7 +155,7 @@ module Auth::Concerns::Shopping::ProductConcern
 				end
 			end
 
-			puts minutes.to_s
+			#puts minutes.to_s
 			
 			minutes
 
