@@ -53,6 +53,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'cloudinary'
   s.add_dependency 'mongoid-geospatial'
   s.add_dependency 'mongoid-embedded-errors'
+  s.add_dependency 'delayed_job_mongoid'
+  s.add_dependency 'daemons'
   #s.add_dependency 'mongoid-embedded-errors'
   s.add_development_dependency 'picasa'
   s.add_development_dependency 'puma'

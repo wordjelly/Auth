@@ -5,7 +5,7 @@ class OtpJob < ActiveJob::Base
   include Auth::JobExceptionHandler
 
   queue_as :default
-  #self.queue_adapter = Auth.configuration.queue_adapter.to_sym
+  self.queue_adapter = :delayed_job
 
   ##we currently log all exceptions to redis.
   rescue_from(StandardError) do |exception|

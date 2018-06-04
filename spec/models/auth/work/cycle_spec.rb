@@ -51,9 +51,6 @@ RSpec.describe Auth::Work::Cycle, type: :model, :cycle_model => true do
 			
 		end
 
-		
-
-
 	end
 
 end
