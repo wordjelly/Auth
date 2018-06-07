@@ -15,7 +15,11 @@
   <%= @client.redirect_urls %>
 </p>
 
+<p>
+  <strong>App Ids</strong>
+  <%= @client.app_ids %>
+</p>
 
 
-<%= link_to 'Edit', edit_client_path(@client) %> |
-<%= link_to 'Back', clients_path %>
+<%= link_to 'Edit', edit_auth_client_path(@client) %> |
+<%= link_to 'Back', auth_clients_path %>

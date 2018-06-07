@@ -11,11 +11,12 @@ class Auth::ProfilesController < Auth::ApplicationController
 	before_action :initialize_vars, TCONDITIONS
 	before_action :is_admin_user, :only => [:set_proxy_user]
 	
-	
 	def initialize_vars
+		puts "---------------------------------------------------"
 		@resource_params = {}
 		@profile_resource = nil
 		@all_params = permitted_params.deep_symbolize_keys
+		
 		
 	  	if collection = @all_params[:resource]
 	  		

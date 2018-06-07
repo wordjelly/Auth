@@ -117,6 +117,23 @@ module Auth::Concerns::Shopping::ProductConcern
 
 	module ClassMethods
 
+		## so we have completed the rolling n minutes.
+		def add_to_previous_rolling_n_minutes(minutes,origin_epoch,cycle_to_add)
+
+			## get all the minutes less than that.
+			rolling_n_minutes_less_than_that = minutes.keys.select{|c| c < origin_epoch}			
+
+			end_min = rolling_n_minutes_less_than_that.size < Auth.configuration.rolling_minutes ? rolling_n_minutes_less_than_that.size : Auth.configuration.rolling_minutes
+
+			end_min = end_min - 1
+
+			end_min = end_min > 0 ? end_min : 0
+			rolling_n_minutes_less_than_that[0..end_min].each do |epoch|
+				minutes[epoch].cycles << cycle_to_add
+			end
+
+		end
+
 		## minutes : {epoch => minute object}
 		def schedule_cycles(minutes,location_id,conditions = {})
 
@@ -124,44 +141,42 @@ module Auth::Concerns::Shopping::ProductConcern
 
 			products = Auth.configuration.product_class.constantize.where(conditions) if !conditions.blank?
 
-
-			minutes.keys.each do |minute|
-				#puts "doing minute: #{minute}"
+			minutes.keys.each do |epoch|
+				
 				products.each do |product|
-					#puts "doing product: #{product}"
+				
 					all_cycles_valid = true
 					product.cycles.each do |cycle|
-						#puts "doing cycle : #{cycle}"
-						all_cycles_valid = cycle.requirements_satisfied(minute + cycle.time_since_prev_cycle.minutes*60,location_id)
-						#puts "all cycles valid becomes ------------------------------------------------------------- #{all_cycles_valid.to_s}"				
+				
+						all_cycles_valid = cycle.requirements_satisfied(epoch + cycle.time_since_prev_cycle.minutes*60,location_id)
+								
 					end
+
+					## just because the cycles are valid, it means we have workers, but how many?
+					## that also has to be returned by the cycle validity statements
+
 					if all_cycles_valid == true
+						cycle_chain = []
 						product.cycles.each do |cycle|
-							minute_at_which_to_add = minute + cycle.time_since_prev_cycle.minutes*60
-							#puts "minute at which to add is: #{minute_at_which_to_add}"
-							#puts minutes.keys.to_s
-							if minutes[minute_at_which_to_add]
+							epoch_at_which_to_add = epoch + cycle.time_since_prev_cycle.minutes*60
+							cycle_to_add = cycle.dup
+							cycle_to_add.origin_epoch = epoch_at_which_to_add
+							cycle_to_add.cycle_chain = cycle_chain
+							if minutes[epoch_at_which_to_add]
+								
+								add_to_previous_rolling_n_minutes(minutes,epoch_at_which_to_add,cycle_to_add)
 
-								minutes[minute_at_which_to_add].cycles << cycle
+								minutes[epoch_at_which_to_add].cycles << cycle_to_add
 
-								#puts "these are the cycles---------"
-								#puts minutes[minute_at_which_to_add].cycles.to_s
-
+								cycle_chain << cycle_to_add.id.to_s
 							else
-								raise "necessary minute not in range."
+								#raise "necessary minute not in range."
 							end
 						end
 					end
 				end
 			end
-
-			#puts minutes.to_s
-			
 			minutes
-
 		end
-
 	end
-
 end
-

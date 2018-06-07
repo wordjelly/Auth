@@ -152,16 +152,12 @@ You need to store these in your app, and distribute them with every copy of the 
 
 2.Still in the web application, click on "Profile" in the top right navigation bar. Now in the url in the address bar the user id will be seen after : /profiles/{user_id}. Copy that user_id.
 
-** Do the following steps through any CURL client.
-
-3.Now make the request “Get a client given the user id”. 
-
-4.Now make the request “Update the client so that it generates a app_id, doesnt use provided one”, using the id of the user, in the put request, as the id.
-
-5.Repeat step 3.
-
-6.Store the “current_app_id” and the “api_key”, securely in the mobile app. Use encryption or  obfuscation. Do not leave these lying around anywhere. 
-
+3. Now visit the url /clients/{user_id}
+4. There click Edit
+5. There add any valid url of the type : www.google.com, don't use http or https, and add anything into the appid
+6. Now click update
+7. You will get to see your app_id and api_key on the next page.
+8. Copy and Store that for future use.
 
 <a name="Create_User_With_Mobile_Number"/>
 

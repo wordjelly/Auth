@@ -2,6 +2,11 @@ class Auth::Work::Cycle
 		
 	include Mongoid::Document
 
+	## for aggs.
+	attr_accessor :cycle_index
+
+	field :origin_epoch
+
 	embedded_in :minutes, :class_name => "Auth::Work::Minute", :polymorphic => true
 
 	embedded_in :products, :class_name => Auth.configuration.product_class, :polymorphic => true
@@ -9,11 +14,24 @@ class Auth::Work::Cycle
 	embeds_many :templates, :class_name => "Auth::Work::Template"
 
 	## each cycle will have a limit
-	field :capacity, type: Integer
+	field :capacity, type: Integer, default: 0
+
+	## there will have to be another field, saying workers who can do it, and entities who can do it.
+	field :workers_available, type: Array
+
 
 	## it will have a list of workers to whom it is assigned
 	field :workers_assigned, type: Array
+
 	
+	## the available entities, these are set at the time of creating the minutes.
+	field :entities_available, type: Array
+
+
+	## the entities assigned, finally.
+	field :entities_assigned, type: Array
+
+
 	## it has to have a priority score
 	field :priority, type: Float
 
@@ -36,8 +54,10 @@ class Auth::Work::Cycle
 =end
 	field :requirements, type: Hash
 
-
 	field :cycle_code, type: String
+
+	## the ids of the related cycles.
+	field :cycle_chain, type: Array
 
 	before_save do |document|
 		document.cycle_code = BSON::ObjectId.new.to_s unless document.cycle_code
@@ -70,80 +90,133 @@ class Auth::Work::Cycle
 	end
 
 	def requirements_satisfied(epoch,location_id)
-		#begin
-			#puts "came to requirements satisfied"
-			Auth.configuration.location_class.constantize.all.each do |l|
-				puts l.attributes.to_s
-			end
-			location = Auth.configuration.location_class.constantize.find(location_id)
-			
-			#puts "location found :#{location}"
-			#puts "epoch : #{epoch}, and location id: #{location_id}"
-			time_for_query = Time.at(epoch)
-			applicable_schedules = Auth::Work::Schedule.collection.find({
-				"$and" => [
-					{
-						"location_id" => location_id
-					},
-					{
-						"start_time" => {
-							"$lte" => time_for_query
-						}
-					},
-					{
-						"end_time" => {
-							"$gte" => time_for_query
-						}
-					}
-				]
-			})
-			
-
-
-			#puts "applicable schedules:"
-			#puts applicable_schedules.to_s
-
-			applicable_schedules = applicable_schedules.to_a
-
-			return false if (applicable_schedules.blank? || applicable_schedules.size == 0)
-			
-			#puts "there are applicable schedules"
-
-			req = self.requirements.deep_dup
-			#puts "req are:"
-			#puts req.to_s
-			
-			applicable_schedules.map!{|c| c = Mongoid::Factory.from_db(Auth::Work::Schedule,c)}
-
-			applicable_schedules.each do |schedule|
-				
-				schedule_for_object = schedule.for_object_class.constantize.find(schedule.for_object_id)
-				
-				#puts "schedule for object is: #{schedule_for_object}"
-
-				## so here the thing is that it can have many cycle types.
-
-				schedule_for_object.cycle_types.keys.each do |type|
-					req[type] = req[type] - 1 if req[type]
-				end
-					
-				#puts "req is: #{req}"
-
-			end
-				
-			k = req.values.uniq
-
-
-			return true if ((k[0] == 0) && (k.size == 1))
-			return false
-
-		#rescue
-
-		#	raise "location id provided to cycle does not exist"
 		
-		#end
+		#puts "came to requirements satisfied"
+		Auth.configuration.location_class.constantize.all.each do |l|
+			puts l.attributes.to_s
+		end
+		location = Auth.configuration.location_class.constantize.find(location_id)
+		
+		#puts "location found :#{location}"
+		#puts "epoch : #{epoch}, and location id: #{location_id}"
+		time_for_query = Time.at(epoch)
+		applicable_schedules = Auth::Work::Schedule.collection.find({
+			"$and" => [
+				{
+					"location_id" => location_id
+				},
+				{
+					"start_time" => {
+						"$lte" => time_for_query
+					}
+				},
+				{
+					"end_time" => {
+						"$gte" => time_for_query
+					}
+				}
+			]
+		})
+		
+
+
+		#puts "applicable schedules:"
+		#puts applicable_schedules.to_s
+
+		applicable_schedules = applicable_schedules.to_a
+
+		return false if (applicable_schedules.blank? || applicable_schedules.size == 0)
+		
+		#puts "there are applicable schedules"
+
+		req = self.requirements.deep_dup
+		#puts "req are:"
+		#puts req.to_s
+		
+		applicable_schedules.map!{|c| c = Mongoid::Factory.from_db(Auth::Work::Schedule,c)}
+
+		## here basically suppose you have n applicable schedules.
+		## you need to combine them into cycle categories and see how many combinations you get out of it.
+
+		available_resources = {}
+
+		applicable_schedules.each do |schedule|
+			
+			schedule_for_object = schedule.for_object_class.constantize.find(schedule.for_object_id)
+			
+			schedule_for_object.cycle_types.keys.each do |type|
+				#req[type] = req[type] - 1 if req[type]
+				available_resources[type] = 0 unless available_resources[type]
+				available_resources[type]+=1
+			end
+
+		end
+		
+		## now we have certain type counts necessary for this cycle.
+		## now how to return the available capacity.
+		#k = req.values.uniq
+		#return true if ((k[0] == 0) && (k.size == 1))
+		#return false
+
+		## so how to split into multiples ?
+		## just do it sequentially.
+		failed = false
+		while failed == false
+			self.requirements.keys.each do |req|
+				failed = true unless available_resources[req]
+				break unless available_resources[req]
+				failed = true if available_resources[req] < self.requirements[req]
+				break if available_resources[req] < self.requirements[req]
+				available_resources[req] -= self.requirements[req]
+			end
+			self.capacity+=1 if failed == false
+		end
+	
+		## now this becomes the cycle capacity.
+		## but only for the origin minute.
+		
+		return self.capacity > 0
 
 	end
+
+
+	###########################################################
+	##
+	##
+	## BOOKINGS.
+	##
+	##
+	###########################################################
+
+	
+
+	def after_book
+		Auth::Work::Minute.get_affected_minutes(self.start_time,self.end_time,self.workers_assigned,self.entities_assigned).each do |minute|
+		
+			## each cycle has its index as cycle_index
+			## this is used to update the cycles.
+		
+		end
+	end
+
+	def book
+		after_book
+	end
+
+	
+	## so the search criteria is 
+	## where entity_ids == [n1,n2,n3], or worker_ids= [y1,y2,y3]
+	## range is such that
+	## if (end time or start time) of any cycle is (from this minute -> time of end of this cycle)
+	## or if start time <= this minute, and end time is  >= minute of end of this cycle.  
+	## for any of those cycles -> if priority is applicable, then block, and block all related chains.
+	## how to block the related chains ?
+	## a cycle has to store all its related chain ids, and also its 30 minute references.
+	## so that's it.
+	## this is something to execute tomorrow.
+
+	## so plan for today
+	## 
 
 end
 

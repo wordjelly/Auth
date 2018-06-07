@@ -24,6 +24,11 @@ module Auth
       respond_with @client
     end
 
+    ## how are we going to get the client id exactly?
+    ## that's the basic problem
+    ## thereafter we can do the rest.
+    
+
     # GET /clients/new
     def new
       #@client = Client.new
@@ -86,6 +91,9 @@ module Auth
 
       ## if the resource_signed_in is an admin, just return
       ## otherwise if the user's id is not the same as the id passed in, then throw a not_found.
+      ## this means that only if the guy is an admin , then this can work.
+      ## otherwise it cannot work
+      ## i think this has to be done from the web app.
       def verify_client_belongs_to_user
         return if @resource_for_web_app.is_admin?
         not_found("client does not belong to user") if @resource_for_web_app.id.to_s != params[:id]

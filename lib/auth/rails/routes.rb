@@ -50,7 +50,8 @@ module ActionDispatch::Routing
 
 	      resources :admin_create_users, :controller => "auth/admin_create_users"
 
-	  	  resources :clients, :controller => "auth/clients"
+	  	  resources :clients, :controller => "auth/clients", :as => "auth_clients"
+		 
 		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 
 		  		## :resource will be something like users.

@@ -183,6 +183,18 @@ module Auth
     attr_accessor :image_class
     attr_accessor :image_controller
 
+
+    #######################################################
+    ##
+    ##
+    ##
+    ## WORK CONSTANTS.
+    ##
+    ##
+    #######################################################
+
+    attr_accessor :rolling_minutes
+
     def initialize
       
 
@@ -388,8 +400,10 @@ module Auth
 
       ########################################################
       ##
+      ## ROLLING MINUTES
       ##
       ########################################################
+      @rolling_minutes = 30
 
     end
   end

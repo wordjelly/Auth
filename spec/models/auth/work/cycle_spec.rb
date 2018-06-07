@@ -51,6 +51,17 @@ RSpec.describe Auth::Work::Cycle, type: :model, :cycle_model => true do
 			
 		end
 
+
+		context " -- decrements related cycles -- " do 
+
+			it " -- finds all cycles in the time span, with the same workers and entities -- " do 
+
+				
+
+			end
+
+		end
+
 	end
 
 end

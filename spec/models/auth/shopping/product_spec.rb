@@ -24,10 +24,7 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 		end
 
 		before(:example) do 
-			Auth::Shopping::Product.delete_all
-			Auth.configuration.location_class.constantize.delete_all
-			Auth.configuration.user_class.constantize.delete_all
-			Auth::Work::Schedule.delete_all
+			clean_all_work_related_classes
 		end
 
 		it " -- adds cycles to appropriate minutes in the schedules -- " do 
@@ -94,7 +91,7 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 		    l = Auth.configuration.location_class.constantize.new
 		    l.id = "first_location"
 		    l.save
-		    puts l.attributes.to_s
+		    #puts l.attributes.to_s
 		    ## so for the minutes, they are going to be the first and second minute in the duration of the schedules
 
 		    minutes = {}
@@ -116,6 +113,7 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 
 
 		end
+
 
 	end
 
