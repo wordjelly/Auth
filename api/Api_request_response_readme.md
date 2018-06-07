@@ -11,41 +11,18 @@
 
 ## Id's and other details generated / used while buildling this tutorial 
 
-1. App developer user id: 
-"current_app_id" : "5a85ae25e138231aa93495e3",
-"api_key" : "3a7d6c8b4fe2b8c0c652666ef07362b39a7bc013f64d53437230549cc9cddda5"
-4. Client Id: 5a857eec421aa919635263fe
--------------------------------------------------------------
+DEVELOPER DETAILS
+==============
 
-ADMIN USER
-----------
-
-Content-Type:application/json
-X-User-Token:wYHQ_6rqxH_QUvQ3mVE6
-X-User-Aid:5a85ae25e138231aa93495e3
-X-User-Es:5bd25e82b431847b39660ee92b78bda6405faac47cba47b7b5d98693781e00d2
-
-User Id: 5a870959421aa90f36a35558
-E-Mail : anyone@gmail.com
-password : password
---------------------------------------------------------------
-
-OTHER USER
-----------
-
-Content-Type:application/json
-X-User-Token:AicEbTzVxuiu8SYq47LQ
-X-User-Aid:5a85ae25e138231aa93495e3
-X-User-Es:ca4685bfcc90b9a1cb13ae92919b0e9acf751f5ce0365a87c5c64270ee8a97a3
+USER ID: 5b191b3c421aa908f72eba1c
+APP_ID : 5b191baa421aa908f72eba1f
+API-KEY : 6db7f40d4f4cd14315127e06e20b1a810ddff899e0682f59af9db644116303e4
+USERNAME : bhargav.r.raut@gmail.com
 
 
-User Id: 5a87111b421aa91047c428b9
-mobile : 9999999999
-E-Mail : none
-password: password
+"current_app_id" : "5b191baa421aa908f72eba1f",
+"api_key" : "6db7f40d4f4cd14315127e06e20b1a810ddff899e0682f59af9db644116303e4"
 
-
---------------------------------------------------------------
 
 ## Specific Prerequisites for Android App
    
@@ -164,6 +141,7 @@ You need to store these in your app, and distribute them with every copy of the 
 ### 2.Create A User With A Mobile Number
 
 1. Use the current_app_id and api_key that was got in (1)
+
 2. Make the request __"create a user with mobile and password"__
 
 2a. If you are making the Android App, you must add the response of verifying the recaptcha into the "g-recaptcha-response" key. In the POSTMAN JSON DUMP that value is currently left blank. 

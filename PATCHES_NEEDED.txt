@@ -1,0 +1,9 @@
+1. paths defined in the engine(the mounted paths), do not automatically convert an object to its id, when loaded from the daughter app. It works in the dummy app, but not in the daughter app. In clients/show.html.erb have to directly pass the id or it does not work. If i try to use any of the paths, like edit_shopping_product_path for.eg, , there too have to directly pass the id or it does not work.
+
+2. engine helpers are not visible in the main app, and if I tried to do the following inside engine.rb :
+```
+ActiveSupport.on_load :action_controller do
+   helper MyEngine::Engine.helpers
+end
+```
+It gave me some error with some admin_create_users helper.

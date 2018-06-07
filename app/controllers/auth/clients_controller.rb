@@ -24,9 +24,6 @@ module Auth
       respond_with @client
     end
 
-    ## how are we going to get the client id exactly?
-    ## that's the basic problem
-    ## thereafter we can do the rest.
     
 
     # GET /clients/new
