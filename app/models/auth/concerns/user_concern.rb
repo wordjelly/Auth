@@ -535,12 +535,13 @@ module Auth::Concerns::UserConcern
 		##first find out if there is already a client for this user id.
 		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :resource_id => self.id)
 
-		#puts "Came to create a client."
+		puts "Came to create a client."
 
 		c.versioned_create({:resource_id => self.id})
 		op_count = 10
 
-		
+		puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
+		puts c.attributes.to_s
 
 		while(true)
 			

@@ -80,6 +80,7 @@ module Auth
       def set_client
         @client = Auth::Client.find(params[:id])
         if @client.nil?
+          puts "--------------COULD NOT FIND A CLIENT------------------"
           render :nothing => true, :status => 404
         else
           return

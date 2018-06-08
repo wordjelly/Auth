@@ -7,21 +7,46 @@
 2. Import into the extension the json request dump.
 3. All through the following guide refer to the names in the dump of the requests.
 4. The hostname for all requests is : __https://www.ourdomain.com__ (In the JSON DUMP the hostname used is localhost:3000)
-
+5. Everytime the user signs-in with his username and password, his authentication token changes.
+6. If an authentication token is used which is incorrect, the authentication token changes
+7. The authentication token is reset after every 2 days.
+8. Everytime the user updates his account credentials (email/phone/password) the authentication token changes.
+9. Executing actions using the authentication token, does not cause it to be changed.
 
 ## Id's and other details generated / used while buildling this tutorial 
 
-DEVELOPER DETAILS
+DEVELOPER DETAILS:
 ==============
 
-USER ID: 5b191b3c421aa908f72eba1c
-APP_ID : 5b191baa421aa908f72eba1f
-API-KEY : 6db7f40d4f4cd14315127e06e20b1a810ddff899e0682f59af9db644116303e4
+USER ID: 5b19c084421aa913b560aabb
+APP_ID : 5b19c0f8421aa913b560aabe
+API-KEY : 382674dff36f53035aab1bece16b5c76ab44fc2a8645770052a44d17efdb04d5
 USERNAME : bhargav.r.raut@gmail.com
 
+"current_app_id" : "5b19c0f8421aa913b560aabe",
+"api_key" : "382674dff36f53035aab1bece16b5c76ab44fc2a8645770052a44d17efdb04d5"
 
-"current_app_id" : "5b191baa421aa908f72eba1f",
-"api_key" : "6db7f40d4f4cd14315127e06e20b1a810ddff899e0682f59af9db644116303e4"
+==============
+
+
+USER CREATED WITH MOBILE NUMBER:
+=================================
+
+
+
+id: 5b19e662e138234cf971cec9
+
+{
+    "es": "89250eb74a530995db8accee89999da1634bf7c59c544ea069d080eba0860c0e",
+    "authentication_token": "EKxwTFC2HuiC_BJ4cDoR"
+}
+
+X-User-Token:EKxwTFC2HuiC_BJ4cDoR
+X-User-Aid:5b19c0f8421aa913b560aabe
+X-User-Es:89250eb74a530995db8accee89999da1634bf7c59c544ea069d080eba0860c0e
+=================
+
+
 
 
 ## Specific Prerequisites for Android App
@@ -35,20 +60,19 @@ USERNAME : bhargav.r.raut@gmail.com
 
 
 ## Table of Contents:
-### [Flows for Sign-In, Sign-Up](#SignIn_Flows)
-### [1. Get An App Id and Api Key](#App_Id_And_Api_Key)  
-### [2. Create A User With A Mobile Number](#Create_User_With_Mobile_Number)
-### [2a. User requests Resend Confirmation Otp](#Resend_Confirmation_Otp)
-### [2b. User Submits OTP](#User_Submit_Otp)
-### [2c. User Polls Verification Status](#Poll_Verification_Status)
-### [2d. Sign In A User with Mobile and Password](#Sign_In_With_Mobile_And_Password)
-### [3. Update A User's Mobile Number](Update_User_Mobile)
-### [4. Get A User's Id](Get_User_Id)
-### [5. Create A User With Email](Create_User_Email)
-### [6. Request Resend Confirmation Email](Request_Resend_Confirmation_Email)
-### [7. Add A Mobile Number to Account With Email](Add_Mobile_To_Email)
-### [8. Change The Email](Change_Email)
-### [9. Request Forgot Password Instructions Using Mobile](Forgot_Password_With_Mobile)
+### [1. Get An App Id and Api Key](#App_Id_And_Api_Key) - DONE  
+### [2. Create A User With A Mobile Number](#Create_User_With_Mobile_Number) - DONE
+### [2a. User requests Resend Confirmation Otp](#Resend_Confirmation_Otp) - DONE
+### [2b. User Submits OTP](#User_Submit_Otp) - DONE
+### [2c. User Polls Verification Status](#Poll_Verification_Status) - DONE
+### [2d. Sign In A User with Mobile and Password](#Sign_In_With_Mobile_And_Password) - DONE
+### [3. Update A User's Mobile Number](Update_User_Mobile, it does not matter what id is passed in here, but id parameter is necessary.) - DONE
+### [4. Get A User's Id](Get_User_Id) - DONE
+### [5. Create A User With Email](Create_User_Email) - DONE
+### [6. Request Resend Confirmation Email](Request_Resend_Confirmation_Email) - DONE
+### [7. Add A Mobile Number to Account With Email](Add_Mobile_To_Email) - DONE
+### [8. Change The Email](Change_Email) - DONE
+### [9. Request Forgot Password Instructions Using Mobile](Forgot_Password_With_Mobile) 
 ### [10. Request Unlock Account with Mobile](Unlock_Account_With_Mobile)
 ### [11. Request Forgot Password Instructions with Email](Forgot_Password_With_Email)
 ### [12. Request Unlock Account With Email](Unlock_Account_With_Email)
@@ -167,7 +191,7 @@ You need to store these in your app, and distribute them with every copy of the 
 
 5. If there is any other error, tell the user to try again later.
 
-6. If the response code is 201> proceed.
+
 
 
 
@@ -282,9 +306,9 @@ If not authenticated, get the user to sign in again, and then try again with new
 2. You will get a response like:
 
 {
-    "authentication_token": "1gA3HxhoxacS2y_6wbzs",
-    "es": "0d546dbd86d36c54acedfb15f4938b8e516d8c8b353513466a32ab49a9afaa5b",
-    "id": "5a85b715421aa91ffc68c86f",
+    "es": "95fdd97fe204f11587502edc6c2e9b2f42db3a2ca6d4db832bb6a4e18b8a1a64",
+    "authentication_token": null,
+    "id": "5b19cef6421aa926a74a4b0d",
     "admin": "false"
 }
 Response code will be: 200 ok.
