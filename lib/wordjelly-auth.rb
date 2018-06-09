@@ -31,6 +31,7 @@ require "payuindia"
 require "cloudinary"
 require "mongoid/geospatial"
 require "mongoid-embedded-errors"
+require "dotenv-rails"
 
 
 module Auth

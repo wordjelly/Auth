@@ -72,14 +72,13 @@ X-User-Es:89250eb74a530995db8accee89999da1634bf7c59c544ea069d080eba0860c0e
 ### [6. Request Resend Confirmation Email](Request_Resend_Confirmation_Email) - DONE
 ### [7. Add A Mobile Number to Account With Email](Add_Mobile_To_Email) - DONE
 ### [8. Change The Email](Change_Email) - DONE
-### [9. Request Forgot Password Instructions Using Mobile](Forgot_Password_With_Mobile) 
+### [9. Request Forgot Password Instructions Using Mobile](Forgot_Password_With_Mobile) - DONE
 ### [10. Request Unlock Account with Mobile](Unlock_Account_With_Mobile)
-### [11. Request Forgot Password Instructions with Email](Forgot_Password_With_Email)
-### [12. Request Unlock Account With Email](Unlock_Account_With_Email)
+### [11. Request Forgot Password Instructions with Email](Forgot_Password_With_Email) - DONE
+### [12. Request Unlock Account With Email](Unlock_Account_With_Email) - DONE
 ### [13. Change the Password](Change_User_Password)
 ### [14. Sign In Using Google OAuth2](Google_OAuth)
 ### [15. Sign In Using Facebook OAuth2](Facebook_OAuth)
-
 ### [16. Set A User As Admin](Set_User_As_Admin)
 ### [17. Admin Creates User With Mobile](Admin_Creates_User_With_Mobile)
 ### [18. Admin Creates User With Email](Admin_Creates_User_With_Email)

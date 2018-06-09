@@ -87,6 +87,7 @@ module OmniAuth
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
 	      ##FOR THE WEB BASED SYSTEM, remember this was set in the request call.
+	      
 	      if !session['omniauth.model'].blank?
 	      	@env['omniauth.model'] = session.delete('omniauth.model')
 	      end
@@ -225,6 +226,9 @@ module OmniAuth
 	          ## THIS IS FOR WEB BASED HTML API
 	          verifier = request.params['code']
 	          redirect_uri = request.params['redirect_uri']
+	          puts "verifier is: #{verifier}"
+	          puts "redirect url is: #{redirect_uri}"
+	          puts "getting token options: #{get_token_options(redirect_uri)}"
 	          client.auth_code.get_token(verifier, get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
 	        elsif verify_token(request.params['access_token'])
 	          #puts "came to option 4"
