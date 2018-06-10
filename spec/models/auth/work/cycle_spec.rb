@@ -43,6 +43,7 @@ RSpec.describe Auth::Work::Cycle, type: :model, :cycle_model => true do
                 product.signed_in_resource = @admin
                 cycle = Auth::Work::Cycle.new
                 cycle.duration = 10
+                cycle.start_time = Time.now.to_i
                 cycle.time_to_next_cycle = 20
                 product.cycles << cycle
                 expect(product.save).to be_truthy

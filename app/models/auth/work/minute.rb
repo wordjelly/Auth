@@ -3,8 +3,11 @@ class Auth::Work::Minute
 	embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :minute_cycles
 	field :time, type: Time
 	field :geom, type: Array
-		
+	
+
+
 	## returns all minutes which have affected cycles , only containing the affected cycles.
+	## does not consider the cycle chains.
 	def self.get_affected_minutes(cycle_start_time,cycle_end_time,cycle_workers_assigned,cycle_entities_assigned)
 		response = Auth::Work::Minute.collection.aggregate([
 			{
@@ -62,8 +65,11 @@ class Auth::Work::Minute
 				}
 			},
 			{
-				"$unwind" => "cycles",
-				"includeArrayIndex" => "cycle_index"
+				"$unwind" =>
+				{
+					"path" => "$cycles",
+					"includeArrayIndex" => "cycle_index"
+				}
 			},
 			{
 				"$match" => {
@@ -126,5 +132,9 @@ class Auth::Work::Minute
 		])
 		response
 	end
+
+	## this means that the cycle has to be keeping track of the workers available and entities_available.
+	## but what about capacity ?
+	## 
 
 end

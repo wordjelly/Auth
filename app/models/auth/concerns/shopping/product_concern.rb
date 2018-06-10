@@ -160,11 +160,13 @@ module Auth::Concerns::Shopping::ProductConcern
 						product.cycles.each do |cycle|
 							epoch_at_which_to_add = epoch + cycle.time_since_prev_cycle.minutes*60
 							cycle_to_add = cycle.dup
-							cycle_to_add.origin_epoch = epoch_at_which_to_add
+							cycle_to_add.start_time = epoch_at_which_to_add
+							cycle_to_add.end_time = cycle_to_add.start_time + cycle_to_add.duration
 							cycle_to_add.cycle_chain = cycle_chain
 							if minutes[epoch_at_which_to_add]
 								
 								add_to_previous_rolling_n_minutes(minutes,epoch_at_which_to_add,cycle_to_add)
+
 
 								minutes[epoch_at_which_to_add].cycles << cycle_to_add
 

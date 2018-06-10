@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wordjelly-auth (1.0.8)
+    wordjelly-auth (1.0.9)
       cloudinary
       daemons
       delayed_job_mongoid
@@ -373,7 +373,7 @@ GEM
     aws-sdk-mediastoredata (1.1.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-mediatailor (1.0.0)
+    aws-sdk-mediatailor (1.1.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-migrationhub (1.2.0)

@@ -91,7 +91,7 @@ class User < Auth::User
   ###############
 
   def as_indexed_json(options={})
-    puts "called as_indexed_json"
+    
          {
             name: name,
             email: email,

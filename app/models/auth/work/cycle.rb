@@ -2,10 +2,15 @@ class Auth::Work::Cycle
 		
 	include Mongoid::Document
 
-	## for aggs.
 	attr_accessor :cycle_index
 
-	field :origin_epoch
+	## unix epoch.
+	field :start_time, type: Integer
+
+	## unix epoch.
+	field :end_time, type: Integer
+
+	validates_presence_of :duration
 
 	embedded_in :minutes, :class_name => "Auth::Work::Minute", :polymorphic => true
 
@@ -36,6 +41,7 @@ class Auth::Work::Cycle
 	field :priority, type: Float
 
 	## it has a fixed duration.
+	## defined in seconds.
 	field :duration, type: Integer
 
 	## time to next cycle
@@ -61,6 +67,7 @@ class Auth::Work::Cycle
 
 	before_save do |document|
 		document.cycle_code = BSON::ObjectId.new.to_s unless document.cycle_code
+		
 	end
 
 
