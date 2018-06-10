@@ -111,6 +111,7 @@ class Auth::Workflow::Assembly
   ##
   ##
   ############################################################
+
   include Auth::Concerns::EsConcern	
 
   INDEX_DEFINITION = {
@@ -175,7 +176,7 @@ class Auth::Workflow::Assembly
       }
     }
 
-  create_es_index(INDEX_DEFINITION)
+  #create_es_index(INDEX_DEFINITION)
 
   def as_indexed_json(options={})
      {
