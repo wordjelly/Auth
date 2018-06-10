@@ -17,7 +17,7 @@
         <% if content_for?(:navbar_right) %>
           <%= content_for(:navbar_right)  %>
         <% else %>
-          <ul class="right hide-on-med-and-down">
+          <ul class="right center-on-small-only">
             <span id="personalization">
              <%= render :partial => "layouts/auth/navbar/personalization.html.erb" %>
             </span>

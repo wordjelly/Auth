@@ -148,6 +148,9 @@ module Auth::Concerns::NotificationConcern
 		recipients[:resources].map{|r|
 			send_email_background(r) if send_by_email?(r)
 			send_sms_background(r) if send_by_sms?(r) 
+			## so here i still need to implement aws for the notifications.
+			## that part is still pending.
+			## so i can override send_sms_background to use a handle_asynchronously with the specified delay.
 			#r.send_mobile_notification(self) if send_by_mobile?(r)
 			#r.send_desktop_notification(self) if send_by_desktop?(r)
 		}
@@ -161,6 +164,9 @@ module Auth::Concerns::NotificationConcern
 	def send_sms_background(resource)
 		send_sms(resource)
 	end
+	## i can override this, to do async.
+	## that's the only thing, 
+	## and it will be another notification object, totally.
 
 	## creates a notification response object using the yield block from calling this method.
 	## block passed if any must return a string as the yield.
