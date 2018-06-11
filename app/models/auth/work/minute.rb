@@ -1,9 +1,12 @@
 class Auth::Work::Minute
-	include Mongoid::Document
-	embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :minute_cycles
-	field :time, type: Time
-	field :geom, type: Array
 	
+	include Mongoid::Document
+	
+	embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :minute_cycles
+	
+	field :time, type: Time
+	
+	field :geom, type: Array
 
 
 	## returns all minutes which have affected cycles , only containing the affected cycles.
@@ -72,6 +75,11 @@ class Auth::Work::Minute
 				}
 			},
 			{
+				"$addFields" => {
+					"cycles.cycle_index" => "$cycle_index"
+				}
+			},
+			{
 				"$match" => {
 					"$and" => [
 						{
@@ -130,7 +138,61 @@ class Auth::Work::Minute
 				}
 			}
 		])
-		response
+
+		array_of_minute_objects = []
+		response.each do |res|
+			#puts JSON.pretty_generate(res)
+			array_of_minute_objects << Auth::Work::Minute.new(res)
+		end
+		array_of_minute_objects
+	end
+
+	## @param[Array] minutes : 
+	def self.update_affected_minutes(minutes,cycle_workers_assigned,cycle_entities_assigned)
+
+		minutes = minutes.map {|minute|
+			
+			pull_hash = {}
+			
+			minute.cycles.each do |cycle|
+				pull_hash["cycles.#{cycle.cycle_index}.workers_available"] = {
+					"$in" => cycle_workers_assigned
+				}				 
+			end
+
+			#puts "pull hash is ==================>>>>>>>>>>>>>>>"
+			#puts pull_hash.to_s
+
+			minute = Auth::Work::Minute
+				.where({
+					"_id" => BSON::ObjectId(minute.id.to_s)
+				})
+				.find_one_and_update(
+					{
+						"$pull" => pull_hash
+=begin
+						{
+							"cycles.0.workers_available" => 
+							{
+								"$in" =>  ["first_worker"]
+							}
+						}
+=end
+					},
+					{
+						:return_document => :after
+					}
+				)	
+			#puts "updated minute first cycle is:"
+			#minute.cycles.each do |cycle|
+			#	puts "cycle is: #{cycle.attributes.to_s}"
+			#end
+			minute
+		}
+
+		minutes
+
+
 	end
 
 	## this means that the cycle has to be keeping track of the workers available and entities_available.
