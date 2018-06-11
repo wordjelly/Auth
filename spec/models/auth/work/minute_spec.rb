@@ -3,6 +3,10 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 
 	context " -- wrapper -- " do 
 
+		before(:example) do 
+			clean_all_work_related_classes
+		end
+
 		it " -- finds the affected cycles -- " do 
 
 			start_minute = Time.new(2012,05,05,10,10,0).to_i
@@ -29,10 +33,29 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 			## now we have 5 minutes, each with 2 cycles.
 			## now lets search for the affected cycles.
 			## we will give a minute range that encomapsses the last three minutes.
-			affected_cycles = Auth::Work::Minute.get_affected_minutes(Time.new(2012,05,05,10,13,0).to_i,Time.new(2012,05,05,10,16,0).to_i,["first_worker"],["second_entity"])
-			affected_cycles.each do |af_cycle|
-				puts af_cycle.to_s
+			affected_minutes = Auth::Work::Minute.get_affected_minutes(Time.new(2012,05,05,10,13,0).to_i,Time.new(2012,05,05,10,16,0).to_i,["first_worker"],["second_entity"])
+
+			## so first of all does it touch the correct cycels ?
+			total_affected_cycles = 0
+			affected_minutes.each do |af_min|
+				minute = Auth::Work::Minute.new(af_min)
+				total_affected_cycles+= minute.cycles.size
 			end
+			expect(total_affected_cycles).to eq(4)
+			
+		end
+
+		it " -- updates affected cycles part 1 -- " do 
+
+
+
+		end
+
+		it " -- updates the cycle chains of all the affected cycles -- " do 
+
+			## since we have grouped it by minute, we can update it in one shot directly since we have 
+			## we basically have to pull and push from the assigned workers and assigned entities at that index.
+
 		end
 
 	end

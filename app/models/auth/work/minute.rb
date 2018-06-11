@@ -135,6 +135,11 @@ class Auth::Work::Minute
 
 	## this means that the cycle has to be keeping track of the workers available and entities_available.
 	## but what about capacity ?
-	## 
+	## so now we are getting the list of the affected cycles
+	## now we have to write one function to reduce the workers/entities there.
+	## and also of those cycle chains.
+	## so while searching you will search for a cycle with at least required number of workers and required number of entities.
+	## so we will query the length or we will remove the assigned and available workers.
+	## also write the function to update those cycles.
 
 end
