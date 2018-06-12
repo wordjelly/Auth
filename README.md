@@ -1,5 +1,9 @@
 ## AUTH
 
+![Auth Logo](https://user-images.githubusercontent.com/38547278/41305783-3192a2ac-6e9e-11e8-8080-48320e4efaac.png)
+
+__[Thanks Zularizal for the wonderful Logo!](http://github.com/zularizal)__
+
 ### Why This Gem?
 
 BECAUSE I'M SINGLE AND HAVE NOTHING ELSE TO DO. :) ;) 
