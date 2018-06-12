@@ -63,7 +63,7 @@ class Auth::Work::Cycle
 	field :cycle_code, type: String
 
 	## the ids of the related cycles.
-	field :cycle_chain, type: Array
+	field :cycle_chain, type: Array, default: []
 
 	before_save do |document|
 		document.cycle_code = BSON::ObjectId.new.to_s unless document.cycle_code

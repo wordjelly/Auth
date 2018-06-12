@@ -73,7 +73,7 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 			affected_minutes = Auth::Work::Minute.get_affected_minutes(Time.new(2012,05,05,10,13,0).to_i,Time.new(2012,05,05,10,16,0).to_i,["first_worker"],["second_entity"])
 
 
-			updated_minutes = Auth::Work::Minute.update_affected_minutes(affected_minutes,["first_worker"],["second_entity"])
+			updated_minutes = Auth::Work::Minute.update_cycles(affected_minutes,["first_worker"],["second_entity"])
 
 
 			updated_minutes.uniq!
@@ -91,11 +91,87 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 		end
 
 		it " -- updates the cycle chains of all the affected cycles -- " do 
+			## okay so i forgot to add the cycle chains here.
+			## 
+			start_minute = Time.new(2012,05,05,10,10,0).to_i
+			## how to add cycle chains. ?
+			## we can just add random cycles that have already been added.
+			cycles_to_minute_hash = {}
+			5.times do |n|
+				minute = Auth::Work::Minute.new
+				minute.time = start_minute
+				cycles_to_minute_hash[minute.time.to_i] = []
 
-			## since we have grouped it by minute, we can update it in one shot directly since we have 
-			## we basically have to pull and push from the assigned workers and assigned entities at that index.
+				2.times do |c|
+					cycle = Auth::Work::Cycle.new
+					cycle.start_time = minute.time.to_i
+					cycle.duration = 10
+					cycle.end_time = cycle.start_time + cycle.duration
+					cycle.requirements = {
+		            	:person_trained_on_em_200 => 1,
+		            	:em_200 => 1
+		            }
+		            cycle.workers_available = ["first_worker","second_worker"]
+		            cycle.entities_available = ["first_entity","second_entity"]
+
+		            ## all the cycles of the same index done before.
+		            cycles_to_minute_hash.keys.each do |k|
+		            	if k < minute.time.to_i
+		            		cycle.cycle_chain << cycles_to_minute_hash[k][c].id.to_s
+		            	end
+		            end
+		            minute.cycles << cycle
+		            cycles_to_minute_hash[minute.time.to_i] << cycle
+				end
+				minute.save
+				start_minute = start_minute + 60.seconds
+			end
+
+			## now we have 5 minutes, each with 2 cycles.
+			## now lets search for the affected cycles.
+			## we will give a minute range that encomapsses the last three minutes.
+			affected_minutes = Auth::Work::Minute.get_affected_minutes(Time.new(2012,05,05,10,13,0).to_i,Time.new(2012,05,05,10,16,0).to_i,["first_worker"],["second_entity"])
+
+			cycles_to_pull = Auth::Work::Minute.update_cycle_chains(affected_minutes)
+
+			response = Auth::Work::Minute.collection.aggregate([
+				{
+					"$match" => {
+						"cycles._id" => {
+							"$in" => cycles_to_pull
+						}
+					}
+				}
+			])
+			response = response.to_a
+			expect(response).to be_empty
 
 		end
+
+		## these will be the next three required things.
+
+		it " -- finds the nearest minute that satisfies the requirements for the job -- " do 
+
+			### that means the start step for all the jobs
+
+
+		end
+
+
+		it " -- finds the nearest minute that satisfies the requirements, alongwith a traveller -- " do 
+
+
+		end
+
+
+		it " -- books minute -- " do 
+
+
+		end
+
+		## so what i would like to do at this stage is switch there
+		## sort out the new css issues, and then 
+		## make a ui for the instructions and the products, and also for editing the instructions and products.
 
 	end
 

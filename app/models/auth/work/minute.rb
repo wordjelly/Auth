@@ -147,8 +147,13 @@ class Auth::Work::Minute
 		array_of_minute_objects
 	end
 
+	def self.update_all_affected_cycles(minutes,cycle_workers_assigned,cycle_entities_assigned)
+		update_cycle_chains(minutes)
+		update_cycles(minutes,cycle_workers_assigned,cycle_entities_assigned)
+	end
+
 	## @param[Array] minutes : 
-	def self.update_affected_minutes(minutes,cycle_workers_assigned,cycle_entities_assigned)
+	def self.update_cycles(minutes,cycle_workers_assigned,cycle_entities_assigned)
 
 		minutes = minutes.map {|minute|
 			
@@ -159,9 +164,6 @@ class Auth::Work::Minute
 					"$in" => cycle_workers_assigned
 				}				 
 			end
-
-			#puts "pull hash is ==================>>>>>>>>>>>>>>>"
-			#puts pull_hash.to_s
 
 			minute = Auth::Work::Minute
 				.where({
@@ -175,16 +177,35 @@ class Auth::Work::Minute
 						:return_document => :after
 					}
 				)	
-			#puts "updated minute first cycle is:"
-			#minute.cycles.each do |cycle|
-			#	puts "cycle is: #{cycle.attributes.to_s}"
-			#end
+			
 			minute
 		}
 
 		minutes
 
+	end
 
+	## first knock of the cycle chains.
+	## then the actual cycles.
+	def self.update_cycle_chains(minutes)
+		cycles_to_pull = []
+		minutes.each do |minute|
+			minute.cycles.each do |cycle|
+				cycles_to_pull << cycle.cycle_chain
+			end
+		end
+
+		cycles_to_pull.flatten.map{|c| c = BSON::ObjectId(c)}.each_slice(100) do |ids_to_pull|
+			pull_hash = {}
+			pull_hash["cycles"] = {
+				"_id" => {
+					"$in" => ids_to_pull
+				}
+			}
+			response = Auth::Work::Minute.collection.update_many({},{"$pull" => pull_hash})
+		end
+
+		cycles_to_pull.flatten	
 	end
 
 	## this means that the cycle has to be keeping track of the workers available and entities_available.
