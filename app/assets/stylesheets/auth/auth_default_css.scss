@@ -1,12 +1,12 @@
 /*
-*
-*= require calendar
-*= require calendar_modifications
+* require calendar
+* require calendar_modifications
 *= require auth/common-styles
 *= require auth/overrides
 */
 @import "materialize";
-@import "materialize/components/color";
+//@import "materialize/components/color";
+
 $primary-color: color("blue", "lighten-2") !default;
 
 .modal { max-height: 90% !important ;}

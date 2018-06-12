@@ -1,12 +1,14 @@
 /***
 get rid of the ghastly yellow background color that chrome adds when autofilling forms.
 **/
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     transition: background-color 5000s ease-in-out 0s;
 }
+
 
 input[type=submit] {
   -webkit-appearance: none !important;
@@ -24,3 +26,5 @@ label{
 .g-recaptcha{
 	display:inline-block;
 }
+
+

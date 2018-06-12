@@ -20,15 +20,13 @@ payumoney.js
 ****/
 
 //= require auth/auth_dependencies.js
-//= require materialize-sprockets
+//= require materialize
 //= require spinner.js
 //= require main.js
 //= require leanModal.js
 //= require you_need_to_sign_in.js
-//= require jquery.calendario.js
-//= require moment
-//= require search.js
 //= require payumoney.js
+//= require search.js
 
 /////THIS CODE SHOWS HOW TO OVERRIDE ALL THE CLIENT SIDE CODE NEEDED
 /////FOR VALIDATIONS TO WORK FOR THE SIGN_IN_FORM.
@@ -45,7 +43,7 @@ SO THERE WE DONT NEED TO DO THE FOLLOWING HIDDEN-FIELD-JUGGLING ETC.
 and it juggles the action and the attributes as required, for the otp. 
 ***/
 $(document).on('click','#login_submit',function(event){
-    console.log("detected login submit click");
+    
 
     var current_screen = $('#login_title').text();
     if(current_screen == "Sign Up"){

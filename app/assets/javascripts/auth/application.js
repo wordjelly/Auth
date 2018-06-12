@@ -16,5 +16,4 @@
 //= require underscore
 //= require turbolinks
 //= require application.js
-//= require modernizr.custom.63321.js
-//= require data.js
+

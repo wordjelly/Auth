@@ -11,6 +11,7 @@
 // about supported directives.
 
 //= require auth/auth_modals_and_navbar.js
+//= require images
 //= require_tree .
 
 

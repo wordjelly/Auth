@@ -4,11 +4,20 @@
 //= require jquery_ujs
 //= require underscore
 //= require turbolinks
-//= require modernizr.custom.63321.js
 //= require cloudinary
-//= require images
-//= require data.js
 
+
+
+/**
 $(document).ready(function() {
     $('select').material_select();
 });
+***/
+
+$(document).ready(function(){
+    $('.modal').modal();
+});
+
+$(document).ready(function(){
+    $('.tabs').tabs();
+  });

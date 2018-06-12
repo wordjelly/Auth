@@ -1,10 +1,12 @@
 <div id="sign_in_inputs">
   <div class="input-field">
-    <input autofocus="autofocus" type="text" value="" name="<%= resource.class.name.downcase %>[login]" id="<%= resource.class.name.downcase %>_login">
-    <label for="<%= resource.class.name.downcase %>_login" class=""><%= login_label_text(resource) %></label>
+    <label for="<%= resource.class.name.downcase %>_login"><%= login_label_text(resource) %></label>
+    <input autofocus="autofocus" type="text" name="<%= resource.class.name.downcase %>[login]" id="<%= resource.class.name.downcase %>_login">
+    
   </div>
   <div class="input-field m-50-top">
-    <input autocomplete="off" type="password" name="<%= resource.class.name.downcase %>[password]" id="<%= resource.class.name.downcase %>_password">
-    <label for="<%= resource.class.name.downcase %>_password" class="">Password</label>
+    <input autocomplete="off" type="password" name="<%= resource.class.name.downcase %>[password]" id="<%= resource.class.name.downcase %>_password" class="validate">
+    <label for="<%= resource.class.name.downcase %>_password">Password</label>
+    <span class="helper-text" data-error="wrong" data-success="right"></span>
   </div>
 </div>

@@ -8,8 +8,10 @@ module Auth::Concerns::Work::GoodConcern
 		embeds_many :parameters, :class_name => "Auth::Work::Parameter"
 		embeds_many :instructions, :class_name => "Auth::Work::Instruction"
 		embeds_many :actors, :class_name => "Auth::Work::Actor"
-		embeds_many :variables, :class_name => "Auth::Work::Variable"
-		
+		embeds_many :variables, :class_name => "Auth::Work::Variable"	
 	end
+
+	## let me make the instructions model.
+
 
 end

@@ -170,14 +170,6 @@ class Auth::Work::Minute
 				.find_one_and_update(
 					{
 						"$pull" => pull_hash
-=begin
-						{
-							"cycles.0.workers_available" => 
-							{
-								"$in" =>  ["first_worker"]
-							}
-						}
-=end
 					},
 					{
 						:return_document => :after

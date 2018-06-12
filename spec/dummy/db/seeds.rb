@@ -1,5 +1,6 @@
 require "faker"
 
+
 def create_assembly_test_data
     Auth::Workflow::Assembly.delete_all
     assembly = Auth::Workflow::Assembly.new
@@ -69,5 +70,51 @@ def create_users
 end
 
 
-#create_users
-create_assembly_test_data
+def create_bullets(n)
+    bullets = []
+    n.times do |b_n|
+        b = Auth::Work::Bullet.new
+        b.text = Faker::Food.ingredient
+        bullets << b
+    end
+    bullets
+end
+
+def create_instructions(n,bullets_n)
+    instructions = []
+    n.times do |i_n|
+        i = Auth::Work::Instruction.new
+        i.title = Faker::Food.dish
+        i.bullets = create_bullets(bullets_n)
+        i.instruction_type = Auth::Work::Instruction::INSTRUCTION_TYPES.sample
+        instructions << i
+    end
+    instructions
+end 
+
+def create_products
+    Auth.configuration.product_class.constantize.delete_all
+    admin_user = User.new
+    admin_user.email = Faker::Internet.email
+    admin_user.confirmed_at = Time.now
+    admin_user.password = "password"
+    admin_user.admin = true
+    admin_user.versioned_create
+
+    10.times do |n|
+        product = Auth.configuration.product_class.constantize.new
+        product.name = Faker::Food.spice
+        product.resource_class = admin_user.class.name
+        product.resource_id = admin_user.id.to_s
+        product.price = Faker::Number.between(10, 500)
+        product.instructions = create_instructions(5,2)
+        puts "response of saving: #{product.id.to_s} : #{product.save}"
+    end
+end
+
+
+create_products
+
+
+## so need a route to see all the products and then see a particular product
+## also need a user to sign up with.
