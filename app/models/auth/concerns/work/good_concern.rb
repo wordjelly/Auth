@@ -11,7 +11,7 @@ module Auth::Concerns::Work::GoodConcern
 		embeds_many :variables, :class_name => "Auth::Work::Variable"	
 	end
 
-	## let me make the instructions model.
+	
 
 
 end

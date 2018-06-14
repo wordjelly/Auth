@@ -6,7 +6,7 @@ class Auth::Work::Instruction
 	embedded_in :product, :class_name => Auth.configuration.product_class
 
 	field :instruction_type, type: String
-	validates_presence_of :instruction_type
+	#validates_presence_of :instruction_type
 
 	field :title, type: String
 

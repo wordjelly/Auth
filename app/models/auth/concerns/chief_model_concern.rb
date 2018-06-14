@@ -17,6 +17,11 @@ module Auth::Concerns::ChiefModelConcern
 		## currently used in the after_save callback where we dont want the refund being set to accepted, and thereafter to update all other refunds as failed to cascade.
 		attr_accessor :skip_callbacks
 
+		## these are for adding embedded documents.
+		attr_accessor :embedded_document_path
+
+		## any embedded document to be changed is to be added here.
+		attr_accessor :embedded_document
 
 		field :public, type:String, default: "no"
 

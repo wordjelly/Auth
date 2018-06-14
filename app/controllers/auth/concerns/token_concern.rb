@@ -104,7 +104,7 @@ module Auth::Concerns::TokenConcern
       self.resource = @resource
     end
 
-    puts "we have a resource as: #{@resource}"
+   
     
   end
 

@@ -100,9 +100,7 @@ module Auth::Concerns::DeviseConcern
 	      if api_key.nil? || current_app_id.nil?
 	        
 	      else
-            #puts "api key:#{api_key}"
-            #puts "current app id: #{current_app_id}"
-            #puts "path is: #{path}"
+            
             
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          	    
@@ -136,10 +134,10 @@ module Auth::Concerns::DeviseConcern
 	    	else
                 #puts "action name is something else."
 		    	if session[:client].nil?
-                    #puts "cient is nil so rendering nothing."
+                    puts "cient is nil so rendering nothing."
 		      		render :nothing => true , :status => :unauthorized
 		      	else
-                    #puts "client is not nil"
+                    
                 end
 	      	end
 	    end
@@ -172,15 +170,15 @@ module Auth::Concerns::DeviseConcern
 
   
     def do_before_request
-       #puts "came to do before request."
+       
        clear_client_and_redirect_url
-   
+       
        set_client
-   
+    
        set_redirect_url
 
        protect_json_request
-
+       
     end
 
     ##used only in render, redirect in DeviseController.class_eval

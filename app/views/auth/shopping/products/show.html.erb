@@ -1,33 +1,141 @@
-<p id="notice"><%= notice %></p>
-<div class="fields">
+<div class="row m-40-top">
+  <div class="col s12 m12 l12">
+<!-- instruction partial -->
+  <ul class="collection with-header">
+          <li class="collection-header"><h2>Vitamin D3</h2></li>
+          <li class="collection-item"><div><i class="material-icons icon-align red-text">timer</i><span class="m-20-left">Report in 30 minutes</span></div></li>
+          <li class="collection-item"><div><i class="material-icons icon-align teal-text">camera_alt</i><span class="m-20-left">You Can Watch Your Test Being Performed</span></div></li>
+          <li class="collection-item"><div><i class="material-icons icon-align yellow-text">location_on</i><span class="m-20-left">Free Home Collection Available</span></div></li>
+          <li class="collection-item"><div><i class="material-icons icon-align green-text">whatshot</i><span class="m-20-left">Not Painful <i class="grey-text"> (As rated by patients)</i></span></div></li>
+          <li class="collection-item"><div><i class="material-icons icon-align">payment</i><span class="m-20-left">Rs.950/-</span></div></li>
+  </ul>
+ </div>
 
-	<% @auth_shopping_product.attributes_to_show.each do |attr| %>
-
-		
-		<div><%= @auth_shopping_product.send("#{attr}") %></div>
-
-	<% end %>
+<div class="row m-40-top">
+    <ul class="collection with-header">
+        <li class="collection-header"><h4>Do I need this Test</h4></li>
+        <li class="collection-item"><div> <img src="/assets/lab.jpg" alt="" class="circle" height="50px" width="50px"><span class="m-20-left">You need this test if you are a smoker</span></div></li>
+    </ul>
 </div>
-<!-- show the instructions -->
-<% @auth_shopping_product.instructions.each do |instruction| %>
-	<!-- render the instructions partial -->
-	<!-- we want a tabbed approach for this -->
-<% end %>
+            
+<!-- individual instructions -->
+<!-- each has a series of bullets -->
+<!-- the bullet will have -->
+<div class="row m-40-top">
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      <div class="card-content blue-grey-text darken-2">
+        <span class="card-title">Do I need this Test?</span>
+        <p>The test is indicated in the following conditions.</p>
+        
+        <ul class="collection m-15-top">
+          <li class="collection-item avatar" style="padding-top:20px;">
+            <img src="/assets/lab.jpg" alt="" class="circle">
+            <span class="title">Smokers</span>
+            <p>Smoking increases the risk of CHD<br>
+            </p>
+            
+          </li>
+          <li class="collection-item avatar">
+            <i class="material-icons circle">folder</i>
+            <span class="title">Title</span>
+            <p>First Line <br>
+               Second Line
+            </p>
+            
+          </li>
+          <li class="collection-item avatar">
+            <i class="material-icons circle green">insert_chart</i>
+            <span class="title">Diabetics</span>
+            <p>First Line <br>
+               Second Line
+            </p>
+            
+          </li>
+          <li class="collection-item avatar">
+            <i class="material-icons circle red">play_arrow</i>
+            <span class="title">Title</span>
+            <p>First Line <br>
+               Second Line
+            </p>
+           
+          </li>
+        </ul>
+
+
+      </div>
+      <div class="card-action">
+        <a href="#">This is a link</a>
+        <a href="#">This is a link</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="row">
-    <div class="col s12">
-      <ul class="tabs tabs-fixed-width tab-demo z-depth-1">
-        <li class="tab col s3"><a href="#test1">Test 1</a></li>
-        <li class="tab col s3"><a class="active" href="#test2">Test 2</a></li>
-        <li class="tab col s3 disabled"><a href="#test3">Disabled Tab</a></li>
-        <li class="tab col s3"><a href="#test4">Test 4</a></li>
-      </ul>
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      <div class="card-content blue-grey-text darken-2">
+        <span class="card-title">About This Test</span>
+        <p>I am a very simple card. I am good at containing small bits of information.
+        I am convenient because I require little markup to use effectively.</p>
+      </div>
+      <div class="card-action">
+        <a href="#">This is a link</a>
+        <a href="#">This is a link</a>
+      </div>
     </div>
-    <div id="test1" class="col s12">Test 1</div>
-    <div id="test2" class="col s12">Test 2</div>
-    <div id="test3" class="col s12">Test 3</div>
-    <div id="test4" class="col s12">Test 4</div>
   </div>
+</div>
 
-<%= link_to 'Edit', edit_product_path(@auth_shopping_product) %> |
-<%= link_to 'Back', products_path %>
+<div class="row">
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      <div class="card-content blue-grey-text darken-2">
+        <span class="card-title">Before The Test</span>
+        <p>I am a very simple card. I am good at containing small bits of information.
+        I am convenient because I require little markup to use effectively.</p>
+      </div>
+      <div class="card-action">
+        <a href="#">This is a link</a>
+        <a href="#">This is a link</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      <div class="card-content blue-grey-text darken-2">
+        <span class="card-title">During The Test</span>
+        <p>I am a very simple card. I am good at containing small bits of information.
+        I am convenient because I require little markup to use effectively.</p>
+      </div>
+      <div class="card-action">
+        <a href="#">This is a link</a>
+        <a href="#">This is a link</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      <div class="card-content blue-grey-text darken-2">
+        <span class="card-title">After The Test</span>
+        <p>I am a very simple card. I am good at containing small bits of information.
+        I am convenient because I require little markup to use effectively.</p>
+      </div>
+      <div class="card-action">
+        <a href="#">This is a link</a>
+        <a href="#">This is a link</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- how to group the instructions, instructions dont have groups, they are just having the bullets, and each bullet will be notifiable, so we have the instruction views, what about the stuff to be shown at the top? what is that? those are some special instructions ? -->
+<!-- product should also have an image, that will be shown next to it in the title -->
+<!-- product price and any other instruction bullet marked as show_in_summary will be shown here, bullet can also have icons, and each bullet will link to a specific resource. -->

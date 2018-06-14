@@ -348,6 +348,7 @@ module SimpleTokenAuthentication
 		def fallback!(entity, fallback_handler)
 		 
       	  return if self.signed_in?
+
 	      fallback_handler.fallback!(self, entity)
 	    end
 
@@ -377,8 +378,7 @@ module SimpleTokenAuthentication
 	        #puts "is it valid"
 	        #puts record.valid?
 	        res = perform_sign_in!(record, sign_in_handler)
-	      	#puts "result of signing in :"
-	      	#puts res.to_s
+	      	
 	      else
 	      	#puts "the token was not correct.-------------------------"
 	      end
@@ -393,7 +393,8 @@ module SimpleTokenAuthentication
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
 	    	token = entity.get_token_from_params_or_headers(self)
-		   		
+		   	
+		   
 
 		    if token
 		    	
@@ -492,7 +493,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 
 
 		OmniAuth::Strategies.constants.each do |constant|
-			puts "Constant is: #{constant}"
+			#puts "Constant is: #{constant}"
 			provider_key = constant.to_s.downcase
 			
 		

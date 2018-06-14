@@ -3,30 +3,40 @@
     <nav class="teal">
       <div class="nav-wrapper">
         <!-- should yield a nav-bar-left if it is there, otherwise take the below thing -->
-        <% if content_for?(:navbar_left) %>
-          <%= content_for(:navbar_left)  %>
-        <% else %>
-          <a href="/" class="brand-logo"><%= Auth.configuration.brand_name %></a>
-          <%= render :partial => 'layouts/auth/navbar/progress_spinner.html.erb' %>
-        <% end %>
-
-        <!-- search bar -->
-        
-        <!-- end search bar -->
-
-        <% if content_for?(:navbar_right) %>
-          <%= content_for(:navbar_right)  %>
-        <% else %>
-          <ul class="right center-on-small-only">
-            <span id="personalization">
-             <%= render :partial => "layouts/auth/navbar/personalization.html.erb" %>
-            </span>
-          </ul>
-        <% end %>
+        <div>
+          <% if content_for?(:navbar_left) %>
+            <%= content_for(:navbar_left)  %>
+          <% else %>
+            <a href="/" class="brand-logo"><%= Auth.configuration.brand_name %></a>
+            <%= render :partial => 'layouts/auth/navbar/progress_spinner.html.erb' %>
+          <% end %>
+        </div>
+        <div class="nav-wrapper col l6 m6 s6 offset-l3 offset-m3 offset-s3 hide-on-med-and-down">
+          <%= render :partial => 'auth/search/search_bar.html.erb' %>  
+        </div>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="right hide-on-med-and-down">
+          
+          <% if content_for?(:navbar_right) %>
+            <%= content_for(:navbar_right)  %>
+          <% else %>
+          <li><span id="personalization">
+           <%= render :partial => "layouts/auth/navbar/personalization.html.erb" %>
+          </span>
+          </li>
+          <% end %>
+        </ul>
       </div>
     </nav>
   </div>
-  <% if content_for?(:proxy_user) %>
+  <ul class="sidenav" id="mobile-demo">
+    <li><a href="sass.html">Sass</a></li>
+    <li><a href="badges.html">Components</a></li>
+    <li><a href="collapsible.html">Javascript</a></li>
+    <li><a href="mobile.html">Mobile</a></li>
+  </ul>
+
+ <% if content_for?(:proxy_user) %>
 
  <% else %>
   <div id="proxy_user"></div>
@@ -35,15 +45,5 @@
 
 
 
-<% if content_for?(:search_bar) %>
-  
-<% else %>  
-  <%= render :partial => "auth/search/search_bar.html.erb" %>
-<% end %>
 
-<% if content_for?(:search_results) %>
-  
-<% else %>
-  <%= render :partial => "auth/search/search_results.html.erb" %>
-<% end %>
 

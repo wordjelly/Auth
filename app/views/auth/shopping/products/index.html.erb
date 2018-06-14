@@ -1,48 +1,7 @@
-<p id="notice"><%= notice %></p>
+<h1>Tests</h1>
 
-<h1>Listing Auth Shopping Products</h1>
-
-<table>
-  <thead>
-    <tr>
-      <!-- id number, this will also hold links to edit and destroy. -->
-      <th>Number</th>
-      <th>Id Number</th>
-      <!-- get the names of the other fields to be shown-->
-      <% @auth_shopping_products.first.attributes_to_show.each do |attr| %>
-        <th><%= attr %></th>
-      <% end %>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @auth_shopping_products.each_with_index {|auth_shopping_product,key| %>
-      <tr>
-        <td><%= key + 1 %></td>
-        <td>
-          <div>
-            <%= link_to auth_shopping_product.id.to_s, product_path(auth_shopping_product) %>
-          </div>
-          <div>
-            <!-- add destory and edit options here -->
-            <!-- end -->
-            <span><%= link_to 'Edit', edit_product_path(auth_shopping_product) %></span>
-            <span><%= link_to 'Destroy', product_path(auth_shopping_product), method: :delete, data: { confirm: 'Are you sure?' } %></span>
-            <!-- here how to show a button, and how to change the form id's so that it uses the object id, -->
-            <span>
-              <% @auth_shopping_cart_item = create_cart_item_from_product(auth_shopping_product) %>
-              <%= render :partial => "auth/shopping/cart_items/form.html.erb", locals:{show_fields: "no"} %>
-            </span>
-          </div>
-        </td>
-        <% @auth_shopping_products.first.attributes_to_show.each do |attr| %>
-          <td><%= auth_shopping_product.send("#{attr}") %></td>
-        <% end %>
-      </tr>
-    <% } %>
-  </tbody>
-</table>
-
-<br>
-
-<%= link_to 'New Product', new_product_path %>
+<%= @auth_shopping_products.each do |product| %>
+  <row>
+    <%= render :partial => "auth/shopping/products/show.html.erb", locals: {:product => product} %>
+  </row>
+<% end %>

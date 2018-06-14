@@ -97,9 +97,10 @@ module Auth::Concerns::Shopping::ProductConcern
 		#field :time_information, type: Hash, default: {}
 		field :miscellaneous_attributes, type: Hash, default: {}
 
-
 		## all products are public to be searched.
 		before_save do |document|
+			## so this entire embedded thing, will change everything actually.
+			## all the attributes have to be added as set now.
 			self.public = "yes"
 		end
 
@@ -114,6 +115,11 @@ module Auth::Concerns::Shopping::ProductConcern
 	    public: public
 	 }
 	end 
+
+	def as_json(options)
+	  # this example DOES NOT ignore the user's options
+	  super({:methods => [:embedded_document_path, :embedded_document]}.merge(options))
+	end
 
 	module ClassMethods
 

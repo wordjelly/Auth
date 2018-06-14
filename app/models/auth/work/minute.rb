@@ -208,13 +208,34 @@ class Auth::Work::Minute
 		cycles_to_pull.flatten	
 	end
 
-	## this means that the cycle has to be keeping track of the workers available and entities_available.
-	## but what about capacity ?
-	## so now we are getting the list of the affected cycles
-	## now we have to write one function to reduce the workers/entities there.
-	## and also of those cycle chains.
-	## so while searching you will search for a cycle with at least required number of workers and required number of entities.
-	## so we will query the length or we will remove the assigned and available workers.
-	## also write the function to update those cycles.
+	## this will block the transporter and rewire his availability for all subsequent and prior minutes.
+	## this i have to do today.
+	def update_transporter
+
+	end
+
+	## TODO -> are teh 30 minute rolling cycles also deleted ?
+
+	## so we are going to
+	## the minute has cycles
+	## given a bunch of cart items, we are going to land up with a bunch of cycles that are going to have to be done.
+	## so we need a minute where all these cycles are possible.
+	## or at least as many of them as possible.
+	## we are going to need cycles with enough workers as well.
+	## and enough entities.
+	## it may be that a cycle exists, but it should have enough workers and entities to do the job.
+	## okay so if we have found such cycles, now we want 
+	## we can label them as rolling
+	## and then we can count how many we got.
+	## match where [cycle is a and cycle is primary] OR [cycle is b and cycle is primary, cycle is c and cycle is primary] present.
+	## then unwind the cycles
+	## so now we know that all these cycles even if they don't be primary, still belong to a minute with a primary
+	## now match only the useful cycles
+	## group by minutes
+	## add a field that combines the size of the avialable cycles + the distance from now
+	## sort by that.
+	def find_applicable_minute
+
+	end
 
 end

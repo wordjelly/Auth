@@ -54,8 +54,7 @@ module Auth::Concerns::OwnerConcern
 			#puts "conditions are:"
 			#puts conditions.to_s
 			all = self.where(conditions)
-			#puts "the resultant size:"
-			#puts all.size.to_s
+			
 			return all.first if all.size > 0 
 			return nil
 		end

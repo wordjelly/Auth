@@ -161,23 +161,24 @@ for the update form, the part where we give the option to directly resend the ad
 
 /****
 show or hide the oauth icons and 
+this needs to be modified for the submit itself.
 ****/
 var toggle_oauth = function(){
 	$('#oauth_icons').toggle();
-	$("#submit").toggleClass("l6 m6 s6 p-0-left p-0-right").toggleClass("l12 m12 s12 center");	
-	$("#submit_icon").toggleClass("right");
+	$("#submit").toggleClass("l6 m6 s6 p-0-left right").toggleClass("l12 m12 s12 offset-l5 offset-m5 offset-s5 center");	
+	
 }
 
 var hide_oauth = function(){
 	$('#oauth_icons').hide();
-	$('#submit').removeClass("l6 m6 s6 p-0-left p-0-right").addClass("l12 m12 s12 center");
-	$('#submit_icon').removeClass('right');
+	$('#submit').removeClass("l6 m6 s6 p-0-left p-0-right").addClass("l12 m12 s12 offset-l5 offset-m5 offset-s5 center");
+	
 }
 
 var show_oauth = function(){
 	$('#oauth_icons').show();
-	$('#submit').addClass("l6 m6 s6 p-0-left p-0-right").removeClass("l12 m12 s12 center");
-	$('#submit_icon').addClass('right');	
+	$('#submit').addClass("l6 m6 s6 p-0-left p-0-right").removeClass("l12 m12 s12 offset-l5 offset-m5 offset-s5 center");
+
 }
 
 /***

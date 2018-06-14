@@ -1,5 +1,8 @@
 class Auth::Image
 
+  ## cloudinary link to show android app that signs request
+  ## https://github.com/cloudinary/cloudinary_android/tree/master/sample-signed
+
   include Mongoid::Document
   include Auth::Concerns::OwnerConcern
 

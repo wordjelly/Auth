@@ -223,3 +223,17 @@ Pass in a proxy resource id, and resource class of the admin, if the user is an 
 1. start_minute and end_minute (null) how to solve this. #update_overlap_hash -- add_start_end_minute
 
 
+
+this was in navbar.html.erb
+
+<% if content_for?(:search_bar) %>
+  
+<% else %>  
+  <%= render :partial => "auth/search/search_bar.html.erb" %>
+<% end %>
+
+<% if content_for?(:search_results) %>
+  
+<% else %>
+  <%= render :partial => "auth/search/search_results.html.erb" %>
+<% end %>
