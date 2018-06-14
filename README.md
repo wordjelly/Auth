@@ -1,6 +1,8 @@
 ## AUTH
 
-![Auth Logo](https://user-images.githubusercontent.com/38547278/41305783-3192a2ac-6e9e-11e8-8080-48320e4efaac.png)
+<h1 align=center>
+<img src="Logo/horizontal.png" width=50%>
+</h1>
 
 __[Thanks Zularizal for the wonderful Logo!](http://github.com/zularizal)__
 
