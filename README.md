@@ -1,7 +1,5 @@
-## AUTH
-
 <h1 align=center>
-<img src="Logo/horizontal.png" width=50%>
+<img src="Logo/horizontal.png" width=70%>
 </h1>
 
 __[Thanks Zularizal for the wonderful Logo!](http://github.com/zularizal)__
