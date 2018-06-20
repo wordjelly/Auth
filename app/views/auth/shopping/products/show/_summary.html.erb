@@ -1,0 +1,20 @@
+<div class="col s12 m12 l12">
+	<ul class="collection with-header">
+        <li class="collection-header"><h2><%= product.name %></h2></li>
+        <% product.summary.each do |s| %>
+	       	<li class="collection-item">
+	          	<div>
+	          		<i class="material-icons icon-align <%= s.summary_icon_color %>"><%= s.summary_icon_class %></i>
+	          		<span class="m-20-left"><%= s.summary_text %></span>
+	          	</div>
+	        </li>
+        <% end %>
+        <li class="collection-item">
+          	<div>
+          		<i class="material-icons icon-align blue-grey-text">payment
+          		</i>
+          		<span class="m-20-left"><%= Auth.configuration.currency %> <%= product.price %>/-</span>
+          	</div>
+	    </li>
+	</ul>
+</div>

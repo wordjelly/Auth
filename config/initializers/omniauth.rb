@@ -38,16 +38,35 @@ module OmniAuth
 	    	on_any_path?(request_paths)
 	    end
 
+	    def on_callback_path?
+	      
+	      on_path?(callback_path)
+	    end
+
+	    def on_path?(path)
+	      #puts "current path is: #{current_path}"
+	      path_without_extension = current_path.gsub(/\.json/,'')
+	      
+	      #puts "path without extension is :#{path_without_extension}"
+	      path_without_extension.casecmp(path).zero?
+	    end
 	
 	    ##modified to use Auth::OmniAuth::Path
 	    def callback_path
+	      
 	      @callback_path ||= begin
+	      	
 	        path = options[:callback_path] if options[:callback_path].is_a?(String)
 	        path ||= current_path if options[:callback_path].respond_to?(:call) && options[:callback_path].call(env)
 	        path ||= custom_path(:request_path)
 	        path ||= Auth::OmniAuth::Path.common_callback_path(name)
+	      	
+
 	        path
+	      
 	      end
+
+
 	    end
 
 	    ##request call - modified to setup the model.
@@ -80,9 +99,9 @@ module OmniAuth
 	    ##now the callback call
 	    # Performs the steps necessary to run the callback phase of a strategy.
 	    def callback_call
-	      #check_state
+
 	      setup_phase
-	      log :info, 'Callback phase initiated.'
+	      
 	      @env['omniauth.origin'] = session.delete('omniauth.origin')
 	      @env['omniauth.origin'] = nil if env['omniauth.origin'] == ''
 	      @env['omniauth.params'] = session.delete('omniauth.params') || {}
@@ -94,6 +113,26 @@ module OmniAuth
 	      OmniAuth.config.before_callback_phase.call(@env) if OmniAuth.config.before_callback_phase
 	      callback_phase
 	    end
+
+
+	    def call!(env) # rubocop:disable CyclomaticComplexity, PerceivedComplexity
+	      
+	      unless env['rack.session']
+	        error = OmniAuth::NoSessionError.new('You must provide a session to use OmniAuth.')
+	        raise(error)
+	      end
+
+	      @env = env
+	      @env['omniauth.strategy'] = self if on_auth_path?
+	      
+	      return mock_call!(env) if OmniAuth.config.test_mode
+	      return options_call if on_auth_path? && options_request?
+	      return request_call if on_request_path? && OmniAuth.config.allowed_request_methods.include?(request.request_method.downcase.to_sym)
+	      return callback_call if on_callback_path?
+	      return other_phase if respond_to?(:other_phase)
+	      @app.call(env)
+	    end
+
   end
   
 end
@@ -104,21 +143,24 @@ end
 module OmniAuth
   module Strategies
   	OAuth2.class_eval do 
-
-  		
-
   		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
-  			
+
+  			#puts request.inspect.to_s
+  			#puts request.params.to_s
+
 	        error = request.params["error_reason"] || request.params["error"]
+	        #puts "error : #{error}"
 	        if error
 	          fail!(error, CallbackError.new(request.params["error"], request.params["error_description"] || request.params["error_reason"], request.params["error_uri"]))
 	        elsif !options.provider_ignores_state  && (request.params["state"].to_s.empty? || request.params["state"] != session.delete("omniauth.state"))
 	          #puts "STATE ISSUES."
+	          #puts "state is detected."
 	          headers = Hash[*env.select {|k,v| k.start_with? 'HTTP_'}
 			  .collect {|k,v| [k.sub(/^HTTP_/, ''), v]}
 			  .collect {|k,v| [k.split('_').collect(&:capitalize).join('-'), v]}
 			  .sort
 			  .flatten]
+			  
 			  if headers["Accept"] == "application/json"
 			  	self.access_token = build_access_token
 		        self.access_token = access_token.refresh! if access_token.expired?
@@ -129,15 +171,19 @@ module OmniAuth
 	          end
 	        else
 	          #puts "didnt have any initial state issues."
+	          
 	          self.access_token = build_access_token
 	          self.access_token = access_token.refresh! if access_token.expired?
 	          super
 	        end
 	      rescue ::OAuth2::Error, CallbackError => e
+	      	puts "invalid creds."
 	        fail!(:invalid_credentials, e)
 	      rescue ::Timeout::Error, ::Errno::ETIMEDOUT => e
+	      	puts "timeout."
 	        fail!(:timeout, e)
 	      rescue ::SocketError => e
+	      	puts "socket error."
 	        fail!(:failed_to_connect, e)
 	    end
 	    
@@ -157,11 +203,22 @@ module OmniAuth
 	     end
   	end
   	Facebook.class_eval do 
-  		protected
+  		
   		def build_access_token
-  			if request.params["fb_exchange_token"]
+
+  			request.body.rewind
+  			hash = request.body.read
+  			request.body.rewind
+          	parsedForm = JSON.parse(hash) unless hash.blank?
+          	post_params_fb_exchange_token = nil
+          	if parsedForm
+          		post_params_fb_exchange_token = parsedForm["fb_exchange_token"]
+          	end
+
+  			fb_exchange_token = request.params["fb_exchange_token"] || post_params_fb_exchange_token
+  			if fb_exchange_token
   				##make the get request.
-  				verify_exchange_token(request.params["fb_exchange_token"])
+  				verify_exchange_token(fb_exchange_token)
   			else
   				verifier = request.params["code"]
         		a_t = client.auth_code.get_token(verifier, {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true)), deep_symbolize(options.auth_token_params))
@@ -179,7 +236,17 @@ module OmniAuth
   		end
 
   		def with_authorization_code!
-  			if request.params.key?('code') || request.params.key?('fb_exchange_token')
+  			
+  			request.body.rewind
+  			hash = request.body.read
+  			request.body.rewind
+          	parsedForm = JSON.parse(hash) unless hash.blank?
+          	post_params_fb_exchange_token = nil
+          	if parsedForm
+          		post_params_fb_exchange_token = parsedForm["fb_exchange_token"]
+          	end
+
+  			if request.params.key?('code') || post_params_fb_exchange_token
           		yield
 	        elsif code_from_signed_request = signed_request_from_cookie && signed_request_from_cookie['code']
 	          request.params['code'] = code_from_signed_request
@@ -196,41 +263,56 @@ module OmniAuth
 	            options.provider_ignores_state = original_provider_ignores_state
 	          end
 	        else
-	          raise NoAuthorizationCodeError, 'must pass either a `code` (via URL or by an `fbsr_XXX` signed request cookie)'
+	          raise StandardError, 'must pass either a `code` (via URL or by an `fbsr_XXX` signed request cookie)'
 	        end
   		end
 
   	end
     GoogleOauth2.class_eval do 
-
-
     	
-
     	def custom_build_access_token
-    		#puts "Came to custome build access token."
-    		#puts "is the request xhr?"
-    		#puts request.xhr?
+    		#puts request.inspect.to_s
+    		#this is because of the read happening in that other def.
+    		
+  			request.body.rewind
+  			hash = request.body.read
+  			request.body.rewind
+          	parsedForm = JSON.parse(hash) unless hash.blank?
+          	
+          	post_params_id_token = nil
+          	post_params_access_token = nil
+
+          	if parsedForm
+          		post_params_id_token = parsedForm['id_token']
+          		post_params_access_token = parsedForm['access_token']
+          	end
+    		
+    		id_token = request.params['id_token'] || post_params_id_token
+    		access_token = request.params['access_token'] || post_params_access_token
+
     		access_token =
-    		if verify_id_token(request.params['id_token'])
+    		if verify_id_token(id_token)
     			## ANDROID APP USES THIS 
     			##in this case the access token is pointless, because we dont really get any kind of access for the api, so we just build a dummy token to satisfy the way this method works, since the method is exepcte to return an access token.
     			##refer to 
     			##@link: https://developers.google.com/identity/sign-in/android/backend-auth
     			##@ref: also refer to the signInActivity.java in the android app, where we pass in 'id_token.'
+    			puts "id token is verified."
     			::OAuth2::AccessToken.new(client,"")
 	        elsif request.xhr? && request.params['code']
 	          ##THIS IS FOR WEB BASED JAVASCRIPT API.
+	          puts "web javascript"
 	          verifier = request.params['code']
 	          client.auth_code.get_token(verifier, get_token_options('postmessage'), deep_symbolize(options.auth_token_params || {}))
 	        elsif request.params['code'] && request.params['redirect_uri']
 	          ## THIS IS FOR WEB BASED HTML API
 	          verifier = request.params['code']
 	          redirect_uri = request.params['redirect_uri']
-	          puts "verifier is: #{verifier}"
-	          puts "redirect url is: #{redirect_uri}"
-	          puts "getting token options: #{get_token_options(redirect_uri)}"
+	          #puts "verifier is: #{verifier}"
+	          #puts "redirect url is: #{redirect_uri}"
+	          #puts "getting token options: #{get_token_options(redirect_uri)}"
 	          client.auth_code.get_token(verifier, get_token_options(redirect_uri), deep_symbolize(options.auth_token_params || {}))
-	        elsif verify_token(request.params['access_token'])
+	        elsif verify_token(access_token)
 	          #puts "came to option 4"
 	          #puts "this is the access token passing verified."
 	          ::OAuth2::AccessToken.from_hash(client, request.params.dup)
@@ -251,8 +333,6 @@ module OmniAuth
 
 	          	verifier = request.params["code"]
 
-	          
-
 	          	client.auth_code.get_token(verifier, get_token_options(url_to_pass_as_callback), deep_symbolize(options.auth_token_params))
 	        	#client.auth_code.get_token(verifier, get_token_options(url_to_pass_as_callback), deep_symbolize(options.auth_token_params))
 	        end
@@ -266,7 +346,7 @@ module OmniAuth
     	private 
     	
     	def verify_id_token(id_token)
-    		
+    		#puts "id token is: #{id_token}"
     		return false unless id_token
     		raw_response = client.request(:get, 'https://www.googleapis.com/oauth2/v3/tokeninfo',
                                       params: { id_token: id_token }).parsed
@@ -276,8 +356,10 @@ module OmniAuth
     		#puts raw_response
         	if raw_response['aud'] == options.client_id || options.authorized_client_ids.include?(raw_response['aud'])
 	        	@raw_info ||= raw_response
+	        	#puts "could verify."
 	        	true
 	        else
+	        	#puts "could not verify/"
 	        	false
 	        end
 

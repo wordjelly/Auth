@@ -2,21 +2,26 @@ module Auth::Concerns::OmniConcern
 
   extend ActiveSupport::Concern
 
-  included do
-    prepend_before_action :set_devise_mapping_for_omniauth, only: [:omni_common]
-    prepend_before_action :do_before_request, only: [:omni_common]
-    attr_accessor :resource
-    helper_method :omniauth_failed_path_for
-  end
 
-  
+
+  included do
+    
+    prepend_before_action :set_devise_mapping_for_omniauth, only: [:omni_common]
+    
+    prepend_before_action :do_before_request, only: [:omni_common]
+    
+    attr_accessor :resource
+    
+    helper_method :omniauth_failed_path_for
+
+    
+  end
 
 
   def set_devise_mapping_for_omniauth
     model = nil
     if !request.env["omniauth.model"].blank?
-      puts "the request env is:"
-      puts request.env["omniauth.model"]
+      
       request.env["omniauth.model"].scan(/omniauth\/(?<model>[a-zA-Z]+)\//) do |ll|
         jj = Regexp.last_match
         model = jj[:model]
@@ -140,7 +145,10 @@ module Auth::Concerns::OmniConcern
            redirect_to omniauth_failed_path_for("no_resource"), :notice => "No resource was specified in the omniauth callback request." and return 
           else
             resource_klazz = request.env["devise.mapping"].to
-           
+            
+           # puts "request env."
+           # puts request.env.to_s
+
             omni_hash = get_omni_hash
             
             puts "the omni hash is:"

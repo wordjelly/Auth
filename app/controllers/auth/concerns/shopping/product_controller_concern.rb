@@ -22,9 +22,9 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     check_for_create(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     #puts "this is the auth shopping product"
-    puts @auth_shopping_product.embedded_document
-    puts @auth_shopping_product.embedded_document_path
-  	@auth_shopping_product.send("#{@auth_shopping_product.embedded_document_path}=",@auth_shopping_product.embedded_document) if (@auth_shopping_product.embedded_document && @auth_shopping_product.embedded_document_path)
+    #puts @auth_shopping_product.embedded_document
+    #puts @auth_shopping_product.embedded_document_path
+  	#@auth_shopping_product.send("#{@auth_shopping_product.embedded_document_path}=",@auth_shopping_product.embedded_document) if (@auth_shopping_product.embedded_document && @auth_shopping_product.embedded_document_path)
     @auth_shopping_product.save
     respond_with @auth_shopping_product
     
@@ -36,6 +36,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     @auth_shopping_product.assign_attributes(@auth_shopping_product_params)
 
     ## assigns the embedded document to the provided path. 
+=begin
     if @auth_shopping_product.embedded_document_path
       curr_element = nil
       total_els = @auth_shopping_product.embedded_document_path.split(".").size
@@ -57,7 +58,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
         end
       }
     end
-    
+=end    
     ## prune nil elements.
     ## at all levels.
 
@@ -96,9 +97,9 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   ## two -> embedded_document.
   def permitted_params
     ## we just keep the embedded_document_path
+    ## i need to change the controllers back to product
+    ## and i need to 
   	pr = params.permit({:product => [:name,:price]})
-    pr = pr.deep_merge({:product => { :embedded_document_path => params[:product][:embedded_document_path], :embedded_document => params[:product][:embedded_document]}})
-    pr
   end
 
 end

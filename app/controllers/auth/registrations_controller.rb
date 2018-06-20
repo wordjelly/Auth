@@ -44,7 +44,9 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 	    resource.m_client = self.m_client
 	 	resource.set_client_authentication
 	 	## end.
+	 	
 	    resource_updated = update_resource(resource, account_update_params)
+	    
 	    yield resource if block_given?
 	    if resource_updated
 	      if is_flashing_format?

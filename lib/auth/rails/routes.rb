@@ -1,6 +1,54 @@
 module ActionDispatch::Routing
   class Mapper
 
+
+  	def get_scope(model)
+ 	 	scope_path = "/"
+ 	 	## here there is the problem of repeats
+ 	 	## because we have the model class as 
+ 	 	## so how to split that for the scope
+ 	 	## normally i had shopping/payments/
+ 	 	#puts Auth.configuration.send("#{model}_class").underscore.pluralize.to_s
+
+ 	 	Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
+ 	 		if Regexp.last_match[:scope_path]
+ 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
+ 	 		end
+ 	 	end
+
+ 	 	puts "scope path is: #{scope_path}"
+ 	 	scope_path
+
+  	end
+
+  	def get_prefix(model)
+  		as_prefix = nil
+  		Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
+ 	 		if Regexp.last_match[:scope_path]
+ 	 			as_prefix =  Regexp.last_match[:scope_path]
+ 	 		end
+ 	 	end
+ 	 	as_prefix
+ 	 	#Auth.configuration.send("#{model}_class").underscore.pluralize.gsub("\/","_")
+ 	 	
+  	end
+
+  	def get_collection(model)
+  		collection = nil
+  		Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
+ 	 		collection = Regexp.last_match[:collection]
+ 	 	end
+ 	 	puts "collection is :#{collection}"
+ 	 	collection
+  	end
+
+  	## the default is 
+  	def get_controller(model)
+  		Auth.configuration.send("#{model}_controller") 
+  	end
+
+
+
   	##@param app_route_resources[Hash] -> 
   	##key:resource[String] -> the name of the resource for which omniauth routes are to be generated.
   	##value:opts[Hash] -> the options specifying the views, controllers etc for omniauth.
@@ -51,6 +99,8 @@ module ActionDispatch::Routing
 	      resources :admin_create_users, :controller => "auth/admin_create_users"
 
 	  	  resources :clients, :controller => "auth/clients", :as => "auth_clients"
+
+	  	  resources :endpoints, :controller => Auth.configuration.endpoint_controller
 		 
 		  resources :profiles, :controller => "auth/profiles" do 
 		  	collection do 
@@ -71,45 +121,50 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product","discount","image"].each do |model|
+			["cart_item","cart","payment","product","discount","image","bullet","instruction"].each do |model|
 
 				if Auth.configuration.send("#{model}_controller")
 
-					scope_path = "/"
-			 	 	as_prefix = nil
-			 	 	collection = nil
-
-			 	 	Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
-
-			 	 		if Regexp.last_match[:scope_path]
-			 	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
-			 	 			## this is done so that the route helper defined inside the engine views also work.
-			 	 			as_prefix =  Regexp.last_match[:scope_path]
-			 	 		end
-			 	 		collection = Regexp.last_match[:collection]
-
-			 	 	end
+			 	 	scope_path = get_scope(model)
+			 	 	as_prefix = get_prefix(model)
+			 	 	collection = get_collection(model)
+			 	 	controller_name = get_controller(model)
 
 			 	 	if collection
-				 	 	scope :path => scope_path, :as => as_prefix do
-				 	 		#puts "As prefix is: #{as_prefix}" 
-				 	 		#puts "scope path is: #{scope_path}"
-				 	 		controller_name = Auth.configuration.send("#{model}_controller")
+
+			 	 		## what about the route for this ?
+
+			 	 		
+
+			 	 		## okay so what and how much longer ?
+			 	 		## probably till night.
+			 	 		## 
+			 	 		if model == "bullet" 
+			 	 			 
+			 	 			resources collection.to_sym, controller: controller_name, path: "/auth/work/bullets"
+			 	 		
+			 	 		elsif model == "instruction"
+			 	 			
+			 	 			resources collection.to_sym, controller: controller_name, path: "/auth/work/instructions"	
+
+			 	 		else
+			 	 			scope :path => scope_path, :as => as_prefix do
 				 	 		
 			 	 			resources collection.to_sym, controller: controller_name do
-			 	 				collection do 
-			 	 				## for the option to create multiple cart items at one time.
-				 	 				if model == "cart_item"
-				 	 					post 'create_multiple', :action => 'create_multiple'
-				 	 				end
-			 	 				end
-
+				 	 				collection do 
+					 	 				if model == "cart_item"
+					 	 					post 'create_multiple', :action => 'create_multiple'
+					 	 				end
+				 	 				end			 	 				
 			 	 			end
-				 	 		
-					    	
+				 	 	
 					    	##A ROUTE HAS BEEN ADDED IN THE DAUGHTER APP FOR THE POST -> TO THE PAYMENTS_UPDATE FOR PAYUMONEY.
 					    	##refer payumoney_controller_concern.rb
-					    end
+
+					   		end
+			 	 		end
+				 	 	
+
 					end
 
 				end

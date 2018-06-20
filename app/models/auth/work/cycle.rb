@@ -98,10 +98,7 @@ class Auth::Work::Cycle
 
 	def requirements_satisfied(epoch,location_id)
 		
-		#puts "came to requirements satisfied"
-		Auth.configuration.location_class.constantize.all.each do |l|
-			puts l.attributes.to_s
-		end
+		
 		location = Auth.configuration.location_class.constantize.find(location_id)
 		
 		#puts "location found :#{location}"
@@ -150,6 +147,8 @@ class Auth::Work::Cycle
 		applicable_schedules.each do |schedule|
 			
 			schedule_for_object = schedule.for_object_class.constantize.find(schedule.for_object_id)
+			
+			## the object should also carry its own type as well.
 			
 			schedule_for_object.cycle_types.keys.each do |type|
 				#req[type] = req[type] - 1 if req[type]

@@ -97,14 +97,21 @@ module Auth::Concerns::Shopping::ProductConcern
 		#field :time_information, type: Hash, default: {}
 		field :miscellaneous_attributes, type: Hash, default: {}
 
+		field :description, type: String, default: "Available"
+
+		field :badge_text, type: String, default: "Delivery in 30 mins"
+
+		field :badge_class, type: String, default: "new badge"
+
 		## all products are public to be searched.
 		before_save do |document|
-			## so this entire embedded thing, will change everything actually.
-			## all the attributes have to be added as set now.
 			self.public = "yes"
 		end
 
+		## first have to ensure that the summary is returned along with the json.
+
 	end
+
 
 
 	def as_indexed_json(options={})
@@ -116,10 +123,6 @@ module Auth::Concerns::Shopping::ProductConcern
 	 }
 	end 
 
-	def as_json(options)
-	  # this example DOES NOT ignore the user's options
-	  super({:methods => [:embedded_document_path, :embedded_document]}.merge(options))
-	end
 
 	module ClassMethods
 
@@ -153,13 +156,11 @@ module Auth::Concerns::Shopping::ProductConcern
 				
 					all_cycles_valid = true
 					product.cycles.each do |cycle|
-				
+
 						all_cycles_valid = cycle.requirements_satisfied(epoch + cycle.time_since_prev_cycle.minutes*60,location_id)
 								
 					end
 
-					## just because the cycles are valid, it means we have workers, but how many?
-					## that also has to be returned by the cycle validity statements
 
 					if all_cycles_valid == true
 						cycle_chain = []
@@ -175,6 +176,8 @@ module Auth::Concerns::Shopping::ProductConcern
 
 
 								minutes[epoch_at_which_to_add].cycles << cycle_to_add
+
+
 
 								cycle_chain << cycle_to_add.id.to_s
 							else

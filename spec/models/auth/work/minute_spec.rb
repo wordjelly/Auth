@@ -3,8 +3,157 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 
 	context " -- wrapper -- " do 
 
+		before(:all) do
+			User.delete_all
+			## create one non admin user
+			@u = User.new(attributes_for(:user_confirmed))
+	        @u.save
+	        @c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
+	        @c.redirect_urls = ["http://www.google.com"]
+	        @c.versioned_create
+	        @u.client_authentication["testappid"] = "testestoken"
+	        @u.save
+	        @ap_key = @c.api_key
+	        @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+			## create one admin user.
+			@admin = User.new(attributes_for(:admin_confirmed))
+	        @admin.admin = true
+	        @admin.client_authentication["testappid"] = "testestoken2"
+	        @admin.save
+	        @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
+		end
+
 		before(:example) do 
 			clean_all_work_related_classes
+		end
+
+		it " -- adds the entity types and counts to the minutes -- ", :update_minute_entities => true do 
+
+			### CREATING PRODUCTS AND CYCLES
+			product = Auth.configuration.product_class.constantize.new
+			product.resource_id = @admin.id.to_s
+            product.resource_class = @admin.class.name
+            product.price = 10.00
+            product.signed_in_resource = @admin
+            
+            cycle = Auth::Work::Cycle.new
+            cycle.id = "first_cycle"
+            cycle.duration = 10
+            cycle.time_to_next_cycle = 20
+            cycle.requirements = {
+            	:person_trained_on_em_200 => 1
+            }
+            product.cycles << cycle
+
+            product.save
+
+
+            cycle = Auth::Work::Cycle.new
+            cycle.id = "second_cycle"
+            cycle.duration = 10
+            cycle.time_to_next_cycle = 20
+            cycle.requirements = {
+            	:person_trained_on_em_200 => 1
+            }
+            product.cycles << cycle
+
+            product.save
+
+
+            cycle = Auth::Work::Cycle.new
+            cycle.duration = 10
+            cycle.id = "third_cycle"
+            cycle.time_to_next_cycle = 20
+            cycle.requirements = {
+            	:person_trained_on_em_200 => 1,
+            	:em_200 => 1
+            }
+            product.cycles << cycle
+            
+            
+
+            u = User.new(attributes_for(:user_confirmed))
+	        u.save
+	        c = Auth::Client.new(:resource_id => @u.id, :api_key => "test", :app_ids => ["testappid"])
+	        c.redirect_urls = ["http://www.google.com"]
+	        c.versioned_create
+	        u.client_authentication["testappid"] = "testestoken"
+	        u.cycle_types = {:person_trained_on_em_200 => true}
+		    expect(u.save).to be_truthy
+
+		    
+
+		    ## now the next thing is the entity
+		    e = Auth::Work::Entity.new
+		    e.cycle_types = {:em_200 => true}
+		    e.save
+
+		    e1 = Auth::Work::Entity.new
+		    e1.cycle_types = {:em_200 => true}
+		    e1.save
+		    
+
+		    ## now we have to create schedules
+		    ## this one is for the user.
+		    schedule = Auth::Work::Schedule.new
+		    schedule.start_time = Time.new(2010,05,17)
+		    schedule.end_time = Time.new(2012,07,9)
+		    schedule.for_object_id = u.id.to_s
+		    schedule.for_object_class = u.class.name.to_s
+		    schedule.can_do_cycles = [product.cycles.first.id.to_s]
+		    schedule.location_id = "first_location"
+		    schedule.save
+
+
+		    ## now one for the entity
+			schedule = Auth::Work::Schedule.new
+		    schedule.start_time = Time.new(2010,05,17)
+		    schedule.end_time = Time.new(2012,07,9)
+		    schedule.for_object_id = e.id.to_s
+		    schedule.for_object_class = e.class.name.to_s
+		    schedule.can_do_cycles = [product.cycles.first.id.to_s]
+		    schedule.location_id = "first_location"
+		    schedule.save
+
+		    schedule = Auth::Work::Schedule.new
+		    schedule.start_time = Time.new(2010,05,17)
+		    schedule.end_time = Time.new(2012,07,9)
+		    schedule.for_object_id = e1.id.to_s
+		    schedule.for_object_class = e1.class.name.to_s
+		    schedule.can_do_cycles = [product.cycles.first.id.to_s]
+		    schedule.location_id = "first_location"
+		    schedule.save		    
+
+		    ## add the location
+		    l = Auth.configuration.location_class.constantize.new
+		    l.id = "first_location"
+		    l.save
+		    #puts l.attributes.to_s
+		    ## so for the minutes, they are going to be the first and second minute in the duration of the schedules
+		    minutes = {}
+		    first_minute = Auth::Work::Minute.new
+		    first_minute.time = Time.new(2011,05,5,10,12,0)
+		    minutes[first_minute.time.to_i] = first_minute
+
+		    ## and now the second minute
+			second_minute = Auth::Work::Minute.new
+		    second_minute.time = Time.new(2011,05,5,10,13,0)
+		    minutes[second_minute.time.to_i] = second_minute
+
+		    ## the minutes have not yet been saved.
+
+		    returned_minutes = Auth.configuration.product_class.constantize.schedule_cycles(minutes,"first_location")
+
+  			## now each minute ?
+  			returned_minutes.keys.each do |time|
+  				minute = returned_minutes[time]
+  				minute.update_entity_types
+  				expect(minute.entity_types["em_200"]).to eq(2)
+  				expect(minute.entity_types["person_trained_on_em_200"]).to eq(1)
+  			end
+
+  			
+
 		end
 
 		it " -- finds the affected cycles -- " do 
@@ -148,31 +297,36 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 
 		end
 
-		## these will be the next three required things.
+		it " -- finds the nearest minute to schedule the job -- " do 
 
-		it " -- finds the nearest minute that satisfies the requirements for the job -- " do 
+			## so we have three products that need to be done
+			## product 1 -> starts with cycle a : {worker_type_a => 1, entity_type_a => 1, :capacity => }
+			## product 2 -> starts with cycle b : {worker_type_a => 1, enttity_type_a => 1} : this could 
+			## product 3 -> starts with cycle c : {worker_type_b => 1}
 
-			### that means the start step for all the jobs
+			## what if two products, need the same start cycle ?
+			## then they have to be fused, just bumping the capacity.
+			## so that will be the first step.
+			## a cycle runs on a certain set of samples.
+			## so basically we are looking for something with a minimum capacity of say 10.
+			## why not complicate this with redis
+			## wouldn't that be really fun.
+			## subtract total worker types found, from the maximum needed, 
+			## this not practical by any length.
+			## i need to structure the cycles like that.
+			## worker type a, worker type b, worker type c
+			## project a -> 
+			## so first of all have to build this.
 
+
+			## so in order to do this job, we need 2 workers of type a, and one of type b.
+			## the minimum's are to be found and defined first.
+			## so they will be the individual start cycle clauses.
+			## now the search is done for the bare minimum's
+			## 
 
 		end
-
-
-		it " -- finds the nearest minute that satisfies the requirements, alongwith a traveller -- " do 
-
-
-		end
-
-
-		it " -- books minute -- " do 
-
-
-		end
-
-		## so what i would like to do at this stage is switch there
-		## sort out the new css issues, and then 
-		## make a ui for the instructions and the products, and also for editing the instructions and products.
-
+		
 	end
 
 end

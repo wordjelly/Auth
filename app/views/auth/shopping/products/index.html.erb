@@ -2,6 +2,6 @@
 
 <%= @auth_shopping_products.each do |product| %>
   <row>
-    <%= render :partial => "auth/shopping/products/show.html.erb", locals: {:product => product} %>
+    <%= render :partial => "auth/shopping/products/index/show.html.erb", locals: {:product => product} %>
   </row>
 <% end %>

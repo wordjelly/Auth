@@ -118,7 +118,9 @@ module Auth::Concerns::UserConcern
 
 		## if a or b or c.
 		after_save :send_reset_password_link
-		
+			
+
+		before_save :refresh_endpoints
 		#######################################################
 		#
 		#
@@ -128,6 +130,8 @@ module Auth::Concerns::UserConcern
 		#######################################################
 
 		field :cycle_types, type: Hash
+
+		
 
 		#######################################################
 		#
@@ -284,8 +288,21 @@ module Auth::Concerns::UserConcern
 			  field :identities,          type: Array, default: [Auth::Identity.new.attributes.except("_id")]
 		  end
 
-		  
-		  
+		  	
+		  ###############################################
+		  ##
+		  ## NOTIFICATION SUPPORT.
+		  ##
+		  ## this is permitted by default.
+		  ## and i have to add this as an update feature.
+		  ## that it adds the gcm_token 
+		  ###############################################
+		  field :android_token, type: String
+		  field :android_endpoint, type: String
+		  field :ios_token, type: String
+		  field :ios_endpoint, type: String
+
+		 
 
 	    end
 
@@ -368,9 +385,11 @@ module Auth::Concerns::UserConcern
 		## if the current signed in resource is not admin, then _id is instead searched for using the current_signed_in_resource => basically will only return the user that is signed in.
 
 		def find_resource(_id,resource)
+
 			conditions = {:_id => _id}
 			conditions[:_id] = resource.id.to_s if !resource.is_admin?
 			all = self.where(conditions)
+			
 			return all.first if all.size > 0 
 			return nil
 		end
@@ -535,13 +554,13 @@ module Auth::Concerns::UserConcern
 		##first find out if there is already a client for this user id.
 		c = Auth::Client.new(:api_key => SecureRandom.hex(32), :resource_id => self.id)
 
-		puts "Came to create a client."
+		#puts "Came to create a client."
 
 		c.versioned_create({:resource_id => self.id})
 		op_count = 10
 
-		puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
-		puts c.attributes.to_s
+		#puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
+		#puts c.attributes.to_s
 
 		while(true)
 			
@@ -777,11 +796,6 @@ module Auth::Concerns::UserConcern
 		name
 	end
 	
-
-	def has_gcm_token
-		false
-	end
-
 	## this method is to be overridden, it returns the value of the admin_variable.
 	## it can be used to decide if the user is an admin.
 	## @used_in : payment_concern in the refund_callback 
@@ -799,7 +813,25 @@ module Auth::Concerns::UserConcern
 
 
 	
+	####################################################################
+	###
+	###
+	### GCM - AMAZON ENDPOINT
+	###
+	###
+	####################################################################
+	def refresh_endpoints
+		puts "called refresh end points."
+		puts self.android_token
+		if self.android_token_changed?
+			endpoint = Auth::Endpoint.new
+			endpoint.android_token = self.android_token
+			self.android_endpoint = endpoint.set_android_endpoint
+		end
+		## now have to make an endpoints controller.
+	end
 
-	
+	## after this we have notification dispatch and scheduling logic based on the instructions and cycles.
+	## this has to also be finished today.
 	
 end

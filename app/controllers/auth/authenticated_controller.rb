@@ -18,59 +18,7 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 
 
 
-	## @return[String] model_name : given a controller with name AssembliesController -> will return assembly
-	## will downcase and singularize the controller name.
-	def get_model_class_name
-		
-		class_name = nil
-
-		self.class.name.scan(/::(?<plural_controller_name>[A-Za-z]+)Controller$/) do |ll|
-
-			jj = Regexp.last_match
-			
-			plural_controller_name = jj[:plural_controller_name]
-
-			class_name = plural_controller_name.singularize.downcase
-
-		end
-
-		not_found("could not determine class name") unless class_name
-		
-		
-
-		return class_name
 	
-	end
-
-	def instantiate_classes
-
-		if Auth.configuration.send("#{get_model_class_name}_class")
-
-			begin
-				instance_variable_set("@model_class",Auth.configuration.send("#{get_model_class_name}_class").constantize)
-			rescue 
-				not_found("could not instantiate class #{get_model_class_name}")
-			end
-
-		else
-			not_found("#{get_model_class_name} class not defined in configuration")
-		end
-
-	end
-
-
-	def build_model_from_params
-      	pp = permitted_params
-      	puts "the permitted_params are:"
-      	puts permitted_params.to_s
-
-      	@model_params = pp.fetch(get_model_class_name.to_sym,{})
-      	puts "model params are:"
-      	puts @model_params.to_s
-
-      	@model = pp[:id] ?  @model_class.find_self(pp[:id],current_signed_in_resource) : @model_class.new(@model_params)
-
-	end
 
 
 	

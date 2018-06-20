@@ -1,0 +1,21 @@
+<div class="row m-40-top">
+  <div class="col s12 m12 l12">
+    <div class="card ">
+      	<div class="card-content blue-grey-text darken-2 p-0-bottom">
+	        <span class="card-title black-text"><h5 class="m-0-top"><%= instruction.title %></h5></span>
+	        <p><h6 class="m-0-top grey-text"><%= instruction.description %></h6></p>
+	        <ul class="collection m-15-top" style="border:none;">
+		        <% instruction.bullets.each do |bullet| %>
+		        	<%= render :partial => "auth/work/bullets/show.html.erb", locals: {bullet: bullet, instruction: instruction, product: product} %>
+		        <% end %>
+	        </ul>
+      	</div>
+      	<div class="card-action">
+      		<% instruction.links.each do |link| %>
+      		<a href="<%= link.url %>"><%= link.url_text %></a>
+      		<% end %>
+      	  <%= link_to "Edit", edit_instruction_path(:product_id => product.id.to_s,:id => instruction.id.to_s) %>
+        </div>
+    </div>
+  </div>
+</div>

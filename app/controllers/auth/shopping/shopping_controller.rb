@@ -1,6 +1,5 @@
 class Auth::Shopping::ShoppingController < Auth::ApplicationController
 
-	
 	def instantiate_discount_class
 		if @auth_shopping_discount_class = Auth.configuration.discount_class
 	      begin

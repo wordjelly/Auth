@@ -13,7 +13,6 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
           ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed admin directly while creating the admin.
           params.require(:user).permit(
             :email, :password, :password_confirmation,
-            :confirmed_at, :redirect_url, :api_key, :additional_login_param
           )
         end
 
@@ -502,7 +501,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
 
           end
-          
+
 
         end
 
@@ -621,5 +620,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
     end
 
   end
+
+  
 
 end

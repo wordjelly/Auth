@@ -1,0 +1,16 @@
+<%= form_for(@auth_work_instruction, as: "instruction", url: instruction_path, method: :put) do |f| %>
+	<div class="form_fields">
+		  <%=
+	          f.text_field :title
+	      %>
+	      <%= 
+	          f.label  :title
+	      %>
+	      <%= 
+	      	  hidden_field_tag :product_id, @auth_shopping_product.id.to_s
+	      %>
+    </div>
+    <div class="actions">
+    	<%= f.submit %>
+  	</div>
+<% end %>

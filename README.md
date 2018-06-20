@@ -187,6 +187,8 @@ class User::ParameterSanitizer < Devise::ParameterSanitizer
     
     # permit(:sign_up, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params] + [:another_param])
 
+    # remember to add gcm_token here if you plan to enable notifications for android.
+
     permit(:account_update, keys: Auth.configuration.auth_resources[resource_class.to_s][:login_params])
 
   end

@@ -18,7 +18,6 @@ module Auth
       g.test_framework :rspec
     end
 
-    
 
   end
 
@@ -81,6 +80,10 @@ module Auth
     attr_accessor :do_redirect
     attr_accessor :brand_name
     attr_accessor :notification_response_class
+    attr_accessor :instruction_class
+    attr_accessor :instruction_controller
+    attr_accessor :bullet_class
+    attr_accessor :bullet_controller
     ## the class used in the user_concern, to send emails.
     ## should inherit from Auth::Notifier.
     ## the class used to send the notification
@@ -194,6 +197,12 @@ module Auth
     #######################################################
 
     attr_accessor :rolling_minutes
+
+    attr_accessor :currency
+
+    attr_accessor :endpoint_class
+
+    attr_accessor :endpoint_controller
 
     def initialize
       
@@ -319,6 +328,17 @@ module Auth
       ###################################################
       @use_es = true
 
+
+      ########################################################
+      ##
+      ## WORK ACCESSOR
+      ##
+      ########################################################
+      @instruction_class = "Auth::Work::Instruction"
+      @instruction_controller = "auth/work/instructions"
+
+      @bullet_class = "Auth::Work::Bullet"
+      @bullet_controller = "auth/work/bullets"
       ########################################################
       ##
       ##
@@ -393,7 +413,6 @@ module Auth
       ##
       ##
       ########################################################
-
       @image_class = "Auth::Image"
       @image_controller = "auth/images"
 
@@ -404,6 +423,17 @@ module Auth
       ##
       ########################################################
       @rolling_minutes = 30
+      @currency = "INR"
+
+
+      ########################################################
+      ##
+      ## ENDPOINT CLASS.
+      ##
+      ########################################################
+      @endpoint_class = "Auth::Endpoint"
+      @endpoint_controller = "auth/endpoints"
+
 
     end
   end

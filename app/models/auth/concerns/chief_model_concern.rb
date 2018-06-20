@@ -23,7 +23,15 @@ module Auth::Concerns::ChiefModelConcern
 		## any embedded document to be changed is to be added here.
 		attr_accessor :embedded_document
 
+		## array of image ids, that are associated with the current document.
+		attr_accessor :images
+
 		field :public, type:String, default: "no"
+
+
+		after_initialize do |document|
+			document.load_images
+		end
 
 
 		def field_names_to_skip_while_making_form
@@ -32,6 +40,13 @@ module Auth::Concerns::ChiefModelConcern
 
 		def publicly_visible_field_names 
 			[]
+		end
+
+
+		##find an image/ images with this parent id.
+		##and add them to an images array. 
+		def load_images
+			self.images = Auth::Image.where(:parent_id => self.id.to_s) || []
 		end
 
 

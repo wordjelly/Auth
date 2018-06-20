@@ -2,6 +2,7 @@
 	<span id="personalization_nav_links">
 		<%= content_for(:personalization_nav_links) if content_for?(:personalization_nav_links) %>
 	</span>
+	<li><%= link_to "Products", products_path %></li>
 	<li data-resource-singular="<%= current_res.class.name.downcase %>" data-resource="<%= Auth.configuration.mount_path[1..-1] + "/" +current_res.class.name.downcase.pluralize %>"><%= link_to "Account Settings", edit_res_registration_path,:class => "profile_nav_option" %></li>
 	<li data-resource-singular="<%= current_res.class.name.downcase %>" data-resource="<%= Auth.configuration.mount_path[1..-1] + "/" +current_res.class.name.downcase.pluralize %>"><%= link_to "Profile", profile_path({:id => current_res.id, :resource => current_res.class.name.downcase.pluralize}),{:class => "profile_nav_option"} %></li>
 	<li><%= link_to('Sign Out', destroy_res_session_path, :method => :delete, id: "sign_out") %></li>
@@ -10,6 +11,7 @@
 		<% Auth.configuration.auth_resources.keys.each do |res| %>
 			<% if Auth.configuration.auth_resources[res][:nav_bar] %>
 				<li class="sign_in_nav_option" data-resource-singular="<%=res.downcase %>" data-resource="<%= Auth.configuration.mount_path[1..-1] + "/" + res.downcase.pluralize %>"><a href="#">Sign In</a></li>
+				<li><%= link_to "Products", products_path %></li>
 			<% end %>
 		<% end %>
 	<% end %>

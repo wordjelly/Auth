@@ -1,0 +1,136 @@
+{
+	"products" : [
+		{
+			"name" : "Vitamin D3",
+			"description" : "This test determines the levels of Vitamin D3 in your blood.",
+			"price" : 900.24,
+			"instructions" : [
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "timer",
+					"summary_icon_color" : "red-text",
+					"summary_text" : "Report in 30 mins",
+					"title" : "Do I Need this Test",
+					"description" : "You need this test if you have any of the following symptoms:",
+					"bullets" : [
+						{
+							"title" : "Pain on the bones",
+							"description" : "Pain on your chest bones, or along your shin"
+						},
+						{
+							"title" : "Brittle Hair",
+							"description" : "Your hair breaks easily"
+						}
+					]
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "camera_alt",
+					"summary_icon_color" : "teal-text",
+					"summary_text" : "You can watch your test being performed",
+					"title" : "Before The Test",
+					"description" : "Follow these instructions just before the test.",
+					"bullets" : [
+						{
+							"title" : "Stay Empty Stomach for 8 hours",
+							"description" : "Heavy meals can affect test values, so you need to be empty stomach for a minimum of 8 hours prior to the test. You will receive notifications by mobile reminding you to do this."
+						},
+						{
+							"title" : "Have A Bath the morning of the test",
+							"description" : "To draw your sample before the test, a needle will be used, which will puncture your skin. Keeping your skin clean , prevents chances of local infections."
+						}
+					]
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "location_on",
+					"summary_icon_color" : "yellow-text",
+					"summary_text" : "Free Home Collection",
+					"title" : "During The Test",
+					"description" : "Follow these instructions just before the test.",
+					"bullets" : [
+						{
+							"title" : "Where Will the Test be performed?",
+							"description" : "If you requested a home visit, your sample will be collected at your residence, by one of our trained phlebotomists."
+						},
+						{
+							"title" : "How Will the test be performed?",
+							"description" : "A small needle will be inserted into the superficial vein of your forearm, and a small quntity of blood will be drawn."
+						},
+						{
+							"title" : "How Long will it take?",
+							"description" : "The process of drawing the blood is typically completed in 2-3 minutes."
+						},
+						{
+							"title" : "Will It Hurt?",
+							"description" : "Our phlebotomists are trained to ensure as little pain as possible."
+						}
+					]
+				}
+			]
+		},
+		{
+			"name" : "FT3",
+			"description" : "Free Thyroid Hormone 3 in blood.",
+			"price" : 350,
+			"instructions" : [
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "timer",
+					"summary_icon_color" : "red-text",
+					"summary_text" : "Report in 30 mins"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "camera_alt",
+					"summary_icon_color" : "teal-text",
+					"summary_text" : "You can watch your test being performed"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "location_on",
+					"summary_icon_color" : "yellow-text",
+					"summary_text" : "Free Home Collection"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "whatshot",
+					"summary_icon_color" : "green-text",
+					"summary_text" : "Not Painful"
+				}
+			]
+		},
+		{
+			"name" : "Anti-dsDNA",
+			"description" : "Test to diagnose Systemic Lupus Erythematosus",
+			"price" : 350,
+			"badge_text": "Report in 90 mins",
+			"instructions" : [
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "timer",
+					"summary_icon_color" : "red-text",
+					"summary_text" : "Report in 90 mins"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "camera_alt",
+					"summary_icon_color" : "teal-text",
+					"summary_text" : "You can watch your test being performed"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "location_on",
+					"summary_icon_color" : "yellow-text",
+					"summary_text" : "Free Home Collection"
+				},
+				{
+					"include_in_summary" : true,
+					"summary_icon_class" : "whatshot",
+					"summary_icon_color" : "green-text",
+					"summary_text" : "Not Painful"
+				}
+			]
+		}
+	]
+}

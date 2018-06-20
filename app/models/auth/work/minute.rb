@@ -8,6 +8,42 @@ class Auth::Work::Minute
 	
 	field :geom, type: Array
 
+	## this includes workers and entities, and actually anything that could be needed for the cycle.
+	field :entity_types, type: Hash, default: {}
+
+	## next step is to pull correctly.
+	## so this done.
+	def update_entity_types
+		#puts "came to update entity types"
+		applicable_schedules = Auth::Work::Schedule.collection.aggregate([
+			{
+				"$match" => {
+					"$and" => [
+						{
+							"start_time" => {
+								"$lte" => self.time
+							}
+						},
+						{
+							"end_time" => {
+								"$gte" => self.time
+							}
+						}
+					]
+				}
+			}
+		])
+
+		applicable_schedules.each do |schedule|
+			sched = Auth::Work::Schedule.new(schedule)
+			object = sched.for_object_class.constantize.find(sched.for_object_id)
+			object.cycle_types.keys.each do |k|
+				self.entity_types[k]+=1 if self.entity_types[k]
+				self.entity_types[k]= 1 unless self.entity_types[k]
+			end
+		end
+
+	end
 
 	## returns all minutes which have affected cycles , only containing the affected cycles.
 	## does not consider the cycle chains.
@@ -208,25 +244,12 @@ class Auth::Work::Minute
 		cycles_to_pull.flatten	
 	end
 
-	## this will block the transporter and rewire his availability for all subsequent and prior minutes.
-	## this i have to do today.
-	def update_transporter
+	
 
-	end
+	## okay first do what can be predictable done.
+	## that means the partials in the views.
+	## go for it.
 
-	## TODO -> are teh 30 minute rolling cycles also deleted ?
-
-	## so we are going to
-	## the minute has cycles
-	## given a bunch of cart items, we are going to land up with a bunch of cycles that are going to have to be done.
-	## so we need a minute where all these cycles are possible.
-	## or at least as many of them as possible.
-	## we are going to need cycles with enough workers as well.
-	## and enough entities.
-	## it may be that a cycle exists, but it should have enough workers and entities to do the job.
-	## okay so if we have found such cycles, now we want 
-	## we can label them as rolling
-	## and then we can count how many we got.
 	## match where [cycle is a and cycle is primary] OR [cycle is b and cycle is primary, cycle is c and cycle is primary] present.
 	## then unwind the cycles
 	## so now we know that all these cycles even if they don't be primary, still belong to a minute with a primary
@@ -234,7 +257,61 @@ class Auth::Work::Minute
 	## group by minutes
 	## add a field that combines the size of the avialable cycles + the distance from now
 	## sort by that.
-	def find_applicable_minute
+	## @param[Array] cycle_requirements_array : {cycle_id , worker_requirements :{"type" : number}, entity_requirements: {"type" : number}}
+	## @param[Hash] transport_information : {distance : , coordinates :} 
+	## lets get the edit out of the way first.
+	def find_applicable_minute(cycle_requirements_array)
+		## go to elasticsearch for this ?
+		## ?
+		aggregations = [
+			{
+				"cycles" => {
+					"$elemMatch" => {
+						"$or" => 
+						[
+
+						]
+					}
+				}	
+			},
+			{
+				"$unwind" => "$cycles"
+			},
+			{
+				## keep all cycles, dont enforce the belongs_to_minute at this level.
+				## just cycle_type and workers and entities
+				## since we want to include the 30 min rolling slots as well.
+				## we are only keeping the cycles which have the required type.
+				## and we can match again, 
+				"$match" => {
+					"cycles.cycle_type" => {
+						"$in" => "all_the_cycles"
+					}
+				} 
+			}
+		]
+
+
+
+		cycle_requirements_array.each do |req|
+			aggregations[0]["cycles"]["$elemMatch"]["$or"] << {
+				"cycle_type" => req["cycle_type"], 
+				"workers_available.#{req['workers_count'] - 1}" => {
+					"$exists" => true
+				},
+				"entities_available.#{req['entities_count'] - 1}" => {
+					"$exists" => true
+				},
+				"belongs_to_minute" => true
+			}
+		end
+
+		## we are going to get minutes that have at the minimum one of the cycles as belonging to the given minute.
+
+		## now we are going to unwind the cycles, 
+		## keep only those which satisfy these conditions.
+
+		## we take a look at other cycles which will be affected only if that cycle, is not already booked, otherwise it doesnt make any difference at all.
 
 	end
 

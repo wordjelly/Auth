@@ -11,12 +11,12 @@
             <%= render :partial => 'layouts/auth/navbar/progress_spinner.html.erb' %>
           <% end %>
         </div>
-        <div class="nav-wrapper col l6 m6 s6 offset-l3 offset-m3 offset-s3 hide-on-med-and-down">
+        <div class="nav-wrapper col l4 m4 s4 offset-l3 offset-m3 offset-s3 hide-on-med-and-down">
           <%= render :partial => 'auth/search/search_bar.html.erb' %>  
         </div>
+
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
-          
           <% if content_for?(:navbar_right) %>
             <%= content_for(:navbar_right)  %>
           <% else %>

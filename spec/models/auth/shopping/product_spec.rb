@@ -130,6 +130,8 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 		    second_minute.time = Time.new(2011,05,5,10,13,0)
 		    minutes[second_minute.time.to_i] = second_minute
 
+		    ## the minutes have not yet been saved.
+
 		    returned_minutes = Auth.configuration.product_class.constantize.schedule_cycles(minutes,"first_location")
 
 		    ## if there are 3 cycles that are applicable to each minute, then the first minute should have 6 cycles and the second should have 3 cycles
@@ -142,8 +144,10 @@ RSpec.describe Auth::Shopping::Product, type: :model, :product_model => true do
 			## expect the second minute to have 3 cycles
 
 			## how to find the expected ids ?
-			## 
+			
+			## here the worker counts and entity counts have to be added to the minutes as well.
 
+				
 			expect(returned_minutes.values.first.cycles.size).to eq(6)
 			expect(returned_minutes.values.last.cycles.size).to eq(3)
 

@@ -1,0 +1,12 @@
+<li class="collection-item avatar" style="padding-top:20px;">
+	<!-- here is the issue of showing the image -->
+	<!-- so we will pick the first image from the array -->
+	<% if bullet.images.size > 0 %>
+		<img src="/assets/lab.jpg" alt="" class="circle" height="30px" width="30px">
+	<% else %>
+		<img src="/assets/placeholder.png" alt="" class="circle" height="30px" width="35px">
+	<% end %>
+	<span class="title blue-grey-text text-darken-3"><%= bullet.title %></span>
+	<br>
+	<p class="grey-text"><%= bullet.description %></p>
+</li>

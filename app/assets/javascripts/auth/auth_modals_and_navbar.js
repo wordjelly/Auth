@@ -213,4 +213,9 @@ $(document).on('click','.additional_login_param_resend_confirmation_message',fun
 });
 
 
-
+/***
+on clicking on ORDER PRODUCT LINK, IT SUBMITS THE FORM.
+****/
+$(document).on('click','.order_product_link',function(event){
+  $(this).closest("form").submit();
+});

@@ -12,7 +12,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 	before_action :is_admin_user, :only => [:set_proxy_user]
 	
 	def initialize_vars
-		puts "---------------------------------------------------"
+		
 		@resource_params = {}
 		@profile_resource = nil
 		@all_params = permitted_params.deep_symbolize_keys
@@ -45,15 +45,26 @@ class Auth::ProfilesController < Auth::ApplicationController
 	## expected params hash:
 	##{:resource => "users", :user => {:admin,:request_send_reset_password_link}, :id}
 	def update
+
+		puts "the profile resource is:"
+		puts @profile_resource.to_s
+
 		check_for_update(@profile_resource)
 		
-		if @resource_params[:admin]
-			@profile_resource.admin = @resource_params[:admin]
-		end
+		#if @resource_params[:admin]
+		#	@profile_resource.admin = @resource_params[:admin]
+		#end
 
-		if @resource_params[:created_by_admin]
-			@profile_resource.created_by_admin = @resource_params[:created_by_admin]
-		end
+		#if @resource_params[:created_by_admin]
+		#	@profile_resource.created_by_admin = @resource_params[:created_by_admin]
+		#end
+
+		## so not only this but i need a basic endpoint as well
+		## to add endpoints.
+		## okay so will need another endpoint model for that purpose.
+		## so first let me finish this.
+
+		@profile_resource.assign_attributes(@resource_params)
 
 		@profile_resource.m_client = self.m_client
 		
@@ -133,13 +144,22 @@ class Auth::ProfilesController < Auth::ApplicationController
 			## we also want to allow to set :created_by_admin => true, 
 			## so that is also enabled, if the user is an admin,
 	  		Auth.configuration.auth_resources.keys.each do |model|
-	  			if current_signed_in_resource && current_signed_in_resource.is_admin?
-	  				filters << {model.downcase.to_sym => [:admin,:created_by_admin]}
+	  			if current_signed_in_resource  
+	  				if current_signed_in_resource.is_admin?
+	  					filters << {model.downcase.to_sym => [:admin,:created_by_admin]}
+	  				else
+	  					filters << {model.downcase.to_sym => [:android_token, :ios_token]}
+	  				end
 	  			end
 	  		end
+	  		## resource has to be passed as well.
+	  		## it is a plural, downcase like "users"
 	  		filters << [:resource,:api_key,:current_app_id,:id]
 	  		params.permit(filters)
 		end
+
+		## if the user is not an admin, then 
+
 	end
 
 	##@used_in : profiles_controller

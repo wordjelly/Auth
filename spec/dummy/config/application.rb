@@ -11,6 +11,12 @@ require "rails/test_unit/railtie"
 Bundler.require(*Rails.groups)
 require "wordjelly-auth"
 
+
+## not only sns, but also the scheduling of the notifications, and email.
+## both have to be completed along with editing.
+## how to allot time in the day ?
+## 
+
 module Dummy
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.

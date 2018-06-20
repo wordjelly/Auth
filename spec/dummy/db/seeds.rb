@@ -85,6 +85,19 @@ def create_instructions(n,bullets_n)
     n.times do |i_n|
         i = Auth::Work::Instruction.new
         i.title = Faker::Food.dish
+        i.include_in_summary = true
+        if i_n == 0
+            i.summary_icon_class = ""
+            i.summary_icon_color = ""
+            i.summary_text = "Report in 30 mins"
+        elsif i_n == 1
+            i.summary_icon_class = ""
+            i.summary_icon_color = ""
+            i.summary_text = "You can watch your test being peformed"
+        elsif i_n == 2
+        elsif i_n == 3
+        elsif i_n == 4
+        end
         i.bullets = create_bullets(bullets_n)
         i.instruction_type = Auth::Work::Instruction::INSTRUCTION_TYPES.sample
         instructions << i
@@ -94,22 +107,40 @@ end
 
 def create_products
     Auth.configuration.product_class.constantize.delete_all
+    User.delete_all
     admin_user = User.new
-    admin_user.email = Faker::Internet.email
+    admin_user.email = "joshi@gmail.com"
     admin_user.confirmed_at = Time.now
     admin_user.password = "password"
     admin_user.admin = true
-    admin_user.versioned_create
+    puts "result of creating user #{admin_user.save}"
 
+=begin
     10.times do |n|
         product = Auth.configuration.product_class.constantize.new
         product.name = Faker::Food.spice
+        product.badge_text = "Report in 30 mins"
         product.resource_class = admin_user.class.name
         product.resource_id = admin_user.id.to_s
         product.price = Faker::Number.between(10, 500)
         product.instructions = create_instructions(5,2)
         puts "response of saving: #{product.id.to_s} : #{product.save}"
     end
+=end
+
+
+    products_json_definition = JSON.parse(IO.read("#{Rails.root}/db/products.json"))
+    products = products_json_definition["products"].map{|c| c = Auth.configuration.product_class.constantize.new(c)}
+    products.map!{|c| 
+        c.resource_class = admin_user.class.name
+        c.resource_id = admin_user.id.to_s
+        puts "response of saving: #{c.id.to_s} : #{c.save}" 
+    }
+
+    ## now we have three products, lets see how they get shown in the index.
+    puts "user count"
+    puts User.all.count
+
 end
 
 
