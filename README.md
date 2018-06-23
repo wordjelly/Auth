@@ -1155,14 +1155,12 @@ Mongoid::Elasticsearch.prefix = 'doggy'
 
 ## To add other elasticsearch client specific options, you can add them here itself, refer to rspro-mongoid-elasticsearch to see these options.
 
-....
-
 ## After that, you have to do , for every single model that you have added an elastisearch index definition to:
 
 ModelName.es.index.create
 
 ## additionally you must add the following lines, to create the indexes for certain models from the engine, which also need elasticsearch.
-```
+
 ## will create indexes for the shopping classes and user class, as defined by you in the configuration.
 [Auth.configuration.product_class, Auth.configuration.cart_class, Auth.configuration.cart_item_class, Auth.configuration.payment_class, Auth.configuration.discount_class, Auth.configuration.user_class]. each do |cl|
 
@@ -1172,6 +1170,7 @@ ModelName.es.index.create
   end
 
 end
+
 ```
 
 
@@ -1202,6 +1201,7 @@ def as_indexed_json(options={})
     public: public
  }  
 end
+
 ```
 
 
@@ -1234,6 +1234,7 @@ class User
   ## the as_indexed_json is also already defined in their concerns.
 
 end
+
 ```
 
 
@@ -1258,6 +1259,7 @@ Following lines are to be placed for any model that is using elasticsearch(inclu
       public: public
     }
   end
+
 ```
 
 
@@ -1303,6 +1305,7 @@ OwnerConcern is not used in UserConcern, so there would not have been any proble
 doc_version is by default initialized to 0. It is expected to be queried, whenever the object is saved, in a find_and_modify style, but is not enforced.
 Currently it is being used only in the Workflow models in this manner.
 -------------------------------------------------------------
+
 ## Admin Create Users
 
 No special configuration is needed. The routes are added automatically, and the views and controller are provided by the engine.
