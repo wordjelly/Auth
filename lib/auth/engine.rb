@@ -84,10 +84,16 @@ module Auth
     attr_accessor :instruction_controller
     attr_accessor :bullet_class
     attr_accessor :bullet_controller
+    attr_accessor :communication_class
+    attr_accessor :communication_controller
     ## the class used in the user_concern, to send emails.
     ## should inherit from Auth::Notifier.
     ## the class used to send the notification
     attr_accessor :mailer_class
+
+    ## the new mailer class being used in Auth::Work::Notification.
+    attr_accessor :new_mailer_class
+    attr_accessor :mail_from
      
     ## the queue adapter for the delayed jobs
     ## @used in OtpJob
@@ -204,6 +210,10 @@ module Auth
 
     attr_accessor :endpoint_controller
 
+    attr_accessor :cycle_class
+
+    attr_accessor :cycle_controller
+
     def initialize
       
 
@@ -309,8 +319,8 @@ module Auth
       @notification_class = nil
       @notification_response_class = nil
 
-      
-      
+      @new_mailer_class = "Auth::SendMail"
+      @mail_from = "bhargav.r.raut@gmail.com"
       
       ###############################################################
       ##
@@ -319,7 +329,7 @@ module Auth
       ###############################################################
       @queue_adapter = "shoryuken"
 
-      
+      ## command : 
       ####################################################
       ##
       ##
@@ -429,10 +439,25 @@ module Auth
       ########################################################
       ##
       ## ENDPOINT CLASS.
+      ## for amazon and aws notifications.
       ##
       ########################################################
       @endpoint_class = "Auth::Endpoint"
       @endpoint_controller = "auth/endpoints"
+
+
+      ########################################################
+      ##
+      ##
+      ## WORK CLASSES
+      ##
+      ##
+      ########################################################
+      @communication_controller = "auth/work/communications"
+      @communication_class = "Auth::Work::Communication"
+
+      @cycle_controller = "auth/work/cycles"
+      @cycle_class = "Auth::Work::Cycle"
 
 
     end

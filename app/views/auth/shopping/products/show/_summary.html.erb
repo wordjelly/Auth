@@ -16,5 +16,18 @@
           		<span class="m-20-left"><%= Auth.configuration.currency %> <%= product.price %>/-</span>
           	</div>
 	    </li>
+	    <li class="collection-item">
+		    <div>
+		    	<i class="material-icons icon-align green-text">create</i>
+		    	<span class="m-20-left"><%= link_to "Edit Product", edit_product_path(product.id.to_s) %></span>
+		    </div>
+	    </li>
+	    <li class="collection-item">
+	    	<div>
+		    	<i class="material-icons icon-align blue-text">note_add</i>
+		    	<span class="m-20-left"><%= link_to "Add New Instruction", new_instruction_path(:product_id => product.id.to_s) %></span>
+		    </div>
+	    </li>
+	    <!-- now in the instructions, add the image and the bullets first, then we will go for the notifications -->
 	</ul>
 </div>

@@ -22,5 +22,6 @@ class Auth::Work::Instruction
 
 	embeds_many :links, :class_name => "Auth::Work::Link"
 	embeds_many :bullets, :class_name => "Auth::Work::Bullet"
+	embeds_many :communications, :class_name => "Auth::Work::Communication", :as => :instruction_communications
 
 end

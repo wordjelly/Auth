@@ -6,6 +6,7 @@ module Auth::Concerns::Work::InstructionControllerConcern
     include Auth::Work::Instructions::InstructionsHelper
   end
 
+
   def initialize_vars
     instantiate_work_classes
     not_found("no product id provided") unless params[:product_id]
@@ -19,13 +20,16 @@ module Auth::Concerns::Work::InstructionControllerConcern
         if params[:id]
           @auth_work_instruction = @auth_shopping_product.instructions.select{|c|
             c.id.to_s == params[:id]
-          }[0]
+          }
+          not_found("no such object") if @auth_work_instruction.empty?
+          @auth_work_instruction = @auth_work_instruction[0]
         else
           @auth_work_instruction = @auth_work_instruction_class.new(@auth_work_instruction_params)
         end
       end
     rescue Mongoid::Errors::DocumentNotFound
        @auth_shopping_product = @auth_shopping_product_class.new
+       @auth_work_instruction = @auth_work_instruction_class.new(@auth_work_instruction_params)
     end
 
   end

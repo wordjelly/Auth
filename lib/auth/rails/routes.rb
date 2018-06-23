@@ -16,7 +16,7 @@ module ActionDispatch::Routing
  	 		end
  	 	end
 
- 	 	puts "scope path is: #{scope_path}"
+ 	 	#puts "scope path is: #{scope_path}"
  	 	scope_path
 
   	end
@@ -38,7 +38,7 @@ module ActionDispatch::Routing
   		Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
  	 		collection = Regexp.last_match[:collection]
  	 	end
- 	 	puts "collection is :#{collection}"
+ 	 	#puts "collection is :#{collection}"
  	 	collection
   	end
 
@@ -121,7 +121,10 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product","discount","image","bullet","instruction"].each do |model|
+			["cart_item","cart","payment","product","discount","image","bullet","instruction","communication"].each do |model|
+
+				## establish a communication controller, model, views and engine constants with defaults.
+
 
 				if Auth.configuration.send("#{model}_controller")
 
@@ -132,13 +135,7 @@ module ActionDispatch::Routing
 
 			 	 	if collection
 
-			 	 		## what about the route for this ?
-
-			 	 		
-
-			 	 		## okay so what and how much longer ?
-			 	 		## probably till night.
-			 	 		## 
+			 	 		 
 			 	 		if model == "bullet" 
 			 	 			 
 			 	 			resources collection.to_sym, controller: controller_name, path: "/auth/work/bullets"
@@ -147,6 +144,9 @@ module ActionDispatch::Routing
 			 	 			
 			 	 			resources collection.to_sym, controller: controller_name, path: "/auth/work/instructions"	
 
+			 	 		elsif model == "communication"
+
+			 	 			resources collection.to_sym, controller: controller_name, path: "/auth/work/communications"
 			 	 		else
 			 	 			scope :path => scope_path, :as => as_prefix do
 				 	 		
@@ -228,7 +228,7 @@ module ActionDispatch::Routing
 						common_callback_path = Auth::OmniAuth::Path.common_callback_path(provider)
 
 						if !Rails.application.routes.url_helpers.method_defined?("#{provider}_omniauth_authorize_path".to_sym)
-							puts "calling route for provider: #{provider}"
+							#puts "calling route for provider: #{provider}"
 							match "#{omniauth_request_path}", controller: omniauth_ctrl, action: "passthru", via: [:get,:post], as: "#{provider}_omniauth_authorize"
 						end
 

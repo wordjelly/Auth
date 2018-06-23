@@ -191,7 +191,7 @@ You need to store these in your app, and distribute them with every copy of the 
 5. If there is any other error, tell the user to try again later.
 
 
-
+6. Proceed to request 2b.
 
 
 <a name="Resend_Confirmation_Otp" />
@@ -538,6 +538,8 @@ Note the authentication token changes on adding the mobile. This is because ther
 
 ### 14. Sign In Using Google OAuth2
 
+! Remember to request the email scope on the android app.
+
 1. There are two possibilities for doing a google oauth2 sign in .
 
 2. From the app you can request : 
@@ -571,6 +573,8 @@ Response :
 <a href="Facebook_OAuth" /a>
 
 ### 15. Sign In Using Facebook OAuth2
+
+! Remember to request the email scope on the android app.
 
 1. First do the facebook oauth flow in the app.
 

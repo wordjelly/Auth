@@ -246,72 +246,95 @@ class Auth::Work::Minute
 
 	
 
-	## okay first do what can be predictable done.
-	## that means the partials in the views.
-	## go for it.
-
-	## match where [cycle is a and cycle is primary] OR [cycle is b and cycle is primary, cycle is c and cycle is primary] present.
-	## then unwind the cycles
-	## so now we know that all these cycles even if they don't be primary, still belong to a minute with a primary
-	## now match only the useful cycles
-	## group by minutes
-	## add a field that combines the size of the avialable cycles + the distance from now
-	## sort by that.
-	## @param[Array] cycle_requirements_array : {cycle_id , worker_requirements :{"type" : number}, entity_requirements: {"type" : number}}
+	
+	## @param[Hash] cycles : {cycle_id => cycle}
 	## @param[Hash] transport_information : {distance : , coordinates :} 
 	## lets get the edit out of the way first.
-	def find_applicable_minute(cycle_requirements_array)
-		## go to elasticsearch for this ?
-		## ?
-		aggregations = [
-			{
-				"cycles" => {
-					"$elemMatch" => {
+	def self.find_applicable_minutes(cycles,transport_information={})
+		query_clause = {
+			"$match" => {
+				"$and" => [
+					{
 						"$or" => 
-						[
+							[
 
-						]
+							]
+					},
+					{
+						"cycles" => {
+							"$elemMatch" => {
+								"$or" => [
+								]
+							}
+						}
 					}
-				}	
-			},
-			{
-				"$unwind" => "$cycles"
-			},
-			{
-				## keep all cycles, dont enforce the belongs_to_minute at this level.
-				## just cycle_type and workers and entities
-				## since we want to include the 30 min rolling slots as well.
-				## we are only keeping the cycles which have the required type.
-				## and we can match again, 
-				"$match" => {
-					"cycles.cycle_type" => {
-						"$in" => "all_the_cycles"
+				]
+			}
+		}
+
+		## that will be one api out of the way.
+		## next is also medicine.
+
+		## after this will be the aggregate phase.
+
+		combined_requirements = {}
+		individual_requirements = []
+		cycles.keys.each do |cycle_id|
+			cycle = cycles[cycle_id]
+			cycle_clause = {
+				"$and" => 
+				[
+
+				]
+			}
+			
+			cycle_clause["$and"] << {
+				"capacity" => cycle.capacity
+			}
+
+			## does the cycle have some kind of type ?
+			cycle_clause["$and"] << {
+				"cycle_type" => cycle.cycle_type
+			}
+
+			query_clause["$match"]["$and"][1]["cycles"]["$elemMatch"]["$or"] << cycle_clause
+
+
+			cycle_clause_for_entity_types = {
+				
+			}
+			
+			cycle.requirements.keys.each do |k|
+				combined_requirements[k] = 0 unless combined_requirements[k]
+				combined_requirements[k]+= cycle.requirements[k]
+				cycle_clause_for_entity_types["entity_types.#{k}"] =
+					{
+						"$gte" => cycle.requirements[k]
 					}
-				} 
-			}
-		]
+				
+			end 
 
+			
+			query_clause["$match"]["$and"][0]["$or"] << cycle_clause_for_entity_types			
 
-
-		cycle_requirements_array.each do |req|
-			aggregations[0]["cycles"]["$elemMatch"]["$or"] << {
-				"cycle_type" => req["cycle_type"], 
-				"workers_available.#{req['workers_count'] - 1}" => {
-					"$exists" => true
-				},
-				"entities_available.#{req['entities_count'] - 1}" => {
-					"$exists" => true
-				},
-				"belongs_to_minute" => true
-			}
 		end
 
-		## we are going to get minutes that have at the minimum one of the cycles as belonging to the given minute.
+=begin
+		query_clause = [{
+			"$match" => {
+				"time" => {
+					"$exists" => true
+				}
+			}
+		}]
+=end		
+		puts "this is the generated query clause => "
+		puts JSON.pretty_generate(query_clause)
 
-		## now we are going to unwind the cycles, 
-		## keep only those which satisfy these conditions.
 
-		## we take a look at other cycles which will be affected only if that cycle, is not already booked, otherwise it doesnt make any difference at all.
+		Auth::Work::Minute.collection.aggregate([query_clause])
+
+
 
 	end
 

@@ -821,17 +821,13 @@ module Auth::Concerns::UserConcern
 	###
 	####################################################################
 	def refresh_endpoints
-		puts "called refresh end points."
-		puts self.android_token
+		
 		if self.android_token_changed?
 			endpoint = Auth::Endpoint.new
 			endpoint.android_token = self.android_token
 			self.android_endpoint = endpoint.set_android_endpoint
 		end
-		## now have to make an endpoints controller.
+		
 	end
 
-	## after this we have notification dispatch and scheduling logic based on the instructions and cycles.
-	## this has to also be finished today.
-	
 end

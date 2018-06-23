@@ -14,7 +14,7 @@ module Auth::Concerns::Shopping::ProductConcern
 
 		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
 
-		
+					
 		INDEX_DEFINITION = {
 				index_options:  {
 				    settings:  {
@@ -143,7 +143,9 @@ module Auth::Concerns::Shopping::ProductConcern
 
 		end
 
-		## minutes : {epoch => minute object}
+		## adds the relevant cycles to the minutes, and returns the hash that came in.
+		## does not save the minutes, after adding the cycles to them.
+		##@return[Hash] {epoch => minute object}
 		def schedule_cycles(minutes,location_id,conditions = {})
 
 			products = Auth.configuration.product_class.constantize.all if conditions.blank?
@@ -172,7 +174,7 @@ module Auth::Concerns::Shopping::ProductConcern
 							cycle_to_add.cycle_chain = cycle_chain
 							if minutes[epoch_at_which_to_add]
 								
-								add_to_previous_rolling_n_minutes(minutes,epoch_at_which_to_add,cycle_to_add)
+								#add_to_previous_rolling_n_minutes(minutes,epoch_at_which_to_add,cycle_to_add)
 
 
 								minutes[epoch_at_which_to_add].cycles << cycle_to_add

@@ -51,19 +51,8 @@ class Auth::ProfilesController < Auth::ApplicationController
 
 		check_for_update(@profile_resource)
 		
-		#if @resource_params[:admin]
-		#	@profile_resource.admin = @resource_params[:admin]
-		#end
-
-		#if @resource_params[:created_by_admin]
-		#	@profile_resource.created_by_admin = @resource_params[:created_by_admin]
-		#end
-
-		## so not only this but i need a basic endpoint as well
-		## to add endpoints.
-		## okay so will need another endpoint model for that purpose.
-		## so first let me finish this.
-
+		puts "going to assing attributes."
+		puts "resource params are: #{}"
 		@profile_resource.assign_attributes(@resource_params)
 
 		@profile_resource.m_client = self.m_client

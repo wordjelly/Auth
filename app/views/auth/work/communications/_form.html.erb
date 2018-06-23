@@ -1,0 +1,57 @@
+<%= form_for(@auth_work_communication, as: "communication", url: @auth_work_communication.new_record? ? communications_path : communication_path(:id => @auth_work_communication.id.to_s), method: @auth_work_communication.new_record? ? :post : :put) do |f| %>
+	<div class="form_fields">
+		<div id="email_options">
+		  	<h5>E-Mail Options</h5>
+		  	<%= f.check_box :send_email,{},true,false %>
+	      	<%= f.label  :send_email %>
+
+	      	<%= f.text_field :email_template_path %>
+	      	<%= f.label :email_template_path %>
+	    </div>
+
+	    <div class="divider"> </div>
+
+	    <div id="repeat_options">
+	    	<h5>Repeat Options</h5>
+	    	<%= f.select :repeat,@auth_work_communication.repeat_options,{include_blank: true} %>
+	    	
+	    	<%= f.number_field :repeat_times %>
+	    	<%= f.label :repeat_times %>
+
+	    	<%= f.text_field :method_to_determine_communication_timing %>
+	    	<%= f.label :method_to_determine_communication_timing %>
+
+	    </div>
+
+	    <div class="divider"></div>
+
+	    <div id="general_options">
+
+	    	<%= f.text_field :method_to_determine_recipients %>
+	    	<%= f.label :method_to_determine_recipients %>
+
+
+		    <% if @auth_work_communication.cycle_id %>
+		      	<%= 
+		      		hidden_field_tag :cycle_id, @auth_work_communication.cycle_id.to_s
+		      	%>
+		    <% end %>
+
+	      	<% if @auth_work_communication.instruction_id %>
+		    	<%=
+		      		hidden_field_tag :instruction_id, @auth_work_communication.instruction_id.to_s %> 
+		    	%>
+	      	<% end %>
+
+	    </div>
+
+    </div>
+    <div class="actions">
+    	<%= f.submit %>
+  	</div>
+<% end %>
+
+<!-- now in order to get this to render, first i need to fix instruction -->
+<!-- then will create some product, and inside that have to give buttons to make instructions and also bullets -->
+<!-- so let me first add , the add instruction to the product -->
+<!-- also let me first do the image upload integration also -->

@@ -1,5 +1,5 @@
 require 'rails_helper'
-RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
+RSpec.describe Auth::Work::Minute, type: :model, :minute_model => true do
 
 	context " -- wrapper -- " do 
 
@@ -26,6 +26,8 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 		before(:example) do 
 			clean_all_work_related_classes
 		end
+
+
 
 		it " -- adds the entity types and counts to the minutes -- ", :update_minute_entities => true do 
 
@@ -297,42 +299,48 @@ RSpec.describe Auth::Shopping::Product, type: :model, :minute_model => true do
 
 		end
 
-		it " -- finds the nearest minute to schedule the job -- " do 
 
-			## so we have three products that need to be done
-			## product 1 -> starts with cycle a : {worker_type_a => 1, entity_type_a => 1, :capacity => }
-			## product 2 -> starts with cycle b : {worker_type_a => 1, enttity_type_a => 1} : this could 
-			## product 3 -> starts with cycle c : {worker_type_b => 1}
+		it " -- finds the nearest minute to schedule the job -- ", :find_minutes => true do 
 
-			## what if two products, need the same start cycle ?
-			## then they have to be fused, just bumping the capacity.
-			## so that will be the first step.
-			## a cycle runs on a certain set of samples.
-			## so basically we are looking for something with a minimum capacity of say 10.
-			## why not complicate this with redis
-			## wouldn't that be really fun.
-			## subtract total worker types found, from the maximum needed, 
-			## this not practical by any length.
-			## i need to structure the cycles like that.
-			## worker type a, worker type b, worker type c
-			## project a -> 
-			## so first of all have to build this.
+			
+			minutes_hash = setup_minutes_with_cycles
+			
+			cycles = {}	
+
+			cycle_one = Auth::Work::Cycle.new
+			cycle_one.cycle_type = "a"
+			cycle_one.capacity = 1
+			cycle_one.requirements = {
+				:person_trained_on_em_200 => 1
+			}
+
+			cycles[cycle_one.id.to_s] = cycle_one
+
+			cycle_two = Auth::Work::Cycle.new
+			cycle_two.cycle_type = "b"
+			cycle_two.capacity = 1
+			cycle_two.requirements = {
+				:person_trained_on_em_200 => 1
+			}
+
+			cycles[cycle_two.id.to_s] = cycle_two
 
 
-			## so in order to do this job, we need 2 workers of type a, and one of type b.
-			## the minimum's are to be found and defined first.
-			## so they will be the individual start cycle clauses.
-			## now the search is done for the bare minimum's
-			## 
+			applicable_minutes = Auth::Work::Minute.find_applicable_minutes(cycles)
+
+			applicable_minutes.each do |min|
+				puts min
+			end
 
 		end
-		
+
+=begin
+{"_id"=>BSON::ObjectId('5b2deab0421aa958e6e221d1'), "entity_types"=>{}, "time"=>2011-05-05 04:43:00 UTC, "cycles"=>[{"_id"=>BSON::ObjectId('5b2deab0421aa958e6e221cd'), "capacity"=>1, "time_since_prev_cycle"=>0, "output"=>[], "cycle_chain"=>[], "duration"=>10, "time_to_next_cycle"=>20, "cycle_type"=>"a", "requirements"=>{"person_trained_on_em_200"=>1}, "start_time"=>1304570580, "end_time"=>1304570590}, {"_id"=>BSON::ObjectId('5b2deab0421aa958e6e221ce'), "capacity"=>1, "time_since_prev_cycle"=>0, "output"=>[], "cycle_chain"=>["5b2deab0421aa958e6e221cd"], "duration"=>10, "time_to_next_cycle"=>20, "cycle_type"=>"b", "requirements"=>{"person_trained_on_em_200"=>1}, "cycle_code"=>"5b2deaaf421aa958e6e221c0", "start_time"=>1304570580, "end_time"=>1304570590}, {"_id"=>BSON::ObjectId('5b2deab0421aa958e6e221cf'), "capacity"=>1, "time_since_prev_cycle"=>0, "output"=>[], "cycle_chain"=>["5b2deab0421aa958e6e221cd", "5b2deab0421aa958e6e221ce"], "duration"=>10, "time_to_next_cycle"=>20, "cycle_type"=>"c", "requirements"=>{"person_trained_on_em_200"=>1, "em_200"=>1}, "cycle_code"=>"5b2deaaf421aa958e6e221c1", "start_time"=>1304570580, "end_time"=>1304570590}]}
+=end
+
+
 	end
 
 end
 
-## rough plan
-## 10 -> 20 : finish the cycles, and then decide what kind of ui it should have, test object + integration with shopping cart + notifications + video / image integration with cycle + bar code.
-## 20 -> 30 : b2b + collection boy interface + location interface + apis for the symptoms, videos, image + 
-## 20 -> 30 : cycle ui + symptom test
-## 1 -> 7 : add all the cycles and steps into the 
+

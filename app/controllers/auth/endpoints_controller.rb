@@ -2,6 +2,7 @@ class Auth::EndpointsController < Auth::ApplicationController
 
 	## responds only to json.
 	## got to add the thing to subscribe them to a topic as well.
+	respond_to :json
 
 	include Auth::Concerns::DeviseConcern
 	
@@ -12,43 +13,59 @@ class Auth::EndpointsController < Auth::ApplicationController
 	before_filter :build_model_from_params 
 	before_filter(:only => [:create]){|c| check_for_create(@model)}		
 
-	## all i have to do now is set the routes
-	## and this should start saving endpoints automatically as needed.
-	## so now lets try to make a new endpoint.
-	## question is that what if that token already exists ?
-	## so i will do a find_one_and_update.
-
 	def create
+
+		
 		or_clause = []
 		
 		or_clause << {
-			"android_token" => self.android_token
-		} if self.android_token
+			"android_token" => @model.android_token
+		} if @model.android_token
 		
 		or_clause << {
-			"ios_token" => self.ios_token
-		} if self.ios_token
+			"ios_token" => @model.ios_token
+		} if @model.ios_token
 
-		returned_document = @model.class.where({
-			"$or" => or_clause
-		}).find_one_and_update(
-			{
-				"$set" => self.attributes,
+		if or_clause.empty?
+			returned_document = nil
+		else
+			returned_document = @model.class.where({
+				"$or" => or_clause
+			}).find_one_and_update(
+				{
+					"$setOnInsert" => @model.attributes,
 
-			},
-			{
-				:return_document => :after
-			}
-		)
+				},
+				{
+					:upsert => true,
+	 				:return_document => :after
+				}
+			)
 
-		#respond_to do |format|
-	    #   format.json {render json: returned_document.to_json, status: returned_document}
-	    #end
+			if returned_document
+				returned_document.set_android_endpoint
+				returned_document.set_ios_endpoint
+			end
+
+		end
+
+		respond_to do |format|
+			if returned_document
+				format.json do 
+					render json: returned_document.to_json, status: 201
+				end
+			else
+				format.json do 
+					render json: {
+		            }.to_json, status: 422
+	        	end
+			end
+		end
 
 	end
 
 	def permitted_params
-		params.require(:endpoint).permit(:android_token,:ios_token)
+		params.permit({:endpoint => [:android_token,:ios_token]},:api_key,:current_app_id)
 	end
 
 end

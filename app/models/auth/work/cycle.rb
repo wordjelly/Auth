@@ -18,8 +18,11 @@ class Auth::Work::Cycle
 
 	embeds_many :templates, :class_name => "Auth::Work::Template"
 
+	embeds_many :communications, :class_name => "Auth::Work::Communication", :as => :cycle_communications
+
 	## each cycle will have a limit
 	field :capacity, type: Integer, default: 0
+	## so this capacity is what has to be updated.
 
 	## there will have to be another field, saying workers who can do it, and entities who can do it.
 	field :workers_available, type: Array
@@ -61,6 +64,10 @@ class Auth::Work::Cycle
 	field :requirements, type: Hash
 
 	field :cycle_code, type: String
+
+	## every cycle should have a type.
+	## we search based on this type.
+	field :cycle_type, type: String
 
 	## the ids of the related cycles.
 	field :cycle_chain, type: Array, default: []
@@ -209,20 +216,7 @@ class Auth::Work::Cycle
 		after_book
 	end
 
-	
-	## so the search criteria is 
-	## where entity_ids == [n1,n2,n3], or worker_ids= [y1,y2,y3]
-	## range is such that
-	## if (end time or start time) of any cycle is (from this minute -> time of end of this cycle)
-	## or if start time <= this minute, and end time is  >= minute of end of this cycle.  
-	## for any of those cycles -> if priority is applicable, then block, and block all related chains.
-	## how to block the related chains ?
-	## a cycle has to store all its related chain ids, and also its 30 minute references.
-	## so that's it.
-	## this is something to execute tomorrow.
 
-	## so plan for today
-	## 
 
 end
 

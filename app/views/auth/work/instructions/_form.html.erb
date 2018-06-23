@@ -1,4 +1,4 @@
-<%= form_for(@auth_work_instruction, as: "instruction", url: instruction_path, method: :put) do |f| %>
+<%= form_for(@auth_work_instruction, as: "instruction", url: @auth_work_instruction.new_record? ? instructions_path : instruction_path(:id => @auth_work_instruction.id), method: @auth_work_instruction.new_record? ? :post : :put) do |f| %>
 	<div class="form_fields">
 		  <%=
 	          f.text_field :title

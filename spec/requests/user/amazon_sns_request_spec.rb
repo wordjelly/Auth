@@ -52,12 +52,14 @@ RSpec.describe "Registration requests", :amazon_endpoint => true,:authentication
 
 	    end	
 
-		it " -- adds android endpoint to user -- " do 
+		it " -- adds android endpoint to user -- ", :user_endpoint => true do 
 
 		    a = {:id => @u2.id.to_s, :user => {:android_token => "xyz"}, api_key: @ap_key, :current_app_id => "testappid", :resource => "users"}
 		    
 		    put credential_exists_profiles_path, a.to_json, @headers
 
+		    #puts response.body.to_s
+		    #puts response.code.to_s
 		    ## get this user
 		    ## assert that it has an endpoint.
 		    user = User.find(@u2.id.to_s)
@@ -65,9 +67,39 @@ RSpec.describe "Registration requests", :amazon_endpoint => true,:authentication
 
 		end
 
-		it " -- creates android endpoint only from json request -- " do 
+		it " -- creates android endpoint only from json request -- ", :raw_endpoint => true do 
+
+			a = {:endpoint => {:android_token => "abc"}, api_key: @ap_key, :current_app_id => "testappid"}
+
+			post endpoints_path, a.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+
+			
+
+			endpoint = JSON.parse(response.body)
+			expect(response.code).to eq("201")
+			expect(endpoint["android_endpoint"]).not_to be_nil
+
+		end
 
 
+		it " -- does not respond to the request if headers are non-json -- ", :json_only => true do 
+
+			a = {:endpoint => {:android_token => "abc"}, api_key: @ap_key, :current_app_id => "testappid"}
+
+			post endpoints_path, a.to_json, {}
+
+			expect(response.code).to eq("404")
+
+		end
+
+
+		it " -- does not respond without valid api key --- " do 
+
+			a = {:endpoint => {:android_token => "abc"}}
+
+			post endpoints_path, a.to_json, { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+
+			expect(response.code).to eq("401")
 
 		end
 

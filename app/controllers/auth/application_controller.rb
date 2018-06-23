@@ -12,6 +12,10 @@ module Auth
 	    end
   	end  
 
+  	rescue_from ActionController::UnknownFormat do |e|
+  		render status: 404, text: "Not Found"
+  	end
+
 
   	######################################################################
   	##
@@ -39,6 +43,7 @@ module Auth
 
 		not_found("could not determine class name") unless class_name
 		
+		puts "class name: #{class_name}"
 		
 
 		return class_name
@@ -63,6 +68,7 @@ module Auth
 
 
 	def build_model_from_params
+		puts "params are: #{params.to_s}"
       	pp = permitted_params
       	puts "the permitted_params are:"
       	puts permitted_params.to_s

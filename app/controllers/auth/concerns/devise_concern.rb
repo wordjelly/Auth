@@ -125,7 +125,7 @@ module Auth::Concerns::DeviseConcern
 	   	##should block any put action on the user
 	   	##and should render an error saying please do this on the server.
 	    if is_json_request? 
-            #puts "it is a json request."
+            
 	    	if action_name == "otp_verification_result"
 	    		##we let this action pass because, we make json ajax requests 
 	    		##from the web ui to this endpoint, and anyway it does
