@@ -191,6 +191,9 @@ module Auth
 
     attr_accessor :image_class
     attr_accessor :image_controller
+    ## basically does not apply if the user is signed in.
+    ## otherwise will apply.
+    attr_accessor :protect_image_with_recaptcha
 
 
     #######################################################
@@ -213,6 +216,8 @@ module Auth
     attr_accessor :cycle_class
 
     attr_accessor :cycle_controller
+
+
 
     def initialize
       
@@ -425,7 +430,7 @@ module Auth
       ########################################################
       @image_class = "Auth::Image"
       @image_controller = "auth/images"
-
+      @protect_image_with_recaptcha = true
 
       ########################################################
       ##

@@ -79,6 +79,7 @@ module Auth::Concerns::Work::InstructionControllerConcern
 
   def show
     instantiate_work_classes
+    ## so i will have to pass the product id as well.
     @auth_shopping_product = @auth_shopping_product_class.find(params[:product_id])
     @auth_work_instruction = @auth_shopping_product.instructions.select{|c| c.id.to_s == params[:id]}[0]
   end

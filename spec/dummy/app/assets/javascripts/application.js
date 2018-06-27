@@ -14,5 +14,3 @@
 //= require images
 //= require_tree .
 
-
- 

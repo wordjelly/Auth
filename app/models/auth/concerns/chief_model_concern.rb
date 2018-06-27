@@ -47,6 +47,10 @@ module Auth::Concerns::ChiefModelConcern
 		##and add them to an images array. 
 		def load_images
 			self.images = Auth::Image.where(:parent_id => self.id.to_s) || []
+			self.images.each do |image|
+				puts image.attributes.to_s
+			end
+			
 		end
 
 

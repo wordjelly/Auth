@@ -9,6 +9,12 @@
 	      <%= 
 	      	  hidden_field_tag :product_id, @auth_shopping_product.id.to_s
 	      %>
+	      <% if @auth_work_instruction.new_record? %>
+	      	<h6>In order to upload images / videos you need to first save this record</h6>
+	      <% else %>
+	      	<% @model = @auth_work_instruction %>
+	      	<%= render :partial => "auth/images/image_concern.html.erb" %>
+	      <% end %>
     </div>
     <div class="actions">
     	<%= f.submit %>

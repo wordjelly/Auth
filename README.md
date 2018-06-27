@@ -1,8 +1,5 @@
 ## AUTH
 
-### Why This Gem?
-
-BECAUSE I'M SINGLE AND HAVE NOTHING ELSE TO DO. :) ;) 
 
 #### Authentication
 

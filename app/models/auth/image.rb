@@ -103,4 +103,8 @@ class Auth::Image
     self.signed_request[:signature].to_s
   end
 
+  def get_url
+    Cloudinary::Utils.cloudinary_url(self.id.to_s)
+  end
+
 end

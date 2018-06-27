@@ -325,6 +325,7 @@ RSpec.describe Auth::Work::Minute, type: :model, :minute_model => true do
 
 			cycles[cycle_two.id.to_s] = cycle_two
 
+			## why this is not working is because the minutes dont have anything in them.
 
 			applicable_minutes = Auth::Work::Minute.find_applicable_minutes(cycles)
 

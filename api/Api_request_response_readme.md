@@ -47,6 +47,13 @@ X-User-Es:89250eb74a530995db8accee89999da1634bf7c59c544ea069d080eba0860c0e
 =================
 
 
+## JSON API HEADER DETAILS:
+
+1. X-User-Token : the "auth_token" returned whenever the user signs in using username and password
+2. X-User-Es : the "es" returned whenever the user signs in using username and password
+3. X-User-Aid : your current_app_id.
+
+
 
 
 ## Specific Prerequisites for Android App
@@ -310,6 +317,7 @@ If not authenticated, get the user to sign in again, and then try again with new
     "id": "5b19cef6421aa926a74a4b0d",
     "admin": "false"
 }
+
 Response code will be: 200 ok.
 
 2a. If the credentials are invalid, you will get code 401, in that case, go and make the user sign in again, with his username and password and then get the refreshed auth_token and es, and try again.

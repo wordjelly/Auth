@@ -1,0 +1,5 @@
+<% if instruction.images.size > 0 %>
+  <img src="<%= instruction.images.first.get_url %>" class="circle" height="30px" width="35px" />
+<% else %>
+  <img src="/assets/placeholder.png" alt="" class="circle" height="30px" width="35px">
+<% end %>
