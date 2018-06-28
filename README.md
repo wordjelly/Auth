@@ -1504,23 +1504,13 @@ Add the following code into it.
 ```
 // images.js
 
-$(document).ready(function(){
-
-  if($.fn.cloudinary_fileupload !== undefined) {
-    $("input.cloudinary-fileupload[type=file]").cloudinary_fileupload();
-    console.log("cloudinary is defined");
-  }
-  else{
-    console.log("cloudinary is undefined");
-  }
-
-  
-  $('#upload_widget_opener').cloudinary_upload_widget(
-  { cloud_name: "doohavoda", api_key:"779116626984783", upload_signature: generateSignature,
+// this ensures that it works even when turbolinks is enabled
+document.addEventListener("turbolinks:load", function() {
+  $('#cloudinary_image_opener').cloudinary_upload_widget(
+  { cloud_name: "doohavoda", api_key:"393369625566631", upload_signature: generateSignature,
   public_id: $("#image_id").text()},
   function(error, result) { console.log(error, result) });
-    
-});
+})
 
 var generateSignature = function(callback, params_to_sign){
   params_to_sign["_id"] = $("#image_id").text();

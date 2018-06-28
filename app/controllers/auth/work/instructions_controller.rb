@@ -1,7 +1,7 @@
 class Auth::Work::InstructionsController < Auth::Work::WorkController
 
 	include Auth::Concerns::Work::InstructionControllerConcern
-		
+	include Auth::Work::Instructions::InstructionsHelper
 	## only these actions need an authenticated user to be present for them to be executed.
     CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new]
 

@@ -107,4 +107,5 @@ class Auth::Image
     Cloudinary::Utils.cloudinary_url(self.id.to_s)
   end
 
+
 end

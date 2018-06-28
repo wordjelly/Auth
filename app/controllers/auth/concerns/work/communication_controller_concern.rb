@@ -1,10 +1,6 @@
-module Auth::Concerns::Work::InstructionControllerConcern
+module Auth::Concerns::Work::CommunicationControllerConcern
 
   	extend ActiveSupport::Concern
-
-  	included do
-    	include Auth::Work::Instructions::InstructionsHelper
-  	end
 
   	## at this stage all we will have is instantiations .
   	def get_parent_object(parent_object_class,parent_object_id)

@@ -2,9 +2,6 @@ module Auth::Concerns::Work::InstructionControllerConcern
 
   extend ActiveSupport::Concern
 
-  included do
-    include Auth::Work::Instructions::InstructionsHelper
-  end
 
 
   def initialize_vars
