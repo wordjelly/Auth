@@ -25,7 +25,6 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		##remember to set the default_url_options in the dummy app routes file.
 		before_create do |document|
 			if document.is_gateway?
-				
 				document.surl = document.furl = Rails.application.routes.url_helpers.shopping_payment_url(document.id.to_s)
 				document.txnid = document.id.to_s
 				#document.txnid = "a#{Random.new.rand(1..50)}"
@@ -93,8 +92,9 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 														self.payment_status = 0 if transaction_details["status"].to_s.downcase =~/pending|failure/
 														if payment_status_changed?
 															## prevents recursive callbacks, after save.
+															## actually this may not be necessary here.
 															self.is_verify_payment = "false"
-															self.save
+															## so only if is_verify_payment is true,
 														else
 															self.errors.add(:payment_status,"transaction status was something other than failed|success|pending")
 														end

@@ -14,11 +14,9 @@ module Auth
 				cls_name_as_string.split("::").map{|c| c = c.underscore}.join("/")
 			end
 
-
 			def self.new_path(cls)
 				"new_" + cls.constantize.new.class.name.underscore.gsub(/\//,"_") + "_path"
 			end
-
 
 			def self.show_or_update_or_delete_path(cls)
 				

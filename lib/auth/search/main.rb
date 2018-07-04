@@ -1,18 +1,18 @@
 module Auth
 	module Search
 		module Main
+
 			## this def, returns a hash with the structure for the basic ngram query.
 			## the query_string is left blank, and you should merge this in through any def that wants to perform an ngram query.
 			## @return[Hash]
-			def self.base_ngram_query
+			def self.es_six_base_ngram_query
 				{
 					body: {
 						query: {
-							filtered: 
-							{
-								query: {
+							bool: {
+								must: {
 									match: {
-										_all: {
+										_all_fields: {
 											query: "",
 											operator: "and"
 										}
@@ -29,29 +29,33 @@ module Auth
 				}
 			end
 
+
+			## searches all indices, for the search string.
 			## @param[Hash] : This is expected to contain the following:
 			## @query_string : the query supplied by the user
 			## @resource_id : a resource_id with which to filter search results, if its not provided, no filter is used on the search results
 			## @size : if not provided a default size of 20 is used
 			## this def will use the #base_ngram_query hash and merge in a filter for the resource_id.
-			
 			## 'Public' Resources
 			##  if the public field is present, don't add any resource_id filter.
 			##  if the public field is not present, then add the resource_id filter if the resource_id is provided.
+			## @return[Hash] : returns a query clause(hash) 
+			def self.es_six_finalize_search_query_clause(args)
 
-			
-			## @return[Array] response: an array of mongoid search result objects. 
-			def self.search(args)	
-				args = args.deep_symbolize_keys
-				return [] unless args[:query_string]
-				query = base_ngram_query
 				
-				## set all the required values.
+				args = args.deep_symbolize_keys
+				
+				return [] unless args[:query_string]
+				
+				query = es_six_base_ngram_query
+				
 				query[:size] = args[:size] || 20
-	
-				query[:body][:query][:filtered][:query][:match][:_all][:query] = args[:query_string]
+				
+				query[:body][:query][:bool][:must][:match][:_all_fields][:query] = args[:query_string]
+
+				
 				if args[:resource_id]
-					query[:body][:query][:filtered][:filter] = {
+					query[:body][:query][:bool][:filter] = {
 							
 								bool: {
 									should: [
@@ -89,7 +93,17 @@ module Auth
 					## as is.
 				end
 
-				#puts JSON.pretty_generate(query)
+				query
+
+			end
+
+
+			## delegates the building of the query to finalize_search_query_clause.
+			## @return[Array] response: an array of mongoid search result objects. 
+			def self.search(args)	
+				query = es_six_finalize_search_query_clause(args)
+				puts "query finalized as:"
+				puts JSON.pretty_generate(query)
 				Mongoid::Elasticsearch.search(query,{:wrapper => :load}).results
 			end
 		end

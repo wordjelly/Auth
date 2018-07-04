@@ -76,9 +76,12 @@ module Auth::Concerns::Shopping::CartConcern
 	## @param[Payment] : a payment object can be passed in.
 	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
 	def prepare_cart
+		puts "PREPARE CART"
 
+		puts "find cart items."
 		find_cart_items
 		
+
 		set_cart_price
 		
 		set_cart_payments
@@ -97,6 +100,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## set the cart items, [Array] of cart items.
 	def find_cart_items
+		puts "find cart items."
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'asc')
 		
@@ -109,6 +113,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## => 
 	def set_cart_price
+		puts "set cart price"
 		self.cart_price = total_value_of_all_items_in_cart = get_cart_items.map{|c| c = c.price*c.quantity}.sum
 		self.cart_price
 	end
@@ -119,6 +124,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	
 	def set_cart_payments
+		puts "set cart payments."
 		self.cart_payments = []
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(get_resource,self)
 		
@@ -135,6 +141,7 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	def set_cart_paid_amount
+		puts "set cart paid amount"
 		total_paid = 0
 		payments = get_cart_payments
 		price = get_cart_price
@@ -249,6 +256,7 @@ module Auth::Concerns::Shopping::CartConcern
 	## then returns a hash with these two instead of the original values.
 	## @used_in : Shopping::PaymentConcern.set_receipt.
 	def prepare_receipt
+		puts "PREPARE RECEIPT-----------------------------------"
 		cart_item_ids = cart_items.map{|c| c = c.id.to_s}
 		cart_payment_ids = cart_payments.map{|c| c = c.id.to_s}
 		receipt = self.attributes.merge({:cart_items => cart_item_ids, :cart_payments => cart_payment_ids})

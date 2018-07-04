@@ -1,4 +1,3 @@
-## AUTH
 
 
 #### Authentication
@@ -1103,6 +1102,38 @@ config.discount_class = "Shopping::Discount"
 config.payment_gateway_info = {:key => "gtKFFx", :salt => "eCwWELxi", :CardName => "Any Name", :CardNumber => "5123456789012346", :CVV => "123", :Expiry => "May 2017"}
 ```
 
+If you are using PayUMoney, remember to incorporate the following into your payments controller :
+
+
+```
+# my_payments_controller.rb
+
+class MyPaymentsController < Auth::Shopping::PaymentsController
+  include Auth::Concerns::Shopping::PayuMoneyConcern
+end
+
+```
+
+Also include, at the top of your routes file:
+
+```
+# config/routes.rb
+
+Rails.application.routes.default_url_options[:host] = Auth.configuration.host_name
+
+Rails.application.routes.draw do
+  ....
+  ## and inside the routes remember to add a route for the callback from payumoney as follows(it depends on what is your payments path, but in case it is like shopping/payments, then you need to add this route.)
+  post 'shopping/payments/:id', to: 'shopping/payments#update', as: "payumoney_payment_gateway_callback_path"
+
+end
+
+```
+
+
+
+
+
 After doing this, run the following from the command line:
 
 ```
@@ -1538,3 +1569,62 @@ var generateSignature = function(callback, params_to_sign){
 2. In the generateSignature function, add the url that points to the create_image_path for your application. In case you used the default image_controller class, you don't need to change this in any way.
 
 That's it.
+
+----------------------------------------------------------------------
+
+## Using Authenticated Controller
+
+THIS DOES NOT WORK, BECAUSE IT IS NOT POSSIBLE TO OVERRIDE THE TOKEN AUTHENTICATION CODITIONS WHILE SUBCLASSING THE MAIN CLASS.
+
+### Why?
+
+Authenticated Controller means you don't need to write any code to setup a new model and controller. THe controller may or may not need authentication, but virtually all aspects are already handled. 
+
+### Create Your Controller
+
+Eg. You want to create a controller called Engagement::VideosController
+
+```
+# controllers/engagement/videos_controller.rb
+
+class Engagement::VideosController < Auth::AuthenticatedController
+  
+  ## Add the names of the actions that you want to protect with authentication
+  ## Refer to code for Auth::AuthenticatedController to see the defaults.
+  CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new]
+
+  ## You must override the following method and assign the model class inside it.
+  def instantiate_classes
+    @model_class = Engagement::Video
+  end
+
+end
+```
+
+### Create Your Model
+
+```
+# models/engagement/video.rb
+
+class Engagement::Video
+  ## You must override the following to define your permitted parameters
+  ## It should be an array (permitted_params normally accepts an array, at the controller level.)
+  def self.permitted_params
+    [{:video => [:title,:description,:youtube_url]},:id]
+  end
+
+  ## override this to define how #index action finds multiple models, based on whatever criteria you are expecting to be passed in.
+  ## this does not have a default, you must specify it.
+  ## you have to assign the variable @models here.
+  def get_many
+    @models = Engagement::Video.all
+  end
+
+end
+
+```
+
+That's it. Just assign the routes and you are good to go. Check the code for Auth::AuthenticatedController to see how it handles responses and override whatever you want.
+
+----------------------------------------------------------------------
+

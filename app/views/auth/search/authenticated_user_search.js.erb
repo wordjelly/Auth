@@ -1,38 +1,12 @@
 <% @search_results.each do |result|
 	_partial = "auth/search/search_result.html.erb"
-	if result.respond_to? :walk_superclasses
-		result_superclass = result.walk_superclasses
-		if result_superclass.to_s =~ /^Auth::/
-			## lookup the view of the base class first.
-			## if that doesnt exist, try the auth class
-			## if that also doesnt exist, then render the base
-			## search result view.
-			search_path = Auth::OmniAuth::Path.model_to_path(result.class) + "/_search_result.html.erb"
-			
-			if lookup_context.find_all(search_path).any?
-
-				_partial = search_path
-				
-			else
-				search_path = Auth::OmniAuth::Path.model_to_path(result_superclass) + "/_search_result.html.erb"
-
-				
-				if lookup_context.find_all(search_path).any?
-					_partial = search_path
-				else
-					
-				end
-			end
-		else
-
-		end	
-	else
-		
+	search_path = Auth::OmniAuth::Path.model_to_path(result.class) + "/_search_result.html.erb"
+	if lookup_context.find_all(search_path).any?
+		puts "found in lookup context."
+		_partial = search_path			
 	end
-
-
 	_partial = _partial.gsub(/\/_search/,"/search")
-	##now render this partial.
+	puts "partial is: #{_partial}"
 %>
 	
 	

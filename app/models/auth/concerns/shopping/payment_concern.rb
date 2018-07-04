@@ -115,7 +115,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 				
 
 		before_validation do |document|
-			puts "came to before validation."
+			puts "---------------START BEFORE VALIDATION----------------"
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
@@ -123,7 +123,10 @@ module Auth::Concerns::Shopping::PaymentConcern
 			## we can hook the refresh into this.
 			document.refresh_refund
 			
+			## here the call goes to save it inside
+			## that will again trigger.
 			document.verify_payment
+			puts "--------------------------finished before validation.-----------------------"
 		end
 
 		## because the validation will not allow the payment status to be changed in case this is not an admin user, and we need to allow the user to refresh the payment state, in case of refunds which need to set as failed because some later refund was accepted but in that callback the nil refund was for some reason not set as failed.
@@ -143,6 +146,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		## when a refund is accepted, any pening refund requests are considered to have failed, since this one has succeeded.
 		after_save do |document|
+			puts "---------------------START AFTER SAVE---------------------"
 			if !document.skip_callback?("after_save")
 
 
@@ -170,10 +174,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 					end
 
 					## set the payment receipt
+					puts "---------------setting payment receipt from after save call---------------------------"
 					document.set_payment_receipt
 
 				end
 			end
+			puts "-----------------------FINISH AFTER SAVE--------------"
 		end
 
 
@@ -249,12 +255,16 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## called in show action of controller.
 	## return[Array]
 	def set_payment_receipt
+		puts "CAME TO SET PAYMENT RECEIPT ------------------------"
 		self.payment_receipt = {:current_payment => [], :cart => {}}
 		Auth.configuration.cart_item_class.constantize.where(:accepted_by_payment_id => self.id.to_s).each do |c_item|
+			puts "THIS ITEM IS C_ITEM: #{c_item.id.to_s}"
 			self.payment_receipt[:current_payment] <<  c_item
 		end
 		set_cart(self.cart_id) if self.cart.nil?
 		self.payment_receipt[:cart] = self.cart.prepare_receipt
+		puts self.payment_receipt.to_s
+		puts "finished set payment receipt."
 	end
 
 	##res : 59a5405c421aa90f732c9059
@@ -458,8 +468,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 	def update_cart_items_accepted
 		
 		if payment_status_changed?
-
+			puts "payment status was changed---------------------"
 			if payment_status == 1
+				puts "PAYMENT STATUS IS 1"
 				self.cart.cart_credit+= self.amount
 			elsif payment_status == 0 && payment_status_was == 1
 				
@@ -469,8 +480,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 			end
 
 		
-
 			cart_item_update_results = self.cart.get_cart_items.map{|cart_item| 
+				puts "CART ITEM OF THE CART IS FOUND"
 				cart_item.signed_in_resource = self.signed_in_resource
 				## first all the expected cart items should exist
 				## then they should all get saved
@@ -486,12 +497,13 @@ module Auth::Concerns::Shopping::PaymentConcern
 				cart_item.set_accepted(self,nil)
 			}.compact.uniq
 			self.errors.add(:cart,"cart item status could not be updated") if cart_item_update_results[0] == false
-		
+			puts "self errors are:"
+			puts self.errors.size
 		else
 			if (payment_status == 0 || payment_status == 1)
 				cart_item_update_results = self.cart.get_cart_items.map{|cart_item|
-					#puts "now mapping cart item"
-					#puts cart_item.id.to_s 
+					puts "VALIDATING IT WITH PAYMENT AT NULL."
+					puts cart_item.id.to_s 
 					cart_item.signed_in_resource = self.signed_in_resource
 					res = cart_item.set_accepted(self,nil)
 					res

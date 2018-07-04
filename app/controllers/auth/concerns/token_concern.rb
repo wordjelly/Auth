@@ -31,6 +31,7 @@ module Auth::Concerns::TokenConcern
     ## if there is more than one model : all but the last will have a fallback of :none.
     ## 
 
+    
     TCONDITIONS = {} unless defined? TCONDITIONS
 
 

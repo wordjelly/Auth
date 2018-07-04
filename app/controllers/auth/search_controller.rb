@@ -27,18 +27,18 @@ class Auth::SearchController < ApplicationController
 	## @html => currently does not support html request.
 	def authenticated_user_search	
 		
+		
 		## m client will be available at this stage.
 		## the problem is that it is hard to pass it forward to the mongoid elasticsearch object.
 		## because while initializing the user it will have to first be set on the user.
 		## is there any other way to achieve this?
 		query = permitted_params[:query]
 		query[:resource_id] = lookup_resource.id.to_s if !current_signed_in_resource.is_admin?
+
 		
 		@search_results = Auth::Search::Main.search(query)
 		
-		puts "these are the search results."
-		puts @search_results.to_s
-
+	
 		#dummy_product = Auth.configuration.product_class.constantize.new
 		#dummy_product.name = "test product"
 		#dummy_product.price = 100.20

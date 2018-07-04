@@ -3,11 +3,15 @@ module Auth::Concerns::DeviseConcern
     extend ActiveSupport::Concern
 
     included do
-		
-	    #skip_before_action :verify_authenticity_token, if: :is_json_request?
-        protect_from_forgery with: :null_session
+        protect_from_forgery with: :null_session, if: Proc.new { |c|
+            c.request.format == 'application/json' 
+        }
         attr_accessor :m_client
     end
+
+    ## so how to implement this ?
+    ## just include the devise concern.
+    ## and let it all through.
 
     ##returns true if the recaptcha is not specified in the configuration
     ##returns true if the recaptcha is valid.
@@ -101,7 +105,6 @@ module Auth::Concerns::DeviseConcern
 	        
 	      else
             
-            
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          	    
                 #puts "found valid clinet."
@@ -124,8 +127,9 @@ module Auth::Concerns::DeviseConcern
 	def protect_json_request
 	   	##should block any put action on the user
 	   	##and should render an error saying please do this on the server.
+        ## if its an html or js request, then authentication token verification should be checked.
+        ## if its a json request, then that doesnt need to be done
 	    if is_json_request? 
-            
 	    	if action_name == "otp_verification_result"
 	    		##we let this action pass because, we make json ajax requests 
 	    		##from the web ui to this endpoint, and anyway it does
@@ -140,7 +144,12 @@ module Auth::Concerns::DeviseConcern
                     
                 end
 	      	end
-	    end
+        else
+            
+            if verify_authenticity_token == false
+                render :nothing => true, :status => :unauthorized
+            end
+        end
 	end
 
     def set_redirect_url
@@ -178,7 +187,8 @@ module Auth::Concerns::DeviseConcern
        set_redirect_url
 
        protect_json_request
-       
+
+
     end
 
     ##used only in render, redirect in DeviseController.class_eval

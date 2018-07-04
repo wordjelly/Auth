@@ -12,9 +12,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	included do 
 
-
-		
-
 		INDEX_DEFINITION = {
 			index_options:  {
 			        settings:  {
@@ -196,7 +193,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	### this is an internal method, cannot be set by admin or anyone, it is done after validation, since it is not necessary for someone to be admin, even the user can call refresh on the record to get the new state of the acceptence.
 	## just checks if the accepted by payment id exists, and if yes, then doesnt do anything, otherwise will update the cart item status as false.
 	def refresh_accepted
-		
+		puts "CALLED REFRESH accepted-----------------------"
 		if self.accepted_by_payment_id
 
 			begin
@@ -205,6 +202,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				## if the payment status is approved, then dont do anything to the cart item.(we don't retro check payment to cart item.)
 				## if the payment status is not approved, then make the cart item accepted as false.
 				if (payment.payment_status.nil? || payment.payment_status == 0)
+					puts "FOUND THE PAYMENT STATUS TO BE NIL or 0"
 					self.accepted = false
 				end
 			rescue Mongoid::Errors::DocumentNotFound
@@ -237,8 +235,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## does not SAVE.
 	def set_accepted(payment,override)
 		
-		#puts "the existing self accepted is:"
-		#puts self.accepted.to_s
+		
 
 		if cart_has_sufficient_credit_for_item?(payment.cart) 
 			
@@ -374,7 +371,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 			return if self.new_record?
 
-			puts "accepted changed? #{self.accepted_changed?.to_s}"
+			
 
 			return if self.accepted_changed? 
 

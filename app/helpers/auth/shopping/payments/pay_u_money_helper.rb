@@ -31,7 +31,7 @@ module Auth::Shopping::Payments::PayUMoneyHelper
           result << hidden_field_tag(field == "hast" ? "hash" : field, value)
         end
 
-        result << '<input type=submit value=" Pay with PayU ">'
+        result << '<input type="image" src="/assets/payumoney.png" >'
         result << '</form>'
         result = result.join("\n")
         concat(result.respond_to?(:html_safe) ? result.html_safe : result)

@@ -8,6 +8,7 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 
 
 	def create
+		puts "CAME TO CREATE."
 		check_recaptcha
 		build_resource(sign_up_params)
 		resource.m_client = self.m_client

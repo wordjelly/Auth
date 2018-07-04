@@ -16,6 +16,7 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
 
   def show
     @auth_shopping_payment = add_signed_in_resource(@auth_shopping_payment)
+  
     @auth_shopping_payment.set_payment_receipt
     respond_with @auth_shopping_payment
   end
@@ -69,7 +70,9 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     #puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment.payment_params = params
     #puts "assigned params."
+    puts "------------COMING TO SAVE-------------------------"
     save_response = @auth_shopping_payment.save
+    puts "------------FINISHED SAVE-------------------------"
     
     ## if save successfull then otherwise, respond_with edit.
     respond_with @auth_shopping_payment, location: (save_response == true ? payment_path(@auth_shopping_payment) : edit_payment_path(@auth_shopping_payment))
