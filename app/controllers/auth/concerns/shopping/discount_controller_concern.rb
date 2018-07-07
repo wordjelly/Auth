@@ -37,7 +37,7 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
     respond_with @auth_shopping_discount
   end
 
-  ##only permits the quantity to be changed, transaction id is internally assigned and can never be changed by the external world.
+ 
   def update
 
     check_for_update(@auth_shopping_discount)
@@ -45,8 +45,8 @@ module Auth::Concerns::Shopping::DiscountControllerConcern
     @auth_shopping_discount.assign_attributes(@auth_shopping_discount_params)
     @auth_shopping_discount = add_owner_and_signed_in_resource(@auth_shopping_discount)  
 
-    
     @auth_shopping_discount.save
+
     respond_with @auth_shopping_discount
   end
 

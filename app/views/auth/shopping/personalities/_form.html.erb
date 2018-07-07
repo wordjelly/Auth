@@ -1,0 +1,32 @@
+<%= form_for(@auth_shopping_personality, url: @auth_shopping_personality.new_record? ? personalities_path : personality_path(@auth_shopping_personality), method: @auth_shopping_personality.new_record? ? :post : :put, namespace: @auth_shopping_personality.id.to_s, as: :personality, remote: true) do |f| %>
+
+  <% if @auth_shopping_personality.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@auth_shopping_personality.errors.count, "error") %> prohibited this auth_shopping_personality from being saved:</h2>
+
+      <ul>
+      <% @auth_shopping_personality.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="row">
+    <div class="form_fields col l6 m6 s6 offset-l3 offset-m3 offset-s3">
+        <%= f.text_field :fullname %>
+        <%= f.label :fullname %>
+
+        <%= f.text_field :date_of_birth, :class => "datepicker" %>
+        <%= f.label :date_of_birth %>
+
+        <%= f.text_field :sex %>
+        <%= f.label :sex %>
+        <div class="actions center m-30-top">
+          <%= f.button :submit, {:class => "waves-effect waves-light btn-small blue-grey"} do %>
+              Create
+          <% end %>
+        </div>
+    </div>
+  </div>
+<% end %>
+

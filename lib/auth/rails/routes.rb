@@ -121,7 +121,7 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product","discount","image","bullet","instruction","communication"].each do |model|
+			["cart_item","cart","payment","product","discount","place","personality","image","bullet","instruction","communication"].each do |model|
 
 				## establish a communication controller, model, views and engine constants with defaults.
 
@@ -151,9 +151,15 @@ module ActionDispatch::Routing
 			 	 			scope :path => scope_path, :as => as_prefix do
 				 	 		
 			 	 			resources collection.to_sym, controller: controller_name do
+			 	 					member do 
+			 	 						if ((model == "personality") || (model == "place"))
+			 	 							get 'search', :action => 'search'
+			 	 						end
+			 	 					end
 				 	 				collection do 
 					 	 				if model == "cart_item"
 					 	 					post 'create_multiple', :action => 'create_multiple'
+					 	 					post 'create_package_items', :action => 'create_package_items'
 					 	 				end
 				 	 				end			 	 				
 			 	 			end

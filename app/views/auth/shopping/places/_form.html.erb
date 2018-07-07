@@ -1,0 +1,62 @@
+<%= form_for(@auth_shopping_place, url: @auth_shopping_place.new_record? ? places_path : place_path(@auth_shopping_place), method: @auth_shopping_place.new_record? ? :post : :put, as: :place, remote: true) do |f| %>
+
+  <% if @auth_shopping_place.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@auth_shopping_place.errors.count, "error") %> prohibited this auth_shopping_place from being saved:</h2>
+
+      <ul>
+      <% @auth_shopping_place.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="row">
+    <div class="form_fields col l6 m6 s6 offset-l3 offset-m3 offset-s3">
+        
+        <%= f.text_field :nearest_address %>
+        <%= f.label :nearest_address %>
+
+        <div id="google_places_autocomplete_results">
+        <ul class="collection" style="border:none !important;"></ul>
+        </div>
+
+        <!-- okay so now we have to autopopulate, so first let me get all the fields of the country , city etc -->
+        <!-- is that necessary ? -->
+
+        <div id="address_details" style="display:none;">
+        <%= f.hidden_field :latitude %>
+
+        <%= f.hidden_field :longitude %>
+
+        <%= f.text_field :unit_number %>
+        <%= f.label :unit_number %>
+
+        <%= f.text_field :building %>
+        <%= f.label :building %>
+
+        <%= f.text_field :street %>
+        <%= f.label :street %>
+
+        <%= f.text_field :pin_code %>
+        <%= f.label :pin_code %>
+
+        <%= f.text_field :city %>
+        <%= f.label :city %>
+
+        <%= f.text_field :country_state %>
+        <%= f.label :country_state %>
+
+        <%= f.text_field :country %>
+        <%= f.label :country %>
+        </div>
+
+        <div class="actions center m-30-top">
+          <%= f.button :submit, {:class => "waves-effect waves-light btn-small blue-grey"} do %>
+              Create
+          <% end %>
+        </div>
+    </div>
+  </div>
+<% end %>
+

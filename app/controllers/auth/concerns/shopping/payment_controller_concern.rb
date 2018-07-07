@@ -28,8 +28,10 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def new
+    puts "these are payment attributes"
+    puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
-    ## so simply render the new action anyways.
+    @auth_shopping_payment.set_cart(@auth_shopping_payment.cart_id)
   end
 
   def edit
@@ -69,10 +71,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
     #puts "these are the attributes assigned in the update action."
     #puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment.payment_params = params
-    #puts "assigned params."
-    puts "------------COMING TO SAVE-------------------------"
+   
     save_response = @auth_shopping_payment.save
-    puts "------------FINISHED SAVE-------------------------"
     
     ## if save successfull then otherwise, respond_with edit.
     respond_with @auth_shopping_payment, location: (save_response == true ? payment_path(@auth_shopping_payment) : edit_payment_path(@auth_shopping_payment))

@@ -1537,7 +1537,7 @@ Add the following code into it.
 
 // this ensures that it works even when turbolinks is enabled
 document.addEventListener("turbolinks:load", function() {
-  $('#cloudinary_image_opener').cloudinary_upload_widget(
+  $('#upload_widget_opener').cloudinary_upload_widget(
   { cloud_name: "doohavoda", api_key:"393369625566631", upload_signature: generateSignature,
   public_id: $("#image_id").text()},
   function(error, result) { console.log(error, result) });
@@ -1569,62 +1569,4 @@ var generateSignature = function(callback, params_to_sign){
 2. In the generateSignature function, add the url that points to the create_image_path for your application. In case you used the default image_controller class, you don't need to change this in any way.
 
 That's it.
-
-----------------------------------------------------------------------
-
-## Using Authenticated Controller
-
-THIS DOES NOT WORK, BECAUSE IT IS NOT POSSIBLE TO OVERRIDE THE TOKEN AUTHENTICATION CODITIONS WHILE SUBCLASSING THE MAIN CLASS.
-
-### Why?
-
-Authenticated Controller means you don't need to write any code to setup a new model and controller. THe controller may or may not need authentication, but virtually all aspects are already handled. 
-
-### Create Your Controller
-
-Eg. You want to create a controller called Engagement::VideosController
-
-```
-# controllers/engagement/videos_controller.rb
-
-class Engagement::VideosController < Auth::AuthenticatedController
-  
-  ## Add the names of the actions that you want to protect with authentication
-  ## Refer to code for Auth::AuthenticatedController to see the defaults.
-  CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new]
-
-  ## You must override the following method and assign the model class inside it.
-  def instantiate_classes
-    @model_class = Engagement::Video
-  end
-
-end
-```
-
-### Create Your Model
-
-```
-# models/engagement/video.rb
-
-class Engagement::Video
-  ## You must override the following to define your permitted parameters
-  ## It should be an array (permitted_params normally accepts an array, at the controller level.)
-  def self.permitted_params
-    [{:video => [:title,:description,:youtube_url]},:id]
-  end
-
-  ## override this to define how #index action finds multiple models, based on whatever criteria you are expecting to be passed in.
-  ## this does not have a default, you must specify it.
-  ## you have to assign the variable @models here.
-  def get_many
-    @models = Engagement::Video.all
-  end
-
-end
-
-```
-
-That's it. Just assign the routes and you are good to go. Check the code for Auth::AuthenticatedController to see how it handles responses and override whatever you want.
-
-----------------------------------------------------------------------
 

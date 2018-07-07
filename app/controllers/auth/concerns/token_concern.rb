@@ -112,9 +112,11 @@ module Auth::Concerns::TokenConcern
 
   
   def lookup_resource 
+    puts "came to lookup resource."
     ## if the current signed in resource si not an admin, just return it, because the concept of proxy arises only if the current_signed in resource is an admin.
+    puts "current signed in resource : #{current_signed_in_resource}"
     return current_signed_in_resource unless current_signed_in_resource.is_admin?
-    
+    puts "crossed resource."
     ## else.
     
     ## first check the session or the params for a proxy resource.

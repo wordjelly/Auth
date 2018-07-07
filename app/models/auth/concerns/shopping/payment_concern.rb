@@ -115,7 +115,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 				
 
 		before_validation do |document|
-			puts "---------------START BEFORE VALIDATION----------------"
+			
 			document.set_cart(document.cart_id)
 			
 			document.payment_callback(document.payment_type,document.payment_params)  
@@ -126,7 +126,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 			## here the call goes to save it inside
 			## that will again trigger.
 			document.verify_payment
-			puts "--------------------------finished before validation.-----------------------"
+			
 		end
 
 		## because the validation will not allow the payment status to be changed in case this is not an admin user, and we need to allow the user to refresh the payment state, in case of refunds which need to set as failed because some later refund was accepted but in that callback the nil refund was for some reason not set as failed.
@@ -146,7 +146,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 		## when a refund is accepted, any pening refund requests are considered to have failed, since this one has succeeded.
 		after_save do |document|
-			puts "---------------------START AFTER SAVE---------------------"
+			
 			if !document.skip_callback?("after_save")
 
 
@@ -174,12 +174,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 					end
 
 					## set the payment receipt
-					puts "---------------setting payment receipt from after save call---------------------------"
+					
 					document.set_payment_receipt
 
 				end
 			end
-			puts "-----------------------FINISH AFTER SAVE--------------"
+			
 		end
 
 
@@ -379,7 +379,12 @@ module Auth::Concerns::Shopping::PaymentConcern
 	end
 
 	def discount_callback(params,&block)
-		
+	
+		## so now what next ?
+		## what about refunds ?
+		## and what about discount coupons for companies ?
+		## can i handle that right now as well ?
+			
 		## the callback should fire on create/update, so new_record checking is not required.
 
 		## first check if the discount id exists -> get the discount object.
@@ -408,7 +413,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 				self.amount = self.discount.discount_amount
 				
 			elsif self.discount.discount_percentage > 0
-				self.amount = self.cart.cart_pending_balance*self.discount.discount_percentage
+				self.amount = self.cart.cart_pending_balance*(self.discount.discount_percentage/100.0)
 			else
 				self.amount = 0
 			end

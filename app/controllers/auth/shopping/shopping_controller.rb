@@ -12,6 +12,30 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 	    end
 	end
 
+	def instantiate_place_class
+		if @auth_shopping_place_class = Auth.configuration.place_class
+	      begin
+	        @auth_shopping_place_class = @auth_shopping_place_class.constantize
+	      rescue
+	        not_found("error instantiating class from place class")
+	      end
+	    else
+	      not_found("place class not specified in configuration")
+	    end
+	end
+
+	def instantiate_personality_class
+		if @auth_shopping_personality_class = Auth.configuration.personality_class
+	      begin
+	        @auth_shopping_personality_class = @auth_shopping_personality_class.constantize
+	      rescue
+	        not_found("error instantiating class from personality class")
+	      end
+	    else
+	      not_found("personality class not specified in configuration")
+	    end
+	end
+
 
     def instantiate_cart_class
 		if @auth_shopping_cart_class = Auth.configuration.cart_class
@@ -79,6 +103,8 @@ class Auth::Shopping::ShoppingController < Auth::ApplicationController
 		instantiate_cart_item_class
 		instantiate_product_class
 		instantiate_discount_class
+		instantiate_personality_class
+		instantiate_place_class
 	end
 
 

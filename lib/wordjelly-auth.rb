@@ -34,5 +34,6 @@ require "mongoid-embedded-errors"
 require "dotenv-rails"
 
 
+
 module Auth
 end

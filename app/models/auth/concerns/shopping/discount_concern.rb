@@ -166,7 +166,6 @@ module Auth::Concerns::Shopping::DiscountConcern
 			document.add_verified_ids ||= []
 			document.add_declined_ids ||= []
 
-			
 
 			document.pending = document.pending - ([document.add_declined_ids + document.add_verified_ids].flatten)
 
@@ -189,18 +188,12 @@ module Auth::Concerns::Shopping::DiscountConcern
 	module ClassMethods
 
 		
-
-
-
-		
 		def find_discounts(options)
 			conditions = {:resource_id => nil}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
 			Auth.configuration.discount_class.constantize.where(conditions)
 		end
 
-
-		
 
 		## @called_from : payment_concern.rb
 		## @param[String] payment_id 

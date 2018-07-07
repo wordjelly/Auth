@@ -72,6 +72,15 @@ module Auth
     attr_accessor :payment_class
     attr_accessor :discount_class
     attr_accessor :discount_controller
+
+    ## for shopping personality.
+    attr_accessor :personality_class
+    attr_accessor :personality_controller
+
+    ## for shopping place.
+    attr_accessor :place_class
+    attr_accessor :place_controller
+
     attr_accessor :notification_class
     attr_accessor :payment_controller
     attr_accessor :payment_gateway_info
@@ -314,6 +323,12 @@ module Auth
       @product_controller = nil
       @discount_class = nil
       @discount_controller = nil
+      ## add this to the routes.
+      ## if you are going to add place, then add that here as well.
+      @personality_class = nil
+      @personality_controller = nil
+      @place_class = nil
+      @place_controller = nil
 
       ###############################################################
       ##

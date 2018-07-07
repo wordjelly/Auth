@@ -1160,7 +1160,7 @@ Make a provision for this request also.
     "updated_at": "2018-02-17T22:13:05.316Z",
     "payment_receipt": null
 }
-```
+``
     
 <a href="Approve_Card_Payment" /a>
 

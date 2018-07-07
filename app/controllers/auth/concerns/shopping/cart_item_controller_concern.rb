@@ -7,6 +7,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     ## to be able to initialize a cart item from a product
     ## inside the create_multiple def.
     include Auth::Shopping::Products::ProductsHelper
+    include Auth::Shopping::CartItems::CartItemsHelper
 
   end
 
@@ -88,6 +89,29 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##
   ##
   ############################################################
+  ## need to add this to the route.
+  ## and need to provide a link to this, and that's the end of this part.
+  def create_package_items
+    cart_items = []
+    params[:product_ids].each do |product_id|
+      cart_item = Auth.configuration.cart_item_class.constantize.new(product_id: product_id)
+      cart_item.resource_id = lookup_resource.id.to_s
+      cart_item.resource_class = lookup_resource.class.name.to_s
+      cart_item.signed_in_resource = current_signed_in_resource
+      cart_item.save
+      cart_items << cart_item
+    end
+    respond_to do |format|
+      format.html do 
+        redirect_to cart_items_path
+      end
+      format.json do 
+        render :json => cart_items.to_json
+      end
+    end
+  end
+
+
   def create_multiple
     #puts "came to create multiple."
     #puts "params are:"

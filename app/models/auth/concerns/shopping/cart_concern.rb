@@ -9,9 +9,11 @@ module Auth::Concerns::Shopping::CartConcern
 	included do 
 		field :name, type: String
 		field :notes, type: String
-		
-
-		
+			
+		## location of the user for this cart
+		field :place_id, type: String
+		## name, age, sex of the user for this cart.
+		field :personality_id, type: String		
 
 
 		## debit is calculated live, by first getting all the items already dispatched and their value, and then getting the total payments made and their value, so it infact becomes something at the validation level of the cart item.
@@ -52,6 +54,10 @@ module Auth::Concerns::Shopping::CartConcern
 
 		attr_accessor :discount
 
+		attr_accessor :personality
+
+		attr_accessor :place
+
 		before_destroy do |document|
 			document.prepare_cart
 			if document.cart_items.keep_if{|c| c.accepted == true}.size > 0
@@ -76,12 +82,9 @@ module Auth::Concerns::Shopping::CartConcern
 	## @param[Payment] : a payment object can be passed in.
 	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
 	def prepare_cart
-		puts "PREPARE CART"
-
-		puts "find cart items."
+		
 		find_cart_items
 		
-
 		set_cart_price
 		
 		set_cart_payments
@@ -93,6 +96,10 @@ module Auth::Concerns::Shopping::CartConcern
 		set_cart_minimum_payable_amount
 
 		set_discount
+
+		set_personality
+
+		set_place
 
 	end
 
@@ -332,6 +339,18 @@ module Auth::Concerns::Shopping::CartConcern
 
 		self.cart_pending_balance == 0		
 
+	end
+
+	def set_personality
+		return unless self.personality_id
+		puts "self personality id is: #{self.personality_id}"
+		self.personality = Auth.configuration.personality_class.constantize.find(self.personality_id)
+	end
+
+	def set_place
+		return unless self.place_id
+		puts "Self place id is: #{self.place_id}"
+		self.place = Auth.configuration.place_class.constantize.find(self.place_id)
 	end
 
 end

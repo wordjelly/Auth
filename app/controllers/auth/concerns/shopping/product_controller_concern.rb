@@ -15,16 +15,11 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     puts "current signed in resource: #{current_signed_in_resource}"
     @auth_shopping_product = params[:id] ? @auth_shopping_product_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_product_class.new(@auth_shopping_product_params)
   end
-
   
 
   def create
     check_for_create(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
-    #puts "this is the auth shopping product"
-    #puts @auth_shopping_product.embedded_document
-    #puts @auth_shopping_product.embedded_document_path
-  	#@auth_shopping_product.send("#{@auth_shopping_product.embedded_document_path}=",@auth_shopping_product.embedded_document) if (@auth_shopping_product.embedded_document && @auth_shopping_product.embedded_document_path)
     @auth_shopping_product.save
     respond_with @auth_shopping_product
     
@@ -34,47 +29,63 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     check_for_update(@auth_shopping_product)
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     @auth_shopping_product.assign_attributes(@auth_shopping_product_params)
-
-    ## assigns the embedded document to the provided path. 
-=begin
-    if @auth_shopping_product.embedded_document_path
-      curr_element = nil
-      total_els = @auth_shopping_product.embedded_document_path.split(".").size
-      @auth_shopping_product.embedded_document_path.split(".").each_with_index {|path,key|
-        if key == (total_els - 1)
-          if curr_element.nil?
-            @auth_shopping_product.send(path + "=",@auth_shopping_product.embedded_document)
-          else
-            curr_element.send(path + "=",@auth_shopping_product.embedded_document) if (path =~ /[a-z]+/)
-            curr_element.send(:[]=,path.to_i,@auth_shopping_product.embedded_document) if (path =~ /\d+/)
-          end
-        else  
-          if curr_element.nil?
-            curr_element = @auth_shopping_product.send(path)
-          else
-            curr_element = curr_element.send(path) if (path =~ /[a-z]+/)
-            curr_element = curr_element[path.to_i] if path=~/\d+/
-          end
-        end
-      }
-    end
-=end    
-    ## prune nil elements.
-    ## at all levels.
-
     @auth_shopping_product.save
     respond_with @auth_shopping_product
     
   end
 
+  ## index can accept product bundle as a parameter.
+  ## like only show the bundles.
+  ## if we want to show that then?
+  ## okay so let us add that bundle parameter.
   def index
     instantiate_shopping_classes
-    @auth_shopping_products = @auth_shopping_product_class.all
+    if params[:query_string]
+      if params[:autocomplete_bundle_name]
+        ## in this case, the autocomplete query has to be done.
+        args = {:query_string => params[:query_string]}
+        query = Auth::Search::Main.es_six_finalize_search_query_clause(args)
+        Auth.configuration.product_class.constantize.bundle_autocomplete_aggregation(query)
+        @auth_shopping_results = Auth.configuration.product_class.constantize.es.search(query,{:wrapper => :load}).results
+      end
+    elsif params[:group_by_bundles]
+      results = Auth.configuration.product_class.constantize.collection.aggregate([
+        {
+          "$match" => {
+            "bundle_name" => {
+              "$exists" => true
+            }
+          }
+        },
+        {
+          "$group" => {
+            "_id" => "$bundle_name",
+            "products" => {
+              "$push" => "$$ROOT"
+            }
+          }
+        }
+      ])
+      ## we need them keyed by the bundle name.
+      @products_grouped_by_bundle = {}
+      @auth_shopping_products = []
+      results.each do |result|
+        bundle_name = result["_id"]
+        products = result["products"].map{|c| c = Auth.configuration.product_class.constantize.new(c)}
+        @products_grouped_by_bundle[bundle_name] = products
+      end
+    else
+      @auth_shopping_products = @auth_shopping_product_class.all
+    end
+        
+    
+
   end
 
   def show
     instantiate_shopping_classes
     @auth_shopping_product = @auth_shopping_product_class.find(params[:id])
+    
     ## will render show.json.erb if its a json request.
   end
 
@@ -92,15 +103,15 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   end
 
-  ## so now two additional keys get added
-  ## one -> embedded_document_path
-  ## two -> embedded_document.
-  def permitted_params
-    ## we just keep the embedded_document_path
-    ## i need to change the controllers back to product
-    ## and i need to 
-  	pr = params.permit({:product => [:name,:price]})
+  ## first create a new product with a bundle.
+  ## so let me modify that part first.
+  def permitted_params 
+  	pr = params.permit({:product => [:name,:price,:bundle_name]})
   end
+
+
+  
+
 
 end
 

@@ -40,8 +40,8 @@ module Auth::Shopping::Products::ProductsHelper
 
 	
 	##/products (GET - all products /CREATE - individual product) 
-	def products_path
-    	main_app.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.product_class))
+	def products_path(params={})
+    	main_app.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.product_class),params)
     end
 
     ##/shopping/products/:id/edit

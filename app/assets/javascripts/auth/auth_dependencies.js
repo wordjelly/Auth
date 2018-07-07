@@ -14,6 +14,21 @@ $(document).ready(function() {
 });
 ***/
 
+document.addEventListener("turbolinks:load", function() {
+  $('.modal').modal();
+  $('.tabs').tabs();
+  $('.sidenav').sidenav();
+  $('.collapsible').collapsible();
+  $('.parallax').parallax();
+  $('.datepicker').datepicker();
+  $('select').formSelect();
+});
+
+
+ $(document).ready(function(){
+    $('select').formSelect();
+  });
+
 $(document).ready(function(){
     $('.modal').modal();
 });
@@ -32,4 +47,8 @@ $(document).ready(function(){
 
 $(document).ready(function(){
     $('.parallax').parallax();
-  });
+});
+
+$(document).ready(function(){
+    $('.datepicker').datepicker();
+});

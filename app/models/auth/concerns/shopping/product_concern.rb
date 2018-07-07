@@ -77,6 +77,15 @@ module Auth::Concerns::Shopping::ProductConcern
 					                resource_id: {
 					                	type: "keyword",
 					                	copy_to: "_all_fields"
+					                },
+					                bundle_name: {
+					                	type: "text",
+					                	copy_to: "_all_fields",
+					                	fields: {
+					                		raw: {
+					                			type: "keyword"
+					                		}
+					                	}    		
 					                }
 					            }
 				        }
@@ -103,20 +112,29 @@ module Auth::Concerns::Shopping::ProductConcern
 
 		field :badge_class, type: String, default: "new badge"
 
+		## so i create a bundle and add 5 products to it,
+		## and then modify their prices ?
+		## what about all the notifications and everythign ?
+		## will have to replicate all that ?
+		## 
+		field :bundle_name, type: String
+
 		## all products are public to be searched.
 		before_save do |document|
 			self.public = "yes"
 		end
 
-		## first have to ensure that the summary is returned along with the json.
+		## forget it.
 
 	end
 
+	
 
 
 	def as_indexed_json(options={})
 	 {
 	 	name: name,
+	 	bundle_name: bundle_name,
 	    price: price,
 	    resource_id: resource_id,
 	    public: public
@@ -125,6 +143,44 @@ module Auth::Concerns::Shopping::ProductConcern
 
 
 	module ClassMethods
+
+		## @return[SearchResult]
+		def bundle_autocomplete_aggregation(query)
+			query[:body][:aggregations] = {
+				bundle_names: {
+					terms: {
+						field: "bundle_name.raw"
+					}
+				}
+			}
+			
+			result = Auth.configuration.product_class.constantize.es.search query
+
+			puts "these are the aggs."
+			puts result.raw_response.to_s
+			#mash = Hashie::Mash.new result		
+			#has_more_results = false if mash.aggregations.bundle_names["buckets"].size == 0
+			#mash.aggregations.bundle_names["buckets"].each do |bucket|
+			#		puts "this is the bucket: "
+			#		puts bucket.to_s
+					#after = bucket["key"]["symptom_thing"]
+					#doc_count = bucket["doc_count"]
+					#create_symptom(after,doc_count)
+					#puts "created #{counter} symptoms"
+					#counter+=1
+			#end
+=begin
+			mash = Hashie::Mash.new symptom_co_occurrence_query
+				has_more_results = false if mash.aggregations.my_buckets["buckets"].size == 0
+				mash.aggregations.my_buckets["buckets"].each do |bucket|
+					after = bucket["key"]["symptom_thing"]
+					doc_count = bucket["doc_count"]
+					create_symptom(after,doc_count)
+					puts "created #{counter} symptoms"
+					counter+=1
+				end
+=end
+		end
 
 		## so we have completed the rolling n minutes.
 		def add_to_previous_rolling_n_minutes(minutes,origin_epoch,cycle_to_add)
