@@ -6,7 +6,6 @@ module Auth::Concerns::Work::GoodConcern
 	
 	included do 	
 		embeds_many :parameters, :class_name => "Auth::Work::Parameter"
-		embeds_many :instructions, :class_name => "Auth::Work::Instruction"
 		embeds_many :actors, :class_name => "Auth::Work::Actor"
 		embeds_many :variables, :class_name => "Auth::Work::Variable"	
 

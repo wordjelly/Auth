@@ -29,6 +29,7 @@ module Auth
 		## "https://2factor.in/API/R1/?module=TRANS_SMS&apikey=#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}&to=#{to_number}&from=#{template_sender_id}&templatename=TemplateName&var1=VAR1_VALUE&var2=VAR2_VALUE"
 		## @return[String] session_id
 		def send_transactional_sms(args)
+			puts "-- send transactional sms---"
 			to_number = args[:to_number]
 			template_name = args[:template_name]
 			var_hash = args[:var_hash]
@@ -52,6 +53,7 @@ module Auth
 			response = request.run
 
 			response.body
+			
 		end
 
 		def auth_gen

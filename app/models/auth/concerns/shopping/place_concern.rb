@@ -2,7 +2,8 @@ module Auth::Concerns::Shopping::PlaceConcern
 
 	extend ActiveSupport::Concern
 	include Auth::Concerns::OwnerConcern
-	
+	include Auth::Concerns::EsConcern	
+
 
 	included do 
 

@@ -10,6 +10,7 @@ class Noti
 
 		## the following three are things which will be specific to the template configured in twofactor.
 		response[:template_name] = "test2"
+		## that's good i alreay have var1 and var2
 		response[:var_hash] = {var1: resource.id.to_s, var2: objects[:payment_id]}
 		response[:template_sender_id] = "PATHOF"
 		

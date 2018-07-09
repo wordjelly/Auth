@@ -69,7 +69,7 @@ module Auth::Concerns::Shopping::PersonalityControllerConcern
     respond_to do |format|
       ## with js.
       format.js do 
-        render :partial => "search_result", locals: {search_results: @search_results, suggestions: []}
+        render :partial => "search", locals: {search_results: @search_results, suggestions: []}
       end
       format.json do 
         render json: @search_results.to_json

@@ -13,6 +13,4 @@ class Auth::Work::CommunicationsController < Auth::Work::WorkController
     before_filter :initialize_vars , TCONDITIONS
     before_filter :is_admin_user , :only => [:create,:update,:destroy,:edit]
     
-    
-
 end

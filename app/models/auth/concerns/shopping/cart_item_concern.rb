@@ -12,6 +12,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	included do 
 
+		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :cart_item_instructions
+			
+
+
 		INDEX_DEFINITION = {
 			index_options:  {
 			        settings:  {
@@ -80,9 +84,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 			    }
 			}
 		}
-		
-
-
+	
 
 		##PERMITTED
 		##the id of the product to which this cart item refers.
@@ -169,6 +171,25 @@ module Auth::Concerns::Shopping::CartItemConcern
 			document.public = "no"
 		end
 
+		## first of all how are the instructions copied over from the product to the cart item.
+		## that's it, now all the communication instructions are enqueued.
+		## next step, get a simple notification to be sent by email, and also by sms -> as soon as the time comes for it to be done.
+		after_save do |document|
+			puts "came to after_save document #{document.accepted_changed?}"
+			puts "is it true :#{document.accepted == true}"
+			if document.accepted_changed? && document.accepted == true
+				puts "accepted changed."
+				document.instructions.each do |instruction|
+					puts "doing instruction: #{instruction.id.to_s}"
+					instruction.communications.each do |communication|
+						## Test seperately?
+						## =>  fuck that.
+						puts "doing communication: #{communication.id.to_s}"
+						CommunicationJob.set(wait_until: communication.set_enqueue_at).perform_later({:cart_item_id => document.id.to_s, :instruction_id => instruction.id.to_s, :communication_id => communication.id.to_s})
+					end
+				end
+			end
+		end
 	end
 
 
@@ -190,7 +211,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	### this is an internal method, cannot be set by admin or anyone, it is done after validation, since it is not necessary for someone to be admin, even the user can call refresh on the record to get the new state of the acceptence.
 	## just checks if the accepted by payment id exists, and if yes, then doesnt do anything, otherwise will update the cart item status as false.
 	def refresh_accepted
-		puts "CALLED REFRESH accepted-----------------------"
+		#puts "CALLED REFRESH accepted-----------------------"
 		if self.accepted_by_payment_id
 
 			begin
@@ -199,7 +220,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 				## if the payment status is approved, then dont do anything to the cart item.(we don't retro check payment to cart item.)
 				## if the payment status is not approved, then make the cart item accepted as false.
 				if (payment.payment_status.nil? || payment.payment_status == 0)
-					puts "FOUND THE PAYMENT STATUS TO BE NIL or 0"
+					#puts "FOUND THE PAYMENT STATUS TO BE NIL or 0"
 					self.accepted = false
 				end
 			rescue Mongoid::Errors::DocumentNotFound
@@ -292,8 +313,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 				}
 			)
 
-			puts "the doc after update is:"
-			puts doc_after_update.attributes.to_s
+			#puts "the doc after update is:"
+			#puts doc_after_update.attributes.to_s
 
 			return false unless doc_after_update
 			return false if doc_after_update.accepted != self.accepted
@@ -307,9 +328,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 	## the #debit function returns the current cart credit.
 	## return true or false depending on whether , after debiting there is any credit left in the cart or not.
 	def cart_has_sufficient_credit_for_item?(cart)
-		puts "cart credit is: #{cart.cart_credit}"
+		#puts "cart credit is: #{cart.cart_credit}"
 		cart_has_credit = cart.debit((self.accept_order_at_percentage_of_price*self.price)) >= 0
-		puts "cart has credit is: #{cart_has_credit.to_s}"
+		#puts "cart has credit is: #{cart_has_credit.to_s}"
 		cart_has_credit
 	end
 
@@ -405,9 +426,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 			if self.product_id
 	 			if product = Auth.configuration.product_class.constantize.find(product_id)
 	 				product_attributes_to_assign.each do |attr|
-	 					## only if the present attribute is nil, then we assign it from the product.
 	 					if self.respond_to? attr.to_sym
 		 					if self.send("#{attr}").nil?
+		 						self.send("#{attr}=",product.send("#{attr}"))
+		 					elsif (self.send("#{attr}").respond_to? :embedded_in) && (self.send("#{attr}").empty?)
 		 						self.send("#{attr}=",product.send("#{attr}"))
 		 					end
 	 					end
@@ -416,11 +438,11 @@ module Auth::Concerns::Shopping::CartItemConcern
 	 		end
 	 	rescue
 
-	 	end
+	 	end 
 	end
 
 	def product_attributes_to_assign
-		["name","price","bunch"]
+		["name","price","bundle_name","instructions"]
 	end
 
 	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.

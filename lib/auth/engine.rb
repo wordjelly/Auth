@@ -227,6 +227,16 @@ module Auth
     attr_accessor :cycle_controller
 
 
+    ###############################################################
+    ##
+    ##
+    ## THIRD PARTY ATTRIBUTES.
+    ##
+    ##
+    ###############################################################
+
+    attr_accessor :two_factor_otp_transactional_sms_template_sender_id
+    attr_accessor :two_factor_otp_transactional_sms_template_name
 
     def initialize
       
@@ -479,6 +489,16 @@ module Auth
       @cycle_controller = "auth/work/cycles"
       @cycle_class = "Auth::Work::Cycle"
 
+      ########################################################
+      ##
+      ##
+      ## THIRD PARTY ATTRIBUTES.
+      ##
+      ##
+      ########################################################
+      ## defaults.
+      @two_factor_otp_transactional_sms_template_name = "test2"
+      @two_factor_otp_transactional_sms_template_sender_id = "PATHOF"
 
     end
   end

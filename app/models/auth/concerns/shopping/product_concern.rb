@@ -10,10 +10,11 @@ module Auth::Concerns::Shopping::ProductConcern
 
 	included do 
 	
-		#embeds_many :specifications, :class_name => Auth.configuration.specification_class
+		
 
 		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
 
+		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :product_instructions
 					
 		INDEX_DEFINITION = {
 				index_options:  {

@@ -23,6 +23,9 @@ module Auth::Concerns::Work::InstructionControllerConcern
         else
           @auth_work_instruction = @auth_work_instruction_class.new(@auth_work_instruction_params)
         end
+      else
+
+        puts "product not found."
       end
     rescue Mongoid::Errors::DocumentNotFound
        @auth_shopping_product = @auth_shopping_product_class.new
@@ -50,7 +53,7 @@ module Auth::Concerns::Work::InstructionControllerConcern
           render json: @auth_work_instruction.to_json
         end
         format.html do 
-          render :partial => "show.html.erb", locals: {instruction: @auth_work_instruction, product: @auth_shopping_product}
+          render "show"
         end
     end
   end
@@ -89,7 +92,7 @@ module Auth::Concerns::Work::InstructionControllerConcern
   end
 
   def new
-    
+    puts "the product is: #{@auth_shopping_product.to_s}"
   end
 
   def edit

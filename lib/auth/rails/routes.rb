@@ -151,7 +151,7 @@ module ActionDispatch::Routing
 			 	 			scope :path => scope_path, :as => as_prefix do
 				 	 		
 			 	 			resources collection.to_sym, controller: controller_name do
-			 	 					member do 
+			 	 					collection do 
 			 	 						if ((model == "personality") || (model == "place"))
 			 	 							get 'search', :action => 'search'
 			 	 						end

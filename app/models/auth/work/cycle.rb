@@ -1,7 +1,8 @@
 class Auth::Work::Cycle
 		
 	include Mongoid::Document
-
+	Auth::Concerns::Work::CommunicationFieldsConcern
+	
 	attr_accessor :cycle_index
 
 	## unix epoch.

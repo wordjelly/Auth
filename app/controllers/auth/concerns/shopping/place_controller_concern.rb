@@ -74,9 +74,8 @@ module Auth::Concerns::Shopping::PlaceControllerConcern
     query_clause = Auth::Search::Main.es_six_finalize_search_query_clause(args)
     @search_results = Auth.configuration.place_class.constantize.es.search(query_clause,{:wrapper => :load}).results
     respond_to do |format|
-      ## with js.
       format.js do 
-        render :partial => "search_result", locals: {search_results: @search_results, suggestions: []}
+        render :partial => "search", locals: {search_results: @search_results, suggestions: []}
       end
       format.json do 
         render json: @search_results.to_json

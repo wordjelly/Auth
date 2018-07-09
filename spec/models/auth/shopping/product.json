@@ -1,0 +1,17 @@
+{
+	"name" : "first_product",
+	"price" : 300,
+	"instructions" : 
+	[
+		{
+			"title" : "first instruction",
+			"communications" : 
+			[
+				{
+					"name" : "first communication",
+					"send_email" : "on"
+				}
+			]
+		}
+	]
+}
