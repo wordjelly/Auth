@@ -89,9 +89,7 @@ module Auth::Concerns::Shopping::PlaceConcern
 			}
 		}
 		
-		before_save do |document|
-			document.public = "no"
-		end
+		
 
 		field :nearest_address, type: String
 

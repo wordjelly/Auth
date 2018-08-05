@@ -1064,6 +1064,44 @@ module OrderCreationFlow
 
 end
 
+module SearchSupport
+  def contains_product?(search_results)
+    response = false
+    search_results.each do |result|
+      begin
+        product = Auth.configuration.product_class.constantize.new(result)
+        response = true if product.tags.include? "product"
+      rescue
+      end
+    end
+    response
+  end
+
+  def contains_cart_item?(search_results)
+    response = false
+    search_results.each do |result|
+      begin
+        cart_item = Auth.configuration.cart_item_class.constantize.new(result)
+        response = true if cart_item.tags.include? "item"
+      rescue
+      end
+    end
+    response
+  end
+
+  def contains_user?(search_results)
+    response = false
+    search_results.each do |result|
+      begin
+        user = User.new(result)
+        response = true if user.tags.include? "user"
+      rescue
+      end
+    end
+    response
+  end
+end
+
 RSpec.configure do |config|
   
   config.include ValidUserHelper, :type => :controller
@@ -1089,6 +1127,8 @@ RSpec.configure do |config|
   config.include SpecificationSupport, :type => :request
   config.include SpecificationSupport, :type => :model
 
+  config.include SearchSupport, :type => :request
+  config.include SearchSupport, :type => :model
   
 
 end

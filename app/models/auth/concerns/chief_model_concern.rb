@@ -10,6 +10,7 @@ module Auth::Concerns::ChiefModelConcern
 		include Mongoid::Document
 		include Mongoid::Timestamps
 		include Mongoid::EmbeddedErrors
+		include Auth::Concerns::ImageLoadConcern
 		## expected to be a hash with names of callbacks and boolean values.
 		## eg: {:before_save => true, :after_save => false..}
 		## used in conjunction with the provided skip_callback?(callback_name) method to determine whether to execute the callbacks or not.
@@ -24,15 +25,8 @@ module Auth::Concerns::ChiefModelConcern
 		attr_accessor :embedded_document
 
 		## array of image ids, that are associated with the current document.
-		attr_accessor :images
-
-		field :public, type:String, default: "no"
-
-
-		after_initialize do |document|
-			document.load_images
-		end
-
+		
+		## moved field public to the es_concern.
 
 		def field_names_to_skip_while_making_form
 			["_id","_type.,","resource_id","resource_class","created_at","updated_at","public"]
@@ -43,12 +37,7 @@ module Auth::Concerns::ChiefModelConcern
 		end
 
 
-		##find an image/ images with this parent id.
-		##and add them to an images array. 
-		def load_images
-			self.images = Auth::Image.where(:parent_id => self.id.to_s) || []
-		end
-
+		
 
 		## returns a list of attributes of tis model other than those mentioned in #FIELD_NAMES_TO_SKIP_WHILE_MAKING_FORM in this concern.
 		## this is only used in the web api.

@@ -1,12 +1,16 @@
-module Auth::Concerns::EsConcern
+module Auth::Concerns::Search::AutocompletedConcern
 
 	extend ActiveSupport::Concern
-	
-	unless Auth::Concerns::EsConcern.included_modules.include? Mongoid::Document
+
+	unless Auth::Concerns::Search::AutocompleteConcern.included_modules.include? Mongoid::Document
 		include Mongoid::Document
 	end
 
-	included do 
+	unless Auth::Concerns::Search::AutocompleteConcern.included_modules.include? Mongoid::Elasticsearch
+		include Mongoid::Elasticsearch
+	end
+
+	included do
 
 		## the page to which the user will be taken if they click on the suggestion.
 		## REQUIRED
@@ -91,36 +95,7 @@ module Auth::Concerns::EsConcern
         	document.set_autocomplete_tags
         end
 
-
-
-		field :public, type:String, default: "no"
-
-
-		def self.create_es_index(definition)
-			## check the presence of a resource_id and a resource_class
-			#raise "Please define a resource_id field on this model to use it with elasticsearch, this field should be a string" unless self.respond_to? :resource_id
-			#raise "Please define a resource_class field on this model as well." unless self.respond_to? :resource_class
-			definition ||= {}
-			if Auth.configuration.use_es == true
-				include Mongoid::Elasticsearch
-				elasticsearch! (
-						definition
-					)
-			end
-		
-		end	
-
 	end
-
-	def as_indexed_json(options={})
-		{
-			tags: self.tags,
-			public: self.public,
-			resource_id: self.resource_id,
-			resource_class: self.resource_class
-		}
-	end
-
 
 	def set_autocomplete_tags
 
@@ -154,5 +129,8 @@ module Auth::Concerns::EsConcern
 		self.autocomplete_description = nil
 		self.tags.clear
 	end
+
+	## we don't want to index the primary or secondary links
+	## only the tags are considered
 
 end

@@ -5,6 +5,8 @@ module Auth::Concerns::Shopping::CartConcern
 	
 	include Auth::Concerns::ChiefModelConcern	
 	include Auth::Concerns::OwnerConcern
+	include Auth::Concerns::EsConcern
+	
 
 	included do 
 		field :name, type: String
@@ -14,7 +16,7 @@ module Auth::Concerns::Shopping::CartConcern
 		field :place_id, type: String
 		## name, age, sex of the user for this cart.
 		field :personality_id, type: String		
-
+		attr_accessor :personality
 
 		## debit is calculated live, by first getting all the items already dispatched and their value, and then getting the total payments made and their value, so it infact becomes something at the validation level of the cart item.
 
@@ -71,8 +73,19 @@ module Auth::Concerns::Shopping::CartConcern
 		validate :add_or_remove_validation
 
 
-		## how to handle discount exceeds cart balance.
-		## how to handle discount origin cart id, is same as this cart.
+		## INDEX DEFINITION
+
+		INDEX_DEFINITION = {
+			index_options:  {
+			        settings:  {
+			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
+				    },
+			        mappings: {
+			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			    }
+			}
+		}
+
 
 	end
 
@@ -107,7 +120,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## set the cart items, [Array] of cart items.
 	def find_cart_items
-		puts "find cart items."
+		#puts "find cart items."
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'asc')
 		
@@ -301,11 +314,12 @@ module Auth::Concerns::Shopping::CartConcern
 		      
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      	
-		      puts "Add or remove is: #{add_or_remove}"
+		      #puts "Add or remove is: #{add_or_remove}"
 
+		      ## and personality also has to be set here.
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
 		      	
-		      puts "unset cart is:#{resp.to_s}"
+		      #puts "unset cart is:#{resp.to_s}"
 		      
 		      
 		      resp

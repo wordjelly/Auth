@@ -83,23 +83,14 @@ class User < Auth::User
     end
   end
 
-  ##############
-  ##
-  ##
-  ## END OVERRIDE.
-  ##
-  ###############
 
-  def as_indexed_json(options={})
-    
-         {
-            name: name,
-            email: email,
-            additional_login_param: additional_login_param,
-            additional_login_param_status: additional_login_param_status,
-            resource_id: resource_id,
-            public: public
-         }
-  end 
+  def set_autocomplete_tags
+      if self.new_record?
+         self.tags << "user"
+         self.tags << self.name
+         self.tags << self.email
+         self.tags << self.additional_login_param
+      end
+   end
 
 end

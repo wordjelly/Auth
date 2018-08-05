@@ -1570,3 +1570,16 @@ var generateSignature = function(callback, params_to_sign){
 
 That's it.
 
+-------------------------------------------------------------------
+
+## BarCode Concern
+
+This engine uses Qagga Js to read barcodes
+
+## Configuration
+
+In the configuration file set the following:
+
+```
+
+```

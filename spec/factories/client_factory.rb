@@ -16,6 +16,8 @@ FactoryGirl.define do
     accept_order_at_percentage_of_price {0.2}
   end
 
+  
+
   factory :client, class: Auth::Client do
     redirect_urls ["http://www.google.com"]
     user_id BSON::ObjectId.new

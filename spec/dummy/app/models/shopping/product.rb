@@ -3,15 +3,13 @@ class Shopping::Product < Auth::Shopping::Product
 	include Auth::Concerns::Work::GoodConcern
 
 	create_es_index(INDEX_DEFINITION)
-   
-	def as_indexed_json(options={})
-    
-         {
-            name: name,
-            price: price,
-            resource_id: resource_id,
-            public: public
-         }
- 	end
+
+   def set_autocomplete_tags
+      if self.new_record?
+         self.tags << "product"
+         self.tags << self.name
+         self.tags << self.description
+      end
+   end
 
 end

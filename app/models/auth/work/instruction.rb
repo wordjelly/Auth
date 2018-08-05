@@ -1,7 +1,8 @@
 class Auth::Work::Instruction
 	include Mongoid::Document
-	include Auth::Concerns::ChiefModelConcern
+	include Mongoid::Timestamps
 	include Auth::Concerns::Work::CommunicationFieldsConcern
+	include Auth::Concerns::ImageLoadConcern
 	
 	attr_accessor :product_id
 	attr_accessor :cart_item_id

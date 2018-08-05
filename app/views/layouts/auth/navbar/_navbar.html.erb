@@ -8,13 +8,10 @@
             <%= content_for(:navbar_left)  %>
           <% else %>
             <a href="/" class="brand-logo"><%= Auth.configuration.brand_name %></a>
-            <%= render :partial => 'layouts/auth/navbar/progress_spinner.html.erb' %>
+            
           <% end %>
         </div>
-        <div class="nav-wrapper col l4 m4 s4 offset-l3 offset-m3 offset-s3 hide-on-med-and-down">
-          <%= render :partial => 'auth/search/search_bar.html.erb' %>  
-        </div>
-
+      
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
           <% if content_for?(:navbar_right) %>
@@ -41,6 +38,9 @@
  <% else %>
   <div id="proxy_user"></div>
  <% end %>
+  <div class="progress" id="progress" style="margin-top:5px !important; visibility:hidden;">
+      <div class="indeterminate" style="width: 100%"></div>
+  </div>
 </div>
 
 

@@ -33,6 +33,7 @@ module Auth::Concerns::TokenConcern
 
     
     TCONDITIONS = {} unless defined? TCONDITIONS
+    LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
 
 
     if Auth.configuration.enable_token_auth
@@ -65,14 +66,14 @@ module Auth::Concerns::TokenConcern
           ## for the last one, just dont add the fallback as none, other conditions are the same.
           res = Auth.configuration.auth_resources.keys[-1]
          
-          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS || {}))
+          acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
           
 
       else
         ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
         res = Auth.configuration.auth_resources.keys[0]
        
-        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge(self::TCONDITIONS || {}))
+        acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
 
       end
     
@@ -91,32 +92,30 @@ module Auth::Concerns::TokenConcern
   ## if yes, sets the resource to the first encoutered such key and breaks the iteration
   ## basically a convenience method to set @resource variable, since when we have more than one model that is being authenticated with Devise, there is no way to know which one to call.
   def set_resource
-    
+  
+    puts "came to set resource."
 
     Auth.configuration.auth_resources.keys.each do |resource|
       break if @resource = self.send("current_#{resource.downcase}") 
     end
-
-    #puts "do we have a resource"
-    #puts @resource.to_s
 
     ## devise in registrations_controller#destroy assumes the existence of an 'resource' variable, so we set that here.
     if devise_controller?
       self.resource = @resource
     end
 
-   
+    puts "resource is: #{@resource.to_s}"
     
   end
 
 
   
   def lookup_resource 
-    puts "came to lookup resource."
+    #puts "came to lookup resource."
     ## if the current signed in resource si not an admin, just return it, because the concept of proxy arises only if the current_signed in resource is an admin.
-    puts "current signed in resource : #{current_signed_in_resource}"
+    #puts "current signed in resource : #{current_signed_in_resource}"
     return current_signed_in_resource unless current_signed_in_resource.is_admin?
-    puts "crossed resource."
+    #puts "crossed resource."
     ## else.
     
     ## first check the session or the params for a proxy resource.

@@ -32,7 +32,8 @@ require "cloudinary"
 require "mongoid/geospatial"
 require "mongoid-embedded-errors"
 require "dotenv-rails"
-
+require "autoinc"
+require "hashids"
 
 
 module Auth

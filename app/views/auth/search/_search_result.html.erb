@@ -1,7 +1,21 @@
-<div class="row m-0-top">
-  <div class="col l6 m6 s6 offset-l3 search-results">
-    <div class="card p-10-top p-10-bottom p-10-left p-10-right">
-        hi there
-    </div>
-  </div>
-</div>
+<li class="collection-item search_result teal-text">
+<%= link_to result.primary_link.html_safe do %>
+	<h5><%= result.tags.join(" ") %></h5>
+<% end %>
+<h6 class="grey-text"><%= result.autocomplete_description %></h6>
+<% result.secondary_links.keys.each do |sl| %>
+	<% if result.secondary_links[sl][:partial] %>
+		<% locals = {} %>
+		<% other_locals = result.secondary_links[sl] || {} %> 
+		<% locals = locals.merge(other_locals) %>
+		<% if result.secondary_links[sl][:instance_name_in_locals] %>
+			<% locals = locals.merge(result.secondary_links[sl][:instance_name_in_locals].to_sym => result) %>
+		<% end %>
+		<%= render :partial => result.secondary_links[sl][:partial], locals: locals %>
+	<% else %>
+		<%= link_to result.secondary_links[sl][:url].html_safe, :data => result.secondary_links[sl][:data] || {} do %>
+			<span class="m-20-right"><%= sl %></span>
+		<% end %>
+	<% end %>
+<% end %>
+</li>

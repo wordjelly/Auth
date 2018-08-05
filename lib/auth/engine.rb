@@ -18,6 +18,7 @@ module Auth
       g.test_framework :rspec
     end
 
+    
 
   end
 
@@ -237,6 +238,28 @@ module Auth
 
     attr_accessor :two_factor_otp_transactional_sms_template_sender_id
     attr_accessor :two_factor_otp_transactional_sms_template_name
+
+
+    ###############################################################
+    ##
+    ##
+    ## HASHIDS SALT.
+    ## THIS IS USED IN PERSONALITY AND PLACE.
+    ##
+    ###############################################################
+
+    attr_accessor :hashids_salt
+    attr_accessor :hashids_alphabet
+
+
+    ###############################################################
+    ##
+    ##
+    ## FOR BARCODE.
+    ##
+    ##
+    ###############################################################
+    attr_accessor :enable_barcode_api
 
     def initialize
       
@@ -499,6 +522,23 @@ module Auth
       ## defaults.
       @two_factor_otp_transactional_sms_template_name = "test2"
       @two_factor_otp_transactional_sms_template_sender_id = "PATHOF"
+
+
+      ########################################################
+      ##
+      ##
+      ########################################################
+      @hashids_salt = "i am a salt"
+      @hashids_alphabet = "abcdefghijklmnopqrstuvwxyz123456789"
+
+
+      ########################################################
+      ##
+      ## barcode : api enabled by default.
+      ##
+      ########################################################
+      @enable_barcode_api = true
+
 
     end
   end

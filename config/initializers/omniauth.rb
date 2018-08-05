@@ -412,10 +412,7 @@ module SimpleTokenAuthentication
 
 		## CHANGE THE AUTHENTICATION TOKEN WHENEVER THE USER IS SAVED. IT DOESNT MATTER IF THERE IS AN EXISTING AUTHENTICATION TOKEN OR NOT.
 	    def ensure_authentication_token
-	      #if authentication_token.blank?
-	      #puts "------------------CAME TO ENSURE AUTHENTICATION TOKEN--------------------"
 	      regenerate_token
-	      #end
 	    end
 	end
 

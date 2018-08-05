@@ -6,85 +6,27 @@ module Auth::Concerns::Shopping::CartItemConcern
 	extend ActiveSupport::Concern
 	
 	include Auth::Concerns::Shopping::ProductConcern
-	include Auth::Concerns::OwnerConcern
-	include Auth::Concerns::EsConcern	
 
+	
 
 	included do 
 
-		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :cart_item_instructions
+		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :cart_item_instructions, :cascade_callbacks => true
 			
 
 
 		INDEX_DEFINITION = {
 			index_options:  {
 			        settings:  {
-			    		index: {
-					        analysis:  {
-					            filter:  {
-					                nGram_filter:  {
-					                    type: "nGram",
-					                    min_gram: 2,
-					                    max_gram: 20,
-					                   	token_chars: [
-					                       "letter",
-					                       "digit",
-					                       "punctuation",
-					                       "symbol"
-					                    ]
-					                }
-					            },
-					            analyzer:  {
-					                nGram_analyzer:  {
-					                    type: "custom",
-					                    tokenizer:  "whitespace",
-					                    filter: [
-					                        "lowercase",
-					                        "asciifolding",
-					                        "nGram_filter"
-					                    ]
-					                },
-					                whitespace_analyzer: {
-					                    type: "custom",
-					                    tokenizer: "whitespace",
-					                    filter: [
-					                        "lowercase",
-					                        "asciifolding"
-					                    ]
-					                }
-					            }
-					        }
-				    	}
+			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 				    },
 			        mappings: {
-			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_item_class) => {
-			            properties: {
-			            	_all_fields:  {
-			            		type: "text",
-				            	analyzer: "nGram_analyzer",
-				            	search_analyzer: "whitespace_analyzer"
-				        	},
-			                name: {
-			                	type: "keyword",
-			                	copy_to: "_all_fields"
-			                },
-			                price: {
-			                	type: "double",
-			                	copy_to: "_all_fields"
-			                },
-			                public: {
-			                	type: "keyword"
-			                },
-			                resource_id: {
-			                	type: "keyword",
-			                	copy_to: "_all_fields"
-			                }
-			            }
-			        }
+			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_item_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 			    }
 			}
 		}
-	
+
+			
 
 		##PERMITTED
 		##the id of the product to which this cart item refers.
@@ -134,6 +76,9 @@ module Auth::Concerns::Shopping::CartItemConcern
 		#################################################################
 		field :unit_id, type: String
 		
+		field :personality_id, type: String
+
+		field :place_id, type: String
 
 
 		before_destroy do |document|
@@ -159,8 +104,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 
 
-		before_create do |document|
-			document.assign_product_attributes
+		after_initialize do |document|
+			if document.new_record?
+				document.assign_product_attributes
+			end
 		end
 
 		
@@ -175,16 +122,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 		## that's it, now all the communication instructions are enqueued.
 		## next step, get a simple notification to be sent by email, and also by sms -> as soon as the time comes for it to be done.
 		after_save do |document|
-			puts "came to after_save document #{document.accepted_changed?}"
-			puts "is it true :#{document.accepted == true}"
+			#puts "came to after_save document #{document.accepted_changed?}"
+			#puts "is it true :#{document.accepted == true}"
 			if document.accepted_changed? && document.accepted == true
-				puts "accepted changed."
+				#puts "accepted changed."
 				document.instructions.each do |instruction|
-					puts "doing instruction: #{instruction.id.to_s}"
+					#puts "doing instruction: #{instruction.id.to_s}"
 					instruction.communications.each do |communication|
 						## Test seperately?
 						## =>  fuck that.
-						puts "doing communication: #{communication.id.to_s}"
+						#puts "doing communication: #{communication.id.to_s}"
 						CommunicationJob.set(wait_until: communication.set_enqueue_at).perform_later({:cart_item_id => document.id.to_s, :instruction_id => instruction.id.to_s, :communication_id => communication.id.to_s})
 					end
 				end
@@ -367,6 +314,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 		return true if self.parent_id
 		return false if (owner_matches(cart) == false)
 		self.parent_id = cart.id.to_s
+		self.personality_id = cart.personality_id
+		self.place_id = cart.place_id
 		self.accepted = nil
 		self.accepted_by_payment_id = nil
 		self.save
@@ -425,9 +374,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 		begin
 			if self.product_id
 	 			if product = Auth.configuration.product_class.constantize.find(product_id)
+	 				puts "product found."
+	 				puts "product miscellaneous_attributes to assign"
+	 				puts product_attributes_to_assign.to_s
 	 				product_attributes_to_assign.each do |attr|
+	 					puts "doing attribute:"
+	 					puts attr.to_s
 	 					if self.respond_to? attr.to_sym
+	 						puts "responds"
 		 					if self.send("#{attr}").nil?
+		 						puts "it is nil"
 		 						self.send("#{attr}=",product.send("#{attr}"))
 		 					elsif (self.send("#{attr}").respond_to? :embedded_in) && (self.send("#{attr}").empty?)
 		 						self.send("#{attr}=",product.send("#{attr}"))
@@ -435,29 +391,45 @@ module Auth::Concerns::Shopping::CartItemConcern
 	 					end
 	 				end
 	 			end
+	 		else
+	 			puts "no product id."
 	 		end
-	 	rescue
-
+	 	rescue => e
+	 		puts e.to_s
 	 	end 
+
+	 	self.instructions.each do |instruction|
+ 			instruction.created_at = nil
+ 			instruction.updated_at = nil
+ 			instruction.bullets.each do |bullet|
+ 				bullet.created_at = nil
+ 				bullet.updated_at = nil
+ 			end
+ 			instruction.communications.each do |communication|
+ 				communication.created_at = nil
+ 				communication.updated_at = nil
+ 			end		
+ 			instruction.links.each do |link|
+ 				link.created_at = nil
+ 				link.updated_at = nil
+ 			end
+	 	end
+	 	puts "attributes assigned are:"
+	 	puts self.attributes.to_s
 	end
 
 	def product_attributes_to_assign
-		["name","price","bundle_name","instructions"]
+		["name","price","bundle_name","instructions","components"]
 	end
 
 	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.
 	def minimum_price_required_to_accept_cart_item
 		price*accept_order_at_percentage_of_price
 	end
+ 	
 
-	def as_indexed_json(options={})
-	 {
-	 	name: name,
-	    price: price,
-	    resource_id: resource_id,
-	    public: public
-	 }
-	end 
+	
+
 
 =begin
 	## @param[String] req : the requirement from the definition. It consists of "*" wildcard, or a product id, or a definition address + product_id -> which is basically one of the output products of the definition. But here it will have the product id, not the self id.

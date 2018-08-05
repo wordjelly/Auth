@@ -68,20 +68,15 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 		sp = @product.save
 		puts "product successfully saved: #{sp.to_s}"
 
+		puts "the product id is: #{@product.id.to_s}"
 		## create a cart item based on above product
-		@cart_item = Shopping::CartItem.new
-		@cart_item.product_id = @product.id.to_s
-		@cart_item.resource_class = @u.class.name.to_s
-		@cart_item.resource_id = @u.id.to_s
-		@cart_item.signed_in_resource = @u
+		@cart_item = Shopping::CartItem.new(product_id: @product.id.to_s, resource_class: @u.class.name.to_s, resource_id: @u.id.to_s, signed_in_resource: @u)
 		su = @cart_item.save
-		puts "cart item saved: #{su.to_s}"
-
-
+	
 		## create one more user who shouldnt be able to see this cart item.
 		@u2 = User.new(attributes_for(:user_confirmed))
 		@u2.versioned_create
-        @u2.client_authentication["testappid"] = "testestoken"
+        @u2.client_authentication["testappid"] = "testestoken2"
         @u2.save
         @u2_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u2.authentication_token, "X-User-Es" => @u2.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 
@@ -98,92 +93,97 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 
 	end
 
+	context " -- personal information masking -- " do 
+
+		## we mask sensitive user information, from the results
+		## only personality ids are shown.
+
+	end
+
 
 	context " -- signed in user -- " do 
 
+
 		context " -- public resource -- " do 
+
+			it " -- allows non authenticated user to search -- " do 
+
+				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Coba", size:10}}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
+				
+			end
 			
 			it " -- allows user to search -- ",:purr => true do 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Coba", size:10}}),nil,@headers
 				
-				puts response.body.to_s
-				results = JSON.parse(response.body)
-				expect(response.code).not_to eq("401")
-				expect(results.size).to eq(1)
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
+
 			end
 
 			it " -- allows admin to search -- ", :aurr => true do 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Coba", size:10}}),nil,@admin_headers
 				
-				## so its not authenticating with this.
-
-				expect(response.code).not_to eq("401")
-
-				results = JSON.parse(response.body)
-				puts JSON.pretty_generate(results)
-				expect(results.size).to eq(1)
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
 			
 			end
 		end
 
-		context " -- private resource -- " do 
+		context " -- private resource -- ", :search_private_resource => true do 
 			
 			
 
-			it " -- allows user to search if he owns resource -- ", :pr_user => true do 
+			it " -- allows user to find the public and his own private resource. -- ", :pr_user => true do 
 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Roc", size:10}}),nil,@headers
 
-				results = JSON.parse(response.body)
-				expect(response.code).not_to eq("401")
-				expect(results.size).to eq(2)
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
+				expect(contains_cart_item?(JSON.parse(response.body))).to be_truthy
+	
 
 			end
+
+=begin
 
 			it " -- allows user to find itself -- ", :search_self => true do 
 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: @u.email[0..4]}}),nil,@headers
-				results = JSON.parse(response.body)
-				expect(response.code).not_to eq("401")
-				expect(results.size).to eq(1)
+				## let this be for the moment.
+				# 
+				expect(contains_user?(JSON.parse(response.body))).to be_truthy
+			end
+
+=end
+			it " -- allows users to search for any personalities it is associated with -- ", :search_personalities => true do 
+
+
 			end
 
 
+			it " -- allows users to search for any places it is associated with -- ", :search_places => true do 
+
+
+			end
+
 			
-			it " -- allows admin to search -- " do 
+			it " -- allows admin to search both public and private resources -- " do 
 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Roch", size:10}}),nil,@admin_headers
 
-				results = JSON.parse(response.body)
-				expect(response.code).not_to eq("401")
-				expect(results.size).to eq(2)
+				
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
+				expect(contains_cart_item?(JSON.parse(response.body))).to be_truthy
 
 			end
 
-			it " -- doesnt allow user to search if he doesnt own the resource -- ", :pr_na do 
+			it " -- only returns the public resources if the user doesnt own the private resources -- ", :pr_na do 
 
 				get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Roc", size:10}}),nil,@u2_headers
 
-				results = JSON.parse(response.body)
-				#puts "this is the response body"
-				#puts results.to_s
-				expect(response.code).to eq("401")
-				expect(results.size).to eq(1)
-
+				expect(contains_product?(JSON.parse(response.body))).to be_truthy
 			end
 
 		end
 
 	end
-
-	context " -- no signed in user -- " do 
-		it " -- returns not authenticated -- " do 
-			get authenticated_user_search_index_path({api_key: @ap_key, :current_app_id => "testappid", query: {query_string: "Roc", size:10}}),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
-			
-			expect(response.code).to eq("401")
-		end
-	end
-
-
-
 end

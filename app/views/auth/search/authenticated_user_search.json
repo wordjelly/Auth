@@ -1,7 +1,7 @@
 <%= 
 
 updated_array = @search_results.map do |k|
-		k = k.as_json.merge({:_type => k._type})
+		k = k.as_json({}).merge({:_type => k._type})
 end
 
 updated_array.to_json.html_safe %>

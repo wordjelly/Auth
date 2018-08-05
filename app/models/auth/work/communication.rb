@@ -1,5 +1,7 @@
 class Auth::Work::Communication
-	include Auth::Concerns::ChiefModelConcern
+	include Mongoid::Document
+	include Mongoid::Timestamps
+	include Auth::Concerns::ImageLoadConcern
 	###################################################################
 	##
 	##

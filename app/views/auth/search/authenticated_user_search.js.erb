@@ -1,19 +1,12 @@
-<% @search_results.each do |result|
-	_partial = "auth/search/search_result.html.erb"
-	search_path = Auth::OmniAuth::Path.model_to_path(result.class) + "/_search_result.html.erb"
-	if lookup_context.find_all(search_path).any?
-		puts "found in lookup context."
-		_partial = search_path			
-	end
-	_partial = _partial.gsub(/\/_search/,"/search")
-	puts "partial is: #{_partial}"
-%>
+$(".search_result").remove();
+<% @search_results.each do |result| %>
 	
-	
-	$("#navbar_search_results").append("<%= escape_javascript render :partial => _partial, locals: {result: result, resource: lookup_resource} %>")
+	<% if result %>
+		
+		$("#search_collection").append("<%= escape_javascript(render :partial => 'auth/search/search_result', locals: {result: result}) %>");
+	<% end %>
 
-<%
+<% end %>
 
-end
+highlight();
 
-%>

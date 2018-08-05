@@ -11,73 +11,11 @@ module Auth::Concerns::UserConcern
 
 		INDEX_DEFINITION = {
 				index_options:  {
-				    settings:  {
-				    		index: {
-						        analysis:  {
-						            filter:  {
-						                nGram_filter:  {
-						                    type: "nGram",
-						                    min_gram: 2,
-						                    max_gram: 20,
-						                   	token_chars: [
-						                       "letter",
-						                       "digit",
-						                       "punctuation",
-						                       "symbol"
-						                    ]
-						                }
-						            },
-						            analyzer:  {
-						                nGram_analyzer:  {
-						                    type: "custom",
-						                    tokenizer:  "whitespace",
-						                    filter: [
-						                        "lowercase",
-						                        "asciifolding",
-						                        "nGram_filter"
-						                    ]
-						                },
-						                whitespace_analyzer: {
-						                    type: "custom",
-						                    tokenizer: "whitespace",
-						                    filter: [
-						                        "lowercase",
-						                        "asciifolding"
-						                    ]
-						                }
-						            }
-						        }
-					    	}
+				        settings:  {
+				    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 					    },
 				        mappings: {
-				          Auth::OmniAuth::Path.pathify(Auth.configuration.auth_resources.keys.first) => {
-				            properties: {
-				            	_all_fields:  {
-					          		type: "text",
-						            analyzer: "nGram_analyzer",
-						            search_analyzer: "whitespace_analyzer"
-						        },
-				                name: {
-				                	type: "text",
-				                	copy_to: "_all_fields"
-				                },
-				                email: {
-				                	type: "keyword",
-				                	copy_to: "_all_fields"
-				                },
-				                additional_login_param: {
-				                	type: "keyword",
-				                	copy_to: "_all_fields"
-				                },
-				                public: {
-				                	type: "keyword"
-				                },
-				                resource_id: {
-				                	type: "keyword",
-				                	copy_to: "_all_fields"
-				                }
-				            }
-				        }
+				          Auth::OmniAuth::Path.pathify(Auth.configuration.user_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 				    }
 				}
 			}
@@ -608,6 +546,8 @@ module Auth::Concerns::UserConcern
 	## this is needed in 
 	def as_json(options={})
 		
+		## basically here the problem is that if the user himself is searching for his own record, then it is trying to return the authentication token.
+		## 
 		
 		json = {:nothing => true}
 		
@@ -617,7 +557,8 @@ module Auth::Concerns::UserConcern
 			 		
 			 		json = {}
 		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
-		     		json[:authentication_token] = self.authentication_token
+		     		json[:authentication_token] = self.	authentication_token
+
 		     		unless options[:show_id].nil?
 		     			json[:id] = self.id.to_s
 		     			json[:admin] = self.admin.to_s
