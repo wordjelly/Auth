@@ -1576,10 +1576,78 @@ That's it.
 
 This engine uses Qagga Js to read barcodes
 
-## Configuration
+### Configuration
 
-In the configuration file set the following:
+Nothing special needed , since the barcode api is enabled by default. If you DON'T WANT IT ENABLED, set the following in the configuration file.
+
+```
+# config/initializers/preinitializer.rb
+  
+Auth.configure do |config|
+  
+  ## Many other configuration options
+
+  ## Do this if you want to disable barcodes
+  config.enable_barcode_api = false
+
+end
 
 ```
 
+### Layout
+
+We use quagga js as for the purpose of reading barcodes.
+You can read about this library at their [official url](https://serratus.github.io/quaggaJS/#gettingstarted)
+
 ```
+<%= javascript_link_tag  "https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js" %>
+```
+
+### Model
+
+In order to use a barcode with a model include the following concern in the model:
+
+```
+class MyModel
+  include Auth::Concerns::Shopping::BarCodeConcern
+end
+```
+
+### Controller
+
+In the controller that the model corresponds to , permit the bar_code_tag attribute as follows
+
+```
+class MyController
+  
+  def permitted_params
+    params.permit(:my_model => [:bar_code_tag, :other_stuff...])
+  end
+end
+```
+
+### Form
+
+In the form for the model, add a field called bar_code_tag, with a class called :bar_code_tag, since this is used by the javascript. Make this a text field. 
+
+Then load the partial which has the scanning functionality.
+
+
+```
+<%= f.text_field :bar_code_tag, :class => "bar_code_tag" %>
+<%= f.label :bar_code_tag %>
+
+
+<%= render :partial => "auth/shopping/bar_codes/scan.html.erb" %>
+```
+
+### Javascripts
+
+The script required to scan the barcode and assign the bar_code_tag to the field with the class 'bar_code_tag' is automatically included with engine, and you don't need to do anything special to include it.
+
+
+### Intended working 
+
+While creating / uploading the model, if a barcode is found in the scanner, then it will automatically populate the text_field called 'bar_code_tag' with that.
+After that when you submit the form, an after_save callback will save the barcode in a seperate barcodes collection. It will write errors in this process to the original object.
+

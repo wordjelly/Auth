@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wordjelly-auth (1.2.5)
+    wordjelly-auth (1.2.6)
       cloudinary
       daemons
       delayed_job_mongoid

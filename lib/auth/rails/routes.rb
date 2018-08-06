@@ -61,6 +61,8 @@ module ActionDispatch::Routing
 	      	end
 	      end
 
+	      resources :bar_codes, :controller => "auth/shopping/bar_codes"
+
 	      ## this controller may need to be changed, actually will have to be changed for every single thing.
 	      resources :assemblies, :controller => Auth.configuration.assembly_controller
 

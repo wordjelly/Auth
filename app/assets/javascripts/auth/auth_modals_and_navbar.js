@@ -27,6 +27,7 @@ payumoney.js
 //= require you_need_to_sign_in.js
 //= require payumoney.js
 //= require search.js
+//= require bar_code.js
 
 /////THIS CODE SHOWS HOW TO OVERRIDE ALL THE CLIENT SIDE CODE NEEDED
 /////FOR VALIDATIONS TO WORK FOR THE SIGN_IN_FORM.

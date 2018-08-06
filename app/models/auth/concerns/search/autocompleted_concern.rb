@@ -16,7 +16,6 @@ module Auth::Concerns::Search::AutocompletedConcern
 		## REQUIRED
 		field :primary_link, type: String
 
-
 		## key -> display name
 		## value -> hash
 		## value_key -> :url -> the url
@@ -28,6 +27,10 @@ module Auth::Concerns::Search::AutocompletedConcern
 		## REQUIRED
 		## array of tags on which to do the autocomplete
 		field :tags, type: Array, default: []
+
+
+		## the tags that are shown in case the owner of the resource is not viewing the resource
+		field :masked_tags, type: Array, default: []
 
 		## OPTIONAL
 		## an optional description that will be shown below the result in the autocomplete.

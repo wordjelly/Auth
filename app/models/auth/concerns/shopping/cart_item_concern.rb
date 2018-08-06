@@ -374,16 +374,16 @@ module Auth::Concerns::Shopping::CartItemConcern
 		begin
 			if self.product_id
 	 			if product = Auth.configuration.product_class.constantize.find(product_id)
-	 				puts "product found."
-	 				puts "product miscellaneous_attributes to assign"
-	 				puts product_attributes_to_assign.to_s
+	 				#puts "product found."
+	 				#puts "product miscellaneous_attributes to assign"
+	 				#puts product_attributes_to_assign.to_s
 	 				product_attributes_to_assign.each do |attr|
-	 					puts "doing attribute:"
-	 					puts attr.to_s
+	 					#puts "doing attribute:"
+	 					#puts attr.to_s
 	 					if self.respond_to? attr.to_sym
-	 						puts "responds"
+	 						#puts "responds"
 		 					if self.send("#{attr}").nil?
-		 						puts "it is nil"
+		 						#puts "it is nil"
 		 						self.send("#{attr}=",product.send("#{attr}"))
 		 					elsif (self.send("#{attr}").respond_to? :embedded_in) && (self.send("#{attr}").empty?)
 		 						self.send("#{attr}=",product.send("#{attr}"))
@@ -392,10 +392,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	 				end
 	 			end
 	 		else
-	 			puts "no product id."
+	 			#puts "no product id."
 	 		end
 	 	rescue => e
-	 		puts e.to_s
+	 		#puts e.to_s
 	 	end 
 
 	 	self.instructions.each do |instruction|
@@ -414,8 +414,8 @@ module Auth::Concerns::Shopping::CartItemConcern
  				link.updated_at = nil
  			end
 	 	end
-	 	puts "attributes assigned are:"
-	 	puts self.attributes.to_s
+	 	#puts "attributes assigned are:"
+	 	#puts self.attributes.to_s
 	end
 
 	def product_attributes_to_assign
