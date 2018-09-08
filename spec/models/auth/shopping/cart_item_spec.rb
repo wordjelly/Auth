@@ -33,6 +33,34 @@ RSpec.describe Auth::Shopping::CartItem, type: :model, :cart_item_model => true 
 			
 		end
 
+		it " -- create_with_embedded works with embedded documents -- ", :create_with_embedded => true do 
+
+			product = Auth.configuration.product_class.constantize.new
+			product.signed_in_resource = @admin
+			product.resource_class = @admin.class
+			product.resource_id = @admin.id.to_s
+			product.name = "test"
+			product.description = "test d"
+			inst = Auth::Work::Instruction.new(title: "test instcuriont")
+			inst.bullets << Auth::Work::Bullet.new(title: "test bullet")
+			product.instructions << inst
+
+			
+			expect(product.save).to be_truthy
+
+
+			product = Auth.configuration.product_class.constantize.find(product.id.to_s)
+			expect(product.instructions.size).to eq(1)
+
+			cart_item = Auth.configuration.cart_item_class.constantize.new
+			cart_item.product_id = product.id.to_s
+			cart_item.signed_in_resource = @u
+			cart_item = cart_item.create_with_embedded(cart_item.product_id)
+			expect(cart_item.errors.full_messages).to be_empty
+			expect(cart_item.instructions.size).to eq(1)
+
+		end
+
 		it " -- schedules all communications for delivery when accepted is set to true -- " do 
 
 			#CommunicationJob.queue_adapter = :test

@@ -3,6 +3,7 @@ class Auth::Work::Instruction
 	include Mongoid::Timestamps
 	include Auth::Concerns::Work::CommunicationFieldsConcern
 	include Auth::Concerns::ImageLoadConcern
+	include Auth::Concerns::CloneConcern
 	
 	attr_accessor :product_id
 	attr_accessor :cart_item_id

@@ -435,7 +435,7 @@ module Auth::Concerns::Shopping::CartItemConcern
 	end
 
 	def product_attributes_to_assign
-		["name","price","product_code"]
+		["name","price","product_code","instructions"]
 	end
 
 	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.
@@ -549,7 +549,13 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def create_with_embedded(product_id)
 		created_document = nil
 		product = Auth.configuration.product_class.constantize.find(product_id)
+		#puts product.attributes.to_s
 		product_clone = product.clone
+		#puts "product clone instructions."
+		#puts product_clone.instructions.to_s
+		#puts product_clone.instructions.map{|c| c = c.attributes}.to_s
+		#exit(1)
+		#puts "finished cloning."
 		if self.valid?
 			self.run_callbacks(:save) do
 	          	self.run_callbacks(:create) do
@@ -557,9 +563,20 @@ module Auth::Concerns::Shopping::CartItemConcern
 		            	"$setOnInsert" => self.attributes
 		            }	            
 		            	
+		            #puts "cloned attributes."
+		            #clone_attributes = product_clone.attributes
+		            #puts clone_attributes
 		            product_attributes_to_assign.each do |attr|
-		            	create_hash["$setOnInsert"][attr.to_s] = product_clone.send("#{attr}")
+		            	if product_clone.send("#{attr}").respond_to? :embedded_in
+		            		create_hash["$setOnInsert"][attr.to_s] = 
+		            		product_clone.send("#{attr}").map{|c| c = c.attributes}
+		            	else
+		            		create_hash["$setOnInsert"][attr.to_s] = product_clone.send("#{attr}")
+		            	end
 		            end
+
+		            puts "Create hash is:"
+		            puts JSON.pretty_generate(create_hash)
 
 		            created_document = Auth.configuration.cart_item_class.constantize.
 					where({

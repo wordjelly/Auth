@@ -507,8 +507,8 @@ module Auth::Concerns::UserConcern
 		c.versioned_create({:resource_id => self.id})
 		op_count = 10
 
-		puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
-		puts c.attributes.to_s
+		#puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
+		#puts c.attributes.to_s
 
 		while(true)
 			
