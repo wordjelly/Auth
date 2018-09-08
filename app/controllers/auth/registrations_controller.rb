@@ -8,11 +8,15 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 
 
 	def create
-		puts "CAME TO CREATE."
+		#puts "CAME TO CREATE."
+		#puts "sign up params."
+		#puts sign_up_params
 		check_recaptcha
 		build_resource(sign_up_params)
 		resource.m_client = self.m_client
 	 	resource.set_client_authentication
+	 	#puts "resource attributes are:"
+	 	#puts resource.attributes.to_s
 	    resource.save
 	    yield resource if block_given?
 	    if resource.persisted?

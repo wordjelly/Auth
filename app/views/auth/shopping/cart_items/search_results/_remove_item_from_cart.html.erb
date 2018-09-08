@@ -1,0 +1,7 @@
+<% if cart_item.parent_id %>
+	<% if cart_item.accepted == false %>
+		<%= link_to cart_path(:id => cart_item.parent_id.to_s, :cart => {:remove_cart_item_ids => [cart_item.id.to_s]}), method: :put, data: { confirm: 'Are you sure?' } do  %>
+				<span>Remove Item From Cart</span>
+		<% end %>
+	<% end %>
+<% end %>

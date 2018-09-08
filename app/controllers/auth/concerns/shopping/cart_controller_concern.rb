@@ -37,22 +37,18 @@ module Auth::Concerns::Shopping::CartControllerConcern
    
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart
+    @auth_shopping_cart.process_items
     respond_with @auth_shopping_cart
   end
 
   ## always returns an empty array.
   def update
     check_for_update(@auth_shopping_cart)
-    
     @auth_shopping_cart.assign_attributes(@auth_shopping_cart_params)
-    
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
-
-    puts 'the auth shopping cart signed in resource is:' 
-    puts @auth_shopping_cart.signed_in_resource
-
     @auth_shopping_cart.save
     @auth_shopping_cart.prepare_cart
+    @auth_shopping_cart.process_items
     respond_with @auth_shopping_cart
   end
 
@@ -67,7 +63,11 @@ module Auth::Concerns::Shopping::CartControllerConcern
   ## returns all the carts of the user.
   ## basically all his orders.
   def index
-    @auth_shopping_carts = @auth_shopping_cart_class.where(:resource_id => lookup_resource.id.to_s)
+    query_clause = {:resource_id => lookup_resource.id.to_s}
+    query_clause.merge({:personality_id => @auth_shopping_cart_params[:personality_id]}) if @auth_shopping_cart_params[:personality_id]
+    @auth_shopping_carts = @auth_shopping_cart_class.where(query_clause)
+    @auth_shopping_carts = @auth_shopping_carts.to_a
+    @auth_shopping_carts.map{|c| c.prepare_cart}
     respond_with @auth_shopping_carts
   end
 
@@ -97,9 +97,9 @@ module Auth::Concerns::Shopping::CartControllerConcern
 
   private
 
-  ##override this def in your controller, and add attributes to transaction:[], each of the attributes in the transaction key will be cycled through, and if those fields exist on the cart_item, then they will be set.
+  ## and for add owner resource also , modify right now
   def permitted_params
-    params.permit({cart: [:personality_id, :place_id, :discount_id,:name, :notes, {:add_cart_item_ids => []},{:remove_cart_item_ids => []}]},:id)
+    params.permit({cart: [:payment_stage, :resource_id,:personality_id, :place_id, :discount_id,:name, :notes, {:add_cart_item_ids => []},{:remove_cart_item_ids => []}]},:id)
   end
 
 end

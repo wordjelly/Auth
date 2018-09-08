@@ -63,6 +63,7 @@ class User < Auth::User
   def send_devise_notification(notification, *args)
     puts "sending devise notification."
     devise_mailer.send(notification, self, *args).deliver_later
+    puts "finished send."
   end
   
   def send_reset_password_link

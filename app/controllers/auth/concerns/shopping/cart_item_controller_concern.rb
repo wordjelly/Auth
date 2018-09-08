@@ -36,13 +36,11 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
 
   ##expects the product id, resource_id is the logged in resource, and quantity 
   def create
-    ##ensure that the cart item is new
-   
     check_for_create(@auth_shopping_cart_item)
     @auth_shopping_cart_item = add_owner_and_signed_in_resource(@auth_shopping_cart_item)
-     
-    @auth_shopping_cart_item.save
-
+    @auth_shopping_cart_item = @auth_shopping_cart_item.create_with_embedded(@auth_shopping_cart_item.product_id)
+    puts "auth shopping cart item becomes:"
+    puts @auth_shopping_cart_item.to_s
     respond_with @auth_shopping_cart_item
   end
 
@@ -52,7 +50,7 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     @auth_shopping_cart_item.assign_attributes(@auth_shopping_cart_item_params)
     @auth_shopping_cart_item = add_owner_and_signed_in_resource(@auth_shopping_cart_item)  
     @auth_shopping_cart_item.save
-    puts @auth_shopping_cart_item.errors.full_messages.to_s
+    
     respond_with @auth_shopping_cart_item
   end
 
@@ -89,24 +87,35 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   ##
   ##
   ############################################################
-  ## need to add this to the route.
-  ## and need to provide a link to this, and that's the end of this part.
-  def create_package_items
+  
+  def create_many_items
     cart_items = []
-    params[:product_ids].each do |product_id|
+    errors = []
+    params[:cart_item][:product_ids].each do |product_id|
       cart_item = Auth.configuration.cart_item_class.constantize.new(product_id: product_id)
       cart_item.resource_id = lookup_resource.id.to_s
       cart_item.resource_class = lookup_resource.class.name.to_s
       cart_item.signed_in_resource = current_signed_in_resource
-      cart_item.save
-      cart_items << cart_item
+      create_result = cart_item.create_with_embedded(cart_item.product_id)
+      if create_result == false
+        ## here there will be the validation errors on the original instance.
+        cart_items << cart_item
+        errors << cart_item.errors.full_messages
+      else
+        ## here the create_result becomes the new cart_item.
+        cart_items << create_result
+      end
     end
     respond_to do |format|
       format.html do 
         redirect_to cart_items_path
       end
       format.json do 
-        render :json => cart_items.to_json
+        if errors.empty?
+          render :json => {cart_items: cart_items}, :status => 200
+        else
+          render :json => {cart_items: cart_items, errors: errors}, :status => 422
+        end
       end
     end
   end
@@ -121,32 +130,39 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
     #puts "auth shopping discount is:"
     #puts @auth_shopping_discount.to_s
     @auth_shopping_cart.discount_id = @auth_shopping_discount.id.to_s
-    
-
-    #puts "is it is a new record"
-    #puts @auth_shopping_discount.new_record?
+   
     unless @auth_shopping_discount.new_record?
+      errors = []
       @auth_shopping_discount.product_ids.each do |product_id|
-        
-        if product = @auth_shopping_product_class.find(product_id)
-         
-          cart_item = create_cart_item_from_product(product)
+
+          cart_item = Auth.configuration.cart_item_class.constantize.new 
           cart_item = add_owner_and_signed_in_resource(cart_item)  
-          
-          if cart_item.save == true
-            @auth_shopping_cart_items << cart_item
-            @auth_shopping_cart.add_cart_item_ids << cart_item.id.to_s
+          if cart_item_created = cart_item.create_with_embedded(product_id)
+            @auth_shopping_cart_items << cart_item_created
+            @auth_shopping_cart.add_cart_item_ids << cart_item_created.id.to_s
           else
-            puts "the errors trying to save the item"
-            puts cart_item.errors.full_messages.to_s
-          end
-        end
-        
+            @auth_shopping_cart_items << cart_item
+            errors << cart_item.errors.full_messages
+          end 
       end
     else
 
     end
-    
+      
+    respond_to do |format|
+      format.html do 
+        render 'create_multiple.html.erb'
+      end
+
+      format.json do 
+        unless errors.empty?
+          render :json => {cart_items: @auth_shopping_cart_items, errors: errors}, :status => 422
+        else
+          render :json => {cart_items: @auth_shopping_cart_items}, :status => 200
+        end
+      end
+
+    end
      
 
   end
@@ -155,13 +171,14 @@ module Auth::Concerns::Shopping::CartItemControllerConcern
   def permitted_params
 
     
-    if action_name.to_s == "update" && !current_signed_in_resource.is_admin?
-
+    if action_name.to_s == "update"
       
       params.permit({cart_item: [:discount_code,:quantity]},:id)
 
     elsif action_name.to_s == "create_multiple"
       params.permit({discount: [:id, {:product_ids => []}]})
+    elsif action_name.to_s == "create_many_items"
+      params.permit({:cart_item => [:product_ids]})
     else
 
       params.permit({cart_item: [:product_id,:discount_code,:quantity]},:id)

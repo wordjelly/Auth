@@ -12,7 +12,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         def sign_up_params
           ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed admin directly while creating the admin.
           params.require(:user).permit(
-            :email, :password, :password_confirmation,
+            :email, :password, :password_confirmation, :additional_login_param, :confirmed_at
           )
         end
 
@@ -145,11 +145,16 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
 
 
-      it " -- creates a client when a user is created -- " do 
+      it " -- creates a client when a user is created -- ", :client_on_user_create => true do 
 
       
         c = Auth::Client.all.count
+        ## i don't think it will accept this here.
         post user_registration_path, user: attributes_for(:user_confirmed)
+        user = assigns(:user)
+        user = User.where(:email => user.email).first
+        user.confirmed_at = Time.now
+        expect(user.save).to be_truthy
         c1 = Auth::Client.all.count
         expect(c1-c).to eql(1)
 
@@ -157,24 +162,26 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
       it " -- creates a client when a user is created with a mobile number -- ", :client_with_mobile => true do 
 
+        puts "--------- BEFORE STARTING ------------"
+
         Auth.configuration.stub_otp_api_calls = true
         
         c = Auth::Client.all.count
+          
+        user_with_mobile_attrs = attributes_for(:user_mobile)
+       
+        post user_registration_path, user: user_with_mobile_attrs
+
+        user_c = assigns(:user)
         
+        user_c.additional_login_param_status = 2
 
-        post user_registration_path, user: attributes_for(:user_mobile)
+        expect(user_c.save).to be_truthy
 
-        usr = assigns(:user)
-
-        u = User.where(:additional_login_param => usr.additional_login_param).first
-
-        u.additional_login_param_status = 2
-
-        result = u.save
-        
         c1 = Auth::Client.all.count
 
-        expect(c1-c).to eql(1)
+        expect(c1-c).to eq(1)
+
 
       end
 
@@ -238,7 +245,15 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
     end
 
-    context "-- redirect url provided --" do 
+    context "-- redirect url provided --", :redirect => true do 
+
+        before(:all) do 
+          Auth.configuration.do_redirect = true
+        end
+
+        after(:all) do 
+          Auth.configuration.do_redirect = false
+        end
 
       context " -- api key provided -- " do
 
@@ -292,6 +307,7 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
           end
 
           context " -- redirect url valid -- " do 
+
 
             it " -- redirects in create action -- ",:problem_noww => true do 
 

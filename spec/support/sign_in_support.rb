@@ -324,7 +324,9 @@ module DiscountSupport
         cart_item.product_id = Shopping::Product.first.id.to_s
         cart_item.price = Shopping::Product.first.price
         cart_item.signed_in_resource = signed_in_res
-        cart_items << cart_item if cart_item.save
+        if cart_item = cart_item.create_with_embedded(cart_item.product_id)
+          cart_items << cart_item
+        end
     end
     return cart_items 
   end
@@ -441,11 +443,11 @@ module DiscountSupport
       c.signed_in_resource = signed_in_res
       c.resource_id = user.id.to_s
       c.resource_class = user.class.to_s
-      #puts "multiple cart save response:"
-      l = c.save
-      #puts l.to_s
-      #puts l.errors.full_messages.to_s
-      c
+      if c = c.create_with_embedded(c.product_id)
+        c
+      else
+        raise "could not create the cart item."
+      end
     }
 
     created_multiple_cart_items

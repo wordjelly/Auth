@@ -1,0 +1,16 @@
+<!-- will accept the 'f' form object -->
+<% if defined? f %>
+	<%= f.text_field :bar_code_tag, :class => "bar_code" %>
+	<%= f.label :bar_code_tag %>
+
+	<!-- need a checkbox for the remove_bar_code -->
+	<% if f.object.bar_code_tag %>
+		<p>
+			<%= f.label(:remove_bar_code) do %>
+				<%= f.check_box(:remove_bar_code) %>
+				<span>Remove Bar COde</span>	
+			<% end %>
+		</p>
+	<% end %>
+
+<% end %>

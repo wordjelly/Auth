@@ -35,7 +35,7 @@ RSpec.describe Auth::Shopping::CartItem, type: :model, :cart_item_model => true 
 
 		it " -- schedules all communications for delivery when accepted is set to true -- " do 
 
-			CommunicationJob.queue_adapter = :test
+			#CommunicationJob.queue_adapter = :test
 
 			product = Auth.configuration.product_class.constantize.new(JSON.parse(IO.read("#{Dir.pwd}/spec/models/auth/shopping/product.json")))
 			product.signed_in_resource = @admin
@@ -53,9 +53,9 @@ RSpec.describe Auth::Shopping::CartItem, type: :model, :cart_item_model => true 
 			cart_item.parent_id = "test"
 			
 
-			perform_enqueued_jobs do 
-				cart_item.save	
-			end
+			#perform_enqueued_jobs do 
+			cart_item.save	
+			#end
 
 
 			expect(ActionMailer::Base.deliveries.count).to eq(1)
@@ -64,8 +64,7 @@ RSpec.describe Auth::Shopping::CartItem, type: :model, :cart_item_model => true 
 
 		it " -- schedules the repeat after 1 month -- ", :schedule_repeat => true do 
 
-			CommunicationJob.queue_adapter = :test
-
+			
 			product = Auth.configuration.product_class.constantize.new(JSON.parse(IO.read("#{Dir.pwd}/spec/models/auth/shopping/product.json")))
 			product.signed_in_resource = @admin
 			product.resource_class = @admin.class
@@ -84,10 +83,9 @@ RSpec.describe Auth::Shopping::CartItem, type: :model, :cart_item_model => true 
 			cart_item.parent_id = "test"
 
 			
-			perform_enqueued_jobs do 
-				cart_item.save	
-			end
-
+			
+			cart_item.save	
+			
 
 			## expect the repeated count to be 1.
 			cart_item = Auth.configuration.cart_item_class.constantize.find(cart_item.id.to_s)

@@ -174,8 +174,10 @@ module Auth::Concerns::Shopping::PayUMoneyConcern
 		## we should just set, gateway callback complete as true, and based on that never show the pay with payumoney link again in the show action.
 
 		## just looking to see if  
-		if (pr["mihpayid"] && pr["hash"] && (pr["txnid"] == self.id.to_s))
-			self.gateway_callback_called = true
+		if pr
+			if (pr["mihpayid"] && pr["hash"] && (pr["txnid"] == self.id.to_s))
+				self.gateway_callback_called = true
+			end
 		end
 	  	yield if block_given?
 	  	return true

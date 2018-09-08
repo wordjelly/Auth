@@ -14,7 +14,7 @@ module Auth::Concerns::Shopping::PersonalityConcern
 			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 				    },
 			        mappings: {
-			          Auth::OmniAuth::Path.pathify(Auth.configuration.personality_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 			    }
 			}
 		}
@@ -30,7 +30,14 @@ module Auth::Concerns::Shopping::PersonalityConcern
 
 		field :sex, type: String
 
+		field :referred_by, type: String
 
+		field :referrer_contact_number, type: String
+
+		validates_presence_of :age
+		validates_presence_of :sex
+		validates_presence_of :fullname
+		validates_presence_of :date_of_birth
 		##################################################################
 		##
 		##
@@ -89,23 +96,71 @@ module Auth::Concerns::Shopping::PersonalityConcern
 		self.age = ((Time.now - birth_time)/1.year).to_i
 	end
 
-
-	######################################################################
+	#################################################################
 	##
 	##
 	## AUTOCOMPLETE METHODS.
 	##
 	##
-	######################################################################
+	#################################################################
+
+	def set_primary_link
+		self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.personality_class),self.id.to_s)
+	end	
+
+	def set_secondary_links 
+		unless self.secondary_links["See All Carts"]
+			
+		end
+
+		unless self.secondary_links["See Latest Cart"]
+
+		end
+
+		unless self.secondary_links["See Pending Carts"]
+
+		end
+
+		unless self.secondary_links["Edit Information"]
+		
+		end
+	end
+
+	def set_autocomplete_tags
+		self.tags = []
+		self.tags << "Personality"
+	end
+
+	def set_autocomplete_description
+		
+	end
+
+
+	
+
+	################################################################
+	##
+	##
+	## CLASS METHODS.
+	##
+	##
+	################################################################
 
 	## @param[Hash] options : can contain a :resource key. which should be the resource(user) to which all the personalities belong.
 	module ClassMethods
 		def find_personalities(options)
 			conditions = {:resource_id => nil, :parent_id => nil}
 			conditions[:resource_id] = options[:resource].id.to_s if options[:resource]
-			puts "conditions are:"
-			puts conditions.to_s
 			Auth.configuration.personality_class.constantize.where(conditions)
 		end
 	end
+
+	#############################################################
+	##
+	##
+	## UTILITY METHODS.
+	##
+	##
+	#############################################################
+
 end

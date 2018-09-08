@@ -6,6 +6,7 @@ class Auth::Image
   include Mongoid::Document
   include Auth::Concerns::OwnerConcern
 
+  ## now what about transformations ?
 
   ###########################################################
   ##
@@ -19,7 +20,7 @@ class Auth::Image
   ## the parent id is the id of the object in which the image is uploaded.
   ## it need not exist. but has to be a valid bson object id.
   def self.permitted_params
-    [{:image => [:_id,:parent_id,:parent_class,:active,:timestamp,:public_id]},:id]
+    [{:image => [:_id,:parent_id,:parent_class,:active,:timestamp,:public_id,:custom_coordinates]},:id]
   end
 
 
@@ -35,6 +36,7 @@ class Auth::Image
   field :parent_id, type: String
   field :parent_class, type: String
   field :active, type: Boolean, default: true  
+  field :custom_coordinates, type: String
   attr_accessor :signed_request
   attr_accessor :timestamp
   attr_accessor :public_id
@@ -65,6 +67,10 @@ class Auth::Image
     document.signed_request = get_signed_request
   end
 
+  ## this should destroy the image.
+  before_destroy do |document|
+    Cloudinary::Uploader.destroy(document.id.to_s)
+  end
 
   ###########################################################
   ##
@@ -93,8 +99,10 @@ class Auth::Image
   ##
   ############################################################
   def get_signed_request
-
-    Cloudinary::Utils.sign_request({:public_id => self.id.to_s,:timestamp=> self.timestamp, :callback => "http://widget.cloudinary.com/cloudinary_cors.html"}, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
+    ## these should be merged only if they exist.
+    params_to_sign = {:public_id => self.id.to_s,:timestamp=> self.timestamp, :callback => "http://widget.cloudinary.com/cloudinary_cors.html"}
+    params_to_sign.merge!({:custom_coordinates => self.custom_coordinates}) unless self.custom_coordinates.blank?
+    Cloudinary::Utils.sign_request(params_to_sign, :options=>{:api_key=>Cloudinary.config.api_key, :api_secret=>Cloudinary.config.api_secret})
 
   end
 
@@ -104,8 +112,11 @@ class Auth::Image
   end
 
   def get_url
-    Cloudinary::Utils.cloudinary_url(self.id.to_s)
+    if self.custom_coordinates
+      Cloudinary::Utils.cloudinary_url self.id.to_s, gravity: "custom", crop: "crop"
+    else
+      Cloudinary::Utils.cloudinary_url self.id.to_s
+    end
   end
-
 
 end

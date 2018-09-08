@@ -1,1 +1,6 @@
-$("#proxy_user").html("<%= escape_javascript(render partial: 'auth/profiles/proxy_resource.html.erb', locals: {proxy_resource: @profile_resource}) %>").show();
+// clear the search results if any.
+$(".search_result").remove();
+$(".acting_for_user").remove();
+<% if session[:proxy_resource_id] %>
+	$("#acting_for_user_holder").html("<%= escape_javascript(render partial: 'layouts/auth/navbar/acting_for_user.html.erb') %>").show();	
+<% end %>

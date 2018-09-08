@@ -5,16 +5,24 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::ChiefModelConcern
 	include Auth::Concerns::OwnerConcern
 	include Auth::Concerns::EsConcern
-	
+	include Mongoid::Autoinc	
+
+
+	## include the bar code concern if enable_bar_code_api is enabled.
+
+	if Auth.configuration.enable_barcode_api == true
+		include Auth::Concerns::Shopping::BarCodeConcern
+	end
 
 	included do 
 		
 		embeds_many :cycles, :class_name => "Auth::Work::Cycle", :as => :product_cycles
 
 		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :product_instructions
-					
-		INDEX_DEFINITION = 
+		
+		INDEX_DEFINITION ||= 
 		{
+			index_name: Auth.configuration.brand_name.downcase,
 			index_options:  
 				{
 				settings:  
@@ -23,7 +31,7 @@ module Auth::Concerns::Shopping::ProductConcern
 					},
 				mappings: 
 					{
-				        Auth::OmniAuth::Path.pathify(Auth.configuration.product_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS.deep_merge(
+				        "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS.deep_merge(
 				        		{
 				        			properties: {
 				        				bundle_name: {
@@ -42,13 +50,11 @@ module Auth::Concerns::Shopping::ProductConcern
 		}
 
 		#include MongoidVersionedAtomic::VAtomic	
-		field :price, type: BigDecimal
+		field :price, type: Float
 		field :name, type: String
 		## a product can only belong to one bunch.
 		field :bunch, type: String
-		##PERMITTED
-		##the number of this product that are being added to the cart
-		##permitted
+	
 		field :quantity, type: Float, default: 1
 		## for WORKFLOW
 		#field :location_information, type: Hash, default: {}
@@ -73,13 +79,81 @@ module Auth::Concerns::Shopping::ProductConcern
 			self.public = "yes"
 		end
 
+		after_initialize do |document|
+
+			if ((document.new_record?) && (document.create_from_product_id))
+				
+				begin
+					create_from_product = Auth.configuration.product_class.constantize.find(self.create_from_product_id)
+					unless create_from_product.product_code.blank?
+						
+						document.attrs_to_copy_from_prod_to_prod.each do |attr|
+							document.send("#{attr}=",create_from_product.send("#{attr}"))
+						end
+					end
+				rescue Mongoid::Errors::DocumentNotFound => e
+					puts e.to_s
+				end
+			end
+		end
+
+		###########################################################
+		##
+		##
+		## THE WHOLE MATTER OF PRODUCT TYPE CODES.
+		##
+		##
+		###########################################################
+
+		## this is automatically assigned to whatever is the calculated hashid, only if it is not already set, so that is is done, in the write attribute hook.
+		field :product_code, type: String
+
+		field :auto_incrementing_number, type: Integer
+
+		increments :auto_incrementing_number
+
+		field :unique_hash_id, type: String
+
+		## first lets do the specs
+
+		attr_accessor :create_from_product_id
+		
+		############################################################
+
+	end
+
+	def write_attribute(field,value)
+		super(field,value)
+		if field.to_s == "auto_incrementing_number"
+			if self.auto_incrementing_number_changed?
+				unless self.unique_hash_id
+					hashids = Hashids.new(Auth.configuration.hashids_salt,0,Auth.configuration.hashids_alphabet)
+					self.unique_hash_id = hashids.encode(self.auto_incrementing_number)
+					## check if the option that create from product id is ticked, then assign that otherwise give it its own new product code
+					if self.create_from_product_id
+						
+					else
+						self.product_code = self.unique_hash_id if (self.product_code.blank?)
+					end
+				end
+			end
+		end
 	end
 
 
+	def attrs_to_copy_from_prod_to_prod
+		["product_code","name","description","price"]
+	end
+
+
+=begin
 	def as_indexed_json(options={})
+	 puts "super is:"
+	 puts super
 	 super.merge({bundle_name: bundle_name})
 	end 
-	
+=end	
+
 	## so we have completed the rolling n minutes.
 	def add_to_previous_rolling_n_minutes(minutes,origin_epoch,cycle_to_add)
 
@@ -144,6 +218,67 @@ module Auth::Concerns::Shopping::ProductConcern
 			end
 		end
 		minutes
+	end
+
+	## here need to add this action links to the products.
+	## it is basically a form to add a cart item
+	## that should be added hereitself.
+	## 
+	def set_secondary_links
+		## this can be done both as a user and as an admin.
+		## what if the admin assigns it for himself.
+		## these checks have to be established for everyone.
+		unless self.secondary_links["Order Now"]
+			self.secondary_links["Order Now"] = {
+				:partial => "auth/shopping/products/show/action_links.html.erb",
+				:instance_name_in_locals => "product", 
+				:other_locals => {}
+			}
+		end
+
+		unless self.secondary_links["Edit Product"]
+			self.secondary_links["Edit Product"] = {
+				:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.product_class),self.id.to_s)
+			}
+		end
+
+		unless self.secondary_links["See All Products"]
+			## for this the url is ===> index path.
+			self.secondary_links["See All Products"] = {
+				:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.product_class),{})
+			}
+
+		end
+
+		unless self.secondary_links["See Related Products"]
+			self.secondary_links["See All Products"] = {
+				:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.product_class),{})
+			}
+
+		end
+		
+		unless self.secondary_links["Add New Product"]
+			self.secondary_links["Add New Product"] = {
+				:partial => "auth/shopping/products/search_results/add_product.html.erb",
+				:instance_name_in_locals => "product", 
+				:other_locals => {}	
+			}
+		end
+
+	end
+
+	
+	def set_autocomplete_tags
+		self.tags = []
+		self.tags << "product"
+	end
+
+	def set_autocomplete_description
+		self.autocomplete_description = self.name + " - " + self.description
+	end
+
+	def set_primary_link
+		self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.product_class),self.id.to_s)
 	end
 	
 end

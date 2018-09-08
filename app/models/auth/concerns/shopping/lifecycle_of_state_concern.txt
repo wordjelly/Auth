@@ -1,0 +1,26 @@
+1. PROCESS_ITEM
+
+						cart controller
+							  |
+							  |
+							  |
+							  |
+						create / update
+							  |
+							  |
+							  |
+							  | 
+					calls cart#process_items(just before render)
+				calls cart#can_process_item?(item)
+					      if true then
+					   		  |
+					   		  |
+					   		  |
+					   		  |
+					calls cart_item#process
+
+
+======================================================================
+
+2. when cart-item is given a parent_id to be saved, in the method set_resource_and_parent id, just before calling save,
+called cart#can_accept_item, to check fi the cart is capable of accepting the item, saving goes forward only if this returns true.

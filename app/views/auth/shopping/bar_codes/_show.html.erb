@@ -1,0 +1,23 @@
+<%= render :partial => "auth/shared/object_errors", locals: {active_model_object: @bar_code} %>
+<div class="collection">
+	<div class="collection-item">
+		<h5>BarCode</h5>
+		<div class="grey-text"><%= @bar_code.bar_code_tag %></div>
+	</div>
+	<div class="collection-item">
+		<h5>Assigned To Object Id</h5>
+		<div class="grey-text"><%= @bar_code.assigned_to_object_id %></div>
+	</div>
+	<div class="collection-item">
+		<h5>Assigned To Object Class</h5>
+		<div class="grey-text"><%= @bar_code.assigned_to_object_class %></div>
+	</div>
+	<div class="collection-item">
+		<h5>Creator Resource Id</h5>
+		<div class="grey-text"><%= @bar_code.resource_id %></div>
+	</div>
+	<div class="collection-item">
+		<h5>Creator Resource Class</h5>
+		<div class="grey-text"><%= @bar_code.resource_class %></div>
+	</div>
+</div>

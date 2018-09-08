@@ -35,3 +35,11 @@ label{
 .parallax-container {
     height: 200px !important;
 }
+
+/* In order to place the tracking correctly */
+/* for the barcode scanner overlay, from qagga */
+canvas.drawing, canvas.drawingBuffer {
+    position: absolute;
+    left: 0;
+    top: 0;
+}

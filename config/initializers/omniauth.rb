@@ -145,6 +145,7 @@ module OmniAuth
   	OAuth2.class_eval do 
   		def callback_phase # rubocop:disable AbcSize, CyclomaticComplexity, MethodLength, PerceivedComplexity
 
+  			#puts "checking the callback phase -----------------------------------------------"
   			#puts request.inspect.to_s
   			#puts request.params.to_s
 
@@ -205,7 +206,6 @@ module OmniAuth
   	Facebook.class_eval do 
   		
   		def build_access_token
-
   			request.body.rewind
   			hash = request.body.read
   			request.body.rewind
@@ -235,11 +235,15 @@ module OmniAuth
   			a_t
   		end
 
+  	
   		def with_authorization_code!
-  			
+  			## with facebook it is coming as the params.
+  			#puts request.params.inspect
   			request.body.rewind
   			hash = request.body.read
   			request.body.rewind
+  			#puts "the hash is:"
+  			#puts hash.to_s
           	parsedForm = JSON.parse(hash) unless hash.blank?
           	post_params_fb_exchange_token = nil
           	if parsedForm
@@ -268,6 +272,7 @@ module OmniAuth
   		end
 
   	end
+
     GoogleOauth2.class_eval do 
     	
     	def custom_build_access_token

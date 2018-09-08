@@ -1,0 +1,5 @@
+<% if current_signed_in_resource && current_signed_in_resource.is_admin? %>
+	<div class="input-field">
+		<%= link_to "Manage this user", admin_create_user_path(:id => user.id.to_s) %>
+	</div>
+<% end %>

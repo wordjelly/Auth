@@ -1,0 +1,20 @@
+<% @new_product = Auth.configuration.product_class.constantize.new(:create_from_product_id => @auth_shopping_product.id.to_s) %>
+<%= form_for(@new_product, url: @new_product.new_record? ? products_path : product_path(@new_product), method: @new_product.new_record? ? :post : :put, as: :product) do |f| %>
+  <% if @new_product.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@new_product.errors.count, "error") %> prohibited this new_product from being saved:</h2>
+
+      <ul>
+      <% @new_product.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="form_fields">
+    <%= f.hidden_field :create_from_product_id, :value => @new_product.create_from_product_id %>
+  </div>
+  <div class="actions">
+    <i class="material-icons" style="vertical-align: bottom;">people</i><span style="margin-left: 1rem;"><%= f.submit "Clone This Product", :style => "background-color: white; border:none; cursor: pointer;", :class => "teal-text" %></span>
+  </div>
+<% end %>

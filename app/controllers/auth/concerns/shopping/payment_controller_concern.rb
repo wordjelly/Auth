@@ -28,8 +28,8 @@ module Auth::Concerns::Shopping::PaymentControllerConcern
   end
 
   def new
-    puts "these are payment attributes"
-    puts @auth_shopping_payment.attributes.to_s
+   # puts "these are payment attributes"
+   # puts @auth_shopping_payment.attributes.to_s
     @auth_shopping_payment = add_owner_and_signed_in_resource(@auth_shopping_payment)
     @auth_shopping_payment.set_cart(@auth_shopping_payment.cart_id)
   end

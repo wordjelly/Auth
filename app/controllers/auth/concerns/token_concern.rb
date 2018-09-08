@@ -122,7 +122,7 @@ module Auth::Concerns::TokenConcern
     proxy_resource_id = params[:proxy_resource_id] || session[:proxy_resource_id]
     proxy_resource_class = params[:proxy_resource_class] || session[:proxy_resource_class]
     
-    ## if these are not provided or set, and if the resource is an admin, then the admin becomes the proxy_resource
+    
     proxy_resource_id = current_signed_in_resource.id.to_s if (current_signed_in_resource.is_admin? && proxy_resource_id.nil?)
 
     proxy_resource_class = current_signed_in_resource.class.to_s if (current_signed_in_resource.is_admin? && proxy_resource_class.nil?)
@@ -183,6 +183,7 @@ module Auth::Concerns::TokenConcern
 
   ## this is used as a before_filter.
   def is_admin_user
+    not_found("not authorized") unless current_signed_in_resource
     not_found("You don't have sufficient privileges to complete that action") if !current_signed_in_resource.is_admin?
   end
 

@@ -1,0 +1,21 @@
+<!-- this placeholder word is replaced by the barcode in the bar_code.js script -->
+
+<%= link_to 'Go', bar_code_path({:id => 'placeholder', :bar_code => {:force_show => true, :go_to_next_step => true}}), :class => "waves-effect waves-light btn", :id => "get_barcode_object", :remote => true %>
+
+<form action="#">
+    <p>
+      <!-- if this is checked, then add force_show=true to the link as a query parameter -->
+      <label>
+        <input id="force_show" type="checkbox" />
+        <span>Show BarCode Entry</span>
+      </label>
+    </p>
+    <p>
+      <!-- if this is checked, then add go_to_next_step=true to the link as a query parameter -->
+      <!-- this is checked by default -->
+      <label>
+        <input id="go_to_next_step" type="checkbox" checked="checked" />
+        <span>Go To Next Step</span>
+      </label>
+    </p>
+</form>

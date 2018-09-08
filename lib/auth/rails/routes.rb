@@ -61,7 +61,9 @@ module ActionDispatch::Routing
 	      	end
 	      end
 
-	      resources :bar_codes, :controller => "auth/shopping/bar_codes"
+	     
+	      
+	      resources :bar_codes, :controller => "auth/shopping/bar_codes", :only => [:show, :index, :new] 	      
 
 	      ## this controller may need to be changed, actually will have to be changed for every single thing.
 	      resources :assemblies, :controller => Auth.configuration.assembly_controller
@@ -104,10 +106,10 @@ module ActionDispatch::Routing
 
 	  	  resources :endpoints, :controller => Auth.configuration.endpoint_controller
 		 
-		  resources :profiles, :controller => "auth/profiles" do 
+		  resources :profiles, :controller => Auth.configuration.profiles_controller do 
 		  	collection do 
 		  		## :resource will be something like users.
-		  		post ':resource/set_proxy_user', :action => 'set_proxy_resource', :as => "set_proxy_resource"
+		  		put ':resource/set_proxy_user', :action => 'set_proxy_resource', :as => "set_proxy_resource"
 		  		get 'credential_exists', :action => 'credential_exists'
 		  		post ':resource/get_user_id', :action => 'get_user_id'
 		  		put ':resource/update', :action => 'update'
@@ -161,7 +163,7 @@ module ActionDispatch::Routing
 				 	 				collection do 
 					 	 				if model == "cart_item"
 					 	 					post 'create_multiple', :action => 'create_multiple'
-					 	 					post 'create_package_items', :action => 'create_package_items'
+					 	 					post 'create_many_items', :action => 'create_many_items'
 					 	 				end
 				 	 				end			 	 				
 			 	 			end
@@ -171,17 +173,11 @@ module ActionDispatch::Routing
 
 					   		end
 			 	 		end
-				 	 	
-
 					end
-
 				end
-
 			end
 
-
-		  
-		  app_route_resources.each do |resource,opts| 
+    		app_route_resources.each do |resource,opts| 
 
 		  	  #puts "resource is : #{resource}"
 		  	  #puts "opts are: #{opts}"

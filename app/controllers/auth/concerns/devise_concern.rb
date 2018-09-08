@@ -78,10 +78,10 @@ module Auth::Concerns::DeviseConcern
 	      return true
 
 	    else
-	      #puts "params are: #{params.to_s}"
-	      #puts params[:state]
-          #puts JSON.is_json?(params[:state])
-          #puts "---- end --- "
+	      puts "params are: #{params.to_s}"
+	      puts params[:state]
+          puts JSON.is_json?(params[:state])
+          puts "---- end --- "
           state = nil
 	      api_key = nil
 	      current_app_id = nil

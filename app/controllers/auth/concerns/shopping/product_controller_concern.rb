@@ -9,10 +9,12 @@ module Auth::Concerns::Shopping::ProductControllerConcern
   end
 
   def initialize_vars
-    puts "came to initialize vars"
+    #puts "came to initialize vars"
   	instantiate_shopping_classes
     @auth_shopping_product_params = permitted_params.fetch(:product,{})
-    puts "current signed in resource: #{current_signed_in_resource}"
+    #puts "product params:"
+    #puts @auth_shopping_product_params.to_s
+    #puts "current signed in resource: #{current_signed_in_resource}"
     @auth_shopping_product = params[:id] ? @auth_shopping_product_class.find_self(params[:id],current_signed_in_resource) : @auth_shopping_product_class.new(@auth_shopping_product_params)
   end
   
@@ -22,7 +24,6 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     @auth_shopping_product.save
     respond_with @auth_shopping_product
-    
   end
 
   def update
@@ -30,6 +31,7 @@ module Auth::Concerns::Shopping::ProductControllerConcern
     @auth_shopping_product = add_owner_and_signed_in_resource(@auth_shopping_product,{:owner_is_current_resource => true})
     @auth_shopping_product.assign_attributes(@auth_shopping_product_params)
     @auth_shopping_product.save
+    puts @auth_shopping_product.errors.full_messages
     respond_with @auth_shopping_product
     
   end
@@ -103,15 +105,14 @@ module Auth::Concerns::Shopping::ProductControllerConcern
 
   end
 
-  ## first create a new product with a bundle.
-  ## so let me modify that part first.
+
   def permitted_params 
-  	pr = params.permit({:product => [:name,:price,:bundle_name]})
+    bar_code_params = [:name,:price,:bundle_name,:create_from_product_id] + Auth::Shopping::BarCode.allow_params
+  	params.permit({:product => bar_code_params},:id)
   end
 
-
-  
-
+  ## so give a button called create product from this product
+  ## it should be a partial with a form.
 
 end
 

@@ -16,8 +16,8 @@ begin
 
 rescue => e
 
-	puts "there was an error loading the file"
-	puts e.to_s
+	#puts "there was an error loading the file"
+	#puts e.to_s
 
 	$date_hash = {}
 

@@ -255,7 +255,7 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## called in show action of controller.
 	## return[Array]
 	def set_payment_receipt
-		puts "CAME TO SET PAYMENT RECEIPT ------------------------"
+		#puts "CAME TO SET PAYMENT RECEIPT ------------------------"
 		self.payment_receipt = {:current_payment => [], :cart => {}}
 		Auth.configuration.cart_item_class.constantize.where(:accepted_by_payment_id => self.id.to_s).each do |c_item|
 			puts "THIS ITEM IS C_ITEM: #{c_item.id.to_s}"
@@ -263,8 +263,8 @@ module Auth::Concerns::Shopping::PaymentConcern
 		end
 		set_cart(self.cart_id) if self.cart.nil?
 		self.payment_receipt[:cart] = self.cart.prepare_receipt
-		puts self.payment_receipt.to_s
-		puts "finished set payment receipt."
+		#puts self.payment_receipt.to_s
+		#puts "finished set payment receipt."
 	end
 
 	##res : 59a5405c421aa90f732c9059
@@ -601,8 +601,9 @@ module Auth::Concerns::Shopping::PaymentConcern
 	## validation
 	def payment_satisfies_minimum_payment_requirement
 		self.cart.prepare_cart
-		puts "the minimum payment amoutn is:"
-		puts self.cart.cart_minimum_payable_amount
+		#puts "the minimum payment amoutn is:"
+		#puts self.cart.cart_minimum_payable_amount
+		## what if self.cart.payment_stage.
 		return if (self.refund == true || self.discount)  
 		self.errors.add("amount","payment amount is not sufficient") if (self.cart.cart_minimum_payable_amount.nil? || (self.cart.cart_minimum_payable_amount > self.amount))
 	end
@@ -623,6 +624,19 @@ module Auth::Concerns::Shopping::PaymentConcern
 
 	def as_json(options={})
 		super(options).merge({:payment_receipt => self.payment_receipt,:cash_change => self.cash_change})
+	end
+
+	def is_approved?
+		puts "the payment status is: #{self.payment_status}"
+		self.payment_status == 1
+	end
+
+	def is_pending?
+		self.payment_status.nil?
+	end
+
+	def is_disapproved?
+		self.payment_status == 0
 	end
 
 end

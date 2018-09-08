@@ -17,6 +17,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 		@profile_resource = nil
 		@all_params = permitted_params.deep_symbolize_keys
 		
+		## okay let's see how to switch to that user.
 		
 	  	if collection = @all_params[:resource]
 	  		
@@ -36,6 +37,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 	## this method needs token authentication, or for the user to be authenticated.
 	## this method also needs an :id, hence the profile_resource is returned.
 	## so what if i sign in as one user,and send in the id of another user?, no because we use the find_resource method, which also considers the current_signed_in_Resource.
+	## now suppose we need to change something, so in show profiles, we will give this method, in the view, to update a signature
 	def show
 		@profile_resource
 	end
@@ -94,11 +96,14 @@ class Auth::ProfilesController < Auth::ApplicationController
 	## params[:proxy_resource_id] and params[:proxy_resource_class]
 	def set_proxy_resource
 		not_found("that user doesn't exist") unless @profile_resource
-		session[:proxy_resource_id] = @profile_resource.id.to_s
-		session[:proxy_resource_class] = @profile_resource.class.name.to_s
-		#puts "the session variables set are as follows:"
-		#puts session[:proxy_resource_id]
-		#puts session[:proxy_resource_class]
+		if params[:unset_proxy]
+			## this unsets the proxy user.
+			session[:proxy_resource_id] = nil
+			session[:proxy_resource_class] = nil
+		else
+			session[:proxy_resource_id] = @profile_resource.id.to_s
+			session[:proxy_resource_class] = @profile_resource.class.name.to_s
+		end
 	end
 
 
@@ -143,7 +148,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 	  		end
 	  		## resource has to be passed as well.
 	  		## it is a plural, downcase like "users"
-	  		filters << [:resource,:api_key,:current_app_id,:id]
+	  		filters << [:resource,:api_key,:current_app_id,:id,:unset_proxy]
 	  		params.permit(filters)
 		end
 

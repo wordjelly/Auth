@@ -9,6 +9,10 @@ module Auth
 
 		def self.set_webhook_identifier(notification_response,last_response)
 			
+			puts "last response is:"
+			puts last_response
+
+
 			last_response = JSON.parse(last_response).deep_symbolize_keys
 			notification_response.webhook_identifier = last_response[:webhook_identifier] if not last_response[:webhook_identifier].nil?
 		end

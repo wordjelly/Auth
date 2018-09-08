@@ -45,9 +45,9 @@ module Auth::Concerns::Shopping::PersonalityControllerConcern
     respond_with @auth_shopping_personality 
   end
 
-  ##should show those cart items which do not have a parent_id.
-  ##since these are the pending cart items.
-  ##all remaining cart items have already been assigned to carts
+  ## will have to have this lookup resource part here.
+  ## what if we want to create items for the user
+  ## 
   def index
     @auth_shopping_personalities = @auth_shopping_personality_class.find_personalities({:resource => lookup_resource}).page 1
     respond_with @auth_shopping_personalities
@@ -81,7 +81,7 @@ module Auth::Concerns::Shopping::PersonalityControllerConcern
   ## this permitted params is overridden in the dummy app, and as a result throws unpermitted parameters for the daughter app parameters, even though they are subsequently permitted, since super is called first.
   def permitted_params
 
-    params.permit({personality: [:date_of_birth, :fullname, :sex]},:id, :query_string)
+    params.permit({personality: [:date_of_birth, :fullname, :sex, :referred_by, :referrer_contact_number]},:id, :query_string)
     
   end
 

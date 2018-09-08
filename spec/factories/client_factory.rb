@@ -67,14 +67,16 @@ FactoryGirl.define do
     email  { Faker::Internet.email }
     password  'password'
     password_confirmation  'password'
+    admin true
   end
 
 
-  factory :admin_confirmed, class: Admin do
+  factory :admin_confirmed, class: User do
     email  { Faker::Internet.email }
     password  'password'
     password_confirmation  'password'
     confirmed_at Time.now
+    admin true
   end
 
 

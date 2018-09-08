@@ -130,7 +130,7 @@ RSpec.describe "cart request spec",:cart => true,:shopping => true, :type => :re
 				puts "response body"
 				puts "this is the response body."
 				puts response.body.to_s
-				expect(cart_response["cart_minimum_payable_amount"]).to eq("10.0")
+				expect(cart_response["cart_minimum_payable_amount"].to_s).to eq("10.0")
 				expect(response.code).to eq("200")
 			end
 

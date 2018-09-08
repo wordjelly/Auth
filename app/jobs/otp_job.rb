@@ -5,7 +5,7 @@ class OtpJob < ActiveJob::Base
   include Auth::JobExceptionHandler
 
   queue_as :default
-  self.queue_adapter = :delayed_job
+  self.queue_adapter = :inline
 
   ##we currently log all exceptions to redis.
   rescue_from(StandardError) do |exception|
@@ -73,7 +73,9 @@ class OtpJob < ActiveJob::Base
 
 
       elsif job_type == "send_email"
-      
+        ## so we need to specify a mailer class
+        ## that is why it is not working here.
+        
         notification = params[:notification_class].capitalize.constantize.find(params[:notification_id])
         email = Auth.configuration.mailer_class.constantize.notification(resource,self)
         email = add_webhook_identifier_to_email(email)

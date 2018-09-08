@@ -1,0 +1,16 @@
+<% if @bar_code.force_show %>
+	location = "<%= bar_code_path({:id => @bar_code.bar_code_tag, :bar_code => {:force_show => true}}) %>";
+<% else %>
+	<% if @bar_code.errors.empty? %>
+		<% unless @bar_code.assigned_to_object.primary_link.blank? %>
+			console.log("primary link not blank");
+			location = "<%= @bar_code.assigned_to_object.primary_link %>";
+		<% else %>
+			console.log("primary link is blank");
+			location  = "<%= bar_code_path(@bar_code.bar_code_tag) %>";
+		<% end %>
+	<% else %>
+		console.log("bar code has errors on it.");
+		alert("<%= @bar_code.errors.full_messages %>");
+	<% end %>
+<% end %>

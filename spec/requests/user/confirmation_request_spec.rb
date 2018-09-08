@@ -1,5 +1,7 @@
 require "rails_helper"
 
+include ActiveJob::TestHelper
+
 RSpec.describe "confirmation request spec",:confirmation => true,:authentication => true, :type => :request do 
 
 	before(:example) do 
@@ -146,13 +148,18 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
         		expect(response.code).to eq("406")
 			end
 
-			it "-- create request works" do 
+			it "-- create request works", :create_valid_conf => true do 
+				
 				prev_msg_count = ActionMailer::Base.deliveries.size
 				
 
-				post user_confirmation_path,{user:{email: @u.email}, api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
+				post user_confirmation_path,{user:{email: @u.email},
+				 api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
 				
+
+
 				message = ActionMailer::Base.deliveries[-1].to_s
+				puts message.to_s
     			confirmation_token = nil
       			message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
 

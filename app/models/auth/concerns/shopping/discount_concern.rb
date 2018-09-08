@@ -44,8 +44,21 @@ module Auth::Concerns::Shopping::DiscountConcern
 		
 	include Auth::Concerns::ChiefModelConcern
 	include Auth::Concerns::OwnerConcern
-	
+	include Auth::Concerns::EsConcern
+
+
 	included do 
+
+		INDEX_DEFINITION = {
+			index_options:  {
+			        settings:  {
+			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
+				    },
+			        mappings: {
+			          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			    }
+			}
+		}
 
 		####################################################
 		##
@@ -379,9 +392,36 @@ module Auth::Concerns::Shopping::DiscountConcern
 
 		end
 
+	end
 
+	#######################################################
+	##
+	##
+	## AUTOCOMPLETE METHODS.
+	##
+	##
+	#######################################################
+	def set_primary_link
+		unless self.primary_link
+			self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.discount_class),self.id.to_s)
+		end
+	end
+
+	def set_autocomplete_tags
+		self.tags = []
+		self.tags << "Discount"
+		self.tags << self.discount_amount.to_s if self.discount_amount
+		self.tags << self.discount_percentage.to_s if self.discount_percentage
+	end
+
+	def set_autocomplete_description
 
 	end
+
+	def set_secondary_links
+		
+	end
+
 
 	#######################################################
 	##

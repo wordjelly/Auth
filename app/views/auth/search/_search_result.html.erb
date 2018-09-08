@@ -1,8 +1,8 @@
 <li class="collection-item search_result teal-text">
 <%= link_to result.primary_link.html_safe do %>
-	<h5><%= result.tags.join(" ") %></h5>
+	<h5 class="search_result_tags"><%= result.tags.join(" ") %></h5>
 <% end %>
-<h6 class="grey-text"><%= result.autocomplete_description %></h6>
+<h6 class="grey-text search_result_description"><%= result.autocomplete_description %></h6>
 <% result.secondary_links.keys.each do |sl| %>
 	<% if result.secondary_links[sl][:partial] %>
 		<% locals = {} %>
@@ -13,8 +13,14 @@
 		<% end %>
 		<%= render :partial => result.secondary_links[sl][:partial], locals: locals %>
 	<% else %>
-		<%= link_to result.secondary_links[sl][:url].html_safe, :data => result.secondary_links[sl][:data] || {} do %>
-			<span class="m-20-right"><%= sl %></span>
+		<% if result.secondary_links[sl][:method] %>
+			<%= link_to result.secondary_links[sl][:url].html_safe, :data => result.secondary_links[sl][:data] || {}, :method => result.secondary_links[sl][:method], :class => result.secondary_links[sl][:class] || {} do %>
+				<span class="m-20-right"><%= sl %></span>
+			<% end %>
+		<% else %>
+			<%= link_to result.secondary_links[sl][:url].html_safe, :data => result.secondary_links[sl][:data] || {}, :class => result.secondary_links[sl][:class] || {} do %>
+				<span class="m-20-right"><%= sl %></span>
+			<% end %>
 		<% end %>
 	<% end %>
 <% end %>

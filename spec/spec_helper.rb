@@ -60,6 +60,15 @@ end
 
 
 RSpec.configure do |config|
+
+  config.before(:each) do
+    ActionMailer::DeliveryJob.queue_adapter = :inline
+    OtpJob.queue_adapter = :inline
+    CommunicationJob.queue_adapter = :inline
+    ActiveJob::Base.queue_adapter = :inline
+  end
+
+
   #config.include Auth::Engine.routes.url_helpers
   
   # rspec-expectations config goes here. You can use an alternate

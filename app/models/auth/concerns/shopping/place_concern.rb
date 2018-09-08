@@ -7,6 +7,7 @@ module Auth::Concerns::Shopping::PlaceConcern
 
 	included do 
 
+=begin
 		INDEX_DEFINITION = {
 			index_options:  {
 			        settings:  {
@@ -88,8 +89,19 @@ module Auth::Concerns::Shopping::PlaceConcern
 			    }
 			}
 		}
+=end		
 		
-		
+		INDEX_DEFINITION = {
+			index_options:  {
+			        settings:  {
+			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
+				    },
+			        mappings: {
+			          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			    }
+			}
+		}
+
 
 		field :nearest_address, type: String
 
@@ -120,6 +132,47 @@ module Auth::Concerns::Shopping::PlaceConcern
 		end
 		address
 	end
+
+
+	#################################################################
+	##
+	##
+	## AUTOCOMPLETE METHODS.
+	##
+	##
+	#################################################################
+
+	def set_primary_link
+		self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.place_class),self.id.to_s)
+	end	
+
+	def set_secondary_links 
+		unless self.secondary_links["See All Carts"]
+			
+		end
+
+		unless self.secondary_links["See Latest Cart"]
+
+		end
+
+		unless self.secondary_links["See Pending Carts"]
+
+		end
+
+		unless self.secondary_links["Edit Information"]
+		
+		end
+	end
+
+	def set_autocomplete_tags
+		self.tags = []
+		self.tags << "Place"
+	end
+
+	def set_autocomplete_description
+		
+	end
+
 
 	module ClassMethods
 		def find_places(options)

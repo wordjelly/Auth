@@ -7,21 +7,18 @@ module Auth::Concerns::Shopping::CartItemConcern
 	
 	include Auth::Concerns::Shopping::ProductConcern
 
-	
-
 	included do 
 
 		embeds_many :instructions, :class_name => "Auth::Work::Instruction", :as => :cart_item_instructions, :cascade_callbacks => true
 			
-
-
 		INDEX_DEFINITION = {
+			index_name: Auth.configuration.brand_name.downcase,
 			index_options:  {
 			        settings:  {
 			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 				    },
 			        mappings: {
-			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_item_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 			    }
 			}
 		}
@@ -80,6 +77,8 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 		field :place_id, type: String
 
+		## this is set as soon as personality is assigned.
+		attr_accessor :personality
 
 		before_destroy do |document|
 			
@@ -104,15 +103,21 @@ module Auth::Concerns::Shopping::CartItemConcern
 		end
 
 
+		## this is not done anymore.
+=begin
 		after_initialize do |document|
 			if document.new_record?
 				document.assign_product_attributes
 			end
 		end
-
+=end
 		
 		validate :user_cannot_change_anything_if_payment_accepted
-		validate :product_id_exists?
+		# no longer done, create_with_embedded checks for the product
+		# existence, and that is the way to create a cart item.
+		# and update params don't allow a product id to be passed
+		# so we don't do this validation.
+		#validate :product_id_exists?
 
 		before_save do |document|
 			document.public = "no"
@@ -313,6 +318,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def set_cart_and_resource(cart)
 		return true if self.parent_id
 		return false if (owner_matches(cart) == false)
+		unless cart.can_accept_item?(self)
+			self.errors.add(:parent_id, "the cart cannot accept this cart item, please add it to a new cart.")
+			return false
+		end
 		self.parent_id = cart.id.to_s
 		self.personality_id = cart.personality_id
 		self.place_id = cart.place_id
@@ -371,33 +380,39 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 	## before creating the document assigns attributes defined in the def #product_attributes_to_assign, to the cart item.
 	def assign_product_attributes
-		begin
+				
+			## load it in the controller
+			## and assign attributes there.
+			## bypassing mongoid is the only way to prevent
+			## this bullshit
+			## it will directly insert, 
+			## but then callbacks go for a six.
+			## the components will have to be added
+			## as a hash at the end
+			## after, changing all their ids
+			## after doing all that
+			## then add as a hash.
+			## and do a find and update
+			## and wrap it all in a prepare_insert block
+			## so that validations and callbacks go through.
+
 			if self.product_id
-	 			if product = Auth.configuration.product_class.constantize.find(product_id)
-	 				#puts "product found."
-	 				#puts "product miscellaneous_attributes to assign"
-	 				#puts product_attributes_to_assign.to_s
-	 				product_attributes_to_assign.each do |attr|
-	 					#puts "doing attribute:"
-	 					#puts attr.to_s
-	 					if self.respond_to? attr.to_sym
-	 						#puts "responds"
-		 					if self.send("#{attr}").nil?
-		 						#puts "it is nil"
-		 						self.send("#{attr}=",product.send("#{attr}"))
-		 					elsif (self.send("#{attr}").respond_to? :embedded_in) && (self.send("#{attr}").empty?)
-		 						self.send("#{attr}=",product.send("#{attr}"))
-		 					end
-	 					end
-	 				end
+	 			if product = Auth.configuration.product_class.constantize.find(self.product_id)
+	 				puts "----------------foundp---------------------------------"
+	 				self.name = product.name
+	 				self.price = product.price
+	 				#self.instructions = product.instructions
+	 				#puts "product found, iterating components.------------"
+	 				self.components = product.components
+	 			else
+	 				puts "----------- no such product ------------------"
+
 	 			end
 	 		else
-	 			#puts "no product id."
+	 			puts "=================no product id."
 	 		end
-	 	rescue => e
-	 		#puts e.to_s
-	 	end 
-
+	 	
+=begin
 	 	self.instructions.each do |instruction|
  			instruction.created_at = nil
  			instruction.updated_at = nil
@@ -414,12 +429,13 @@ module Auth::Concerns::Shopping::CartItemConcern
  				link.updated_at = nil
  			end
 	 	end
+=end
 	 	#puts "attributes assigned are:"
 	 	#puts self.attributes.to_s
 	end
 
 	def product_attributes_to_assign
-		["name","price","bundle_name","instructions","components"]
+		["name","price","product_code"]
 	end
 
 	## this is got by multiplying the price of the cart item by the minimum_acceptable at field.
@@ -428,30 +444,148 @@ module Auth::Concerns::Shopping::CartItemConcern
 	end
  	
 
-	
+	## here need to add this action links to the products.
+	## it is basically a form to add a cart item
+	## that should be added hereitself.
+	## 
+	def set_secondary_links
+			
+		unless self.secondary_links["Remove From Wish List"]
+			self.secondary_links["Remove From Wish List"] = {
+				:partial => "auth/shopping/cart_items/search_results/remove_item_from_wish_list.html.erb",
+				:instance_name_in_locals => "cart_item", 
+				:other_locals => {}
+			}
+		end
 
+		unless self.secondary_links["Check Status"]
+			if self.parent_id
+				self.secondary_links["Check Status"] = {
+					:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.edit_path(Auth.configuration.cart_item_class),self.id.to_s)
+				}
+			end
+		end
 
+		unless self.secondary_links["Remove Item From Cart"]
+			self.secondary_links["Remove Item From Cart"] = {
+				:partial => "auth/shopping/cart_items/search_results/remove_item_from_cart.html.erb",
+				:instance_name_in_locals => "cart_item", 
+				:other_locals => {}
+			}
+		end
+		
+		## let me add for cart, personality and place as well.
+		unless self.secondary_links["See Other Items in Cart"]
+			if self.parent_id
+				self.secondary_links["See Other Items In Cart"] = {
+					:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.cart_class),self.parent_id)
+				}
+			end
+		end
+
+	end
+
+	def set_autocomplete_tags
 =begin
-	## @param[String] req : the requirement from the definition. It consists of "*" wildcard, or a product id, or a definition address + product_id -> which is basically one of the output products of the definition. But here it will have the product id, not the self id.
-	## it has to be the product id.
-	## @return[Boolean] : true/false if this product satisfies the requirement or not.
-	## from where is this to be called ?
-	## see first we grouped it by the value for that definition.
-	## now the question is , that how many things are needed ?
-	## is this even necessary?
-	## does it need an output address ?
-	## i don't think this is needed.
-	## we are just going to make the groups.
-	## that's where all this will be synchronized
-	def satisfies_requirement(req)
-		if ((req == self.product_id.to_s) || (req == "*"))
-			true
-		elsif req == (self.miscellaneous_attributes[:address] + ":" + self.product_id.to_s)
-			true
-		else
-			false
+		self.tags = []
+		self.tags << "item"
+		if self.personality_id
+			personality = Auth.configuration.personality_class.constantize.find(self.personality_id)
+			personality.add_info(self.tags)
+		end
+=end
+	end
+
+	def set_autocomplete_description
+		
+		#self.autocomplete_description = self.name + " - " + self.description
+		
+	end
+
+	def set_primary_link
+			self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.cart_item_class),self.id.to_s)
+	end	
+
+	###############################################################
+	##
+	##
+	## STATE MACHINE
+	##
+	##
+	###############################################################
+	## called from cart_concern ,and there is indirectly called from the cart_controller after_update, and after_create
+	## so i have to give a way to call refresh on the cart
+	## so that this method is indirectly called.
+	## override it in the app to do custom logic with the item
+	def process
+
+	end
+
+	## so when this is assigned the personality will be set.
+	def personality_id=(personality_id)
+		super(personality_id)
+		begin
+			## here only for all the embedded docs assign this.
+			self.personality = 
+			Auth.configuration.personality_class.constantize.find(personality_id) unless self.personality
+		rescue
 		end
 	end
-=end
 
+	#################################################################################
+	##
+	##
+	## CREATE EMBEDDED
+	##
+	##
+	#################################################################################
+	
+	## returns false if there are validation errors
+	## returns a document incase the document is persisted.
+	## adds an error on _id called "failed to create cart item", if the
+	## item could not be created despite there being no validation errors.
+	## so checking for false means creation has failed and you can 
+	## use the instance you already had to check for the validation errors
+	def create_with_embedded(product_id)
+		created_document = nil
+		product = Auth.configuration.product_class.constantize.find(product_id)
+		product_clone = product.clone
+		if self.valid?
+			self.run_callbacks(:save) do
+	          	self.run_callbacks(:create) do
+		            create_hash = {
+		            	"$setOnInsert" => self.attributes
+		            }	            
+		            	
+		            product_attributes_to_assign.each do |attr|
+		            	create_hash["$setOnInsert"][attr.to_s] = product_clone.send("#{attr}")
+		            end
+
+		            created_document = Auth.configuration.cart_item_class.constantize.
+					where({
+						"$and" => [
+							"_id" => BSON::ObjectId(self.id.to_s)
+						]
+					}).
+					find_one_and_update(
+						{
+							"$setOnInsert" => create_hash["$setOnInsert"]
+						},
+						{
+							:return_document => :after,
+							:upsert => true
+						}
+					)
+	          	end
+	        end
+	        unless created_document
+	        	self.errors.add(:_id,"failed to create the cart item")
+	        	false
+	    	else
+	    		created_document
+	    	end
+	    else
+	    	false
+		end	
+	end
 end

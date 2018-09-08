@@ -1,7 +1,6 @@
 module Auth
 	module Search
 		module Main
-
 			## this def, returns a hash with the structure for the basic ngram query.
 			## the query_string is left blank, and you should merge this in through any def that wants to perform an ngram query.
 			## param[Symbol] search_on_field : the field on which we are going to do the n_Gram query. Most of the times this should default to _all_fields
@@ -125,11 +124,20 @@ module Auth
 
 
 			## delegates the building of the query to finalize_search_query_clause.
+			## @args[Hash] : must have a field called query_string
 			## @return[Array] response: an array of mongoid search result objects. 
 			def self.search(args)	
+				puts "args are:"
+				puts args.to_s
 				query = es_six_finalize_search_query_clause(args)
+				puts "query is:"
 				puts JSON.pretty_generate(query)
-				Mongoid::Elasticsearch.search(query,{:wrapper => :load}).results
+				res = Mongoid::Elasticsearch.search(query,{:wrapper => :load}).results
+				puts "----------------- OUTPUTTING RESULTS ---------------"
+				res.each do |res|
+					puts res.to_s
+				end
+				res
 			end
 		end
 	end

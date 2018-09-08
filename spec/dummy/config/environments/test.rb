@@ -31,15 +31,16 @@ Rails.application.configure do
   # ActionMailer::Base.deliveries array.
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
   config.action_mailer.delivery_method = :test
-  
-  config.active_job.queue_adapter = :test
+  config.action_mailer.perform_deliveries = true
+  config.active_job.queue_adapter = :inline
+
 
   # Randomize the order test cases are executed.
   config.active_support.test_order = :random
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
-
+  config.action_mailer.raise_delivery_errors = false
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 end

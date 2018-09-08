@@ -9,6 +9,25 @@ module Auth::Concerns::Shopping::CartConcern
 	
 
 	included do 
+
+		###########################################################
+		##
+		##
+		## STATE MACHINE BEGINS.
+		##
+		##
+		##########################################################
+
+		field :payment_stage, type: String
+
+		##########################################################
+		##
+		##
+		## STATE MACHINE ENDS.
+		##
+		##
+		##########################################################
+
 		field :name, type: String
 		field :notes, type: String
 			
@@ -54,6 +73,8 @@ module Auth::Concerns::Shopping::CartConcern
 		## the discount object id, passed in so that it can be rendered in the show_cart action where we provide a link to create a payment.
 		field :discount_id, type: String
 
+		field :will_pay_at_step, type: String
+
 		attr_accessor :discount
 
 		attr_accessor :personality
@@ -81,7 +102,7 @@ module Auth::Concerns::Shopping::CartConcern
 			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 				    },
 			        mappings: {
-			          Auth::OmniAuth::Path.pathify(Auth.configuration.cart_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+			          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 			    }
 			}
 		}
@@ -95,7 +116,9 @@ module Auth::Concerns::Shopping::CartConcern
 	## @param[Payment] : a payment object can be passed in.
 	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
 	def prepare_cart
-		
+			
+		puts "--------------- CALLING PREPARE CART ----------------"
+
 		find_cart_items
 		
 		set_cart_price
@@ -111,8 +134,6 @@ module Auth::Concerns::Shopping::CartConcern
 		set_discount
 
 		set_personality
-
-		set_place
 
 	end
 
@@ -133,7 +154,9 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## => 
 	def set_cart_price
-		puts "set cart price"
+		## so basically somewhere a cart_item is being directly created
+		## without using the controller
+		## that's the issue.
 		self.cart_price = total_value_of_all_items_in_cart = get_cart_items.map{|c| c = c.price*c.quantity}.sum
 		self.cart_price
 	end
@@ -318,9 +341,15 @@ module Auth::Concerns::Shopping::CartConcern
 
 		      ## and personality also has to be set here.
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
-		      	
-		      #puts "unset cart is:#{resp.to_s}"
 		      
+		      ## add these to the autocomplete tags
+		      if resp == true
+		      	if cart_item.parent_id
+		      		self.tags << cart_item.name unless self.tags.include? cart_item.name
+		      	else
+		      		self.tags.delete(cart_item.name)
+		      	end
+		      end
 		      
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
@@ -348,23 +377,93 @@ module Auth::Concerns::Shopping::CartConcern
 	## the current implementation returns true if all items have been fully paid for.
 	def can_create_discount_coupons?
 		#return (self.cart_items.select{|c| c.accepted.nil? || c.accepted == false}.size == 0)
-		puts "CAME TO CAN CREATE DISCOUNT COUPONS."
+		#puts "CAME TO CAN CREATE DISCOUNT COUPONS."
 		prepare_cart
-
 		self.cart_pending_balance == 0		
 
 	end
 
 	def set_personality
-		return unless self.personality_id
-		puts "self personality id is: #{self.personality_id}"
+		#puts "personality id is : #{self.personality_id}"
+		return if self.personality_id.blank?
+		#puts "self personality id is: #{self.personality_id}"
 		self.personality = Auth.configuration.personality_class.constantize.find(self.personality_id)
+		#puts "self personality is: "
+		#puts self.personality.to_s
+		
 	end
 
 	def set_place
-		return unless self.place_id
-		puts "Self place id is: #{self.place_id}"
+		return if self.place_id.blank?
+		#puts "Self place id is: #{self.place_id}"
 		self.place = Auth.configuration.place_class.constantize.find(self.place_id)
 	end
 
+	##############################################################
+	##
+	##
+	## METHODS FOR AUTOCOMPLETE CONCERNS.
+	##
+	##
+	##############################################################
+	def set_primary_link
+		unless self.primary_link
+			self.primary_link = Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.show_or_update_or_delete_path(Auth.configuration.cart_class),self.id.to_s)
+		end
+	end
+
+	## so as long as before save is called, this problem is sorted out.
+	## let me check that first.
+	def set_autocomplete_tags
+		self.tags = [] 
+		self.tags << "Cart"
+		if self.personality_id
+			self.personality = Auth.configuration.personality_class.constantize.find(self.personality_id) unless self.personality
+			self.personality.add_info(self.tags)
+		end
+	end
+
+	def set_autocomplete_description
+
+	end
+
+	def set_secondary_links
+
+	end
+
+
+	###############################################################
+	##
+	##
+	## STATE MACHINE BEGINS.
+	##
+	##
+	###############################################################
+	## @param[Object] cart_item : the cart_item that needs to be added to this cart
+	## @return[Boolean] true/false : depending on whether 
+	def can_accept_item?(cart_item)
+		return true
+	end
+
+	## @param[Object] cart_item : each cart item calls this method when : a) in cart_controller, after_create, b) in cart_controller after_update
+	## here it will check if the payment_stage has been satisfied or not, and then will decide to process the item further.
+	def can_process_item?(cart_item)
+		return true
+	end
+	
+	def process_items
+		self.cart_items.each do |item|
+			item.process if can_process_item?(item)
+		end
+	end
+	###############################################################
+	##
+	##
+	## STATE MACHINE ENDS.
+	##
+	##
+	###############################################################
+
+
+	
 end

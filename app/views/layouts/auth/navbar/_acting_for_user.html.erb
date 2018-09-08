@@ -1,0 +1,19 @@
+<% if session[:proxy_resource_id] %>
+		<% if session[:proxy_resource_class] %>
+			<% resource = session[:proxy_resource_class].constantize.find(session[:proxy_resource_id]) %>
+			<div>
+			<ul class="collection acting_for_user">
+			    <li class="collection-item avatar">
+			      <img src="/assets/placeholder.png" alt="" class="circle">
+			      <span class="title">You are acting on behalf of</span>
+			      <p><%= resource.email || resource.additional_login_param %><br>
+			      </p>
+			      <!-- add a link to detach -->
+			      <p>
+			      	<%= link_to "Detach", set_proxy_resource_profiles_path({:resource => resource.class.name.pluralize, :id => resource.id.to_s, :unset_proxy => true}), method: :put, remote: true %>
+			      </p>
+			    </li>
+			</ul>
+			</div>
+		<% end %>
+<% end %> 

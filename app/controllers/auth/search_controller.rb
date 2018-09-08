@@ -50,6 +50,9 @@ class Auth::SearchController < ApplicationController
 			puts result.to_s	
 		end
 
+		
+
+
 		respond_with @search_results
 	end
 

@@ -144,12 +144,18 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 	        format.json do 
 	          render :nothing => true, :status => 204
 	        end
+	        format.js do 
+	        	render 'destroy'
+	        end
 	      else
 	        format.json do 
 	          render json: {
 	            id: @model.id.to_s,
 	            errors: @model.errors
 	          }.to_json
+	        end
+	        format.js do 
+	        	render 'destroy'
 	        end
 	      end
 	    end

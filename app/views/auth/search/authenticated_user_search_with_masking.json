@@ -1,0 +1,15 @@
+<%= 
+
+updated_array = @search_results.map do |k|
+		if current_signed_in_resource
+			if current_signed_in_resource.is_owner?(k)
+				k = k.as_json({}).merge({:_type => k._type}).merge({:tags => k.tags, :masked_tags => k.masked_tags, :primary_link => k.primary_link, :secondary_links => k.secondary_links})
+			else
+				k = k.as_json({}).merge({:_type => k._type}).merge({:masked_tags => k.masked_tags, :primary_link => k.primary_link, :secondary_links => k.secondary_links})
+			end
+		else
+			k = k.as_json({}).merge({:_type => k._type}).merge({:tags => k.tags, :masked_tags => k.masked_tags, :primary_link => k.primary_link, :secondary_links => k.secondary_links})
+		end
+end
+
+updated_array.to_json.html_safe %>

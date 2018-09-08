@@ -1,0 +1,3 @@
+<% if current_signed_in_resource && current_signed_in_resource.is_admin? %>
+	<%= link_to "Add New Product", new_product_path %>
+<% end %>

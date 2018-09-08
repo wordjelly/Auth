@@ -10,15 +10,18 @@ module Auth::Concerns::UserConcern
 	included do 
 
 		INDEX_DEFINITION = {
+				index_name: Auth.configuration.brand_name.downcase,
 				index_options:  {
 				        settings:  {
 				    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
 					    },
 				        mappings: {
-				          Auth::OmniAuth::Path.pathify(Auth.configuration.user_class) => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
+				          "document" => Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_MAPPINGS
 				    }
 				}
 			}
+		## so now first let me change the mapping name, and also shift the as_indexed_json def to the respective model everywhere
+
 
 		include GlobalID::Identification
 
@@ -35,12 +38,14 @@ module Auth::Concerns::UserConcern
 		## so if it doesnt respond to confirmed_at -> then create a client anyways
 		## if it responds to and the confirmed_at has changed, then create a client.
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) || (a.additional_login_param_status_changed? && a.additional_login_param_status == 2) }
+		#after_save :create_client
 
 		after_save :set_client_authentication
 
 		before_save do |document|
 			## set the document resource id if its not already set.
 			document.resource_id = document.id.to_s unless document.resource_id
+			document.resource_class = document.class.name.to_s unless document.resource_class
 
 			##if the additional login param changes, for eg. during an update, then set the additional login param status to pending immediately before saving itself, so that it is transactional type of thing.
 			if document.additional_login_param_changed? && !document.additional_login_param.blank?
@@ -81,6 +86,8 @@ module Auth::Concerns::UserConcern
 		#######################################################
 
 		field :resource_id, type: String
+		field :resource_class, type: String
+
 
 		########################################################
 		# FIELDS FOR ALLOWING THE ADMIN TO CREATE USERS, AND ALSO REQUEST 
@@ -252,6 +259,7 @@ module Auth::Concerns::UserConcern
   			
   			## okay so this will be modified in the simple token authentication part.
   			attr_accessor :authentication_token
+  			attr_accessor :es
   			field :encrypted_authentication_token, type: String
 
   			field :authentication_token_expires_at, type: Integer
@@ -482,7 +490,9 @@ module Auth::Concerns::UserConcern
 	##client is created irrespective of whether the user is confirmed or not.
 	def create_client
 		
-
+		#puts "self additional login param status changed ?"
+		#puts self.additional_login_param_status_changed?
+		#puts "self status is: #{self.additional_login_param_status}"
 		##we want to create a new client, provided that there is no client for this user id.
 		##if a client already exists, then we dont want to do anything.
 		##when we create the client we want to be sure that 
@@ -497,24 +507,24 @@ module Auth::Concerns::UserConcern
 		c.versioned_create({:resource_id => self.id})
 		op_count = 10
 
-		#puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
-		#puts c.attributes.to_s
+		puts "-------CREATED A CLIENT AS FOLLOWS:-----------"
+		puts c.attributes.to_s
 
 		while(true)
 			
 			if c.op_success?
-				#puts "the op was a success"
+				puts "the op was a success"
 				break
 			elsif op_count == 0
-				#puts "op count was 0"
+				puts "op count was 0"
 				break
 			elsif (Auth::Client.where(:resource_id => self.id).count == 0)
-				#puts "tried to create here."
+				puts "tried to create here."
 				c.api_key = SecureRandom.hex(32)
 				c.versioned_create({:resource_id => self.id})
 				op_count-=1
 			else
-				#puts "finally broke."
+				puts "finally broke."
 				break
 			end
 
@@ -701,6 +711,7 @@ module Auth::Concerns::UserConcern
 	##just a combination of having the redirect_url and the above method,
 	##and whether to redirect or not.
 	def reply_with_redirect_url_and_auth_token_and_es?(redirect_url,client,curr_user)
+		
 		Auth.configuration.do_redirect && redirect_url && reply_with_auth_token_es?(client,curr_user)
 	end
 
@@ -770,5 +781,80 @@ module Auth::Concerns::UserConcern
 		end
 		
 	end
+
+	################################################################
+	##
+	##
+	## OWNERSHIP.
+	##
+	##
+	################################################################
+	def is_owner?(object)
+		raise "object does not have a resource id field" unless ((object.respond_to? :resource_id) || (object.respond_to? :resource_class))
+		return true if ((object.resource_class == self.resource_class) && (object.resource_id == self.resource_id))
+		return false
+	end
+
+	################################################################
+	##
+	##
+	## AUTOCOMPLETE CONCERN PART.
+	##
+	##
+	################################################################
+
+
+    ## so the user's will have to give a unique id,
+    ## what if they want you to check that ?
+    def set_autocomplete_tags
+      if self.new_record?
+         self.tags << "user"
+         self.tags << self.name
+         self.tags << self.email
+         self.tags << self.additional_login_param
+      end
+    end
+
+    def set_primary_link
+      self.primary_link = Rails.application.routes.url_helpers.profile_path(:id => self.id.to_s, :resource => self.class.name.pluralize.downcase)
+    end
+
+    ## ill take it from here onwards.
+
+    ## now first we are going to test it with the ui.
+    ## and we are going to test it with one admin and one non admin account
+    ## before that, we are going to 
+    def set_secondary_links    		
+   	    unless self.secondary_links["Add New Account"]
+			self.secondary_links["Add New User"] = {
+				:partial => "auth/admin_create_users/search_results/add_new_user.html.erb",
+				:instance_name_in_locals => "user", 
+				:other_locals => {}
+			}
+		end
+		unless self.secondary_links["Manage This Account"]
+			self.secondary_links["Manage This User"] = {
+				:partial => "auth/admin_create_users/search_results/manage_user.html.erb",
+				:instance_name_in_locals => "user", 
+				:other_locals => {}
+			}
+		end
+		unless self.secondary_links["Set Unset Proxy"]
+			self.secondary_links["Set Unset Proxy"] = {
+				:partial => "auth/profiles/search_results/switch_to_user.html.erb",
+				:instance_name_in_locals => "user", 
+				:other_locals => {}
+			}
+		end
+		
+		## switch to the user, and see all associated people.
+
+		unless self.secondary_links["See All Associated People"]
+			self.secondary_links["See All Associated People"] = {
+				:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.personality_class))
+			}
+		end
+
+    end
 
 end

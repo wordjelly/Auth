@@ -6,7 +6,8 @@ class Auth::Shopping::Personality
 		:sex => ["Male","Female"]
 	}
 
-
-	
+	def attributes_for_tags
+		["fullname","sex","age"]
+	end
 
 end

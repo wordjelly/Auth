@@ -610,7 +610,7 @@ module Devise
 
   ##the additional_login_param is added as a authentication_key 
   class ParameterSanitizer
-    DEFAULT_PERMITTED_ATTRIBUTES =
+    DEFAULT_PERMITTED_ATTRIBUTES ||=
       {
         sign_in: [:login,:password, :remember_me, :redirect_url, :api_key, :current_app_id],
         sign_up: [:password, :password_confirmation, :redirect_url, :api_key, :current_app_id],

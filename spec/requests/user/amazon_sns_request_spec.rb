@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Registration requests", :amazon_endpoint => true,:authentication => true, :type => :request do
+RSpec.describe "Amazon SNS Tests", :amazon_endpoint => true,:authentication => true, :type => :request do
 	before(:all) do 
 	    Auth.configuration.recaptcha = true
 	    User.delete_all
@@ -88,7 +88,7 @@ RSpec.describe "Registration requests", :amazon_endpoint => true,:authentication
 
 			post endpoints_path, a.to_json, {}
 
-			expect(response.code).to eq("404")
+			expect(response.code).to eq("401")
 
 		end
 
