@@ -65,8 +65,10 @@ module Auth
     attr_accessor :simulate_invalid_otp
     attr_accessor :otp_controller
     attr_accessor :cart_item_controller
+    attr_accessor :cart_item_controller_token_auth_actions
     attr_accessor :cart_item_class
     attr_accessor :cart_controller
+    attr_accessor :cart_controller_token_auth_actions
     attr_accessor :cart_class
     attr_accessor :product_class
     attr_accessor :product_controller
@@ -356,8 +358,10 @@ module Auth
       ##
       ###############################################################
       @cart_item_controller = nil
+      @cart_item_controller_token_auth_actions = [:create,:update,:destroy,:edit,:new,:index,:show,:create_multiple]
       @cart_item_class = nil
       @cart_controller = nil
+      @cart_controller_token_auth_actions = [:create,:update,:destroy,:edit,:new,:index,:show]
       @cart_class = nil
       @payment_controller = nil
       @payment_class = nil

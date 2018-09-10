@@ -104,13 +104,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 
 
 		## this is not done anymore.
-=begin
-		after_initialize do |document|
-			if document.new_record?
-				document.assign_product_attributes
-			end
-		end
-=end
 		
 		validate :user_cannot_change_anything_if_payment_accepted
 		# no longer done, create_with_embedded checks for the product
@@ -376,62 +369,6 @@ module Auth::Concerns::Shopping::CartItemConcern
 		rescue
 			self.errors.add(:product_id,"this product id does not exist")
 		end
-	end
-
-	## before creating the document assigns attributes defined in the def #product_attributes_to_assign, to the cart item.
-	def assign_product_attributes
-				
-			## load it in the controller
-			## and assign attributes there.
-			## bypassing mongoid is the only way to prevent
-			## this bullshit
-			## it will directly insert, 
-			## but then callbacks go for a six.
-			## the components will have to be added
-			## as a hash at the end
-			## after, changing all their ids
-			## after doing all that
-			## then add as a hash.
-			## and do a find and update
-			## and wrap it all in a prepare_insert block
-			## so that validations and callbacks go through.
-
-			if self.product_id
-	 			if product = Auth.configuration.product_class.constantize.find(self.product_id)
-	 				puts "----------------foundp---------------------------------"
-	 				self.name = product.name
-	 				self.price = product.price
-	 				#self.instructions = product.instructions
-	 				#puts "product found, iterating components.------------"
-	 				self.components = product.components
-	 			else
-	 				puts "----------- no such product ------------------"
-
-	 			end
-	 		else
-	 			puts "=================no product id."
-	 		end
-	 	
-=begin
-	 	self.instructions.each do |instruction|
- 			instruction.created_at = nil
- 			instruction.updated_at = nil
- 			instruction.bullets.each do |bullet|
- 				bullet.created_at = nil
- 				bullet.updated_at = nil
- 			end
- 			instruction.communications.each do |communication|
- 				communication.created_at = nil
- 				communication.updated_at = nil
- 			end		
- 			instruction.links.each do |link|
- 				link.created_at = nil
- 				link.updated_at = nil
- 			end
-	 	end
-=end
-	 	#puts "attributes assigned are:"
-	 	#puts self.attributes.to_s
 	end
 
 	def product_attributes_to_assign

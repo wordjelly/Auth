@@ -942,14 +942,43 @@ config.oauth_credentials = {
 --------------------------------------------------------------
 ### Token Authentication for API Access
 
-If you do not want token authentication, add the following in the configuration file:
-
-This has not been extensively tested, and is currently __not__ recommended. For one, the Shopping Api will throw extensive errors.
+Token authentication adds support for authentication using headers.
+To add token authentication to any controller do the following:
 
 ```
-config.enable_token_auth = nil
+class MyController < ApplicationController
+    include Auth::Concerns::DeviseConcern
+    include Auth::Concerns::TokenConcern
+    before_filter :do_before_request , TCONDITIONS
+end
+```
+TCONDITIONS, is a an array of controller actions, which are to be protected using token authentication.
+
+#### Special Mention for Cart and Cart_Item_Controllers.
+
+If you are subclassing the Auth::Shopping::CartItem or Auth::Shopping::CartControllerConcern, and want to add some custom actions to be protected by token authentication, then you have to set those in the preinitializer.rb file. 
+As follows:
+
+```
+config.cart_controller_token_auth_actions = [:create,:update,:destroy,:edit,:new,:index,:show,:get_report, :historical_data,:update_impressions]
 ```
 
+A similar configuration variable has been provided for cart_item, called cart_item_controller_token_auth_actions. By default it includes the normal CRUD actions.
+
+#### LAST_FALLBACK
+
+If you don't want to use devise as the fallback incase token authentication fails, then you need to provide a constant in your controller, called LAST_FALLBACK, **before** including the token_concern, as follows:
+
+
+```
+class MyController < ApplicationController
+    LAST_FALLBACK=:none
+    include Auth::Concerns::DeviseConcern
+    include Auth::Concerns::TokenConcern
+    before_filter :do_before_request , TCONDITIONS
+end
+```
+In the example above, :none is used , which means that the action will go through even if no authenticated user is found. Note that any option supported by SimpleTokenAuthentication for fallbacks is supported. It will default to :devise, which in turn throws Not authenticated.
 --------------------------------------------------------------
 ## Creating An Admin Model
 

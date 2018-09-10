@@ -470,7 +470,7 @@ module SimpleTokenAuthentication
 
 	    def find_record_from_identifier(entity)
 	    	## you are supposed to find the record using one of the other parameters.
-
+	    	#puts "came to find entity from identifier -----------------------------------"
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
 	    	
@@ -511,6 +511,7 @@ module SimpleTokenAuthentication
 	    		#puts query.to_s
 
 		    	records = entity.model.where(query)
+		    	
 		    	if records.size > 0
 		    		#puts "the records size is:" 
 		    		#puts records.size.to_s

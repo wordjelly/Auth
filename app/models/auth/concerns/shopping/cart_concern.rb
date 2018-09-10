@@ -141,7 +141,12 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## set the cart items, [Array] of cart items.
 	def find_cart_items
-		#puts "find cart items."
+		puts "find cart items."
+		puts "get resource is: #{get_resource.id.to_s}"
+		Auth.configuration.cart_item_class.constantize.all.each do |citem|
+			puts "this is the cart item."
+			puts citem.parent_id.to_s
+		end
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'asc')
 		
@@ -329,33 +334,39 @@ module Auth::Concerns::Shopping::CartConcern
 	##TODO: you should change this to be called before_validation instead, so that all code remains in the model.
 	def add_or_remove(item_ids,add_or_remove)
 	    item_ids.map {|id|
+
 	      begin
-	      	  #puts "the signed in resource is:"
-	      	  #puts self.signed_in_resource
+	      	  puts "the signed in resource is:"
+	      	  puts self.signed_in_resource
 	      	  
 		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
 		      
+		      puts "found cart item: #{cart_item.id.to_s}"
+
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      	
-		      #puts "Add or remove is: #{add_or_remove}"
+		      puts "Add or remove is: #{add_or_remove}"
 
 		      ## and personality also has to be set here.
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
 		      
 		      ## add these to the autocomplete tags
 		      if resp == true
+		      	puts "the response of adding was true."
 		      	if cart_item.parent_id
 		      		self.tags << cart_item.name unless self.tags.include? cart_item.name
 		      	else
 		      		self.tags.delete(cart_item.name)
 		      	end
+		      else
+		      	puts "Response of adding was false."
 		      end
 		      
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
-	  	  	#puts "--------------------------------------------DIDNT FIND THE CART ITEM"
-	  	  	#puts error.to_s
-	  	  	#puts "--------------------------------------------"
+	  	  	puts "--------------------------------------------DIDNT FIND THE CART ITEM"
+	  	  	puts error.to_s
+	  	  	puts "--------------------------------------------"
 	  	  	true
 	  	  end
 	    }
@@ -452,6 +463,7 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 	
 	def process_items
+		self.prepare_cart unless self.cart_items
 		self.cart_items.each do |item|
 			item.process if can_process_item?(item)
 		end

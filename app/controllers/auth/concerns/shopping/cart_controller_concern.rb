@@ -34,20 +34,20 @@ module Auth::Concerns::Shopping::CartControllerConcern
   def create
     check_for_create(@auth_shopping_cart)
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
-   
     @auth_shopping_cart.save
-    @auth_shopping_cart.prepare_cart
     @auth_shopping_cart.process_items
     respond_with @auth_shopping_cart
   end
 
   ## always returns an empty array.
   def update
+    puts "------ came to update cart -----------"
     check_for_update(@auth_shopping_cart)
     @auth_shopping_cart.assign_attributes(@auth_shopping_cart_params)
     @auth_shopping_cart = add_owner_and_signed_in_resource(@auth_shopping_cart)
+    puts "Called save."
     @auth_shopping_cart.save
-    @auth_shopping_cart.prepare_cart
+    puts "Came to process items."
     @auth_shopping_cart.process_items
     respond_with @auth_shopping_cart
   end
