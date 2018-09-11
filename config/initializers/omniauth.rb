@@ -473,12 +473,14 @@ module SimpleTokenAuthentication
 	    	#puts "came to find entity from identifier -----------------------------------"
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
+      		#puts "additional_identifiers"
+      		#puts additional_identifiers
 	    	
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
 	    	token = entity.get_token_from_params_or_headers(self)
 		   	
-		   
+		   	#puts "token:#{token}"
 
 		    if token
 		    	

@@ -92,6 +92,7 @@ module Auth::Concerns::Shopping::PlaceConcern
 =end		
 		
 		INDEX_DEFINITION = {
+			index_name: Auth.configuration.brand_name.downcase,
 			index_options:  {
 			        settings:  {
 			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS

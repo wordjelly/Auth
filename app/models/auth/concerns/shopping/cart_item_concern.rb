@@ -423,19 +423,19 @@ module Auth::Concerns::Shopping::CartItemConcern
 	end
 
 	def set_autocomplete_tags
-=begin
+
 		self.tags = []
 		self.tags << "item"
 		if self.personality_id
 			personality = Auth.configuration.personality_class.constantize.find(self.personality_id)
 			personality.add_info(self.tags)
 		end
-=end
+
 	end
 
 	def set_autocomplete_description
 		
-		#self.autocomplete_description = self.name + " - " + self.description
+		self.autocomplete_description = self.name + " - " + self.description
 		
 	end
 

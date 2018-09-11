@@ -513,18 +513,18 @@ module Auth::Concerns::UserConcern
 		while(true)
 			
 			if c.op_success?
-				puts "the op was a success"
+				#puts "the op was a success"
 				break
 			elsif op_count == 0
-				puts "op count was 0"
+				#puts "op count was 0"
 				break
 			elsif (Auth::Client.where(:resource_id => self.id).count == 0)
-				puts "tried to create here."
+				#puts "tried to create here."
 				c.api_key = SecureRandom.hex(32)
 				c.versioned_create({:resource_id => self.id})
 				op_count-=1
 			else
-				puts "finally broke."
+				#puts "finally broke."
 				break
 			end
 

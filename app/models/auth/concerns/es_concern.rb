@@ -43,6 +43,8 @@ module Auth::Concerns::EsConcern
 
 		AUTOCOMPLETE_INDEX_SETTINGS ||=
 			{
+				number_of_shards: 1,
+				number_of_replicas: 0,
 		        analysis:  {
 		            filter:  {
 		                nGram_filter:  {
@@ -128,11 +130,11 @@ module Auth::Concerns::EsConcern
         	document.add_attributes_for_tags
         end
 
-        ## unless the document is embedded, it will be added to the index after save
+        ## unless the document is embedded, it will be added to the index after saved
         ## if the document is embedded, it can only be added to the es_index, through the controller create/update actions.
         after_save do |document|
 			unless document.class.embedded?
-				document.es_update
+			document.es_update
 			end
 		end
     

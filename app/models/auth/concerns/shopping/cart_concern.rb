@@ -97,6 +97,7 @@ module Auth::Concerns::Shopping::CartConcern
 		## INDEX DEFINITION
 
 		INDEX_DEFINITION = {
+			index_name: Auth.configuration.brand_name.downcase,
 			index_options:  {
 			        settings:  {
 			    		index: Auth::Concerns::EsConcern::AUTOCOMPLETE_INDEX_SETTINGS
@@ -117,7 +118,7 @@ module Auth::Concerns::Shopping::CartConcern
 	## this is used in case there is a new payment which is calling prepare_cart. in that case the new payment has to be also added to the cart_payments. this is alwasy the case when a new payment is made with a status directly set as accepted, i.e for eg a cashier makes a payment on behalf of the customer.
 	def prepare_cart
 			
-		puts "--------------- CALLING PREPARE CART ----------------"
+		#puts "--------------- CALLING PREPARE CART ----------------"
 
 		find_cart_items
 		
@@ -141,12 +142,12 @@ module Auth::Concerns::Shopping::CartConcern
 
 	## set the cart items, [Array] of cart items.
 	def find_cart_items
-		puts "find cart items."
-		puts "get resource is: #{get_resource.id.to_s}"
-		Auth.configuration.cart_item_class.constantize.all.each do |citem|
-			puts "this is the cart item."
-			puts citem.parent_id.to_s
-		end
+		#puts "find cart items."
+		#puts "get resource is: #{get_resource.id.to_s}"
+		#Auth.configuration.cart_item_class.constantize.all.each do |citem|
+		#	puts "this is the cart item."
+		#	puts citem.parent_id.to_s
+		#end
 		conditions = {:resource_id => get_resource.id.to_s, :parent_id => self.id.to_s}
 		self.cart_items = Auth.configuration.cart_item_class.constantize.where(conditions).order(:created_at => 'asc')
 		
@@ -172,7 +173,7 @@ module Auth::Concerns::Shopping::CartConcern
 
 	
 	def set_cart_payments
-		puts "set cart payments."
+		#puts "set cart payments."
 		self.cart_payments = []
 		payments_made_to_this_cart = Auth.configuration.payment_class.constantize.find_payments(get_resource,self)
 		
@@ -189,7 +190,7 @@ module Auth::Concerns::Shopping::CartConcern
 	end
 
 	def set_cart_paid_amount
-		puts "set cart paid amount"
+		#puts "set cart paid amount"
 		total_paid = 0
 		payments = get_cart_payments
 		price = get_cart_price
@@ -304,7 +305,7 @@ module Auth::Concerns::Shopping::CartConcern
 	## then returns a hash with these two instead of the original values.
 	## @used_in : Shopping::PaymentConcern.set_receipt.
 	def prepare_receipt
-		puts "PREPARE RECEIPT-----------------------------------"
+		#puts "PREPARE RECEIPT-----------------------------------"
 		cart_item_ids = cart_items.map{|c| c = c.id.to_s}
 		cart_payment_ids = cart_payments.map{|c| c = c.id.to_s}
 		receipt = self.attributes.merge({:cart_items => cart_item_ids, :cart_payments => cart_payment_ids})
@@ -336,37 +337,37 @@ module Auth::Concerns::Shopping::CartConcern
 	    item_ids.map {|id|
 
 	      begin
-	      	  puts "the signed in resource is:"
-	      	  puts self.signed_in_resource
+	      	  #puts "the signed in resource is:"
+	      	  #puts self.signed_in_resource
 	      	  
 		      cart_item = Auth.configuration.cart_item_class.constantize.find_self(id,self.signed_in_resource)
 		      
-		      puts "found cart item: #{cart_item.id.to_s}"
+		      #puts "found cart item: #{cart_item.id.to_s}"
 
 		      cart_item.signed_in_resource = self.signed_in_resource
 		      	
-		      puts "Add or remove is: #{add_or_remove}"
+		      #puts "Add or remove is: #{add_or_remove}"
 
 		      ## and personality also has to be set here.
 		      resp = (add_or_remove == 1) ? cart_item.set_cart_and_resource(self) : cart_item.unset_cart
 		      
 		      ## add these to the autocomplete tags
 		      if resp == true
-		      	puts "the response of adding was true."
+		      	#puts "the response of adding was true."
 		      	if cart_item.parent_id
 		      		self.tags << cart_item.name unless self.tags.include? cart_item.name
 		      	else
 		      		self.tags.delete(cart_item.name)
 		      	end
 		      else
-		      	puts "Response of adding was false."
+		      	#puts "Response of adding was false."
 		      end
 		      
 		      resp
 	  	  rescue Mongoid::Errors::DocumentNotFound => error
-	  	  	puts "--------------------------------------------DIDNT FIND THE CART ITEM"
-	  	  	puts error.to_s
-	  	  	puts "--------------------------------------------"
+	  	  	#puts "--------------------------------------------DIDNT FIND THE CART ITEM"
+	  	  	#puts error.to_s
+	  	  	#puts "--------------------------------------------"
 	  	  	true
 	  	  end
 	    }
