@@ -34,15 +34,14 @@ class Auth::Shopping::BarCode
 		[:bar_code_tag,:remove_bar_code]
 	end
 
-	
+	## tries to clear the assigned object id from the barcode record.
+	## if it returns null, then it will first check if any record exists, to which that object_id was assigned, if no record exists, returns true(because it means that this object id was already cleared from some barcode before.), on the other hand if some record is found, then returns false.
 	def self.clear_object(assigned_to_object_id)
 		## we just do a find one and update
 		begin
 			returned_document = where(:assigned_to_object_id => assigned_to_object_id).find_one_and_update(
 				{
 					"$set" => {
-						"resource_id" => nil,
-						"resource_class" => nil,
 						"assigned_to_object_id" => nil,
 						"assigned_to_object_class" => nil
 					}
@@ -53,15 +52,46 @@ class Auth::Shopping::BarCode
 			)
 			true
 		rescue
-			false
+			doc_exists = where(:assigned_to_object_id => assigned_to_object_id).first
+			return true unless doc_exists
+			return false
 		end
-		
+	end
+
+	def self.transfer_bar_code(from_object,to_object)
+
+		returned_document = Auth::Shopping::BarCode.collection.find_one_and_update(
+				{	
+					"$and" => 
+					[
+						{
+							"assigned_to_object_id" => from_object.id.to_s
+						},
+						{
+							"assigned_to_object_class" => from_object.class.name.to_s
+						}
+					]
+				},
+				{
+					"$set" => {
+						
+						"assigned_to_object_id" => to_object.id.to_s,
+						"assigned_to_object_class" => to_object.class.name.to_s
+					}
+				},
+				{
+					:return_document => :after
+				})
+
+
+		returned_document
+
+
 	end
 
 	## there should not already exist a bar code with this bar code
 	## or one where this object id is already assigned.
 	def self.upsert_and_assign_object(object)
-
 		returned_document = Auth::Shopping::BarCode.collection.find_one_and_update(
 				{
 					"$or" => 
@@ -86,9 +116,7 @@ class Auth::Shopping::BarCode
 					"$setOnInsert" => {
 						"bar_code_tag" => object.bar_code_tag,
 						"assigned_to_object_id" => object.id.to_s,
-						"assigned_to_object_class" => object.class.name.to_s,
-						"resource_id" => object.resource_id,
-						"resource_class" => object.resource_class
+						"assigned_to_object_class" => object.class.name.to_s
 					}
 				},
 				{
@@ -96,6 +124,9 @@ class Auth::Shopping::BarCode
 					:upsert => true
 				})
 
+
+		puts "returned document is:"
+		puts returned_document.to_s
 
 		return nil if returned_document.nil?
 

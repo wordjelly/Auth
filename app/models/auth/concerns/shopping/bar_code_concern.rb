@@ -18,6 +18,11 @@ module Auth::Concerns::Shopping::BarCodeConcern
 =end
 		end
 
+		## so if i want to assign a barcode , i.e the same barcode to the unit.
+		## how to do that?
+		## scan the barcode(from step show) -> go to the product(with some arguments) -> click button called assign to unit -> it updates the unit with a barcode.
+		## now when we scan the barcode -> it goes to barcode controller -> and there it searches for a class with that.
+
 		before_validation do |document|
 =begin
 			## if the tag has changed, and if it was not nil
@@ -30,9 +35,19 @@ module Auth::Concerns::Shopping::BarCodeConcern
 				end
 			end
 =end
+			## will have to remove it from product.
+			## then reassign it to unit.
+			## that's the only way.
+			## first update product -> remove_bar code.
+			## then save the unit with it.
+			## product update will have to be carried out internally.
+			
 			if document.remove_bar_code == "1"
+				puts "remove bar code was 1"
 				if Auth::Shopping::BarCode.clear_object(document.id.to_s) == false
 					document.errors.add(:bar_code_tag,"could not clear the barcode tag. Please try again later")
+				else
+					puts "clear barcode succeeds."
 				end
 			end
 		end
@@ -42,10 +57,11 @@ module Auth::Concerns::Shopping::BarCodeConcern
 		## if we do it before_save ?
 		after_save do |document|
 			
+			puts "Came to after_Save product."
 			unless document.bar_code_tag.nil?
-				
+				puts "bar code tag is not nil"
 				if bar_code_object = Auth::Shopping::BarCode.upsert_and_assign_object(self)
-
+					puts "upsert and assign works."
 				else
 					document.errors.add(:bar_code_tag,"the bar code tag could not be persisted")
 				end
