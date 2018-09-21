@@ -12,4 +12,14 @@ class Shopping::Product < Auth::Shopping::Product
       end
    end
 
+   def as_indexed_json(options={})
+        {
+            tags: self.tags,
+            public: self.public,
+            document_type: Auth::OmniAuth::Path.pathify(self.class.name.to_s),
+            resource_id: self.resource_id,
+            resource_class: self.resource_class
+        }
+    end
+
 end

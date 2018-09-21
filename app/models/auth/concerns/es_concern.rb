@@ -134,7 +134,7 @@ module Auth::Concerns::EsConcern
         ## if the document is embedded, it can only be added to the es_index, through the controller create/update actions.
         after_save do |document|
 			unless document.class.embedded?
-			document.es_update
+				document.es_update
 			end
 		end
     

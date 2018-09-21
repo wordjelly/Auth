@@ -51,6 +51,7 @@ RSpec.describe "search request spec",:search => true, :type => :request do
         ## create a product.
 		@product = Shopping::Product.new
 		@product.name = "Cobas e411"
+		@product.description = "Cobas description"
 		@product.price = 500.00
 		@product.signed_in_resource = @admin
 		@product.resource_id = @admin.id.to_s
@@ -61,6 +62,7 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 		## create another product
 		@product = Shopping::Product.new
 		@product.name = "Roche 423"
+		@product.description = "Roche descrption."
 		@product.price = 500.00
 		@product.signed_in_resource = @admin
 		@product.resource_id = @admin.id.to_s
@@ -71,8 +73,8 @@ RSpec.describe "search request spec",:search => true, :type => :request do
 		puts "the product id is: #{@product.id.to_s}"
 		## create a cart item based on above product
 		@cart_item = Shopping::CartItem.new(product_id: @product.id.to_s, resource_class: @u.class.name.to_s, resource_id: @u.id.to_s, signed_in_resource: @u)
-		su = @cart_item.save
-	
+		@cart_item.create_with_embedded(@cart_item.product_id)
+		@cart_item.signed_in_resource = @u
 		## create one more user who shouldnt be able to see this cart item.
 		@u2 = User.new(attributes_for(:user_confirmed))
 		@u2.versioned_create

@@ -3,4 +3,7 @@ class Auth::Shopping::CartItem
 	def attributes_for_tags
 		["name","description"]
 	end
+
+	
+    
 end

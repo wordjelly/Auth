@@ -42,14 +42,16 @@ RSpec.describe "token request spec", :type => :request, token: true do
 
         context "-- API JSON token authentication tests " do 
 
-                it " - authenticates  ",:one => true do 
-                        get new_topic_path, nil, @headers
-                        expect(response.code).to eq("200")
+                it " -- will authenticate provided the api key and app id in the body -- " do 
+                    get new_topic_path, {:api_key => @ap_key, :current_app_id => "testappid"}, @headers
+                    expect(response.code).to eq("200")
                 end
 
-                it " - authenticates and sets resource ", :topic_focus => true do 
+
+                it " - will not authenticate without the app id and api key. ", :topic_focus => true do 
                         get new_topic_path, nil, @headers
-                        expect(assigns(:resource)).to be_truthy      
+                        expect(response.code).to eq("401")
+                             
                 end
 
                 it " - does not authenticate without es", :defocus => true do 
@@ -66,20 +68,7 @@ RSpec.describe "token request spec", :type => :request, token: true do
 
         end
 
-        context " -- authenticates admin as well as user models -- ", :token_tests => true do 
-
-
-
-            it " -- doesnt attempt authentication of admin user if the normal user gets authenticated -- " do 
-
-                 get new_topic_path, nil, @headers
-                
-                 expect(response.code).to eq("200")
-
-            end
-
-
-        end
+        
 
         context " -- token regeneration -- " do 
 

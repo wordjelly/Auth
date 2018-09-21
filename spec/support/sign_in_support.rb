@@ -1084,7 +1084,7 @@ module SearchSupport
     search_results.each do |result|
       begin
         cart_item = Auth.configuration.cart_item_class.constantize.new(result)
-        response = true if cart_item.tags.include? "item"
+        response = !cart_item.product_id.nil?
       rescue
       end
     end

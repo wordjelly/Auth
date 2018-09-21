@@ -2,7 +2,6 @@
 module Auth::Concerns::Shopping::CartItemConcern
 
 
-
 	extend ActiveSupport::Concern
 	
 	include Auth::Concerns::Shopping::ProductConcern
@@ -423,14 +422,12 @@ module Auth::Concerns::Shopping::CartItemConcern
 	end
 
 	def set_autocomplete_tags
-
 		self.tags = []
 		self.tags << "item"
 		if self.personality_id
 			personality = Auth.configuration.personality_class.constantize.find(self.personality_id)
 			personality.add_info(self.tags)
 		end
-
 	end
 
 	def set_autocomplete_description
@@ -486,60 +483,46 @@ module Auth::Concerns::Shopping::CartItemConcern
 	def create_with_embedded(product_id)
 		created_document = nil
 		product = Auth.configuration.product_class.constantize.find(product_id)
-		#puts product.attributes.to_s
+		
 		product_clone = product.clone
-		#puts "product clone instructions."
-		#puts product_clone.instructions.to_s
-		#puts product_clone.instructions.map{|c| c = c.attributes}.to_s
-		#exit(1)
-		#puts "finished cloning."
-		if self.valid?
-			self.run_callbacks(:save) do
-	          	self.run_callbacks(:create) do
-		            create_hash = {
-		            	"$setOnInsert" => self.attributes
-		            }	            
-		            	
-		            #puts "cloned attributes."
-		            #clone_attributes = product_clone.attributes
-		            #puts clone_attributes
-		            product_attributes_to_assign.each do |attr|
-		            	if product_clone.send("#{attr}").respond_to? :embedded_in
-		            		create_hash["$setOnInsert"][attr.to_s] = 
-		            		product_clone.send("#{attr}").map{|c| c = c.attributes}
-		            	else
-		            		create_hash["$setOnInsert"][attr.to_s] = product_clone.send("#{attr}")
-		            	end
-		            end
+		
+        create_hash = {
+        	"$setOnInsert" => self.attributes
+        }	            
+        	
+        product_attributes_to_assign.each do |attr|
+        	if product_clone.send("#{attr}").respond_to? :embedded_in
+        		create_hash["$setOnInsert"][attr.to_s] = 
+        		product_clone.send("#{attr}").map{|c| c = c.attributes}
+        	else
+        		create_hash["$setOnInsert"][attr.to_s] = product_clone.send("#{attr}")
+        	end
+        end
 
-		            puts "Create hash is:"
-		            puts JSON.pretty_generate(create_hash)
+        c = Auth.configuration.cart_item_class.constantize.
+		where({
+			"$and" => [
+				"_id" => BSON::ObjectId(self.id.to_s)
+			]
+		}).
+		find_one_and_update(
+			{
+				"$setOnInsert" => create_hash["$setOnInsert"]
+			},
+			{
+				:return_document => :after,
+				:upsert => true
+			}
+		)
 
-		            created_document = Auth.configuration.cart_item_class.constantize.
-					where({
-						"$and" => [
-							"_id" => BSON::ObjectId(self.id.to_s)
-						]
-					}).
-					find_one_and_update(
-						{
-							"$setOnInsert" => create_hash["$setOnInsert"]
-						},
-						{
-							:return_document => :after,
-							:upsert => true
-						}
-					)
-	          	end
-	        end
-	        unless created_document
-	        	self.errors.add(:_id,"failed to create the cart item")
-	        	false
-	    	else
-	    		created_document
-	    	end
-	    else
-	    	false
-		end	
+		c.signed_in_resource = self.signed_in_resource
+		c.valid?
+  		c.run_callbacks(:save) do 
+  			c.run_callbacks(:create) do 
+
+  			end
+  		end
+  		c.run_callbacks(:after_save)
+  		c
 	end
 end

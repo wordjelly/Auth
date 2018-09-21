@@ -58,6 +58,8 @@ class Auth::Shopping::BarCode
 		end
 	end
 
+
+	
 	def self.transfer_bar_code(from_object,to_object)
 
 		returned_document = Auth::Shopping::BarCode.collection.find_one_and_update(

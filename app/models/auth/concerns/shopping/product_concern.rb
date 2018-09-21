@@ -7,7 +7,6 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::EsConcern
 	include Mongoid::Autoinc	
 
-
 	## include the bar code concern if enable_bar_code_api is enabled.
 
 	if Auth.configuration.enable_barcode_api == true
