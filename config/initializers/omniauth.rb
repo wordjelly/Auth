@@ -336,6 +336,8 @@ module OmniAuth
 	            ## make sure that the host you specify in Auth.configuration 
 	            url_to_pass_as_callback = Auth.configuration.host_name + script_name + callback_path
 
+	            
+
 	          	verifier = request.params["code"]
 
 	          	client.auth_code.get_token(verifier, get_token_options(url_to_pass_as_callback), deep_symbolize(options.auth_token_params))

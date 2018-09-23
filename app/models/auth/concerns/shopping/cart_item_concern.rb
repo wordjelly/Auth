@@ -485,7 +485,10 @@ module Auth::Concerns::Shopping::CartItemConcern
 		product = Auth.configuration.product_class.constantize.find(product_id)
 		
 		product_clone = product.clone
-		
+			
+		self.created_at = Time.now
+  		self.updated_at = Time.now
+			
         create_hash = {
         	"$setOnInsert" => self.attributes
         }	            

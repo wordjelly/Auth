@@ -127,6 +127,7 @@ module Auth::Concerns::EsConcern
         	document.set_secondary_links
         	document.set_autocomplete_description
         	document.set_autocomplete_tags
+        	document.add_created_at
         	document.add_attributes_for_tags
         end
 
@@ -212,16 +213,26 @@ module Auth::Concerns::EsConcern
 
 	end
 
+=begin
 	def created_at=(created_at)
+			
 		
 		super(created_at)
 		
 		return unless self.created_at
 		
 		human_readable = self.created_at.strftime("%B %-d %Y")
-		self.tags << human_readable unless self.tags.include? human_readable		
+		self.tags << human_readable unless self.tags.include? human_readable
+
+		
 		self.masked_tags << human_readable unless self.tags.include? human_readable
 		
+	end
+=end
+
+	def add_created_at
+		human_readable = self.created_at.strftime("%B %-d %Y") if self.created_at
+		self.tags << human_readable unless self.tags.include? human_readable
 	end
 
 	def clear_autocomplete_data
