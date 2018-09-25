@@ -114,6 +114,10 @@ module Auth::Concerns::UserConcern
 		
 		field :admin,				type: Boolean, default: false
 
+		## the only way to set this is from the mongo console.
+		## executive admin can do the actions like setting other admins as workers etc.
+		field :chief_admin,		type: Boolean, default: false
+
 		attr_accessor :m_client
 
 		##additional parameter by which login can be done.
@@ -751,7 +755,7 @@ module Auth::Concerns::UserConcern
 	## this method is to be overridden, it returns the value of the admin_variable.
 	## it can be used to decide if the user is an admin.
 	## @used_in : payment_concern in the refund_callback 
-	def is_admin?
+	def is_admin?(args=nil)
 		admin
 	end
 

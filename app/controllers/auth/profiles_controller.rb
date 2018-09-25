@@ -48,13 +48,13 @@ class Auth::ProfilesController < Auth::ApplicationController
 	##{:resource => "users", :user => {:admin,:request_send_reset_password_link}, :id}
 	def update
 
-		puts "the profile resource is:"
-		puts @profile_resource.to_s
+		#puts "the profile resource is:"
+		#puts @profile_resource.to_s
 
 		check_for_update(@profile_resource)
 		
-		puts "going to assing attributes."
-		puts "resource params are: #{}"
+		#puts "going to assing attributes."
+		#puts "resource params are: #{}"
 		@profile_resource.assign_attributes(@resource_params)
 
 		@profile_resource.m_client = self.m_client
@@ -152,7 +152,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 	  		params.permit(filters)
 		end
 
-		## if the user is not an admin, then 
+		## if i want to allow more things here then 
 
 	end
 
