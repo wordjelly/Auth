@@ -27,10 +27,15 @@
     </nav>
   </div>
   <ul class="sidenav" id="mobile-demo">
-    <li><a href="sass.html">Sass</a></li>
-    <li><a href="badges.html">Components</a></li>
-    <li><a href="collapsible.html">Javascript</a></li>
-    <li><a href="mobile.html">Mobile</a></li>
+    <% if content_for?(:navbar_right) %>
+      <%= content_for(:navbar_right)  %>
+    <% else %>
+      <li>
+        <span id="personalization">
+          <%= render :partial => "layouts/auth/navbar/personalization.html.erb" %>
+        </span>
+      </li>
+    <% end %>
   </ul>
 
  <% if content_for?(:proxy_user) %>

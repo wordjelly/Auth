@@ -1680,3 +1680,55 @@ The script required to scan the barcode and assign the bar_code_tag to the field
 While creating / uploading the model, if a barcode is found in the scanner, then it will automatically populate the text_field called 'bar_code_tag' with that.
 After that when you submit the form, an after_save callback will save the barcode in a seperate barcodes collection. It will write errors in this process to the original object.
 
+--------------------------------------------------------------------
+
+
+## How to Set Secondary Links for Models Implementing the EsConcern
+
+### Basic Format
+
+For the url parameter - It will link to this url
+
+```
+
+Rails.application.routes.url_helpers.send(whatever_path as text)
+
+```
+
+For the data parameter:
+
+```
+
+## URL MUST BE SPECIFIED AS '#'
+
+{:url => "#", :data => {:procedure_id => self.id.to_s}}
+
+
+:data => {:some_key => some_value}
+
+```
+
+For the partial parameter - It will render a partial in the search results for this link.
+
+```
+
+:partial => "auth/profiles/search_results/switch_to_user.html.erb",
+:instance_name_in_locals => "user", 
+:other_locals => {}
+
+```
+
+
+```
+  
+unless self.secondary_links["What should be displayed in search results"]
+  self.secondary_links["What should be displayed in search results"] = {
+    :url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.personality_class)),
+    :data => {:some_key => "some_value"},
+    :partial => "auth/profiles/search_results/switch_to_user.html.erb",
+    :instance_name_in_locals => "user", 
+    :other_locals => {}
+  }
+end
+
+```

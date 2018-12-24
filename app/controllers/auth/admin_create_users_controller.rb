@@ -17,7 +17,7 @@ class Auth::AdminCreateUsersController < ApplicationController
 
     @auth_user_params = permitted_params.fetch(:user,{}) 
 
-    @auth_user = params[:id] ? @auth_user_class.find_self(params[:id],current_signed_in_resource) : @auth_user_class.new(@auth_user_params)
+    @auth_user = params[:id] ? @auth_user_class.find(params[:id]) : @auth_user_class.new(@auth_user_params)
     
   end
 

@@ -2,7 +2,7 @@
 <%= render :partial => "auth/shared/object_errors.html.erb", locals: {active_model_object: @auth_user} %>
 <!-- if the current signed in resource is admin -->
 	<!-- give options to resend sms otp, resend confirmation email, basically render the options partial from admin_create_users -->
-	<%= render :partial => "auth/admin_create_users/admin_actions.html.erb", locals: {user: @auth_user} %>
+<%= render :partial => "auth/admin_create_users/admin_actions.html.erb", locals: {user: @auth_user} %>
 <!-- else -->
 	
 <!-- end -->

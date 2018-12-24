@@ -17,13 +17,12 @@ class Auth::ProfilesController < Auth::ApplicationController
 		@profile_resource = nil
 		@all_params = permitted_params.deep_symbolize_keys
 		
-		## okay let's see how to switch to that user.
-		
 	  	if collection = @all_params[:resource]
 	  		
 	  		if Auth.configuration.auth_resources[collection.singularize.capitalize]
 
 	  			@resource_class = collection.singularize.capitalize.constantize
+	  			
 	  			@resource_symbol = collection.singularize.to_sym
 	  			
 	  			@resource_params = @all_params.fetch(@resource_symbol,{})
