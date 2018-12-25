@@ -8,14 +8,12 @@ module Auth::Concerns::Shopping::BarCodeConcern
 
 		after_find do |document| 
 			## look for a barcode
-=begin
 			unless document.bar_code_tag
 				bar_codes = Auth::Shopping::BarCode.where(:assigned_to_object_id => document.id.to_s, :assigned_to_object_class => document.class.name)
 				if bar_codes.size == 1
 					document.bar_code_tag = bar_codes.first.bar_code_tag
 				end
 			end
-=end
 		end
 
 		## so if i want to assign a barcode , i.e the same barcode to the unit.
@@ -48,6 +46,8 @@ module Auth::Concerns::Shopping::BarCodeConcern
 					document.errors.add(:bar_code_tag,"could not clear the barcode tag. Please try again later")
 				else
 					puts "clear barcode succeeds."
+					## remove the barcode from the object, that was loaded at find.
+					document.bar_code_tag = nil
 				end
 			end
 		end
@@ -58,16 +58,28 @@ module Auth::Concerns::Shopping::BarCodeConcern
 		after_save do |document|
 			
 			puts "Came to after_Save product."
-			unless document.bar_code_tag.nil?
-				puts "bar code tag is not nil"
+			
+			unless document.bar_code_tag.blank?
+				
+				#puts "bar code tag is not nil"
+				#puts "barcode tag is:"
+				
+				#puts "-----------|||||||||||||||||||||||||"
+				#puts document.bar_code_tag.to_s
+				#puts "-----------|||||||||||||||||||||||||"
+
 				if bar_code_object = Auth::Shopping::BarCode.upsert_and_assign_object(self)
-					puts "upsert and assign works."
+					#puts "upsert and assign works."
+					#puts "self barcode is:"
+					#puts self.bar_code_tag.to_s
 				else
 					document.errors.add(:bar_code_tag,"the bar code tag could not be persisted")
 				end
 
 			end
+
 		end
+
 	end
 
 end
