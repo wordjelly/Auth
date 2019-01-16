@@ -12,9 +12,7 @@ class Auth::SearchController < ApplicationController
 	before_action :do_before_request, TCONDITIONS
 
 	## only option is to set no fallback
-	## so that it will just go through.
-
-			
+	## so that it will just go through.		
 	## permitted_params[:query] is expected to be a hash, which can provide the following arguments
 	## :query_string => a string for the query
 	## :search_on_field => the field name on which the search can be performed, will default to the 'tags' field.

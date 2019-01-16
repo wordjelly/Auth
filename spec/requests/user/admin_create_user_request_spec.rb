@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "cart item request spec", :admin_create_user => true, :type => :request do 
+RSpec.describe "admin create user spec", :admin_create_user => true, :type => :request do 
 
 	before(:all) do 
         ActionController::Base.allow_forgery_protection = false

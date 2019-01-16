@@ -134,6 +134,23 @@ module Auth::Concerns::UserConcern
 		
 		
 		field :name,				type: String, default: ""
+
+		## will have to enable these as permitted parameters.
+
+		field :title, type: String
+
+	    field :first_name, type: String
+	    
+	    field :last_name, type: String
+	    
+	    field :date_of_birth, type: Time
+	    
+	    field :sex, type: String
+	    
+	    field :address, type: String
+    
+
+
 		field :image_url,			type: String, default: ""
 		###ENDS.
 

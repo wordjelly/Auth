@@ -142,7 +142,7 @@ module Auth
 				
 				OpenStruct.new({code: 200, body: JSON.generate({:Status => "Success", :Details => Faker::Name.name})})
 			else
-				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource.additional_login_param}/AUTOGEN", timeout: typhoeus_timeout)
+				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/+91#{resource.additional_login_param}/AUTOGEN", timeout: typhoeus_timeout, headers: {'Content-Type'=> "application/x-www-form-urlencoded"})
 			end
 		end
 
@@ -161,7 +161,7 @@ module Auth
 					OpenStruct.new({code: 200, body: JSON.generate({:Status => ((otp_session_id == otp) ? "Success" : "failed"), :Details => "location: two_factor_otp.rb#verify_otp_response, compares otp_session id to provided otp to decide failure or success"})})	
 				end
 			else
-				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{otp}", timeout: typhoeus_timeout)
+				Typhoeus.get("https://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/SMS/VERIFY/#{otp_session_id}/#{otp}", timeout: typhoeus_timeout, headers: {'Content-Type'=> "application/x-www-form-urlencoded"})
 			end
 		end
 
@@ -196,9 +196,7 @@ module Auth
 
 	 	## return the timeout in seconds.
 	 	def typhoeus_timeout
-	 		10
+	 		20
 	 	end
-
-
 	end
 end
