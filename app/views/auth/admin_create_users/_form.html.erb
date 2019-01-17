@@ -10,21 +10,28 @@
     <%= f.text_field :additional_login_param %>
     <%= f.label :additional_login_param %>
 
-<!---
-    ## add to permitted parameters.
-    ## use select field.
-    
-    field :title, type: String
-    field :first_name, type: String
-    field :last_name, type: String
-    field :date_of_birth, type: Time
-    field :sex, type: String
-    field :address, type: String
-    
+    <%= f.select("title", [["Mr","Mrs"],["Mrs","Mrs"],["Mast","Mast"],["Miss","Miss"],["Dr","Dr"]] , { include_blank: true }) %>
 
---->    
+    <%= f.text_field :first_name %>
+    <%= f.label :first_name %>
 
-    
+    <%= f.text_field :last_name %>
+    <%= f.label :last_name %>
+
+    <%= f.select("sex", [["Male","Male"],["Female","Female"],["Other","Other"]] , { include_blank: true }) %>
+
+    <%= f.text_field :address %>
+    <%= f.label :address %>  
+
+    <%= f.text_field :date_of_birth, :class => "datepicker date_of_birth" %>
+    <%= f.label :date_of_birth %>
+
+    <!-- test if user can be created with these fields -->
+    <!-- in the registrations controller -->
+    <!-- also in the update controller -->
+    <!-- also add them in the admin_create_user controller -->
+    <!-- history will be a seperate thing -->
+    <!-- there have to override for history points -->
 
   </div>
   <div class="actions">

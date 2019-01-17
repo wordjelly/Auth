@@ -163,7 +163,7 @@ module Auth::Concerns::OtpConcern
 				  	if @intent == "reset_password"
 				  		
 				  		##protected method so had to do this.
-				  		if resource.confirmed? && !resource.	pending_reconfirmation?
+				  		if resource.confirmed? && !resource.pending_reconfirmation?
 				  			resource.class.send_reset_password_instructions(resource.attributes)
 				  			
 				  			intent_verification_message = "An email has been sent to your email account, with instructions on resetting your password" if resource.errors.empty?

@@ -45,7 +45,7 @@ class Auth::AdminCreateUsersController < ApplicationController
   #  User.where(:email => "bhargav.r.raut@gmail.com").first.delete
   # POST /auth/admin_create_users
   def create
-    @auth_user.password = @auth_user.password_confirmation =SecureRandom.hex(24)
+    @auth_user.password = @auth_user.password_confirmation = SecureRandom.hex(24)
     @auth_user.m_client = self.m_client
     @auth_user.created_by_admin = true
 
@@ -83,7 +83,7 @@ class Auth::AdminCreateUsersController < ApplicationController
   end
 
   def permitted_params
-    params.permit({user: [:email,:additional_login_param, :password, :password_confirmation]},:id)    
+    params.permit({user: ([:email,:additional_login_param, :password, :password_confirmation] + Devise::ParameterSanitizer::DEFAULT_PERMITTED_ATTRIBUTES[:account_update]).uniq},:id)    
   end
 
 end

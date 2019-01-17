@@ -70,16 +70,16 @@ module Auth
 				response = send_otp_response
 
 				if response.code == 200
-					puts "-- send response code is 200"
+					#puts "-- send response code is 200"
 					response_body = JSON.parse(response.body).symbolize_keys
-					puts "---send response body is:"
-					puts response_body.to_s
+					#puts "---send response body is:"
+					#puts response_body.to_s
 					if response_body[:Status] == "Success"
 						puts "--send response status is success"
 						puts "set the redis value to : #{response_body[:Details]}"
 						$redis.hset(resource.id.to_s + "_two_factor_sms_otp","otp_session_id",response_body[:Details])
 					else
-						#puts "--response status is failure"
+						puts "--otp response status is failure"
 						log_error_to_redis(response_body[:Details])
 					end
 				else
@@ -103,18 +103,22 @@ module Auth
 					response = verify_otp_response(otp,otp_session_id)
 					if response.code == 200
 						response_body = JSON.parse(response.body).symbolize_keys
+						#puts "response body is:"
+						#puts response_body.to_s
 						if response_body[:Status] == "Success"
 							##suppose here we say additional parameter confirmed
 							##then when we have to sign in user, we just need to bypass the active_for_authentication,
 							##and dont touch anything else.
+							#puts "successfully matched otp --- "
 
 							resource.otp = otp
 
 							resource.additional_login_param_status = 2
 							
+							#puts "set the status as: #{resource.additional_login_param_status}"
+							#puts "going for save."
 							resource.save
-							
-							
+
 							
 							clear_redis_user_otp_hash
 						else
@@ -156,8 +160,8 @@ module Auth
 					##check the otp, and derive the response based on that.
 					##this comparison of comparing the session id, with the opt is just for test purpose.
 					##in reality they have nothing to do with each other.
-					puts "otp session id is:#{otp_session_id}"
-					puts "otp is: #{otp}"
+					#puts "otp session id is:#{otp_session_id}"
+					#puts "otp is: #{otp}"
 					OpenStruct.new({code: 200, body: JSON.generate({:Status => ((otp_session_id == otp) ? "Success" : "failed"), :Details => "location: two_factor_otp.rb#verify_otp_response, compares otp_session id to provided otp to decide failure or success"})})	
 				end
 			else

@@ -49,8 +49,11 @@ class Auth::RegistrationsController < Devise::RegistrationsController
 	    resource.m_client = self.m_client
 	 	resource.set_client_authentication
 	 	## end.
-	 	
-	    resource_updated = update_resource(resource, account_update_params)
+	 	puts " ----- the account update params are: --- "
+	 	k = account_update_params
+	 	puts k
+	 	puts " ----- -------------------"
+	    resource_updated = update_resource(resource, k)
 	    
 	    yield resource if block_given?
 	    if resource_updated

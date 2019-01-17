@@ -40,6 +40,9 @@ module Auth::Concerns::UserConcern
 		after_save :create_client, :if => Proc.new { |a| (!(a.respond_to? :confirmed_at)) || (a.confirmed_at_changed?) || (a.additional_login_param_status_changed? && a.additional_login_param_status == 2) }
 		#after_save :create_client
 
+
+
+
 		after_save :set_client_authentication
 
 		before_save do |document|
@@ -184,10 +187,15 @@ module Auth::Concerns::UserConcern
 		  if !opts[:skip].include? :registrations
 	      	devise :registerable
 	      	devise :validatable
+
+	      	## email is required only if the additional_login_param is nil.
+	      	## 
 	      	def email_required?
           		#additional_login_param.nil?
           		return additional_login_param.nil?
         	end 
+	      	
+
 	      	validates_presence_of   :additional_login_param, if: :additional_login_param_required?
 	      	
 
@@ -200,9 +208,13 @@ module Auth::Concerns::UserConcern
 	        ##VALIDATIONS TO BE DONE ONLY ON UPDATE
 	        validate :additional_login_param_changed_on_unconfirmed_email,on: :update
 	        validate :email_changed_on_unconfirmed_additional_login_param,on: :update
-	        validate :email_and_additional_login_param_both_changed,on: [:update,:create]
+	        #validate :email_and_additional_login_param_both_changed,on: [:update,:create]
+	        #CHANGED THIS TO NOW ONLY TRIGGER ON UPDATE.
+	        #YOU CAN CREATE AN ACCOUNT WITH EMAIL AND ADDITIONAL_LOGIN_PARAM
+	        validate :email_and_additional_login_param_both_changed,on: [:update]
 
 	        field :remember_created_at, type: Time
+	  	 
 	  	  end
 
 
@@ -447,6 +459,9 @@ module Auth::Concerns::UserConcern
 		#puts self.request_send_reset_password_link.to_s
 
 		## if there was an unconfirmed_email present.
+		## this will happen only once. not again and again.
+		## the first time the link is sent, it won't get sent again.
+		## and only if created by admin.
 
 		if self.created_by_admin
 
@@ -696,6 +711,9 @@ module Auth::Concerns::UserConcern
 	end
 
 	##now what if both have changed?
+	##keep this only on update.
+	##then we don't have to give a shit really.
+	##whatever happens will work out thereafter.
 	def email_and_additional_login_param_both_changed
 		#puts "calling email and additional login param both changed"
 		##add error saying you cannot change both at the same time.

@@ -287,7 +287,6 @@ DeviseController.class_eval do
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
   
-
   def redirect_to(options = {}, response_status = {})
 
       cli = session[:client]
@@ -601,7 +600,7 @@ module Devise
         
         self.status = 401
         self.content_type = 'application/json'
-        self.response_body = {"success"=> false, "errors" => ["u shall not pass LOL"]}.to_json
+        self.response_body = {"success"=> false, "errors" => ["Authentication Failure"]}.to_json
     end
 
     
@@ -610,14 +609,20 @@ module Devise
 
   ##the additional_login_param is added as a authentication_key 
   class ParameterSanitizer
-    DEFAULT_PERMITTED_ATTRIBUTES ||=
+      
+    DEFAULT_SIGN_IN_ATTRIBUTES ||= [:login,:password, :remember_me, :redirect_url, :api_key, :current_app_id]
+
+    DEFAULT_SIGN_UP_ATTRIBUTES ||= [:password, :password_confirmation, :redirect_url, :api_key, :current_app_id,:first_name,:last_name,:date_of_birth,:sex,:address,:title]
+
+    DEFAULT_UPDATE_ATTRIBUTES ||= [:password, :password_confirmation, :current_password, :redirect_url, :api_key, :current_app_id,:first_name,:last_name,:date_of_birth,:sex,:address,:title,:android_token,:ios_token]
+
+    DEFAULT_PERMITTED_ATTRIBUTES =
       {
-        sign_in: [:login,:password, :remember_me, :redirect_url, :api_key, :current_app_id],
-        sign_up: [:password, :password_confirmation, :redirect_url, :api_key, :current_app_id],
-        account_update: [:password, :password_confirmation, :current_password, :redirect_url, :api_key, :current_app_id]
+        sign_in: DEFAULT_SIGN_IN_ATTRIBUTES,
+        sign_up: DEFAULT_SIGN_UP_ATTRIBUTES,
+        account_update: DEFAULT_UPDATE_ATTRIBUTES
       }
 
   end
-
 end
 

@@ -2,23 +2,21 @@ require "rails_helper"
 
 RSpec.describe "Registration requests", :registration => true,:authentication => true, :type => :request do
   before(:all) do 
+    
     Auth.configuration.recaptcha = true
+    
     User.delete_all
+    
     Auth::Client.delete_all
+
     module Devise
-
       RegistrationsController.class_eval do
-
         def sign_up_params
-          ##quick hack to make registrations controller accept confirmed_at, because without that there is no way to send in a confirmed admin directly while creating the admin.
-          params.require(:user).permit(
-            :email, :password, :password_confirmation, :additional_login_param, :confirmed_at
-          )
+          params.require(:user).permit(Devise::ParameterSanitizer::DEFAULT_UPDATE_ATTRIBUTES + [:email,:additional_login_param,:confirmed_at])
         end
-
       end
-
     end
+
   end
 
   context " -- web app requests -- " do 
@@ -80,6 +78,31 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
     end
 
+    context " -- creates user with name, age, date_of_birth etc -- ", :creates_user_with_name_dob_sex => true do 
+
+      it " --  -- " do 
+        post user_registration_path, {user: attributes_for(:user_confirmed).merge({:first_name => "Radhika", :last_name => "Joshi", :date_of_birth => "10/10/1988", :sex => "Female"}),:api_key => @ap_key, :current_app_id => "testappid"}
+
+        @user = assigns(:user)
+        
+        expect(@user.client_authentication).not_to be_nil
+
+        expect(@user.first_name).to eq("Radhika")
+
+        expect(@user.last_name).to eq("Joshi")
+
+        expect(@user.date_of_birth).to eq(Time.find_zone("UTC").parse("10/10/1988"))
+        
+        expect(@user.client_authentication).not_to be_empty
+        
+        expect(@user.authentication_token).not_to be_nil
+        
+        expect(@user.errors.full_messages).to be_empty
+      
+      end
+
+    end
+
     context " -- auth token and client salt creation -- " do 
 
       it " -- creates client authentication and auth token on user create -- " do
@@ -120,20 +143,22 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
       end
 
+      ## this has failed due to a parameter change on the test.
+      it " -- does not change the auth_token or client_authentication if other user data is updated -- ", :adds_first_name => true do 
 
-      it " -- does not change the auth_token or client_authentication if other user data is updated -- " do 
+        #puts Devise::ParameterSanitizer::DEFAULT_PERMITTED_ATTRIBUTES
 
         sign_in_as_a_valid_and_confirmed_user
 
-        name = Faker::Name.name
+        first_name = Faker::Name.name
 
-        put user_registration_path, :id => @user.id, :user => {:name => name, :current_password => "password"}
+        put user_registration_path, :id => @user.id, :user => {:first_name => first_name, :current_password => "password"}
         
         @user_updated = assigns(:user)
         ##here don't need to confirm anything because we are not changing the email.
         expect(@user_updated.errors.full_messages).to be_empty
         expect(@user_updated.client_authentication).to eql(@user.client_authentication)
-        expect(@user_updated.name).to eql(name)
+        expect(@user_updated.first_name).to eql(first_name)
         expect(@user_updated.authentication_token).not_to eql(@user.authentication_token)
 
       end
@@ -455,7 +480,13 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
             user_json_hash = JSON.parse(response.body)
             
             expect(user_json_hash.keys).to match_array(["nothing"])
-        end        
+        end  
+
+        it " -- CREATE WITH NAME, TITLE, DATE OF BIRTH, SEX AND ADDRESS -- " do   
+
+
+
+        end      
 
         
         context " -- recaptcha ", recaptcha_json: true do 
@@ -490,7 +521,10 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
         
 
         context " --- UPDATE REQUEST --- " do 
-            
+          
+
+
+
           it " -- works -- ", :email_update => true do  
 
             a = {:id => @u2.id, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}

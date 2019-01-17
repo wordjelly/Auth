@@ -20,6 +20,27 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
 
+        ### okay so suppose you enter your mobile number.
+        ### then you enter your email ?
+        ### can we automatically shunt it.
+        ### to another parameter?
+        ### client side
+        ### later send for verification.
+        ### just call save on it.
+        ### something that happens on verification.
+        ### the same pathway that is taken when you add an email later on.
+        ### no difference, but is triggered on verifying the mobile.
+        ### we have to have another parameter on the user to store that.
+        ### how do you verify the email?
+        ### that is the question.
+        ### otp => verified, added email -> waiting for verification.
+        ### but cannot have both at the same time inputted.
+        ### otp gives him account access.
+        ### but not report by pdf.
+        ### if he adds an email, does he need to verify it?
+        ### just give a secondary option for the email.
+        ### on verifying the sms, 
+
 
         ### CREATE ONE ADMIN USER
 
@@ -172,6 +193,29 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
                 Noti.delete_all
             end
 
+            ## what if we create with email and mobile, solve this today.
+
+            it " -- creates a user with first name, last name, dob and mobile -- ", :admin_creates_user_with_personal_details => true do 
+
+                post admin_create_users_path,{user: {:email => "rrphotosoft@gmail.com", :first_name => "Bhargav", :last_name => "Raut", :date_of_birth => "10/10/1888", :sex => "Male", :title => "Dr"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
+                
+                user_created = assigns(:auth_user)
+                expect(user_created).not_to be_nil
+                expect(user_created.errors).to be_empty
+                expect(user_created.first_name).to eq("Bhargav")
+                expect(user_created.last_name).to eq("Raut")
+                expect(user_created.date_of_birth).to eq(Time.find_zone("UTC").parse("10/10/1888"))
+                expect(user_created.sex).to eq("Male")
+                expect(user_created.title).to eq("Dr")
+                expect(response.code).to eq("201")
+                response_body = JSON.parse(response.body)
+                expect(response_body).to eq({"nothing" => true})
+                ## now also check the confirmation email is sent.
+                confirmation_token = get_confirmation_token_from_email
+                expect(confirmation_token).not_to be_nil
+
+            end
+
             it " -- creates the user and sends the confirmation email -- " do 
 
                 post admin_create_users_path,{user: {:email => "rrphotosoft@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
@@ -289,13 +333,84 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         end
 
         context " -- validations --" do 
-            it " -- admin cannot simultaneously create user with email and mobile -- " do 
+            it " -- admin can simultaneously create user with email and mobile -- ", :simultaneous_email_password => true do 
 
-                post admin_create_users_path,{user: {:additional_login_param => "9561137096", :email => "doggy@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
+                post admin_create_users_path,{user: {:additional_login_param => "9561137096", :email => "bhargav.r.raut@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @admin_headers
 
-                expect(response.code).to eq("422")
+                message = ActionMailer::Base.deliveries[-1] unless ActionMailer::Base.deliveries.blank?
+                
+                expect(message).not_to be_blank
+
+                expect(response.code).to eq("201")
 
             end
+
+        end
+
+        context " -- user with email and mobile -- " do 
+
+            it " -- on verifying the mobile of a user with both email and password, the email verification still works -- ", :simult_email_sms_verify => true do 
+
+                ## so we have to create a user with both email and mobile.
+                ## without a password.
+                ## then we call save
+                ## it should send the confirmation email.
+                ## then we use the otp to confirm.
+                ## after that we try to confirm the email.
+                pwd = SecureRandom.hex(24)
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd}
+                user = User.new(attributes_for_user)
+                user.save
+                
+                ## use that to verify.
+                @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+                
+                $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                
+
+                @last_user_created.verify_sms_otp($otp_session_id)
+
+                ## this should send the reset password message.
+
+                @last_user_created = User.find(@last_user_created.id.to_s)
+                #puts @last_user_created.additional_login_param_status
+                #puts " -- errors are ----> "
+                #puts @last_user_created.errors.full_messages
+
+                expect(@last_user_created.additional_login_param_confirmed?).to be_truthy
+
+                ## search for the latest notification.
+                ## it has the link.
+                ## set new password using that link.
+                ## then try 
+
+
+            end
+
+
+=begin
+            it " -- on verifying the email of the user, the mobile can still be verified -- " do 
+
+
+            end
+
+
+            it " -- on verifying the mobile, the change password link goes to the mobile -- " do 
+
+            end
+
+
+            it " -- after verifying the mobile, if the email is verified, then the change password link is not sent to it -- " do 
+
+
+            end
+
+            it " -- after verifying the email, if the mobile is verified, the change password link does not go to it -- " do 
+
+
+            end
+
+=end
 
         end
 

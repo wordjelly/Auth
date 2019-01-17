@@ -29,6 +29,7 @@ payumoney.js
 //= require search.js
 //= require bar_code.js
 
+
 /////THIS CODE SHOWS HOW TO OVERRIDE ALL THE CLIENT SIDE CODE NEEDED
 /////FOR VALIDATIONS TO WORK FOR THE SIGN_IN_FORM.
 var mobile_number_regex = /^([0]\+[0-9]{1,5})?([7-9][0-9]{9})$/;
