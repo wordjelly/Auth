@@ -80,7 +80,6 @@ module Auth::Concerns::NotificationConcern
 	
 
 	######################### FORMAT METHODS ####################
-
 	## returns the name of a partial to be rendered.
 	def email_partial
 		"auth/notifier/email.html.erb"

@@ -347,23 +347,42 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
 
         end
 
-        context " -- user with email and mobile -- " do 
+        context " -- user with email and mobile -- ", :simult => true do 
 
-            it " -- on verifying the mobile of a user with both email and password, the email verification still works -- ", :simult_email_sms_verify => true do 
+            it " -- on verifying the email, a reset password link is sent by email, thereafter mobile can be verified, but reset password link is not sent again. -- ", :simult_email_sms_verify => true do 
 
-                ## so we have to create a user with both email and mobile.
-                ## without a password.
-                ## then we call save
-                ## it should send the confirmation email.
-                ## then we use the otp to confirm.
-                ## after that we try to confirm the email.
+                
                 pwd = SecureRandom.hex(24)
-                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd}
+                
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
                 user = User.new(attributes_for_user)
+                
                 user.save
                 
-                ## use that to verify.
+                ## a confirmation email should have been sent.
+                message = ActionMailer::Base.deliveries[-1].to_s
+                confirmation_token = nil
+                message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+                    j = Regexp.last_match
+                    confirmation_token = j[:confirmation_token]
+
+                end
+
+                expect(confirmation_token).not_to be_nil
+                
+                get user_confirmation_path,{confirmation_token: confirmation_token}
+
+                ## on confirming it should generate a reset_password_message.
+                ## get the base deliveries.
+                message = ActionMailer::Base.deliveries[-1].to_s
+                confirmation_token = nil
+                expect(message =~ /reset_password/).to be_truthy
+
+
                 @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+
+                
                 
                 $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
                 
@@ -373,44 +392,88 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
                 ## this should send the reset password message.
 
                 @last_user_created = User.find(@last_user_created.id.to_s)
-                #puts @last_user_created.additional_login_param_status
-                #puts " -- errors are ----> "
-                #puts @last_user_created.errors.full_messages
+               
+                expect(@last_user_created.additional_login_param_confirmed?).to be_truthy
+         
+                resource_ids = JSON.generate({User.name => [@last_user_created.id.to_s]})
+                
+                n = Noti.where(:resource_ids => resource_ids).first
+                
+                expect(n).to be_nil
+                
+            end
+
+
+            it " -- on verifying the mobile, a reset password link is sent by mobile, thereafter email can be verified, but the reset password link is not resent -- ", :simult_two => true do 
+
+                u = User.where(:additional_login_param => "9561137096").first.delete
+
+                ActionMailer::Base.deliveries = []
+
+
+                pwd = SecureRandom.hex(24)
+                
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
+
+                user = User.new(attributes_for_user)
+                
+                user.save
+
+                @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+
+                
+                
+                $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                
+
+                @last_user_created.verify_sms_otp($otp_session_id)
+
+                ## this should send the reset password message.
+
+                @last_user_created = User.find(@last_user_created.id.to_s)
+               
 
                 expect(@last_user_created.additional_login_param_confirmed?).to be_truthy
 
-                ## search for the latest notification.
-                ## it has the link.
-                ## set new password using that link.
-                ## then try 
+                    
+                resource_ids = JSON.generate({User.name => [@last_user_created.id.to_s]})
+                
+                n = Noti.where(:resource_ids => resource_ids).first
+
+                expect(n).not_to be_nil
+
+                ## so the reset password message was sent.
+                ## now we try to verify the email.
+                ## and then a reset password message should not be 
+                ## sent at that time.
+                message = ActionMailer::Base.deliveries[-1].to_s
+                #puts "the message becomes:"
+                #puts message.to_s
+                confirmation_token = nil
+                message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+                    j = Regexp.last_match
+                    confirmation_token = j[:confirmation_token]
+
+                end
+
+                expect(confirmation_token).not_to be_nil
+                    
+                ActionMailer::Base.deliveries = []
+
+                get user_confirmation_path,{confirmation_token: confirmation_token}
+
+                ## clear the base deliveries.
+                ## on confirming it should generate a reset_password_message.
+                ## get the base deliveries.
+                #message = ActionMailer::Base.deliveries[-1].to_s
+                #confirmation_token = nil
+                #expect(message =~ /reset_password/).not_to be_truthy
+                expect(ActionMailer::Base.deliveries).to be_blank
+            end     
 
 
-            end
-
-
-=begin
-            it " -- on verifying the email of the user, the mobile can still be verified -- " do 
-
-
-            end
-
-
-            it " -- on verifying the mobile, the change password link goes to the mobile -- " do 
-
-            end
-
-
-            it " -- after verifying the mobile, if the email is verified, then the change password link is not sent to it -- " do 
-
-
-            end
-
-            it " -- after verifying the email, if the mobile is verified, the change password link does not go to it -- " do 
-
-
-            end
-
-=end
+          
 
         end
 

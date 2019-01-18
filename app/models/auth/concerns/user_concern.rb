@@ -453,6 +453,7 @@ module Auth::Concerns::UserConcern
 	## if the resource was created by an administrator, and the attr_accessor request_send_reset_password_link is true, then it will check if the email is confirmed, and then send the reset_password_instructions to the email. otherwise will check if the mobile is confirmed, and will just generate that reset_password_link
 	def send_reset_password_link
 		
+		#puts " --- came to set reset password link --- "
 		reset_password_link = nil
 
 		#puts "came to send reset password link, and this is the attr accessor."
@@ -465,7 +466,7 @@ module Auth::Concerns::UserConcern
 
 		if self.created_by_admin
 
-			#puts "the request send is true."
+			#puts "is created by admin."
 			#puts self.attributes.to_s
 			#puts "is the additional login param confirmed"
 			#puts self.additional_login_param_confirmed?

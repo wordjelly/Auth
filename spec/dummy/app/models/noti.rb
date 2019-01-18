@@ -26,6 +26,14 @@ class Noti
 		#end
 	end
 
+	## will send by email, if the email is confirmed.
+	## so basically won't send the reset password notification
+	## on the sms being confirmed.
+	## but will send it on the email being confirmed.
+	def send_by_email?(resource)
+		return (resource.confirmed? && !resource.pending_reconfirmation?)
+	end
+
 	def send_email_background(resource)
 		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_email",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
 		#Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
