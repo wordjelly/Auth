@@ -406,7 +406,11 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
 
             it " -- on verifying the mobile, a reset password link is sent by mobile, thereafter email can be verified, but the reset password link is not resent -- ", :simult_two => true do 
 
-                u = User.where(:additional_login_param => "9561137096").first.delete
+                if u = User.where(:additional_login_param => "9561137096")
+                    if u.size > 0
+                        u.first.delete
+                    end
+                end
 
                 ActionMailer::Base.deliveries = []
 
@@ -472,8 +476,184 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
                 expect(ActionMailer::Base.deliveries).to be_blank
             end     
 
+        end
 
-          
+
+        context " -- resend reset password token -- ", :resend_reset_password_token => true do 
+
+            it " -- sends the reset password token to the mobile after the mobile has been verified on doing resend reset password link  -- ", :resend_reset_password_to_mobile => true do 
+
+                 if u = User.where(:additional_login_param => "9561137096")
+                    if u.size > 0
+                        u.first.delete
+                    end
+                end
+
+                pwd = SecureRandom.hex(24)
+                
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
+
+                user = User.new(attributes_for_user)
+                
+                user.save
+
+                @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+
+                    
+                $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                
+
+                @last_user_created.verify_sms_otp($otp_session_id)
+
+                ## this should send the reset password message.
+
+                @last_user_created = User.find(@last_user_created.id.to_s)
+               
+
+                expect(@last_user_created.additional_login_param_confirmed?).to be_truthy
+
+                    
+                resource_ids = JSON.generate({User.name => [@last_user_created.id.to_s]})
+                
+                n = Noti.where(:resource_ids => resource_ids)
+
+                expect(n.size).to eq(1)
+                #expect(n).not_to be_nil
+
+
+                ## now do resend reset password link
+                update_hash = {:resource => "users", :user => {:created_by_admin => true}, :api_key => @ap_key, :current_app_id => "testappid"}
+
+                put profile_path(:id => user.id.to_s), update_hash.to_json, @admin_headers
+
+                ## now it should have sent that message.
+
+                n = Noti.where(:resource_ids => resource_ids)
+
+                expect(n.size).to eq(2)
+
+            end
+
+
+            it " -- sends the reset password token to the email after the email has been verified on doing resent reset password link -- " do 
+
+                if u = User.where(:additional_login_param => "9561137096")
+                    if u.size > 0
+                        u.first.delete
+                    end
+                end
+
+                pwd = SecureRandom.hex(24)
+                
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
+
+                user = User.new(attributes_for_user)
+                
+                user.save
+
+                ## confirm the email.
+                message = ActionMailer::Base.deliveries[-1].to_s
+                confirmation_token = nil
+                message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+                    j = Regexp.last_match
+                    confirmation_token = j[:confirmation_token]
+
+                end
+
+                expect(confirmation_token).not_to be_nil
+
+                user = User.find(user.id)
+                user.confirm!
+
+
+                ActionMailer::Base.deliveries = []
+
+                update_hash = {:resource => "users", :user => {:created_by_admin => true}, :api_key => @ap_key, :current_app_id => "testappid"}
+
+                put profile_path(:id => user.id.to_s), update_hash.to_json, @admin_headers
+
+
+                message = ActionMailer::Base.deliveries[-1].to_s
+                expect(message =~ /reset_password/).to be_truthy
+                  
+
+            end
+
+            it " -- sends the reset password link to email, if both are confirmed, and resend_reset_password_token is triggered -- " do 
+
+                if u = User.where(:additional_login_param => "9561137096")
+                    if u.size > 0
+                        u.first.delete
+                    end
+                end
+
+                pwd = SecureRandom.hex(24)
+                
+                attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
+
+                user = User.new(attributes_for_user)
+                
+                user.save
+
+                @last_user_created = User.order_by(:confirmation_sent_at => 'desc').first
+
+                    
+                $otp_session_id = $redis.hget(@last_user_created.id.to_s + "_two_factor_sms_otp","otp_session_id")
+                
+
+                @last_user_created.verify_sms_otp($otp_session_id)
+
+                ## this should send the reset password message.
+
+                @last_user_created = User.find(@last_user_created.id.to_s)
+               
+
+                expect(@last_user_created.additional_login_param_confirmed?).to be_truthy
+
+                ## it must have sent it to the email.
+
+                    
+                resource_ids = JSON.generate({User.name => [@last_user_created.id.to_s]})
+                
+                n = Noti.where(:resource_ids => resource_ids)
+
+                expect(n.size).to eq(1)
+
+
+                ## confirm the email.
+                message = ActionMailer::Base.deliveries[-1].to_s
+                confirmation_token = nil
+                message.scan(/confirmation_token=(?<confirmation_token>.*)\"/) do |ll|
+
+                    j = Regexp.last_match
+                    confirmation_token = j[:confirmation_token]
+
+                end
+
+                expect(confirmation_token).not_to be_nil
+
+                user = User.find(user.id)
+                user.confirm!
+
+
+                ## now we trigger reset.
+                ## no new notifications
+                ActionMailer::Base.deliveries = []
+
+                update_hash = {:resource => "users", :user => {:created_by_admin => true}, :api_key => @ap_key, :current_app_id => "testappid"}
+
+                put profile_path(:id => user.id.to_s), update_hash.to_json, @admin_headers
+
+
+                message = ActionMailer::Base.deliveries[-1].to_s
+                expect(message =~ /reset_password/).to be_truthy
+
+                 n = Noti.where(:resource_ids => resource_ids)
+
+                expect(n.size).to eq(1)
+
+            end
 
         end
 
