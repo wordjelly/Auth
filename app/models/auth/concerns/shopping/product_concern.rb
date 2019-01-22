@@ -7,8 +7,6 @@ module Auth::Concerns::Shopping::ProductConcern
 	include Auth::Concerns::EsConcern
 	include Mongoid::Autoinc	
 
-	## include the bar code concern if enable_bar_code_api is enabled.
-
 	if Auth.configuration.enable_barcode_api == true
 		include Auth::Concerns::Shopping::BarCodeConcern
 	end
@@ -66,11 +64,10 @@ module Auth::Concerns::Shopping::ProductConcern
 
 		field :badge_class, type: String, default: "new badge"
 
-		## so i create a bundle and add 5 products to it,
-		## and then modify their prices ?
-		## what about all the notifications and everythign ?
-		## will have to replicate all that ?
-		## 
+		## so we have a bundle name,
+		## this has already been done.
+		## we have to make this bundle name barcode scannable.
+		## or autoassignable.
 		field :bundle_name, type: String
 
 			

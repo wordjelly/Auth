@@ -19,32 +19,7 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         @ap_key = @c.api_key
         @headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @u.authentication_token, "X-User-Es" => @u.client_authentication["testappid"], "X-User-Aid" => "testappid"}
         
-
-        ### okay so suppose you enter your mobile number.
-        ### then you enter your email ?
-        ### can we automatically shunt it.
-        ### to another parameter?
-        ### client side
-        ### later send for verification.
-        ### just call save on it.
-        ### something that happens on verification.
-        ### the same pathway that is taken when you add an email later on.
-        ### no difference, but is triggered on verifying the mobile.
-        ### we have to have another parameter on the user to store that.
-        ### how do you verify the email?
-        ### that is the question.
-        ### otp => verified, added email -> waiting for verification.
-        ### but cannot have both at the same time inputted.
-        ### otp gives him account access.
-        ### but not report by pdf.
-        ### if he adds an email, does he need to verify it?
-        ### just give a secondary option for the email.
-        ### on verifying the sms, 
-
-
-        ### CREATE ONE ADMIN USER
-
-        ### It will use the same client as the user.
+       
         @admin = User.new(attributes_for(:admin_confirmed))
         @admin.admin = true
         @admin.client_authentication["testappid"] = "testestoken2"
