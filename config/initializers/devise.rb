@@ -280,7 +280,6 @@ end
 DeviseController.class_eval do 
   
   
-  
   include Auth::Concerns::DeviseConcern  
   
   ##add to devise concern.
@@ -380,35 +379,38 @@ DeviseController.class_eval do
 
   ##add to devise_concern.
   def require_no_authentication
-    
+    puts "------------ CAME TO REQUIRE NO AUTH ---------------"
+    puts "action is:#{action_name}"
     do_before_request
-    #puts "came past do before request."
+    puts "came past do before request."
 
     assert_is_devise_resource!
-    #puts "came past assert is devise resource"
+    puts "came past assert is devise resource"
     
 
     return unless is_navigational_format?
 
-    #puts "came past is navigational format."
+    puts "came past is navigational format."
 
     no_input = devise_mapping.no_input_strategies
-    #puts "no input is: #{no_input}"
+    puts "no input is: #{no_input}"
    
 
     authenticated = if no_input.present?
       args = no_input.dup.push scope: resource_name
-      #puts "authenticated already."
+      puts "authenticated already."
       warden.authenticate?(*args)
     else
-      #puts "check if authenticated"
+      puts "check if authenticated"
       warden.authenticated?(resource_name)
     end
 
-
+    puts "came past autnenticated."
+    puts "authenticated is: #{authenticated}"
+    puts "Resource is: #{resource}"
     if authenticated && resource = warden.user(resource_name)
       if @redirect_url.nil?
-        #puts "came to failure."
+        puts "came to failure."
         flash[:alert] = I18n.t("devise.failure.already_authenticated")
         redirect_to after_sign_in_path_for(resource)
       else
@@ -453,7 +455,7 @@ module Devise
     ##otherwise we do nothing.
     def verify_signed_out_user
       if is_json_request?
-        render :nothing => true, :status => 406 and return
+        head 406 and return
       end
       if all_signed_out?
         set_flash_message! :notice, :already_signed_out
@@ -488,7 +490,7 @@ module Devise
 
       if resource.errors.empty?
         if is_json_request?
-          render :nothing => true, :status => 201 and return 
+          head 201 and return 
         end
         set_flash_message! :notice, :unlocked
         respond_with_navigational(resource){ redirect_to after_unlock_path_for(resource) }
@@ -515,7 +517,7 @@ module Devise
       if resource.errors.empty?
         set_flash_message!(:notice, :confirmed)
         if is_json_request?
-          render :nothing => true, :status => 201 and return 
+          head 201 and return 
         else
           ##when we have first signed into the accoutn, and then we want to change the email, then when we click the confirmation link for the new email, in that case, we cannot set the resource to nil, since the user is already signed in, so we do this check to see if who we have signed in , is the same as the user who has confirmed, and in that case, we just let things proceed.
           current_resource = self.send("current_#{self.resource.class.name.downcase.to_s}")

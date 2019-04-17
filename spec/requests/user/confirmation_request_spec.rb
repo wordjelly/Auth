@@ -39,13 +39,13 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 
 			it "-- get request is successfull" do 
 				
-				get new_user_confirmation_path,{}
+				get new_user_confirmation_path,params: {}
 				expect(response.code).to eq("200")		
 			end
 
 			it "-- create request is successfull" do				
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_confirmation_path,{user:{email: @u.email}}
+				post user_confirmation_path,params: {user:{email: @u.email}}
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
     			confirmation_token = nil
@@ -70,7 +70,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
       				confirmation_token = j[:confirmation_token]
 
       			end
-    			get user_confirmation_path,{confirmation_token: confirmation_token}
+    			get user_confirmation_path,params: {confirmation_token: confirmation_token}
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
     			
@@ -82,14 +82,14 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 			
 
 			it "-- get request, client created, but no redirection" do 
-				get new_user_confirmation_path, {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				get new_user_confirmation_path, params: {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(response.code).to eq("200")	
 
 			end
 
 			it "-- create request, client created, but no redirection" do 
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_confirmation_path,{user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				post user_confirmation_path,params: {user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
@@ -123,17 +123,17 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 		context "-- no api key" do 
 
 			it "-- get request returns 406" do 
-				get new_user_confirmation_path,nil,@headers
+				get new_user_confirmation_path,params: nil,headers: @headers
         		expect(response.code).to eq("406")
 			end
 
 			it "-- create request returns not authenticated" do 
-				post user_confirmation_path,{user:{email: @u.email}}.to_json,@headers
+				post user_confirmation_path,params: {user:{email: @u.email}}.to_json,headers: @headers
 				expect(response.code).to eq("401")
 			end
 
 			it "-- show request returns not authenticated" do 
-				get user_confirmation_path,{confirmation_token: "dog"}.to_json,@headers
+				get user_confirmation_path,params: {confirmation_token: "dog"}.to_json,headers: @headers
 				expect(response.code).to eq("401")
 			end
 
@@ -144,7 +144,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 
 
 			it "-- get request returns 406" do 
-				get new_user_confirmation_path,{api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
+				get new_user_confirmation_path,params: {api_key: @ap_key,:current_app_id => "testappid"}.to_json,headers: @headers
         		expect(response.code).to eq("406")
 			end
 
@@ -153,8 +153,8 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
 				prev_msg_count = ActionMailer::Base.deliveries.size
 				
 
-				post user_confirmation_path,{user:{email: @u.email},
-				 api_key: @ap_key,:current_app_id => "testappid"}.to_json,@headers
+				post user_confirmation_path,params: {user:{email: @u.email},
+				 api_key: @ap_key,:current_app_id => "testappid"}.to_json,headers: @headers
 				
 
 
@@ -183,7 +183,7 @@ RSpec.describe "confirmation request spec",:confirmation => true,:authentication
       				confirmation_token = j[:confirmation_token]
 
       			end
-    			get user_confirmation_path,{confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "testappid"}, @headers
+    			get user_confirmation_path,params: {confirmation_token: confirmation_token, api_key: @ap_key, :current_app_id => "testappid"}, headers: @headers
     			@u.reload
     			expect(@u.confirmed_at).not_to be(nil)
     			expect(response.code).to eq("201")

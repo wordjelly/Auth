@@ -41,6 +41,9 @@ RSpec.configure do |config|
   #config.after(:each) do
   #  DatabaseCleaner.clean
   #end
+  #config.include Rails::Controller::Testing::TestProcess, type: :controller
+  #config.include Rails::Controller::Testing::Integration, type: :controller
+  #config.include Rails::Controller::Testing::TemplateAssertions, type: :controller
 
   config.include(Capybara::Webkit::RspecMatchers, :type => :feature)
 end

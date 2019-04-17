@@ -8,8 +8,6 @@ now in all the tests, we sign in this user only, using its own client. normally 
 
 RSpec.describe "session request spec",:session => true,:authentication => true, :type => :request do 
 
-	
-
 	context " -- web app requests" do 
 
 		before(:example) do 
@@ -33,7 +31,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- GET Request,should set the session variables " do 
 
-				get new_user_session_path,{redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				get new_user_session_path, params: {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
 				
@@ -42,7 +40,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			it " -- CREATE request, should redirect with the auth_token and es " do 
 				
 				
-				post user_session_path,{user: {login: @u.email, password: "password"},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				post user_session_path, params: {user: {login: @u.email, password: "password"},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				user = assigns(:user)
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to("http://www.google.com?authentication_token=#{user.authentication_token}&es=#{user.client_authentication[@c.app_ids[0]]}")
@@ -54,7 +52,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			it " -- DESTROY Request, should not redirect. " do 
 				
 				sign_in_as_a_valid_and_confirmed_user
-				delete destroy_user_session_path,{:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				delete destroy_user_session_path, params: {:id => @user.id, redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(response.code).to eq("302")
 				expect(response).to redirect_to(root_path)
 				expect(@user.errors.full_messages).to be_empty         		
@@ -67,7 +65,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- yields new session" do 
 
-				get new_user_session_path,{api_key: "dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				get new_user_session_path, params: {api_key: "dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -79,7 +77,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			end
 
 			it " -- create session successfully,but does not redirect" do 
-				post user_session_path, {user: {login: @u.email, password: "password"}, api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				post user_session_path, params: {user: {login: @u.email, password: "password"}, api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
@@ -91,7 +89,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_and_confirmed_user
-				delete destroy_user_session_path,{:id => @user.id, api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				delete destroy_user_session_path, params: {:id => @user.id, api_key:"dog", redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
@@ -108,7 +106,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- yields new session" do 
 
-				get new_user_session_path,{ redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				get new_user_session_path, params: { redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -119,7 +117,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			end
 
 			it " -- create session successfully, but does not redirect" do 
-				post new_user_session_path, {user: attributes_for(:user),  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				post new_user_session_path, params: {user: attributes_for(:user),  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(session[:client]).to be_nil
@@ -130,7 +128,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_and_confirmed_user
-				delete destroy_user_session_path,{:id => @user.id,  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
+				delete destroy_user_session_path, params: {:id => @user.id,  redirect_url:"http://www.google.com", current_app_id: @c.app_ids[0]}
 				expect(session[:client]).to be_nil
 				expect(session[:redirect_url]).to be_nil
 				expect(response.code).to eq("302")
@@ -153,7 +151,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 			end
 
 			it " -- create session successfully, but does not redirect" do 
-				post new_user_session_path, {user: attributes_for(:user)}
+				post new_user_session_path, params: {user: attributes_for(:user)}
 				res = assigns(:user)
 				expect(response.code).to eq("200")
 				expect(res).not_to be_nil
@@ -162,13 +160,14 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- destory session loads" do 
 				sign_in_as_a_valid_and_confirmed_user
-				delete destroy_user_session_path,{:id => @user.id}
+				delete destroy_user_session_path, params: {:id => @user.id}
 				expect(response.code).to eq("302")
 			end
 
 		end
 
 	end
+
 
 	context " -- json requests " do 
 
@@ -187,8 +186,8 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 		end
 
 		after(:example) do 
-			session.delete(:client)
-			session.delete(:redirect_url)
+			#session.delete(:client)
+			#session.delete(:redirect_url)
 		end
 
 		before(:each) do 
@@ -199,19 +198,19 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 		context " -- no api key" do 
 
 			it " -- new session returns not authenticated" do 
-				get new_user_session_path,nil,@headers
+				get new_user_session_path,params: nil,headers: @headers
         		expect(response.code).to eq("406")
 			end
 
 			it " -- create session retursn not authenticated" do 
-				post new_user_session_path, {user: attributes_for(:user)}.to_json, @headers
+				post new_user_session_path, params: {user: attributes_for(:user)}.to_json, headers: @headers
         		expect(response.code).to eq("401")
 			end
 
 			it " -- destroy session returns not authenticated" do 
 				
 				a = {:id => @u.id}
-		        delete destroy_user_session_path, a.to_json, @headers
+		        delete destroy_user_session_path,params: a.to_json,headers: @headers
 		        expect(response.code).to eq("406")
 			end
 
@@ -220,20 +219,20 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 		context " -- invalid api key " do 
 
 			it " -- new session returns not authenticated" do 
-				get new_user_registration_path,nil,@headers
+				get new_user_registration_path,params: nil,headers: @headers
         		expect(response.code).to eq("401")
 
 			end
 
 			it " -- create session retursn not authenticated" do 
-				post new_user_session_path, {user: attributes_for(:user)}.to_json, @headers
+				post new_user_session_path, params: {user: attributes_for(:user)}.to_json, headers: @headers
         		expect(response.code).to eq("401")
 			end
 
 			it " -- destroy session returns not authenticated" do 
 
 				a = {:id => @u.id}
-		        delete destroy_user_session_path, a.to_json, @headers
+		        delete destroy_user_session_path, params: a.to_json, headers: @headers
 		        expect(response.code).to eq("406")
 			end
 
@@ -243,7 +242,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 			it " -- returns 406 when calling GET" do 
 				
-				get new_user_session_path, {api_key: @ap_key, current_app_id: @c.app_ids[0]}, @headers
+				get new_user_session_path, params: {api_key: @ap_key, current_app_id: @c.app_ids[0]}, headers: @headers
 				expect(response.code).to eq("406")
 				
 			end
@@ -253,7 +252,7 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 				
 				params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				
-				post user_session_path, params.to_json, @headers
+				post user_session_path, params: params.to_json, headers: @headers
         		expect(response.code).to eq("201")
         		user_hash = JSON.parse(response.body)
         		expect(user_hash.keys).to match_array(["authentication_token","es"])
@@ -264,14 +263,14 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 				params = {user: {login: @u.email, password: "wrong_password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				
-				post user_session_path, params.to_json, @headers
+				post user_session_path, params: params.to_json, headers: @headers
         		expect(response.code).to eq("401")
 
 			end
 
 			it " -- returns 406 when calling DESTROY" do 
 				a = {:id => @u.id, :api_key => @ap_key, current_app_id: @c.app_ids[0]}
-		        delete destroy_user_session_path, a.to_json, @headers
+		        delete destroy_user_session_path, params: a.to_json, headers: @headers
 		        expect(response.code).to eq("406")
 			end
 
@@ -310,13 +309,13 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 		it " -- signs in user using first client -- " do 
 			params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
-			post user_session_path, params
+			post user_session_path, params: params
 		end
 
 		it "-- signs in user using second client -- " do 
 			params = {user: {login: @u.email, password: "password"}, api_key: @ap_key2, current_app_id: @c2.app_ids[0]}
 				
-			post new_user_session_path, params
+			post new_user_session_path, params: params
 			@signed_in_user = assigns(:user)
 			expect(@signed_in_user.client_authentication[@c.app_ids[0]]).not_to be_nil	
 			expect(@signed_in_user.client_authentication[@c2.app_ids[0]]).not_to be_nil
@@ -344,18 +343,17 @@ RSpec.describe "session request spec",:session => true,:authentication => true, 
 
 	    it " -- signs in user with first app id -- " do 
 	    	params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[0]}
-			post new_user_session_path, params
+			post new_user_session_path, params: params
 	    end
 
 	    it " -- signs in user with second app id -- " do 
 	    	params = {user: {login: @u.email, password: "password"}, api_key: @ap_key, current_app_id: @c.app_ids[1]}
-			post new_user_session_path, params
+			post new_user_session_path, params: params
 	    	@signed_in_user = assigns(:user)
 			expect(@signed_in_user.client_authentication[@c.app_ids[0]]).not_to be_nil
 			expect(@signed_in_user.client_authentication[@c.app_ids[1]]).not_to be_nil	
 	    end
 
 	end
-
 
 end

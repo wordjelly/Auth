@@ -7,7 +7,7 @@ module Auth::Concerns::ChiefModelConcern
 
 		include Mongoid::Document
 		include Mongoid::Timestamps
-		include Mongoid::EmbeddedErrors
+		#include Mongoid::EmbeddedErrors
 		include Auth::Concerns::CloneConcern
 		include Auth::Concerns::ImageLoadConcern
 		## expected to be a hash with names of callbacks and boolean values.

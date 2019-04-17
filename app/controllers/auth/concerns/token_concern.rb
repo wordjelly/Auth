@@ -4,10 +4,11 @@ module Auth::Concerns::TokenConcern
   extend ActiveSupport::Concern
   
   included do 
-  	
+
+
     attr_accessor :authentication_done
     
-    TCONDITIONS ||= {:only => [:show]} 
+    TCONDITIONS = {:only => [:show]} unless defined? TCONDITIONS
     LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
 
 
@@ -17,12 +18,17 @@ module Auth::Concerns::TokenConcern
       ## how many models are defined in the preinitializer
       auth_resources_count = Auth.configuration.auth_resources.size
 
-          
+      puts "auth_resources count:"
+      puts auth_resources_count.to_s
+      res = Auth.configuration.auth_resources.keys[0]
+      puts "the TCONDITIONS ARE: #{self::TCONDITIONS}"
+      #acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
+
       ## if we have more than one auth resource model.
       if auth_resources_count > 1
           ## take all of them except the last, and add the fallback as none to them.
           ## also merge the controller level conditions defined above.
-
+          puts "there is more than one."
           Auth.configuration.auth_resources.keys.slice(0,auth_resources_count - 1).each do |res|
 
             acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => :none}).merge(self::TCONDITIONS))
@@ -39,14 +45,20 @@ module Auth::Concerns::TokenConcern
       else
         ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
         res = Auth.configuration.auth_resources.keys[0]
-       
+        #puts "the last resource is:"
+        #puts "the action is: #{action_name}"
+        #puts res.to_s
+        #puts "conditions are:"
+        puts res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {})
         acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
-
+        #puts "crosses token auth handler"
       end
-    
+
+
     end
 
-    before_filter :set_resource
+
+    before_action :set_resource
 
     ## made this a helper so that it can be used in views as well.
     helper_method :lookup_resource
@@ -60,7 +72,7 @@ module Auth::Concerns::TokenConcern
   ## basically a convenience method to set @resource variable, since when we have more than one model that is being authenticated with Devise, there is no way to know which one to call.
   def set_resource
   
-    #puts "came to set resource."
+    puts "--------------------came to set resource."
 
     Auth.configuration.auth_resources.keys.each do |resource|
       break if @resource = self.send("current_#{resource.downcase}") 
@@ -78,7 +90,7 @@ module Auth::Concerns::TokenConcern
 
   
   def lookup_resource 
-    #puts "came to lookup resource."
+    puts "came to lookup resource."
     ## if the current signed in resource si not an admin, just return it, because the concept of proxy arises only if the current_signed in resource is an admin.
     #puts "current signed in resource : #{current_signed_in_resource}"
     return current_signed_in_resource unless current_signed_in_resource.is_admin?

@@ -16,6 +16,7 @@ require 'support/omniauth_macros.rb'
 require 'support/payumoney_support.rb'
 require "capybara/rspec"
 require 'capybara/rails'
+require 'rails-controller-testing'
 
 Dir[File.join(ENGINE_RAILS_ROOT, "spec/support/**/*.rb")].each {|f| require f }
 
@@ -45,6 +46,14 @@ RSpec.configure do |config|
   config.include(OmniauthMacros)
   config.include(PayumoneySupport)
   config.include WaitForAjax, type: :feature
+  [:controller, :view, :request].each do |type|
+    config.include ::Rails::Controller::Testing::TestProcess, :type => type
+    config.include ::Rails::Controller::Testing::TemplateAssertions, :type => type
+    config.include ::Rails::Controller::Testing::Integration, :type => type
+  end
+  #config.include Rails::Controller::Testing::TestProcess
+  #config.include Rails::Controller::Testing::TemplateAssertions
+  #config.include Rails::Controller::Testing::Integration
   #config.expect_with(:rspec) { |c| c.syntax = :should }
 
  # config.include Devise::Test::ControllerHelpers, type: :view

@@ -43,7 +43,7 @@ module Auth::Concerns::DeviseConcern
 
     def ignore_json_request
       if is_json_request?
-        render :nothing => true, :status => 406 and return
+        head 406
       end
     end
 
@@ -139,15 +139,16 @@ module Auth::Concerns::DeviseConcern
                 #puts "action name is something else."
 		    	if session[:client].nil?
                     puts "cient is nil so rendering nothing."
-		      		render :nothing => true , :status => :unauthorized
-		      	else
+		      		#render :nothing => true , :status => :unauthorized
+		      	    head :unauthorized
+                else
                     
                 end
 	      	end
         else
             
             if verify_authenticity_token == false
-                render :nothing => true, :status => :unauthorized
+                head :unauthorized
             end
         end
 	end

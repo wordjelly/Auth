@@ -15,7 +15,7 @@ class Auth::ProfilesController < Auth::ApplicationController
 		
 		@resource_params = {}
 		@profile_resource = nil
-		@all_params = permitted_params.deep_symbolize_keys
+		@all_params = permitted_params
 		
 	  	if collection = @all_params[:resource]
 	  		

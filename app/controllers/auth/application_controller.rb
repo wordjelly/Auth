@@ -8,7 +8,7 @@ module Auth
   		respond_to do |format|
 	       format.json {render json: {:errors => e.to_s}, status: 422}
   		   format.js   {render :partial => "auth/modals/resource_errors.js.erb", locals: {:errors => [e.to_s]}}
-	       format.html {render :text => e.to_s}
+	       format.html {render :plain => e.to_s.html_safe}
 	    end
   	end  
 
@@ -159,8 +159,6 @@ module Auth
 	 def check_method_missing
 	 	puts Rails.application.routes.url_helpers.to_s
 	 end
-
-	 
 
   end
 end

@@ -44,11 +44,11 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
     context " -- on creating account -- " do 
 
-    	it "creating an account with email and additional login param produces a validation error." do 
+    	it "creating an account with email and additional login param produces no validation error." do 
     		usr_attrs = attributes_for(:user)
     		usr_attrs[:additional_login_param] = "9822028511"
-    		post user_registration_path, {user: usr_attrs,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
-    		expect(assigns(:user).errors).not_to be_empty
+    		post user_registration_path, params: {user: usr_attrs,:api_key => @ap_key, :current_app_id => "testappid"}.to_json, headers: @headers
+    		expect(assigns(:user).errors).to be_empty
     	end
 
         context " -- mobile validations -- ", :mobile_validations => true do 
@@ -73,7 +73,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                 end
 
                 it " --- gives a validation error if additional login param is not a valid mobile on CREATE -- " do 
-                    post user_registration_path, {user: attributes_for(:user_mobile_invalid),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
+                    post user_registration_path, params: {user: attributes_for(:user_mobile_invalid),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, headers: @headers
                     @user_created = assigns(:user)
                     @cl = assigns(:client)
                     user_json_hash = JSON.parse(response.body)
@@ -118,7 +118,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                         a = {:id => last_user_created.id, :user => {:additional_login_param => Faker::Name.name, :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                        put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                         
                         @user_updated = assigns(:user)
                         expect(@user_updated.errors).not_to be_empty
@@ -156,7 +156,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                     it "-- creates confirmed email account " do 
 
-                        post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
+                        post user_registration_path, params: {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, headers: @headers
                         @user_created = assigns(:user)
                         
                         @cl = assigns(:client)
@@ -177,10 +177,10 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                          user.m_client = @c
                          user.m_client.current_app_id = "testappid"
                          expect(user.save).to be_truthy
-                         user.confirm!
+                         user.confirm
                         a = {:id => user.id, :user => {:additional_login_param => Faker::Name.name, :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => user.authentication_token, "X-User-Es" => user.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                        put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => user.authentication_token, "X-User-Es" => user.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                        
                        
 
@@ -233,7 +233,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                     a = {:id => last_user_created.id, :user => {:additional_login_param => "", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                    put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                     @user_updated = assigns(:user)
                     expect(@user_updated.errors).not_to be_empty
                     
@@ -275,7 +275,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                         a = {:id => last_user_created.id, :user => {:additional_login_param => "9561137096", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                        put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                         @user_updated = assigns(:user)
                         expect(@user_updated.errors).to be_empty
                         
@@ -317,7 +317,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                    
                         a = {:id => last_user_created.id.to_s, :user => {:email => "rihanna@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
                                
-                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                        put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                         @user_updated = assigns(:user)
                         expect(@user_updated.unconfirmed_email).to eq("rihanna@gmail.com")
                         expect(@user_updated.errors).to be_empty
@@ -339,7 +339,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                         a = {:id => last_user_created.id, :user => {:additional_login_param => "9822028511", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                        put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                        put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
 
                         expect(response.code).not_to eq("204")
 
@@ -378,7 +378,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
 
                 it "-- creates confirmed email account " do 
 
-                    post user_registration_path, {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, @headers
+                    post user_registration_path, params: {user: attributes_for(:user_confirmed),:api_key => @ap_key, :current_app_id => "testappid"}.to_json, headers: @headers
                     @user_created = assigns(:user)
                     @cl = assigns(:client)
                     user_json_hash = JSON.parse(response.body)
@@ -394,13 +394,13 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     last_user_created.m_client = @c
                     last_user_created.m_client.current_app_id = "testappid"
                     last_user_created.save
-                    last_user_created.confirm!
+                    last_user_created.confirm
                     last_user_created.additional_login_param = "9822028511"
                     last_user_created.save
                     
                     a = {:id => last_user_created.id.to_s, :user => {:email => "jeronimo1122334@gmail.com", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                    put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
 
                     @user_updated = assigns(:user)
                     user_json_hash = JSON.parse(response.body)
@@ -446,7 +446,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     last_user_created.m_client = @c
                     last_user_created.m_client.current_app_id = "testappid"
                     last_user_created.save
-                    last_user_created.confirm!
+                    last_user_created.confirm
                     #puts last_user_created.attributes.to_s
                     #puts "pending reconfirmation--------------------------"
                     #puts last_user_created.pending_reconfirmation?
@@ -456,7 +456,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     
                     a = {:id => last_user_created.id.to_s, :user => {:additional_login_param => "9822028511", :current_password => 'password'}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                    put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
 
                     
                     @user_updated = assigns(:user)
@@ -507,7 +507,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     
                     a = {:id => last_user_created.id.to_s, :user => {:email => "doggon@gmail.com"}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                    put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
 
                     @user_updated = assigns(:user)
                     
@@ -538,7 +538,7 @@ RSpec.describe "Additional login param and email flow requests", :alp_email => t
                     
                     a = {:id => last_user_created.id.to_s, :user => {:email => "doggon@gmail.com", :current_password => "password"}, api_key: @ap_key, :current_app_id => "testappid"}
 
-                    put user_registration_path, a.to_json,@headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
+                    put user_registration_path, params: a.to_json,headers: @headers.merge({"X-User-Token" => last_user_created.authentication_token, "X-User-Es" => last_user_created.client_authentication["testappid"], "X-User-Aid" => "testappid"})
                     
                     @user_updated = assigns(:user)
                     

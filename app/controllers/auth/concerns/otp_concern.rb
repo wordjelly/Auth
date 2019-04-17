@@ -4,17 +4,20 @@ module Auth::Concerns::OtpConcern
 	included do 
 		include Auth::Concerns::DeviseConcern
 	    ##refer to auth/applicationcontroller for the not_found def, and its rescue block.
-	    before_filter :do_before_request
-	    before_filter :initialize_vars
-	    before_filter :check_recaptcha, only: [:send_sms_otp,:verify_otp]
+	    before_action :do_before_request
+	    before_action :initialize_vars
+	    before_action :check_recaptcha, only: [:send_sms_otp,:verify_otp]
 	    
 	end
 
 	def initialize_vars
 	  	##deep symbolize the incoming params after passing through permitted params.
 	  	
-	  	@resource_params = permitted_params.deep_symbolize_keys
+	  	@resource_params = permitted_params
 	  	
+	  	puts "the resoure params are:"
+	  	puts @resource_params.to_s
+
 	  	##if the resource is defined, assign the class and the symbol for use further in the file
 	  	##eg: resource is provided in the route as : users, so 
 	  	##@resource_class => User

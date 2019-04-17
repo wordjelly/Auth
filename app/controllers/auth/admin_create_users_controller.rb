@@ -1,13 +1,14 @@
 class Auth::AdminCreateUsersController < ApplicationController
   ## only these actions need an authenticated user to be present for them to be executed.
+
   CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index,:show]
   TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
   include Auth::Concerns::DeviseConcern
   include Auth::Concerns::TokenConcern
-  before_filter :do_before_request , TCONDITIONS
-  before_filter :initialize_vars , TCONDITIONS
+  before_action :do_before_request , TCONDITIONS
+  before_action :initialize_vars , TCONDITIONS
   ## ensures that only admin users.
-  before_filter :is_admin_user , TCONDITIONS
+  #before_action :is_admin_user , TCONDITIONS
 
 
   ## called before all the actions.
@@ -45,7 +46,9 @@ class Auth::AdminCreateUsersController < ApplicationController
   #  User.where(:email => "bhargav.r.raut@gmail.com").first.delete
   # POST /auth/admin_create_users
   def create
-    @auth_user.password = @auth_user.password_confirmation = SecureRandom.hex(24)
+    k = SecureRandom.hex(24)
+    @auth_user.password = k
+    @auth_user.password_confirmation = k
     @auth_user.m_client = self.m_client
     @auth_user.created_by_admin = true
 

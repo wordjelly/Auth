@@ -432,7 +432,9 @@ module SimpleTokenAuthentication
 		## but then the gem attempts authentication of the second model also, and failing that, triggers the not authenticated fallback.
 		## to prevent that from happening, we ignore the fallback if we are already signed in.
 		def fallback!(entity, fallback_handler)
-		 
+		  
+		  puts "came to fallback!"
+
       	  return if self.signed_in?
 
 	      fallback_handler.fallback!(self, entity)
@@ -472,17 +474,17 @@ module SimpleTokenAuthentication
 
 	    def find_record_from_identifier(entity)
 	    	## you are supposed to find the record using one of the other parameters.
-	    	#puts "came to find entity from identifier -----------------------------------"
+	    	puts "came to find entity from identifier -----------------------------------"
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
-      		#puts "additional_identifiers"
-      		#puts additional_identifiers
+      		puts "additional_identifiers"
+      		puts additional_identifiers
 	    	
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
 	    	token = entity.get_token_from_params_or_headers(self)
 		   	
-		   	#puts "token:#{token}"
+		   	puts "token:#{token}"
 
 		    if token
 		    	

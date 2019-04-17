@@ -50,7 +50,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 			it " -- create -- " do 
 
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_unlock_path,{user:{email: @u.email}}
+				post user_unlock_path,params: {user:{email: @u.email}}
 				expect(response.code).to eq("302")
 				message = ActionMailer::Base.deliveries[-1].to_s
     			token = nil
@@ -80,7 +80,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
       				token = j[:unlock_token]
 
       			end
-    			get user_unlock_path,{unlock_token: token}
+    			get user_unlock_path,params: {unlock_token: token}
     			expect(response.code).to eql("302")
     			@u.reload
     			expect(@u.access_locked?).not_to be_truthy
@@ -94,7 +94,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 		context " -- valid api key + redirect_url -- " do 
 
 			it " -- new should not redirect" do 
-				get new_user_unlock_path, {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				get new_user_unlock_path, params: {redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
 				expect(response.code).to eq("200")	
@@ -102,7 +102,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 
 			it " -- create should not redirect" do 
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_unlock_path,{user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+				post user_unlock_path, params: {user:{email: @u.email},redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 				expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
 				expect(response.code).to eq("302")
@@ -133,7 +133,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
       				token = j[:unlock_token]
 
       			end
-    			get user_unlock_path,{unlock_token: token,redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
+    			get user_unlock_path,params: {unlock_token: token,redirect_url: "http://www.google.com", api_key: @ap_key, current_app_id: @c.app_ids[0]}
 
     			expect(session[:client]).not_to be_nil
 				expect(session[:redirect_url]).not_to be_nil
@@ -157,7 +157,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 
 			it " -- new -- " do 
 				
-				get new_user_unlock_path,{api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,@headers
+				get new_user_unlock_path,params: {api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,headers: @headers
 				expect(response.code).to eq("406")
 
 			end
@@ -165,7 +165,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
 			it " -- create -- " do 
 
 				prev_msg_count = ActionMailer::Base.deliveries.size
-				post user_unlock_path,{user:{email: @u.email},api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,@headers
+				post user_unlock_path,params: {user:{email: @u.email},api_key: @ap_key, current_app_id: @c.app_ids[0]}.to_json,headers: @headers
 				
 				message = ActionMailer::Base.deliveries[-1].to_s
     			token = nil
@@ -193,7 +193,7 @@ RSpec.describe "unlock request spec", :type => :request,:authentication => true,
       				token = j[:unlock_token]
 
       			end
-    			get user_unlock_path,{unlock_token: token, api_key: @ap_key, current_app_id: @c.app_ids[0]},@headers
+    			get user_unlock_path,params: {unlock_token: token, api_key: @ap_key, current_app_id: @c.app_ids[0]},headers: @headers
     			@u.reload
     			expect(@u.unlock_token).to be_nil
     			expect(@u.locked_at).to be_nil
