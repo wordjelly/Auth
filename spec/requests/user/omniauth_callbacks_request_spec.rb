@@ -2,8 +2,6 @@ require "rails_helper"
 
 RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :omniauth => true do
   
-
-
     context " -- begin -- " do
         before(:each) do 
             
@@ -30,7 +28,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             context  " -- google_oauth2 test -- ", google_oauth: true do 
 
 
-                it " -- handles invalid id_token -- " do 
+                it " -- handles invalid id_token -- ", :goog_invalid => true do 
                    
                     OmniAuth.config.test_mode = false
                     
@@ -39,7 +37,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
                 end   
@@ -54,7 +52,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
 
@@ -72,7 +70,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
                     
                     expect(response).to redirect_to(omniauth_failure_path("error"))
 
@@ -93,7 +91,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => nil}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(response).to redirect_to(omniauth_failure_path("no_resource"))
                 end
@@ -112,7 +110,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
                     #puts response.body.to_s
                     ##check that a user was created.
                     ##check that identity was created.
@@ -138,7 +136,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => "assholde", :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(response.code).to eql("401")
                     expect(response.body).to eql("")
@@ -169,7 +167,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers            
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers            
 
                     #puts response.body.to_s
                     json_response = JSON.parse(response.body)
@@ -207,7 +205,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     u = User.where(:email => "rrphotosoft@gmail.com").first
                     expect(u).not_to be_nil
@@ -238,7 +236,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers            
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers            
 
                     #puts response.body.to_s
                     json_response = JSON.parse(response.body)
@@ -263,7 +261,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                    post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     u = User.where(:email => "rrphotosoft@gmail.com").first
                     expect(u).not_to be_nil
@@ -286,7 +284,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post facebook_omniauth_callback_url,request_body.to_json,@headers
+                    post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(JSON.parse(response.body)).to eql({"failure_message" => "Invalid credentials"})
                 end   
@@ -302,7 +300,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post facebook_omniauth_callback_url,request_body.to_json,@headers
+                    post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     u = User.where(:email => "rrphotosoft@gmail.com").first
                     expect(u).not_to be_nil
@@ -322,7 +320,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                    post facebook_omniauth_callback_url,request_body.to_json,@headers
+                    post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
                     
                     expect(response).to redirect_to(omniauth_failure_path("error"))
 
@@ -340,7 +338,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => nil}.to_json
                     }
 
-                    post facebook_omniauth_callback_url,request_body.to_json,@headers
+                    post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                     expect(response).to redirect_to(omniauth_failure_path("no_resource"))
                 end
@@ -388,7 +386,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+            post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
         end
 
@@ -406,7 +404,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                     }
                  
 
-            post facebook_omniauth_callback_url,request_body.to_json,@headers
+            post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             puts "total users with rrphotosoft------------------------------------------------------------------------------------------------------------------------"
             puts User.where(:email => "rrphotosoft@gmail.com").count
@@ -438,7 +436,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+            post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
@@ -460,7 +458,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post facebook_omniauth_callback_url,request_body.to_json,@headers
+            post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
@@ -504,7 +502,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                     }
 
 
-                post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                 user_created = User.where(:email => "rrphotosoft@gmail.com").first
                 @confirmed_at_times << user_created.confirmed_at
@@ -522,7 +520,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
                 user_signed_in = User.where(:email => "rrphotosoft@gmail.com").first
 
                 @confirmed_at_times << user_signed_in.confirmed_at
@@ -561,7 +559,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+                post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                 user_created = User.where(:email => "rrphotosoft@gmail.com").first
                 @confirmed_at_times << user_created.confirmed_at
@@ -581,7 +579,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-                post facebook_omniauth_callback_url,request_body.to_json,@headers
+                post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
                 u = User.where(:email => "rrphotosoft@gmail.com").first
                 @confirmed_at_times << u.confirmed_at
@@ -621,12 +619,12 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             
             google_oauth2_verify_token_true_verify_hd_true 
 
-            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+            post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),params: nil,headers: @headers
         end
 
         it " -- does not process forgot password instructions -- " do 
             u = User.order_by(:confirmed_at => "desc").first
-            post user_password_path,{user: {email: u.email}}
+            post user_password_path,params: {user: {email: u.email}}
             expect(ActionMailer::Base.deliveries).to be_empty
             
         end
@@ -671,7 +669,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
             
                 google_oauth2_verify_token_true_verify_hd_true 
 
-                post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),nil,@headers
+                post google_oauth2_omniauth_callback_url(:id_token => "rupert", :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json),params: nil,headers: @headers
 
                 
                 response_body = JSON.parse(response.body)
@@ -725,7 +723,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+            post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
         end
 
@@ -740,7 +738,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post facebook_omniauth_callback_url,request_body.to_json,@headers
+            post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
@@ -766,7 +764,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post google_oauth2_omniauth_callback_url,request_body.to_json,@headers
+            post google_oauth2_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             
@@ -788,7 +786,7 @@ RSpec.describe "Omniauth requests", :type => :request,:authentication => true, :
                         :state => {:api_key => @c.api_key, :current_app_id => @c.app_ids[0], :path => @c.path}.to_json
                     }
 
-            post facebook_omniauth_callback_url,request_body.to_json,@headers
+            post facebook_omniauth_callback_url,params: request_body.to_json,headers: @headers
 
             u = User.where(:email => "rrphotosoft@gmail.com").first
             

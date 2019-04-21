@@ -1,7 +1,6 @@
 module Auth::Notify
 	def self.send_notification(notification)
-		## for tests.
-		##return if Auth.configuration.notify == false
+		## so here we have notification send_notification.
 		notification.send_notification
 	end
 

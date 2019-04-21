@@ -156,8 +156,6 @@ module Auth::Concerns::NotificationConcern
 	end
 
 	################### SEND SMS NOTIFICATION ####################
-
-
 	## defaults to just sending the sms direclty.
 	## override using a background job to actually call the send_sms method.
 	def send_sms_background(resource)

@@ -22,7 +22,7 @@ class Noti
 		job_arguments = [resource.class.name.to_s,resource.id.to_s,"send_transactional_sms",JSON.generate({:notification_id => self.id.to_s, :notification_class => self.class.name.to_s})]
 		#Auth::SidekiqUp.sidekiq_running(JSON.generate(job_arguments)) do 
 		k = OtpJob.perform_later(job_arguments)
-			puts "send sms background : perform_later returns: #{k.to_s}"
+		puts "send sms background : perform_later returns: #{k.to_s}"
 		#end
 	end
 

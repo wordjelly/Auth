@@ -75,11 +75,11 @@ class User < Auth::User
           notification.resource_ids = JSON.generate(resource_ids)
           notification.objects[:payment_id] = r
           notification.save
+          ## so this notification goes through here.
+          ## 
           Auth::Notify.send_notification(notification)
-          
       else
         #puts "no r."
-        
       end
     end
   end

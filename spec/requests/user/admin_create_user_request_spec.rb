@@ -26,7 +26,6 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         @admin.save
         @admin_headers = { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json", "X-User-Token" => @admin.authentication_token, "X-User-Es" => @admin.client_authentication["testappid"], "X-User-Aid" => "testappid"}
 
-        ## add this line to stub the otp api calls, while running the tests.
         Auth.configuration.stub_otp_api_calls = true
         
     end
@@ -313,6 +312,8 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         context " -- validations --" do 
             it " -- admin can simultaneously create user with email and mobile -- ", :simultaneous_email_password => true do 
 
+                ActionMailer::Base.deliveries = []
+
                 post admin_create_users_path,params: {user: {:additional_login_param => "9561137096", :email => "bhargav.r.raut@gmail.com"},:api_key => @ap_key, :current_app_id => "testappid"}.to_json, headers: @admin_headers
 
                 message = ActionMailer::Base.deliveries[-1] unless ActionMailer::Base.deliveries.blank?
@@ -328,15 +329,37 @@ RSpec.describe "admin create user spec", :admin_create_user => true, :type => :r
         context " -- user with email and mobile -- ", :simult => true do 
 
             it " -- on verifying the email, a reset password link is sent by email, thereafter mobile can be verified, but reset password link is not sent again. -- ", :simult_email_sms_verify => true do 
-
-                
+  
                 pwd = SecureRandom.hex(24)
                 
+                if u = User.where(:additional_login_param => "9561137096")
+                    if u.size > 0
+                        u.first.delete
+                    end
+                end
+                
                 attributes_for_user = {:email => Faker::Internet.email, :additional_login_param => "9561137096", :password => pwd, :password_confirmation => pwd, :created_by_admin => true}
-                user = User.new(attributes_for_user)
-                
+
+                user = User.new(attributes_for_user) 
                 user.save
+                #puts user.errors.full_messages.to_s
+
+
+                #u = User.find(user.id.to_s)
+                #u.confirm
+
+                #u = User.find(user.id.to_s)
+                #u.created_by_admin = true
+                #u.save
+
+                #puts "user errors:"
+                #puts user.errors.full_messages.to_s
+                #exit(1)
                 
+                # but on using admin_create
+                # there is no confirmation message.
+                # it directly sends a change password token right?
+
                 ## a confirmation email should have been sent.
                 message = ActionMailer::Base.deliveries[-1].to_s
                 confirmation_token = nil

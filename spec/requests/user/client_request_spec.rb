@@ -16,7 +16,7 @@ RSpec.describe "client request spec", :client => true, :type => :request do
 
 	context " -- json requests -- " do 
 		it " -- does not respond to json request -- " do 
-			get auth_client_path(:id => @u.id.to_s),nil,{ "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
+			get auth_client_path(:id => @u.id.to_s),params: nil,headers: { "CONTENT_TYPE" => "application/json" , "ACCEPT" => "application/json"}
 			expect(response.code).to eq("401")
 		end
 	end
@@ -54,7 +54,7 @@ RSpec.describe "client request spec", :client => true, :type => :request do
 			sign_in(@u)
 			client = Auth::Client.find(@u.id.to_s)
 			
-			put auth_client_path(:id => @u.id.to_s), :client => {:add_app_id => "anything"}
+			put auth_client_path(:id => @u.id.to_s), params: {:client => {:add_app_id => "anything"}}
 			
 			expect(response.code).to eq("200")
 			client = assigns(:client)

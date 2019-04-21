@@ -4,7 +4,7 @@ class TopicsController < ApplicationController
   TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
   include Auth::Concerns::DeviseConcern
   include Auth::Concerns::TokenConcern
-  before_filter :do_before_request , TCONDITIONS
+  before_action :do_before_request , TCONDITIONS
   
   respond_to :html, :json
   before_action :set_topic, only: [:show, :edit, :update, :destroy]

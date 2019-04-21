@@ -49,7 +49,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari-mongoid'
   s.add_dependency 'kaminari-actionview'
   s.add_dependency 'googl'
-  s.add_dependency 'elasticsearch-persistence', '6.0.0'
+  s.add_dependency 'elasticsearch-persistence', '5.0.2'
   #s.add_dependency 'premailer-rails'
   s.add_dependency 'sinatra'
   s.add_dependency 'dotenv-rails'

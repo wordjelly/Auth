@@ -33,6 +33,7 @@ require "mongoid/geospatial"
 require "dotenv-rails"
 require "autoinc"
 require "hashids"
+require "elasticsearch/persistence/model"
 
 
 module Auth

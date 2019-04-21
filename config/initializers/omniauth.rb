@@ -334,6 +334,10 @@ module OmniAuth
 	            ## #callback_url -> ref to it in #http://www.rubydoc.info/github/intridea/omniauth-oauth2/OmniAuth/Strategies/OAuth2#callback_url-instance_method
 	            ## that method calls 'full_host', but that may be the wrong host, especially in case of above mentioned android issue.
 	            ## make sure that the host you specify in Auth.configuration 
+	            puts "host name: #{Auth.configuration.host_name}"
+	            puts "script name: #{script_name}"
+	            puts "callback path: #{callback_path}"
+
 	            url_to_pass_as_callback = Auth.configuration.host_name + script_name + callback_path
 
 	            
