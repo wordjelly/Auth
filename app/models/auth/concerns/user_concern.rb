@@ -862,6 +862,7 @@ module Auth::Concerns::UserConcern
     ## now first we are going to test it with the ui.
     ## and we are going to test it with one admin and one non admin account
     ## before that, we are going to 
+    ## personality class kaha se ayega bhosadike?
     def set_secondary_links    		
    	    unless self.secondary_links["Add New Account"]
 			self.secondary_links["Add New User"] = {
@@ -886,13 +887,13 @@ module Auth::Concerns::UserConcern
 		end
 		
 		## switch to the user, and see all associated people.
-
-		unless self.secondary_links["See All Associated People"]
-			self.secondary_links["See All Associated People"] = {
-				:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.personality_class))
-			}
+		unless Auth.configuration.personality_class.blank?
+			unless self.secondary_links["See All Associated People"]
+				self.secondary_links["See All Associated People"] = {
+					:url => Rails.application.routes.url_helpers.send(Auth::OmniAuth::Path.create_or_index_path(Auth.configuration.personality_class))
+				}
+			end
 		end
-
     end
 
 end

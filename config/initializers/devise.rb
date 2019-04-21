@@ -345,13 +345,12 @@ DeviseController.class_eval do
       end
   end
  
-  def render(*args)
 
+  def render(*args)
        cli = session[:client]
        if (session[:client] && (session[:client].is_a? Hash))
         cli = Auth::Client.new(session[:client])
        end
-
 
        #if resource && resource.set_client_authentication?(action_name,controller_name,cli)
        #  resource.set_client_authentication(cli)
@@ -369,7 +368,6 @@ DeviseController.class_eval do
               
               redirect_to (session.delete(:redirect_url) + "?authentication_token=" + resource.authentication_token + "&es=" + curr_app_es) 
             else
-             
               super(*args)
             end
         end     

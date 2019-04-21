@@ -45,6 +45,13 @@ gem 'auth', :git => "https://github.com/wordjelly/Auth"
 jquery rails.
 
 # gem jquery-rails
+
+## If you are planning to use wicked-pdf, please note that
+## it overrides the #render method, and that can cause infinite
+## loops, as this engine, also overrides the render method, in the devisecontrollers.
+## we found that the engine works fine with wickedpdf version:
+## 1.1.0, but not the higher versions. 
+
 ```
 
 Now from the command line run:
@@ -151,9 +158,11 @@ Now create A 'User' Model as follows:
 
 ```
 # app/models/user.rb
-class User < Auth::User
+class User
 
-
+  include Auth::Concerns::UserConcern
+  ## without this line, the elasticsearch searchability for the user model will not work.
+  create_es_index(INDEX_DEFINITION)
 
 end
 ```
@@ -244,8 +253,9 @@ Add this line to development.rb file (or production if you are in production)
 
 ## Local MailServer Configuration : eg. for Mailcatcher
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {:address => "localhost", :port => 1025}
+  # the following two lines are no longer needed.
+  #config.action_mailer.delivery_method = :smtp
+  #config.action_mailer.smtp_settings = {:address => "localhost", :port => 1025}
 
 ## Mailgun configuration.  
   config.action_mailer.delivery_method = :mailgun
