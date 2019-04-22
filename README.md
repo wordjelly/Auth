@@ -61,6 +61,29 @@ bundle update
 rails g mongoid:config
 ```
 
+Remember to add this to the generated .yml file at the bottom:
+
+```
+production:
+  clients:
+    default:
+     # The standard MongoDB connection URI allows for easy
+     # replica set connection setup.
+     # Use environment variables or a config file to keep your
+     # credentials safe e.g. <%= ENV['MONGODB_URI'] %>.
+     uri: <%= ENV['MONGODB_URI'] || "mongodb://localhost" %>
+     ## so i can use all these
+     ## the same way.
+     ## only for elasticsearch the credentials 
+     options:
+       # The default timeout is 5, which is the time in seconds
+       # for a connection to time out.
+       # We recommend 15 because it allows for plenty of time
+       # in most operating environments.
+       connect_timeout: 15
+```
+
+The 'MONGODB_URI' should be set from mongoLab.
 
 The Auth gem adds the following additional, essential, dependencies to your application:
 

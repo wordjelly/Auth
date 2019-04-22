@@ -3,6 +3,6 @@ class Auth::Shopping::CartItemsController < Auth::Shopping::ShoppingController
     TCONDITIONS = {:only => Auth.configuration.cart_item_controller_token_auth_actions}
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
-    before_filter :do_before_request , TCONDITIONS
-    before_filter :initialize_vars , TCONDITIONS
+    before_action :do_before_request , TCONDITIONS
+    before_action :initialize_vars , TCONDITIONS
 end

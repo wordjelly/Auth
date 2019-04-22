@@ -4,6 +4,6 @@ class Auth::Shopping::CartsController < Auth::Shopping::ShoppingController
     ##this ensures api access to this controller.
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
-    before_filter :do_before_request , TCONDITIONS
-    before_filter :initialize_vars , TCONDITIONS
+    before_action :do_before_request , TCONDITIONS
+    before_action :initialize_vars , TCONDITIONS
 end

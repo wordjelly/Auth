@@ -7,13 +7,13 @@ class Auth::AuthenticatedController < Auth::ApplicationController
 	
 	CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index]
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
-	before_filter :do_before_request , TCONDITIONS
-	before_filter :instantiate_classes
-	before_filter :build_model_from_params 
+	before_action :do_before_request , TCONDITIONS
+	before_action :instantiate_classes
+	before_action :build_model_from_params 
 	## add the filters for check_for_create, check_for_update and check_for_destroy
-	before_filter(:only => [:create]){|c| check_for_create(@model)}
-	before_filter(:only => [:update]){|c|  check_for_update(@model)}
-	before_filter(:only => [:destroy]){|c|  check_for_destroy(@model)}
+	before_action(:only => [:create]){|c| check_for_create(@model)}
+	before_action(:only => [:update]){|c|  check_for_update(@model)}
+	before_action(:only => [:destroy]){|c|  check_for_destroy(@model)}
 
 
 
