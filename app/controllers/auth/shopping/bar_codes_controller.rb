@@ -8,8 +8,8 @@ class Auth::Shopping::BarCodesController < Auth::Shopping::ShoppingController
     ##this ensures api access to this controller.
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
-    before_filter :do_before_request , TCONDITIONS
-    before_filter :is_admin_user, {:only => [:index]}
+    before_action :do_before_request , TCONDITIONS
+    before_action :is_admin_user, {:only => [:index]}
 
     def new
 

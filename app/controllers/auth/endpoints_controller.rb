@@ -8,10 +8,10 @@ class Auth::EndpointsController < Auth::ApplicationController
 	
 	CONDITIONS_FOR_TOKEN_AUTH = [:create,:update,:destroy,:edit,:new,:index]
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
-	before_filter :do_before_request , TCONDITIONS
-	before_filter :instantiate_classes
-	before_filter :build_model_from_params 
-	before_filter(:only => [:create]){|c| check_for_create(@model)}		
+	before_action :do_before_request , TCONDITIONS
+	before_action :instantiate_classes
+	before_action :build_model_from_params 
+	before_action(:only => [:create]){|c| check_for_create(@model)}		
 
 	def create
 
