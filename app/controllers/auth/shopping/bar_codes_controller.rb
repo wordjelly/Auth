@@ -5,7 +5,6 @@ class Auth::Shopping::BarCodesController < Auth::Shopping::ShoppingController
     ## NEW CAN BE ACCESSED BY ANY USER ,NOT NECESSARILY AN AUTHENTICATED USER OR ANYTHING.
     CONDITIONS_FOR_TOKEN_AUTH = [:index,:show]
     TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
-    ##this ensures api access to this controller.
     include Auth::Concerns::DeviseConcern
     include Auth::Concerns::TokenConcern
     before_action :do_before_request , TCONDITIONS

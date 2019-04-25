@@ -1,5 +1,7 @@
 class Auth::RegistrationsController < Devise::RegistrationsController
 	
+	include Auth::Concerns::DeviseConcern  
+
 	TCONDITIONS = {:only => [:update,:destroy,:show]}
 
 	include Auth::Concerns::TokenConcern

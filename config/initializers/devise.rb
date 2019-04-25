@@ -279,9 +279,7 @@ end
 
 DeviseController.class_eval do 
   
-  
-  include Auth::Concerns::DeviseConcern  
-  
+
   ##add to devise concern.
   skip_before_action :assert_is_devise_resource!, if: :is_omniauth_callback?
 
@@ -385,7 +383,6 @@ DeviseController.class_eval do
     assert_is_devise_resource!
     puts "came past assert is devise resource"
     
-
     return unless is_navigational_format?
 
     puts "came past is navigational format."

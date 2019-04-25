@@ -5,11 +5,38 @@ module Auth::Concerns::TokenConcern
   
   included do 
 
-
     attr_accessor :authentication_done
+
+=begin
+    -first looks for a class variable called @tconditions
+    this can be conveniently set from a controller that implements this concern, before including the concern.
+    -if that is not found, checks if TCONDITIONS , has already been defined, and if yes, does nothing.
+    -if none of them have been specified, sets TCONDITIONS to block all actions of the controller, with authentication.
+=end
+    if defined? @tconditions
+      TCONDITIONS = @tconditions
+    elsif defined? TCONDITIONS
     
-    TCONDITIONS = {:only => [:show]} unless defined? TCONDITIONS
-    LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
+    else
+      TCONDITIONS = {:only => [:index,:edit,:show,:create,:update,:new, :destroy, :delete]}
+    end
+=begin
+    Similar strategy is used for last_fallback.
+=end
+    if defined? @last_fallback
+      LAST_FALLBACK = @last_fallback
+    elsif defined? LAST_FALLBACK
+    else
+      LAST_FALLBACK = :devise
+    end
+
+    
+    puts "the tconditions become:"
+    puts TCONDITIONS
+
+    puts "the last fallback becomes:"
+    puts LAST_FALLBACK
+    #LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
 
 
     if Auth.configuration.enable_token_auth

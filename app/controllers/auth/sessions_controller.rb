@@ -1,6 +1,7 @@
 class Auth::SessionsController < Devise::SessionsController
  	
-  
+  include Auth::Concerns::DeviseConcern  
+
 
   def create
     self.resource = warden.authenticate!(auth_options)

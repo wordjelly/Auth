@@ -88,7 +88,6 @@ The 'MONGODB_URI' should be set from mongoLab.
 The Auth gem adds the following additional, essential, dependencies to your application:
 
 1. mongoid (currently only supported database backend)
-2. premailer-rails (for formatting emails with normal css)
 3. mailgun-ruby (for sending emails)
 4. simple-token-authentication (for token authenticatin)
 5. devise (devise is used as the authentication base)
@@ -248,10 +247,15 @@ You need to tell your application to use this parameter sanitizer as follows
 The parameter sanitizer above will not be used , unless you tell Rails to autoload that file at startup, as follows:
 
 ```
+For rails 4 and below.
 # config/application.rb
 
 config.autoload_paths += %W(#{config.root}/lib)
 config.autoload_paths += Dir["#{config.root}/lib/**/"]
+
+For rails 5
+config.eager_load_paths << Rails.root.join("lib")
+config.autoload_paths << Rails.root.join('lib')
 ```
 
 #### Mailer Host configuration
@@ -308,7 +312,12 @@ end
 
 #### Mailer Configuration + Email CSS
 
-The gem comes prepackaged with 'premailer-rails'. You can refer to its documentation for more details.
+Add the following to your gemfile:
+
+```
+gem 'premailer-rails'
+
+```
 
 A. Mailer for Notifications:
 
