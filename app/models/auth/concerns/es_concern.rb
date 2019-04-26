@@ -141,6 +141,8 @@ module Auth::Concerns::EsConcern
     
 		field :public, type:String, default: "no"
 
+		field :document_type, type:String
+
 		def es_concern_attributes
 			["tags","autocomplete_description"]
 		end

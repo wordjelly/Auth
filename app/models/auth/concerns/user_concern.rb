@@ -793,6 +793,16 @@ module Auth::Concerns::UserConcern
 		admin
 	end
 
+	## @return[String] the first name " " last_name,
+	## if none is defined, will return an empty string.
+	## if only one of them is defined, will only return it.
+	def full_name
+		n = ""
+		n+= self.first_name if self.first_name
+		n+= " #{self.last_name}" if self.last_name
+		n
+	end
+
 
 
 	## @return[Boolean] true/false : override to decide how the user decides if it can create discount coupons for its contents or not.

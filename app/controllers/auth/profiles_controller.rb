@@ -1,6 +1,6 @@
 class Auth::ProfilesController < Auth::ApplicationController
 		
-	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_resource]
+	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_resource, :edit]
 
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
 
