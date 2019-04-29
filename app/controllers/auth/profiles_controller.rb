@@ -1,5 +1,7 @@
 class Auth::ProfilesController < Auth::ApplicationController
-		
+	
+	respond_to :json, :html, :json
+
 	CONDITIONS_FOR_TOKEN_AUTH = [:get_user_id,:show,:update,:set_proxy_resource, :edit]
 
 	TCONDITIONS = {:only => CONDITIONS_FOR_TOKEN_AUTH}
