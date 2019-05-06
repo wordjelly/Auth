@@ -73,8 +73,10 @@ module ActionDispatch::Routing
 	      resources :sops, :controller => Auth.configuration.sop_controller
 
 	      resources :steps, :controller => Auth.configuration.step_controller
-
-	      resources :orders, :controller => Auth.configuration.order_controller
+	      
+	      namespace :workflow do 
+	      	resources :orders, :controller => Auth.configuration.order_controller
+	  	  end
 
 	      resources :requirements, :controller => Auth.configuration.requirement_controller
 

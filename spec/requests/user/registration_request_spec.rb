@@ -152,6 +152,9 @@ RSpec.describe "Registration requests", :registration => true,:authentication =>
 
         first_name = Faker::Name.name
 
+        ## so while doing it through user registration as an update it works.
+        ## but when we are directly calling save, it may not be working.
+
         put user_registration_path, params: {:id => @user.id, :user => {:first_name => first_name, :current_password => "password"}}
         
         @user_updated = assigns(:user)

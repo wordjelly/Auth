@@ -414,6 +414,12 @@ module SimpleTokenAuthentication
 
 	module ActsAsTokenAuthenticatable
 
+		## if the skip_authentication_token_generation carries
+		## any value it will not regenerate the authentication token.
+		## this can be useful if you are updating the user, but not his 
+		## 
+		mattr_accessor :skip_authentication_token_regeneration
+
 		def regenerate_token
 			self.authentication_token = generate_authentication_token(token_generator)
 	      	raise "please set a field called: encrypted_authentication_token on your user model" unless self.respond_to? :encrypted_authentication_token
@@ -422,8 +428,11 @@ module SimpleTokenAuthentication
 		end
 
 		## CHANGE THE AUTHENTICATION TOKEN WHENEVER THE USER IS SAVED. IT DOESNT MATTER IF THERE IS AN EXISTING AUTHENTICATION TOKEN OR NOT.
+	   	## so this is happening, we will have to skip this hook.
+	   	## so we will have to mod this to check for an accessor.
+	   	## otherwise it will screw up totally.
 	    def ensure_authentication_token
-	      regenerate_token
+	      regenerate_token if self.skip_authentication_token_regeneration.blank?
 	    end
 	end
 
@@ -437,7 +446,7 @@ module SimpleTokenAuthentication
 		## to prevent that from happening, we ignore the fallback if we are already signed in.
 		def fallback!(entity, fallback_handler)
 		  
-		  puts "came to fallback!"
+		 # puts "came to fallback!"
 
       	  return if self.signed_in?
 
@@ -478,17 +487,17 @@ module SimpleTokenAuthentication
 
 	    def find_record_from_identifier(entity)
 	    	## you are supposed to find the record using one of the other parameters.
-	    	puts "came to find entity from identifier -----------------------------------"
+	    	#puts "came to find entity from identifier -----------------------------------"
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
-      		puts "additional_identifiers"
+      		#puts "additional_identifiers"
       		puts additional_identifiers
 	    	
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
 	    	token = entity.get_token_from_params_or_headers(self)
 		   	
-		   	puts "token:#{token}"
+		   	#puts "token:#{token}"
 
 		    if token
 		    	
