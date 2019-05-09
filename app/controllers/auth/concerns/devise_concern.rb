@@ -72,6 +72,7 @@ module Auth::Concerns::DeviseConcern
 
     def set_client
 	    
+        puts "came to set client -------!!!!!!!!!!!!! "
 	    if session[:client]
 	      
 	      
@@ -107,7 +108,7 @@ module Auth::Concerns::DeviseConcern
             
 	        if session[:client] = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
 	          	    
-                #puts "found valid clinet."
+                puts "found valid client."
                 request.env["omniauth.model"] = path
                 
                 self.m_client = Auth::Client.find_valid_api_key_and_app_id(api_key, current_app_id)
@@ -142,7 +143,7 @@ module Auth::Concerns::DeviseConcern
 		      		#render :nothing => true , :status => :unauthorized
 		      	    head :unauthorized
                 else
-                    
+                    puts " -------- have A VALID CLIENT WITH JSON --------- "
                 end
 	      	end
         else
@@ -188,7 +189,6 @@ module Auth::Concerns::DeviseConcern
        set_redirect_url
 
        protect_json_request
-
 
     end
 

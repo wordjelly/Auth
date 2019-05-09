@@ -491,13 +491,13 @@ module SimpleTokenAuthentication
 	    	additional_identifiers = entity.get_additional_identifiers_from_headers(self)
       		
       		#puts "additional_identifiers"
-      		puts additional_identifiers
+      		#puts additional_identifiers
 	    	
 	    	app_id_value = additional_identifiers["X-User-Aid"]
 	    	user_es_value = additional_identifiers["X-User-Es"]
 	    	token = entity.get_token_from_params_or_headers(self)
 		   	
-		   	#puts "token:#{token}"
+		   	#puts "token is :#{token}"
 
 		    if token
 		    	
@@ -509,11 +509,11 @@ module SimpleTokenAuthentication
 		    	#puts user_es_value.to_s
 		    	return nil if (app_id_value.blank? || user_es_value.blank?)
 		    		
-		    	## sanitize the values incoming to leave only letters and numbers.
+		    	## sanitize the values incoming to leave only letters and numbers and fucking underscores.
 
-		    	app_id_value = app_id_value.gsub(/[^0-9a-z]/i, '')
+		    	app_id_value = app_id_value.gsub(/[^0-9a-z_]/i, '')
 	    		
-	    		user_es_value = user_es_value.gsub(/[^0-9a-z]/i, '')
+	    		user_es_value = user_es_value.gsub(/[^0-9a-z_]/i, '')
 	    		
 	    		## fails if there are no alphanumeric characters left in the string.
 	    		#puts "the user es vale is: #{user_es_value}"
@@ -533,7 +533,7 @@ module SimpleTokenAuthentication
 		    	
 		    	if records.size > 0
 		    		#puts "the records size is:" 
-		    		#puts records.size.to_s
+		    		##puts records.size.to_s
 		    		#puts "found such a record.!!!!!!!!!!!!"
 		    		r = records.first
 		    		#puts r.attributes.to_s

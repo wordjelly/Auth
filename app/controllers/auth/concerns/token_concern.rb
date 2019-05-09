@@ -31,11 +31,11 @@ module Auth::Concerns::TokenConcern
     end
 
     
-    puts "the tconditions become:"
-    puts TCONDITIONS
+    #puts "the tconditions become:"
+    #puts TCONDITIONS
 
-    puts "the last fallback becomes:"
-    puts LAST_FALLBACK
+    #puts "the last fallback becomes:"
+    #puts LAST_FALLBACK
     #LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
 
 
@@ -45,17 +45,17 @@ module Auth::Concerns::TokenConcern
       ## how many models are defined in the preinitializer
       auth_resources_count = Auth.configuration.auth_resources.size
 
-      puts "auth_resources count:"
-      puts auth_resources_count.to_s
+      #puts "auth_resources count:"
+      #puts auth_resources_count.to_s
       res = Auth.configuration.auth_resources.keys[0]
-      puts "the TCONDITIONS ARE: #{self::TCONDITIONS}"
+      #puts "the TCONDITIONS ARE: #{self::TCONDITIONS}"
       #acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
 
       ## if we have more than one auth resource model.
       if auth_resources_count > 1
           ## take all of them except the last, and add the fallback as none to them.
           ## also merge the controller level conditions defined above.
-          puts "there is more than one."
+          #puts "there is more than one."
           Auth.configuration.auth_resources.keys.slice(0,auth_resources_count - 1).each do |res|
 
             acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => :none}).merge(self::TCONDITIONS))
@@ -76,7 +76,7 @@ module Auth::Concerns::TokenConcern
         #puts "the action is: #{action_name}"
         #puts res.to_s
         #puts "conditions are:"
-        puts res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {})
+        
         acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
         #puts "crosses token auth handler"
       end
