@@ -602,7 +602,7 @@ module Auth::Concerns::UserConcern
 			 		
 			 		json = {}
 		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
-		     		json[:authentication_token] = self.	authentication_token
+		     		json[:authentication_token] = self.authentication_token
 
 		     		unless options[:show_id].nil?
 		     			json[:id] = self.id.to_s

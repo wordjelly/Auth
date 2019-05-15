@@ -418,7 +418,7 @@ module SimpleTokenAuthentication
 		## any value it will not regenerate the authentication token.
 		## this can be useful if you are updating the user, but not his 
 		## 
-		mattr_accessor :skip_authentication_token_regeneration
+		attr_accessor :skip_authentication_token_regeneration
 
 		def regenerate_token
 			self.authentication_token = generate_authentication_token(token_generator)
