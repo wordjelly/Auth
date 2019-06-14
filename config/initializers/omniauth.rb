@@ -385,13 +385,79 @@ end
 
 module SimpleTokenAuthentication
 	module Configuration
+
 		mattr_accessor :additional_identifiers
+		
+=begin
+	########################################################
+	##
+	##
+	## STRUCTURE
+	##
+	##
+	########################################################
+	{
+	"controllers" : 
+		{
+			"controller_name(demodularized)" : {
+				"actions" : [
+					{
+						"action_name" : "new",
+						"requires_authentication" : "yes",
+						"requires_authorization" : "no"
+					},
+				]
+			}
+		}
+	}
+=end
+		mattr_accessor :permissions
+		
 		@@additional_identifiers = {}
+		@@permissions = {}
+
 	end
 
 	## had to include option force true because otherwise devise does not throw a 401 if you try to do token_authentication inside a devise controller.
 	## took 3 hours to sort this mess out.
 	DeviseFallbackHandler.class_eval do 
+
+		def permit_unauthenticated?(controller)
+			unless SimpleTokenAuthentication.permissions.blank?
+				unless SimpleTokenAuthentication.permissions["controllers"].blank?
+					unless SimpleTokenAuthentication.permissions["controllers"][controller.controller_name].blank?
+						unless SimpleTokenAuthentication.permissions["controllers"][controller.controller_name]["actions"].blank?
+
+							current_action = SimpleTokenAuthentication.permissions["controllers"][controller.controller_name]["actions"].select{|c|
+
+								c["action_name"] == controller.action_name
+
+							}				
+
+							puts "the current action is:"
+							puts current_action.to_s
+
+							unless current_action.blank?
+
+								## so if requires authentication is either "optional" or "no", it will not fallback onto devise, and let the thing pass through.
+								## this has to be set in the initializers.
+
+								return current_action[0]["requires_authentication"] != "yes"
+									
+							end	
+
+						end
+					end
+				end
+			end	
+			false
+		end
+
+		def fallback!(controller, entity)
+		  unless permit_unauthenticated?(controller)
+	      	authenticate_entity!(controller, entity)
+	  	  end
+	    end
 
 		def authenticate_entity!(controller, entity)
 	      controller.send("authenticate_#{entity.name_underscore}!".to_sym,{:force => true})
@@ -432,7 +498,11 @@ module SimpleTokenAuthentication
 	   	## so we will have to mod this to check for an accessor.
 	   	## otherwise it will screw up totally.
 	    def ensure_authentication_token
+	      
+	      puts "the skip authentication token is: #{self.skip_authentication_token_regeneration}"
+
 	      regenerate_token if self.skip_authentication_token_regeneration.blank?
+	    
 	    end
 	end
 
@@ -468,6 +538,7 @@ module SimpleTokenAuthentication
 		  ##then we should find
 		  
 	      record = find_record_from_identifier(entity)
+	      #puts "-------------!!!-----------!!!!"
 	      #puts "record found is: #{record.to_s}"
 	      
 	      if token_correct?(record, entity, token_comparator)
@@ -502,7 +573,7 @@ module SimpleTokenAuthentication
 		    if token
 		    	
 		    	## fails if the app id or user es is nil blank or empty
-		    	#puts "returning nil"
+		    	
 		    	#puts "app id vlue is:"
 		    	#puts app_id_value.to_s
 		    	#puts "user es value is:"
@@ -533,7 +604,7 @@ module SimpleTokenAuthentication
 		    	
 		    	if records.size > 0
 		    		#puts "the records size is:" 
-		    		##puts records.size.to_s
+		    		#puts records.size.to_s
 		    		#puts "found such a record.!!!!!!!!!!!!"
 		    		r = records.first
 		    		#puts r.attributes.to_s
@@ -546,8 +617,14 @@ module SimpleTokenAuthentication
 	    end
 
 		def token_correct?(record, entity, token_comparator)
+			#puts "record is----------------------------000-0-0-0-0-0-0-0-0-:"
+			#puts record.to_s
 			return false unless record
 			token = entity.get_token_from_params_or_headers(self)
+			#puts "token from headers is: #{token}"
+			#puts "the encrypted authentication token:"
+			#puts record.encrypted_authentication_token.to_s
+
 			Devise::Encryptor.compare(record.class,record.encrypted_authentication_token,token)
     	end
 	end
