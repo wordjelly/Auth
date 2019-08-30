@@ -66,37 +66,37 @@ module ActionDispatch::Routing
 	      resources :bar_codes, :controller => "auth/shopping/bar_codes", :only => [:show, :index, :new] 	      
 
 	      ## this controller may need to be changed, actually will have to be changed for every single thing.
-	      resources :assemblies, :controller => Auth.configuration.assembly_controller
+	      #resources :assemblies, :controller => Auth.configuration.assembly_controller
 
-	      resources :stages, :controller => Auth.configuration.stage_controller
+	      #resources :stages, :controller => Auth.configuration.stage_controller
 
-	      resources :sops, :controller => Auth.configuration.sop_controller
+	      #resources :sops, :controller => Auth.configuration.sop_controller
 
-	      resources :steps, :controller => Auth.configuration.step_controller
+	      #resources :steps, :controller => Auth.configuration.step_controller
 	      
-	      namespace :workflow do 
-	      	resources :orders, :controller => Auth.configuration.order_controller
-	  	  end
+	      #namespace :workflow do 
+	      #	resources :orders, :controller => Auth.configuration.order_controller
+	  	  #end
 
-	      resources :requirements, :controller => Auth.configuration.requirement_controller
+	      #resources :requirements, :controller => Auth.configuration.requirement_controller
 
-	      resources :states, :controller =>  Auth.configuration.state_controller
+	      #resources :states, :controller =>  Auth.configuration.state_controller
 
 	      resources :locations, :controller =>  Auth.configuration.location_controller
 
-	      resources :schedules, :controller =>  Auth.configuration.schedule_controller
+	      #resources :schedules, :controller =>  Auth.configuration.schedule_controller
 
-	      resources :bookings, :controller =>  Auth.configuration.booking_controller
+	      #resources :bookings, :controller =>  Auth.configuration.booking_controller
 
-	      resources :slots, :controller =>  Auth.configuration.slot_controller
+	      #resources :slots, :controller =>  Auth.configuration.slot_controller
 
-	      resources :overlaps, :controller =>  Auth.configuration.overlap_controller
+	      #resources :overlaps, :controller =>  Auth.configuration.overlap_controller
 
-	      resources :minutes, :controller =>  Auth.configuration.minute_controller
+	      #resources :minutes, :controller =>  Auth.configuration.minute_controller
 
-	      resources :entities, :controller =>  Auth.configuration.entity_controller
+	      #resources :entities, :controller =>  Auth.configuration.entity_controller
 
-	      resources :specifications, :controller =>  Auth.configuration.specification_controller
+	      #resources :specifications, :controller =>  Auth.configuration.specification_controller
 
 	      ## image controller is required by default.
 	      ## 
@@ -118,6 +118,9 @@ module ActionDispatch::Routing
 		  		
 		  	end
 		  end
+
+
+
 		  
 		 if Auth.configuration.otp_controller
 			 get "#{Auth.configuration.mount_path}/:resource/otp_verification_result", :action => "otp_verification_result", :controller => "#{Auth.configuration.otp_controller}", :as => "otp_verification_result"
@@ -127,8 +130,8 @@ module ActionDispatch::Routing
 		  end
 
 
-			["cart_item","cart","payment","product","discount","place","personality","image","bullet","instruction","communication"].each do |model|
-
+			#["cart_item","cart","payment","product","discount","place","personality","image","bullet","instruction","communication"].each do |model|
+				["image"].each do |model|
 				## establish a communication controller, model, views and engine constants with defaults.
 
 

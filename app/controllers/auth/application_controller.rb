@@ -68,14 +68,14 @@ module Auth
 
 
 	def build_model_from_params
-		puts "params are: #{params.to_s}"
+		#puts "params are: #{params.to_s}"
       	pp = permitted_params
-      	puts "the permitted_params are:"
-      	puts permitted_params.to_s
+      	#puts "the permitted_params are:"
+      	#puts permitted_params.to_s
 
       	@model_params = pp.fetch(get_model_class_name.to_sym,{})
-      	puts "model params are:"
-      	puts @model_params.to_s
+      	#puts "model params are:"
+      	#puts @model_params.to_s
 
       	@model = pp[:id] ?  @model_class.find_self(pp[:id],current_signed_in_resource) : @model_class.new(@model_params)
 
