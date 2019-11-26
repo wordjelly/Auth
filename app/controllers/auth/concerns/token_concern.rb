@@ -31,24 +31,24 @@ module Auth::Concerns::TokenConcern
     end
 
     
-    #puts "the tconditions become:"
-    #puts TCONDITIONS
+    puts "the tconditions become:"
+    puts TCONDITIONS
 
-    #puts "the last fallback becomes:"
-    #puts LAST_FALLBACK
+    puts "the last fallback becomes:"
+    puts LAST_FALLBACK
     #LAST_FALLBACK = :devise unless defined? LAST_FALLBACK
 
 
     if Auth.configuration.enable_token_auth
         
-      #puts "TCONDITIONS ARE: #{TCONDITIONS}"
+      puts "TCONDITIONS ARE: #{TCONDITIONS}"
       ## how many models are defined in the preinitializer
       auth_resources_count = Auth.configuration.auth_resources.size
 
-      #puts "auth_resources count:"
-      #puts auth_resources_count.to_s
+      puts "auth_resources count:"
+      puts auth_resources_count.to_s
       res = Auth.configuration.auth_resources.keys[0]
-      #puts "the TCONDITIONS ARE: #{self::TCONDITIONS}"
+      puts "the TCONDITIONS ARE: #{self::TCONDITIONS}"
       #acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
 
       ## if we have more than one auth resource model.
@@ -72,10 +72,10 @@ module Auth::Concerns::TokenConcern
       else
         ## in case there is only one authentication resource, then the conditions are like the last one in case there are multiple(like above.)
         res = Auth.configuration.auth_resources.keys[0]
-        #puts "the last resource is:"
+        puts "the last resource is:"
         #puts "the action is: #{action_name}"
-        #puts res.to_s
-        #puts "conditions are:"
+        puts res.to_s
+        puts "conditions are:"
         
         acts_as_token_authentication_handler_for(res.constantize,Auth.configuration.auth_resources[res].merge({:fallback => self::LAST_FALLBACK}).merge(self::TCONDITIONS || {}))
         #puts "crosses token auth handler"

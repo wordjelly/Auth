@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency "turbolinks"
   s.add_dependency "remotipart"
   s.add_dependency 'momentjs-rails'
-  s.add_dependency 'simple_token_authentication'
+  s.add_dependency 'simple_token_authentication','1.15.1'
   s.add_dependency 'devise'
   s.add_dependency 'omniauth'
   s.add_dependency 'omniauth-google-oauth2'
@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'kaminari-actionview'
   s.add_dependency 'googl'
   s.add_dependency 'elasticsearch-persistence', '5.0.2'
+  s.add_dependency 'sprockets', '3.7.2'
   #s.add_dependency 'premailer-rails'
   s.add_dependency 'sinatra'
   s.add_dependency 'dotenv-rails'
@@ -59,7 +60,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'wj-jquery-rails', '>= 4.2.2.1'
   s.add_dependency 'wj-mailgun-ruby', '>= 1.1.7'
   s.add_dependency 'wj-payuindia', '>= 0.1.1'
-  s.add_dependency 'wj-mongoid-elasticsearch', '~> 0.0.7'
+  s.add_dependency 'wj-mongoid-elasticsearch'
   s.add_dependency 'cloudinary'
   s.add_dependency 'mongoid-geospatial'
   #s.add_dependency 'mongoid-embedded-errors'

@@ -1,6 +1,7 @@
 module Auth
 	module TwoFactorOtp
-
+		# so this is complicated.
+		TYPHOEUS_TIMEOUT = 20
 		## the currently being used resource. 
 		mattr_accessor :resource
 
@@ -11,9 +12,10 @@ module Auth
 			$redis.hget(resource.id.to_s + "_two_factor_sms_otp","error")
 		end
 
+		## after this put it into a background job.
+
 		def self.set_webhook_identifier(notification_response,last_response)
 
-			
 			last_response = JSON.parse(last_response)
 			
 			if last_response["Status"] && last_response["Status"] == "Success"
@@ -21,6 +23,44 @@ module Auth
 				notification_response.webhook_identifier = last_response["Details"]
 			end
 			
+		end
+
+		def self.ttrans
+			args = {
+				:to_number => "9561137096",
+				:template_name => "Report Updated",
+				:var_hash => {:VAR1 => "Bhargav", :VAR2 => "Raut", :VAR3 => "http://www.google.com", :VAR4 => "Plus Path Lab"},
+				:template_sender_id => "LABTST"
+			}
+			send_transactional_sms_new(args)
+		end
+
+		def self.send_transactional_sms_new(args)
+			if Auth.configuration.stub_otp_api_calls == true
+				puts "stubbing transactional sms otp message, as stub_otp_api_calls is set to true"
+				return {"stubbing_otp_transactions_sms_calls" => true}.to_json
+			end
+			puts "-- send transactional sms---"
+			to_number = args[:to_number]
+			template_name = args[:template_name]
+			var_hash = args[:var_hash]
+			template_sender_id = args[:template_sender_id]
+			
+			url = "http://2factor.in/API/V1/#{Auth.configuration.third_party_api_keys[:two_factor_sms_api_key]}/ADDON_SERVICES/SEND/TSMS"
+			
+			body = {
+				To: to_number,
+				From: template_sender_id,
+				TemplateName: template_name,
+			}.merge(var_hash)
+			
+			response = Typhoeus.post(
+			  url,
+			  body: body,
+			  timeout: TYPHOEUS_TIMEOUT
+			)
+			#puts response.body
+			response.body	
 		end
 
 		## to_number : string, indian telephone number, without the preceeding 91
@@ -94,6 +134,10 @@ module Auth
 
 		end
 
+		## so gotta first sort out two factor api issues.
+		## and get the basic sms transactionals working.
+		## and then done.
+
 		def verify(otp)
 			
 			if Auth.configuration.third_party_api_keys[:two_factor_sms_api_key].nil?
@@ -144,6 +188,9 @@ module Auth
 			#puts "--came to clear redis otp hash."
 			$redis.del(resource.id.to_s + "_two_factor_sms_otp")
 		end
+
+		## so we get the transactional working.
+		## then we get some more tests going for this.s
 
 		def send_otp_response
 			if Auth.configuration.stub_otp_api_calls == true

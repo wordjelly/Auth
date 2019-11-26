@@ -27,7 +27,7 @@ module Auth::Concerns::UserConcern
 
 		USER_INFO_FIELDS = ["name","image_url"]
 
-		PUBLICLY_VISIBLE_FIELD_NAMES = ["email","additional_login_param"]
+		PUBLICLY_VISIBLE_FIELD_NAMES = ["id","email","additional_login_param","name","image_url"]
 
 		include MongoidVersionedAtomic::VAtomic
 		
@@ -591,24 +591,30 @@ module Auth::Concerns::UserConcern
 	## this is needed in 
 	def as_json(options={})
 		
-		## basically here the problem is that if the user himself is searching for his own record, then it is trying to return the authentication token.
-		## 
+		## so if this does not work, then we go forward.
 		
 		json = {:nothing => true}
 		
 		if (!self.destroyed? && options[:otp_verification].nil?)
 			
-			if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
-			 		
-			 		json = {}
-		     		json[:es] = self.client_authentication[self.m_client.current_app_id]
-		     		json[:authentication_token] = self.authentication_token
+			if self.m_client.blank?
+				json = {}
+				PUBLICLY_VISIBLE_FIELD_NAMES.each do |fname|
+					json[fname.to_sym] = self.send(fname) unless self.send(fname).blank?
+				end
+			else
+				if self.m_client.current_app_id && at_least_one_authentication_key_confirmed? && self.errors.empty?
+				 		
+				 		json = {}
+			     		json[:es] = self.client_authentication[self.m_client.current_app_id]
+			     		json[:authentication_token] = self.authentication_token
 
-		     		unless options[:show_id].nil?
-		     			json[:id] = self.id.to_s
-		     			json[:admin] = self.admin.to_s
-		     		end
-		     	
+			     		unless options[:show_id].nil?
+			     			json[:id] = self.id.to_s
+			     			json[:admin] = self.admin.to_s
+			     		end
+			     	
+			 	end
 		 	end
 		 	if self.errors.full_messages.size > 0
 		 	 	json[:errors] = self.errors.full_messages

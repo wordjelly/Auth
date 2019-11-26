@@ -83,7 +83,9 @@ class OtpJob < ActiveJob::Base
         notification.send_email(resource) do 
           JSON.generate(email.message.mailgun_variables)      
         end
-      
+        
+        ## so basically we call deliver now 
+        ## inside the background job.
         email.deliver_now
   	
       end

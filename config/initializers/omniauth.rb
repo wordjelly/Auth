@@ -499,7 +499,7 @@ module SimpleTokenAuthentication
 	   	## otherwise it will screw up totally.
 	    def ensure_authentication_token
 	      
-	      puts "the skip authentication token is: #{self.skip_authentication_token_regeneration}"
+	      #puts "the skip authentication token is: #{self.skip_authentication_token_regeneration}"
 
 	      regenerate_token if self.skip_authentication_token_regeneration.blank?
 	    
