@@ -1,7 +1,7 @@
 module Auth
 	module TwoFactorOtp
 		# so this is complicated.
-		TYPHOEUS_TIMEOUT = 20
+		TYPHOEUS_TIMEOUT = 30
 		## the currently being used resource. 
 		mattr_accessor :resource
 
@@ -53,6 +53,9 @@ module Auth
 				From: template_sender_id,
 				TemplateName: template_name,
 			}.merge(var_hash)
+
+			puts "url is: #{url}"
+			puts "body is: #{body}"
 			
 			response = Typhoeus.post(
 			  url,

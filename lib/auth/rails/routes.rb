@@ -1,21 +1,15 @@
 module ActionDispatch::Routing
   class Mapper
-
-
   	def get_scope(model)
  	 	scope_path = "/"
- 	 	## here there is the problem of repeats
- 	 	## because we have the model class as 
- 	 	## so how to split that for the scope
- 	 	## normally i had shopping/payments/
- 	 	#puts Auth.configuration.send("#{model}_class").underscore.pluralize.to_s
-
+ 	 
  	 	Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
  	 		if Regexp.last_match[:scope_path]
  	 			scope_path = scope_path +  Regexp.last_match[:scope_path]
  	 		end
  	 	end
 
+ 	 	#first run cyclically and check if the things change.
  	 	#puts "scope path is: #{scope_path}"
  	 	scope_path
 
@@ -33,6 +27,14 @@ module ActionDispatch::Routing
  	 	
   	end
 
+  	## now what flashing?
+  	## or what ?
+  	## a spec?
+  	## okay let me add the images
+  	## keep making progress
+  	## and then we test it later.
+  	## let me write flashing.
+
   	def get_collection(model)
   		collection = nil
   		Auth.configuration.send("#{model}_class").underscore.pluralize.scan(/(?<scope_path>.+?)\/(?<collection>[A-Za-z_]+)$/) do 
@@ -46,8 +48,6 @@ module ActionDispatch::Routing
   	def get_controller(model)
   		Auth.configuration.send("#{model}_controller") 
   	end
-
-
 
   	##@param app_route_resources[Hash] -> 
   	##key:resource[String] -> the name of the resource for which omniauth routes are to be generated.
