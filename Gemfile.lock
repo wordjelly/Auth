@@ -781,6 +781,7 @@ GEM
     multi_xml (0.6.0)
     multipart-post (2.0.0)
     netrc (0.11.0)
+    nio4r (2.5.7)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
     oauth (0.5.4)
@@ -816,7 +817,8 @@ GEM
     picasa (0.9.1)
       httparty
     public_suffix (3.0.2)
-    puma (3.11.4)
+    puma (5.3.1)
+      nio4r (~> 2.0)
     rack (1.6.10)
     rack-protection (1.5.5)
       rack
